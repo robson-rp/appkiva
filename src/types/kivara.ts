@@ -25,12 +25,12 @@ export interface Child {
 
 export type Level = 'apprentice' | 'saver' | 'planner' | 'investor' | 'master';
 
-export const LEVEL_CONFIG: Record<Level, { label: string; minPoints: number; color: string }> = {
-  apprentice: { label: 'Aprendiz', minPoints: 0, color: 'kivara-blue' },
-  saver: { label: 'Guardador', minPoints: 100, color: 'kivara-green' },
-  planner: { label: 'Planeador', minPoints: 300, color: 'kivara-gold' },
-  investor: { label: 'Investidor', minPoints: 600, color: 'kivara-purple' },
-  master: { label: 'Mestre', minPoints: 1000, color: 'kivara-pink' },
+export const LEVEL_CONFIG: Record<Level, { label: string; minPoints: number; color: string; avatar: string; evolvedAvatar: string }> = {
+  apprentice: { label: 'Aprendiz', minPoints: 0, color: 'kivara-blue', avatar: '🐣', evolvedAvatar: '🐥' },
+  saver: { label: 'Guardador', minPoints: 100, color: 'kivara-green', avatar: '🦊', evolvedAvatar: '🐺' },
+  planner: { label: 'Planeador', minPoints: 300, color: 'kivara-gold', avatar: '🦁', evolvedAvatar: '👑' },
+  investor: { label: 'Investidor', minPoints: 600, color: 'kivara-purple', avatar: '🐉', evolvedAvatar: '🔮' },
+  master: { label: 'Mestre', minPoints: 1000, color: 'kivara-pink', avatar: '🦅', evolvedAvatar: '⭐' },
 };
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'approved';
@@ -49,7 +49,7 @@ export interface Task {
   completedAt?: string;
 }
 
-export type TransactionType = 'earned' | 'spent' | 'saved' | 'allowance';
+export type TransactionType = 'earned' | 'spent' | 'saved' | 'allowance' | 'donated';
 
 export interface Transaction {
   id: string;
@@ -68,6 +68,24 @@ export interface Vault {
   currentAmount: number;
   icon: string;
   createdAt: string;
+  interestRate: number; // monthly % (e.g. 1 = 1%)
+}
+
+export interface DonationCause {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'education' | 'solidarity' | 'environment';
+  totalReceived: number;
+}
+
+export interface Donation {
+  id: string;
+  childId: string;
+  causeId: string;
+  amount: number;
+  date: string;
 }
 
 export type MissionStatus = 'available' | 'in_progress' | 'completed';

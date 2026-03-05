@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -47,9 +47,21 @@ export const mockTransactions: Transaction[] = [
 ];
 
 export const mockVaults: Vault[] = [
-  { id: 'vault-1', childId: 'child-1', name: 'Bicicleta nova', targetAmount: 500, currentAmount: 180, icon: '🚲', createdAt: '2026-02-15' },
-  { id: 'vault-2', childId: 'child-1', name: 'Jogo de vídeo', targetAmount: 200, currentAmount: 85, icon: '🎮', createdAt: '2026-02-20' },
-  { id: 'vault-3', childId: 'child-2', name: 'Bola de futebol', targetAmount: 150, currentAmount: 40, icon: '⚽', createdAt: '2026-03-01' },
+  { id: 'vault-1', childId: 'child-1', name: 'Bicicleta nova', targetAmount: 500, currentAmount: 180, icon: '🚲', createdAt: '2026-02-15', interestRate: 1 },
+  { id: 'vault-2', childId: 'child-1', name: 'Jogo de vídeo', targetAmount: 200, currentAmount: 85, icon: '🎮', createdAt: '2026-02-20', interestRate: 1.5 },
+  { id: 'vault-3', childId: 'child-2', name: 'Bola de futebol', targetAmount: 150, currentAmount: 40, icon: '⚽', createdAt: '2026-03-01', interestRate: 1 },
+];
+
+export const mockDonationCauses: DonationCause[] = [
+  { id: 'cause-1', name: 'Livros para Todos', description: 'Ajuda a comprar livros para crianças sem acesso', icon: '📚', category: 'education', totalReceived: 450 },
+  { id: 'cause-2', name: 'Refeições Solidárias', description: 'Contribui para refeições em comunidades carenciadas', icon: '🍽️', category: 'solidarity', totalReceived: 780 },
+  { id: 'cause-3', name: 'Plantar Árvores', description: 'Ajuda a plantar árvores na tua comunidade', icon: '🌳', category: 'environment', totalReceived: 320 },
+  { id: 'cause-4', name: 'Material Escolar', description: 'Doa material escolar a quem precisa', icon: '✏️', category: 'education', totalReceived: 560 },
+];
+
+export const mockDonations: Donation[] = [
+  { id: 'don-1', childId: 'child-1', causeId: 'cause-1', amount: 10, date: '2026-03-01' },
+  { id: 'don-2', childId: 'child-1', causeId: 'cause-3', amount: 5, date: '2026-03-03' },
 ];
 
 export const mockMissions: Mission[] = [
