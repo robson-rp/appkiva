@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockChallenges, mockClassrooms } from '@/data/mock-data';
-import { Plus, Target, Trophy, Clock, Sparkles, Users, Pencil, Trash2, Calendar } from 'lucide-react';
+import { Plus, Target, Trophy, Clock, Sparkles, Users, Pencil, Trash2, Calendar, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,8 +61,11 @@ export default function TeacherChallenges() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
+  const [showUrgentOnly, setShowUrgentOnly] = useState(false);
 
   const activeChallenges = challenges.filter(c => c.status === 'active');
+  const urgentActive = activeChallenges.filter(c => (c.currentAmount / c.targetAmount) >= 0.5);
+  const displayedActive = showUrgentOnly ? urgentActive : activeChallenges;
   const upcomingChallenges = challenges.filter(c => c.status === 'upcoming');
   const completedChallenges = challenges.filter(c => c.status === 'completed');
 
@@ -423,8 +426,25 @@ export default function TeacherChallenges() {
         </TabsList>
 
         <TabsContent value="active" className="mt-4 space-y-4">
-          {activeChallenges.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhum desafio em curso</p>}
-          {activeChallenges.map(renderChallenge)}
+          {urgentActive.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showUrgentOnly ? 'default' : 'outline'}
+                size="sm"
+                className="rounded-xl font-display text-xs gap-1.5"
+                onClick={() => setShowUrgentOnly(prev => !prev)}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" />
+                Próximos de terminar ({urgentActive.length})
+              </Button>
+            </div>
+          )}
+          {displayedActive.length === 0 && (
+            <p className="text-center text-muted-foreground py-8">
+              {showUrgentOnly ? 'Nenhum desafio próximo de terminar' : 'Nenhum desafio em curso'}
+            </p>
+          )}
+          {displayedActive.map(renderChallenge)}
         </TabsContent>
 
         <TabsContent value="upcoming" className="mt-4 space-y-4">
