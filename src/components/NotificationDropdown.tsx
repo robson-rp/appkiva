@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users } from 'lucide-react';
+import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockNotifications, mockTeacherNotifications } from '@/data/mock-data';
+import { mockNotifications, mockTeacherNotifications, mockChallenges } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
 import { Notification } from '@/types/kivara';
 import {
@@ -47,6 +47,20 @@ function generateStreakNotifications(): Notification[] {
   return notifs;
 }
 
+function generateChallengeAlerts(): Notification[] {
+  return mockChallenges
+    .filter(c => c.status === 'active' && (c.currentAmount / c.targetAmount) >= 0.9)
+    .map(c => ({
+      id: `challenge-alert-${c.id}`,
+      title: '🚨 Desafio quase concluído!',
+      message: `"${c.title}" atingiu ${Math.round((c.currentAmount / c.targetAmount) * 100)}% da meta. A turma está quase lá!`,
+      type: 'class' as const,
+      read: false,
+      date: new Date().toISOString().split('T')[0],
+      urgent: true,
+    }));
+}
+
 const typeConfig: Record<Notification['type'], { icon: typeof Bell; bg: string }> = {
   task: { icon: ListTodo, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
   mission: { icon: Target, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
@@ -60,8 +74,9 @@ export function NotificationDropdown() {
   const { user } = useAuth();
   const isTeacher = user?.role === 'teacher';
   const streakNotifs = isTeacher ? [] : generateStreakNotifications();
+  const challengeAlerts = isTeacher ? generateChallengeAlerts() : [];
   const baseNotifs = isTeacher ? mockTeacherNotifications : mockNotifications;
-  const [notifications, setNotifications] = useState([...streakNotifs, ...baseNotifs]);
+  const [notifications, setNotifications] = useState([...challengeAlerts, ...streakNotifs, ...baseNotifs]);
   const [showBanner, setShowBanner] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const urgentNotif = notifications.find(n => n.urgent && !n.read);
