@@ -39,7 +39,7 @@ export default function Login() {
             <img src={kivoImg} alt="Kivo" className="w-24 h-24 mx-auto" />
           </motion.div>
           <img src={kivaraLogo} alt="KIVARA" className="h-12 mx-auto mb-2 brightness-0 invert" />
-          <p className="text-white/80 font-body">Educação financeira para toda a família</p>
+          <p className="text-white/80 font-body">Pequenos hábitos. Grandes futuros.</p>
         </div>
 
         <Card className="shadow-kivara border-0">
