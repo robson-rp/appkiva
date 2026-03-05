@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { mockChildren, mockTasks, mockTransactions, mockVaults, mockSharedGoals } from '@/data/mock-data';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -21,33 +20,35 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 export default function ParentDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: realChildren = [] } = useChildren();
+  const { data: children = [], isLoading: childrenLoading } = useChildren();
   const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
-  const totalDistributed = mockTransactions
-    .filter((t) => t.type === 'allowance')
+
+  const totalBalance = children.reduce((s, c) => s + c.balance, 0);
+
+  // Compute distributed from real transactions
+  const totalDistributed = realTransactions
+    .filter((t) => t.entryType === 'allowance' && t.direction === 'in')
     .reduce((s, t) => s + t.amount, 0);
-  const totalBalance = mockChildren.reduce((s, c) => s + c.balance, 0);
-  const tasksCompleted = mockTasks.filter((t) => t.status === 'completed' || t.status === 'approved').length;
-  const tasksPending = mockTasks.filter((t) => t.status === 'completed').length;
 
   const stats = [
-    { label: 'Crianças', value: mockChildren.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/parent/children' },
+    { label: 'Crianças', value: children.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/parent/children' },
     { label: 'Distribuído', value: totalDistributed, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/parent/allowance', suffix: ' 🪙' },
-    { label: 'Concluídas', value: tasksCompleted, icon: CheckCircle, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary', to: '/parent/tasks' },
-    { label: 'A Aprovar', value: tasksPending, icon: ListTodo, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive', to: '/parent/tasks' },
+    { label: 'Transacções', value: realTransactions.length, icon: CheckCircle, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary', to: '/parent/tasks' },
+    { label: 'Crianças', value: children.length, icon: ListTodo, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive', to: '/parent/children' },
   ];
 
-  const txIcon = (type: string) => {
-    if (type === 'earned' || type === 'allowance') return <ArrowDownLeft className="h-3.5 w-3.5 text-secondary" />;
-    return <ArrowUpRight className="h-3.5 w-3.5 text-destructive" />;
-  };
-
-  const statusConfig: Record<string, { label: string; className: string }> = {
-    pending: { label: 'Pendente', className: 'bg-muted text-muted-foreground' },
-    in_progress: { label: 'Em Progresso', className: 'bg-[hsl(var(--kivara-light-blue))] text-primary' },
-    completed: { label: 'A Aprovar', className: 'bg-[hsl(var(--kivara-light-gold))] text-accent-foreground' },
-    approved: { label: 'Aprovada', className: 'bg-[hsl(var(--kivara-light-green))] text-secondary' },
+  const entryLabel: Record<string, string> = {
+    allowance: 'Mesada',
+    task_reward: 'Tarefa',
+    mission_reward: 'Missão',
+    purchase: 'Compra',
+    donation: 'Doação',
+    vault_deposit: 'Cofre ↓',
+    vault_withdraw: 'Cofre ↑',
+    transfer: 'Transferência',
+    adjustment: 'Ajuste',
+    refund: 'Reembolso',
   };
 
   return (
@@ -86,7 +87,7 @@ export default function ParentDashboard() {
       </motion.div>
 
       {/* Quick Action: Send Allowance */}
-      {realChildren.length > 0 && (
+      {children.length > 0 && (
         <motion.div variants={item}>
           <Card className="border-border/50 overflow-hidden border-dashed border-2 border-secondary/40 bg-secondary/5">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -97,7 +98,7 @@ export default function ParentDashboard() {
                 <div>
                   <p className="font-display font-bold text-sm">Enviar Mesada</p>
                   <p className="text-xs text-muted-foreground">
-                    {realChildren.length} {realChildren.length === 1 ? 'criança' : 'crianças'} · Saldo total: {realChildren.reduce((s, c) => s + c.balance, 0)} KVC
+                    {children.length} {children.length === 1 ? 'criança' : 'crianças'} · Saldo total: {totalBalance} KVC
                   </p>
                 </div>
               </div>
@@ -112,50 +113,16 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-      {/* Real Children from DB */}
-      {realChildren.length > 0 && (
-        <motion.div variants={item}>
-          <Card className="border-border/50 overflow-hidden">
-            <div className="h-0.5 bg-secondary" />
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-green))] flex items-center justify-center">
-                  <Users className="h-4 w-4 text-secondary" />
-                </div>
-                Crianças (dados reais)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {realChildren.map((child) => (
-                <motion.div
-                  key={child.childId}
-                  whileHover={{ x: 4 }}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50"
-                >
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-2xl shadow-sm">
-                    {child.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display font-bold text-sm">{child.displayName}</p>
-                    <p className="text-[11px] text-muted-foreground">💰 {child.balance} KVC</p>
-                  </div>
-                  <CoinDisplay amount={child.balance} size="sm" />
-                </motion.div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
       <SendAllowanceDialog
         open={allowanceOpen}
         onOpenChange={setAllowanceOpen}
-        children={realChildren}
+        children={children}
       />
 
+      {/* Stats */}
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((stat) => (
-          <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
+        {stats.map((stat, i) => (
+          <motion.div key={`${stat.label}-${i}`} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
               className="cursor-pointer border-border/50 hover:shadow-kivara transition-all duration-300 overflow-hidden"
               onClick={() => navigate(stat.to)}
@@ -174,7 +141,7 @@ export default function ParentDashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Children Overview */}
+        {/* Children Overview — Real Data */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 gradient-kivara" />
@@ -190,12 +157,26 @@ export default function ParentDashboard() {
               </button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockChildren.map((child) => {
-                const childVaults = mockVaults.filter((v) => v.childId === child.id);
-                const totalSaved = childVaults.reduce((s, v) => s + v.currentAmount, 0);
-                return (
+              {childrenLoading ? (
+                Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40">
+                    <Skeleton className="w-12 h-12 rounded-2xl" />
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                ))
+              ) : children.length === 0 ? (
+                <div className="py-6 text-center">
+                  <p className="text-muted-foreground text-sm">Nenhuma criança associada.</p>
+                  <p className="text-muted-foreground text-xs mt-1">Adiciona crianças na secção Crianças.</p>
+                </div>
+              ) : (
+                children.map((child) => (
                   <motion.div
-                    key={child.id}
+                    key={child.childId}
                     whileHover={{ x: 4 }}
                     className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50"
                     onClick={() => navigate('/parent/children')}
@@ -204,108 +185,20 @@ export default function ParentDashboard() {
                       {child.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-display font-bold text-sm">{child.name}</p>
-                      <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                        <span>💰 {child.balance} moedas</span>
-                        <span>🏦 {totalSaved} poupado</span>
-                      </div>
+                      <p className="font-display font-bold text-sm">{child.displayName}</p>
+                      <span className="text-[11px] text-muted-foreground">💰 {child.balance} KVC</span>
                     </div>
                     <CoinDisplay amount={child.balance} size="sm" />
                   </motion.div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Tasks to Approve */}
-        <motion.div variants={item}>
-          <Card className="border-border/50 h-full overflow-hidden">
-            <div className="h-0.5 gradient-gold" />
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
-                  <ListTodo className="h-4 w-4 text-accent-foreground" />
-                </div>
-                Tarefas Recentes
-              </CardTitle>
-              <button onClick={() => navigate('/parent/tasks')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-                Ver todas <ChevronRight className="h-3 w-3" />
-              </button>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {mockTasks.slice(0, 4).map((task) => {
-                const child = mockChildren.find((c) => c.id === task.childId);
-                const status = statusConfig[task.status];
-                return (
-                  <motion.div
-                    key={task.id}
-                    whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-card shadow-sm flex items-center justify-center text-lg border border-border/30">
-                      {child?.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-display font-bold truncate">{task.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{child?.name} · +{task.reward} 🪙</p>
-                    </div>
-                    <span className={`text-[10px] font-display font-semibold px-2.5 py-1 rounded-xl ${status.className}`}>
-                      {status.label}
-                    </span>
-                  </motion.div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Savings Overview + Recent Activity */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Savings */}
-        <motion.div variants={item}>
-          <Card className="border-border/50 overflow-hidden">
-            <div className="h-0.5 bg-secondary" />
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-green))] flex items-center justify-center">
-                  <Target className="h-4 w-4 text-secondary" />
-                </div>
-                Objectivos de Poupança
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {mockVaults.map((vault) => {
-                const child = mockChildren.find((c) => c.id === vault.childId);
-                const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
-                return (
-                  <div key={vault.id} className="bg-muted/30 rounded-2xl p-4 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-display font-bold text-sm flex items-center gap-2">
-                        <span className="text-lg">{vault.icon}</span> {vault.name}
-                        <span className="text-[10px] text-muted-foreground font-normal bg-muted rounded-lg px-2 py-0.5">{child?.name}</span>
-                      </span>
-                      <span className="text-xs text-muted-foreground font-display font-bold">
-                        {vault.currentAmount}/{vault.targetAmount} 🪙
-                      </span>
-                    </div>
-                    <div className="relative">
-                      <Progress value={pct} className="h-2.5 rounded-full" />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
-                        {pct}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                ))
+              )}
             </CardContent>
           </Card>
         </motion.div>
 
         {/* Recent Activity — Real Data */}
         <motion.div variants={item}>
-          <Card className="border-border/50 overflow-hidden">
+          <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
@@ -340,18 +233,6 @@ export default function ParentDashboard() {
                   const formattedDate = tx.createdAt
                     ? format(new Date(tx.createdAt), "d MMM, HH:mm", { locale: pt })
                     : '';
-                  const entryLabel: Record<string, string> = {
-                    allowance: 'Mesada',
-                    task_reward: 'Tarefa',
-                    mission_reward: 'Missão',
-                    purchase: 'Compra',
-                    donation: 'Doação',
-                    vault_deposit: 'Cofre ↓',
-                    vault_withdraw: 'Cofre ↑',
-                    transfer: 'Transferência',
-                    adjustment: 'Ajuste',
-                    refund: 'Reembolso',
-                  };
                   return (
                     <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
                       <div className="flex items-center gap-3">
@@ -378,67 +259,6 @@ export default function ParentDashboard() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Shared Goals */}
-      {mockSharedGoals.length > 0 && (
-        <motion.div variants={item}>
-          <Card className="border-border/50 overflow-hidden">
-            <div className="h-0.5 bg-gradient-to-r from-primary via-accent to-secondary" />
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
-                  <Handshake className="h-4 w-4 text-accent-foreground" />
-                </div>
-                Metas Partilhadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {mockSharedGoals.map((goal) => {
-                const child = mockChildren.find(c => c.id === goal.childId);
-                const total = goal.parentContribution + goal.childContribution;
-                const pct = Math.round((total / goal.targetAmount) * 100);
-                const parentPct = Math.round((goal.parentContribution / goal.targetAmount) * 100);
-                const childPct = Math.round((goal.childContribution / goal.targetAmount) * 100);
-                return (
-                  <div key={goal.id} className="bg-muted/30 rounded-2xl p-4 space-y-3 border border-border/30">
-                    <div className="flex justify-between items-center">
-                      <span className="font-display font-bold text-sm flex items-center gap-2">
-                        <span className="text-lg">{goal.icon}</span> {goal.name}
-                        <span className="text-[10px] text-muted-foreground font-normal bg-muted rounded-lg px-2 py-0.5">
-                          com {child?.name}
-                        </span>
-                      </span>
-                      <span className="font-display font-bold text-xs text-primary">{pct}%</span>
-                    </div>
-                    {/* Stacked progress bar */}
-                    <div className="relative h-3 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="absolute inset-y-0 left-0 bg-primary rounded-l-full"
-                        style={{ width: `${parentPct}%` }}
-                      />
-                      <div
-                        className="absolute inset-y-0 bg-secondary"
-                        style={{ left: `${parentPct}%`, width: `${childPct}%` }}
-                      />
-                    </div>
-                    <div className="flex flex-wrap justify-between gap-1 text-[10px] text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                        <span>Pai: 🪙 {goal.parentContribution}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-secondary" />
-                        <span>{child?.name}: 🪙 {goal.childContribution}</span>
-                      </div>
-                      <span className="font-display font-bold">Meta: 🪙 {goal.targetAmount}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
     </motion.div>
   );
 }
