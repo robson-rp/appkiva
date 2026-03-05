@@ -341,3 +341,34 @@ export const DIFFICULTY_CONFIG: Record<LessonDifficulty, { label: string; color:
   intermediate: { label: 'Intermédio', color: 'bg-chart-2/15 text-chart-2' },
   advanced: { label: 'Avançado', color: 'bg-chart-1/15 text-chart-1' },
 };
+
+// ── Collectible Badges ──
+
+export type BadgeCategory = 'saving' | 'generosity' | 'discipline' | 'knowledge';
+export type BadgeTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+export const BADGE_CATEGORIES: Record<BadgeCategory, { label: string; icon: string; color: string }> = {
+  saving: { label: 'Poupança', icon: '🐷', color: 'hsl(var(--chart-3))' },
+  generosity: { label: 'Generosidade', icon: '❤️', color: 'hsl(var(--chart-1))' },
+  discipline: { label: 'Disciplina', icon: '⚡', color: 'hsl(var(--chart-2))' },
+  knowledge: { label: 'Conhecimento', icon: '📚', color: 'hsl(var(--chart-4))' },
+};
+
+export const BADGE_TIERS: Record<BadgeTier, { label: string; color: string; bg: string; glow: string }> = {
+  bronze: { label: 'Bronze', color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-950/30', glow: 'shadow-orange-300/30' },
+  silver: { label: 'Prata', color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800/30', glow: 'shadow-slate-300/30' },
+  gold: { label: 'Ouro', color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-950/30', glow: 'shadow-yellow-300/40' },
+  platinum: { label: 'Platina', color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-950/30', glow: 'shadow-violet-400/40' },
+};
+
+export interface CollectibleBadge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: BadgeCategory;
+  tier: BadgeTier;
+  requirement: string;
+  unlockedAt?: string;
+  childId?: string;
+}

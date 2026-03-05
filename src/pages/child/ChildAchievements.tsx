@@ -3,7 +3,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { mockAchievements, mockChildren } from '@/data/mock-data';
 import { LevelBadge } from '@/components/LevelBadge';
 import { Kivo } from '@/components/Kivo';
-import { Lock, Trophy, Star } from 'lucide-react';
+import { Lock, Trophy, Star, Award } from 'lucide-react';
+import { NavLink } from '@/components/NavLink';
 
 export default function ChildAchievements() {
   const child = mockChildren[0];
@@ -32,6 +33,25 @@ export default function ChildAchievements() {
         </Card>
       </motion.div>
 
+      {/* Badges Link */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <NavLink to="/child/badges">
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 hover:shadow-md transition-all cursor-pointer active:scale-[0.99]">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Award className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-sm text-foreground">Colecção de Badges</p>
+                  <p className="text-[10px] text-muted-foreground">Poupança, Generosidade, Disciplina e Conhecimento</p>
+                </div>
+              </div>
+              <span className="text-lg">→</span>
+            </CardContent>
+          </Card>
+        </NavLink>
+      </motion.div>
       {/* Unlocked */}
       <div>
         <div className="flex items-center gap-2 mb-3">
