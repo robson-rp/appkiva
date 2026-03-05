@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -34,6 +34,7 @@ function TeacherSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { logout, user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -73,10 +74,15 @@ function TeacherSidebar() {
                           <HoverCardContent side="right" className="w-56 p-3 space-y-1.5">
                             <p className="font-display font-bold text-xs">Desafios próximos de terminar</p>
                             {urgentChallenges.map(ch => (
-                              <div key={ch.id} className="flex items-center justify-between gap-2 text-[11px]">
+                              <button
+                                key={ch.id}
+                                type="button"
+                                onClick={() => navigate('/teacher/challenges')}
+                                className="flex items-center justify-between gap-2 text-[11px] w-full rounded-lg px-2 py-1 hover:bg-accent/50 transition-colors text-left"
+                              >
                                 <span>{ch.icon} {ch.title}</span>
                                 <span className="font-bold text-primary">{Math.round((ch.currentAmount / ch.targetAmount) * 100)}%</span>
-                              </div>
+                              </button>
                             ))}
                           </HoverCardContent>
                         </HoverCard>
