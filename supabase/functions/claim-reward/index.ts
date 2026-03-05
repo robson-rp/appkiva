@@ -191,7 +191,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 10. Get new balance
+    // 10. Create notification for the parent
+    await supabaseAdmin.from("notifications").insert({
+      profile_id: reward.parent_profile_id,
+      title: "Recompensa resgatada! 🎁",
+      message: `A recompensa "${reward.name}" foi resgatada por ${reward.price} KivaCoins.`,
+      type: "reward",
+      metadata: { reward_id: reward.id, reward_name: reward.name, claimed_by: callerProfile.id },
+    });
+
+    // Also notify the child (confirmation)
+    await supabaseAdmin.from("notifications").insert({
+      profile_id: callerProfile.id,
+      title: "Recompensa obtida! 🎉",
+      message: `Resgataste "${reward.name}" por ${reward.price} KivaCoins. Aproveita!`,
+      type: "reward",
+      metadata: { reward_id: reward.id, reward_name: reward.name },
+    });
+
+    // 11. Get new balance
     const { data: newBalanceData } = await supabaseAdmin
       .from("wallet_balances")
       .select("balance")

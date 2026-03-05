@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { createNotification } from '@/hooks/use-notifications';
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'approved';
 export type TaskCategory = 'cleaning' | 'studying' | 'helping' | 'other';
@@ -110,7 +111,7 @@ export function useApproveTask() {
       // Get the task to find the reward and child wallet
       const { data: task, error: taskError } = await supabase
         .from('tasks')
-        .select('reward, child_profile_id')
+        .select('reward, child_profile_id, title')
         .eq('id', taskId)
         .single();
 
@@ -135,8 +136,17 @@ export function useApproveTask() {
       });
 
       if (txError) throw txError;
+
+      // Create notification for the child
+      await createNotification({
+        profileId: task.child_profile_id,
+        title: 'Tarefa aprovada! ✅',
+        message: `A tarefa "${task.title}" foi aprovada. +${task.reward} KivaCoins!`,
+        type: 'task',
+        metadata: { task_id: taskId, reward: task.reward },
+      });
     },
-    onSuccess: () => {
+    onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['children'] });
       queryClient.invalidateQueries({ queryKey: ['household-transactions'] });
