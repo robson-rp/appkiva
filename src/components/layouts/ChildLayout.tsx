@@ -5,6 +5,7 @@ import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockNotifications } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
+import kivaraLogo from '@/assets/logo-kivara.svg';
 
 const bottomNavItems = [
   { title: 'Início', url: '/child', icon: Home },
@@ -25,7 +26,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-2">
           <span className="text-2xl">{user?.avatar}</span>
           <div>
-            <h1 className="font-display text-sm font-bold text-primary">KIVARA</h1>
+            <img src={kivaraLogo} alt="KIVARA" className="h-5" />
             <p className="text-xs text-muted-foreground">Olá, {user?.name}!</p>
           </div>
         </div>

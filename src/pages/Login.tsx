@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserRole } from '@/types/kivara';
+import kivaraLogo from '@/assets/logo-kivara.svg';
 
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -36,7 +37,7 @@ export default function Login() {
           >
             🐿️
           </motion.div>
-          <h1 className="font-display text-4xl font-bold text-white mb-2">KIVARA</h1>
+          <img src={kivaraLogo} alt="KIVARA" className="h-12 mx-auto mb-2 brightness-0 invert" />
           <p className="text-white/80 font-body">Educação financeira para toda a família</p>
         </div>
 
