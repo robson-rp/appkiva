@@ -9,13 +9,29 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import kivoImg from '@/assets/kivo.svg';
+import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ChildWallet() {
   const child = mockChildren[0];
-  const transactions = mockTransactions.filter((t) => t.childId === child.id);
+  const { data: walletBalance } = useWalletBalance();
+  const { data: ledgerTx } = useWalletTransactions();
+  const balance = walletBalance?.balance ?? child.balance;
+  
+  // Use ledger transactions if available, fallback to mock
+  const transactions = ledgerTx && ledgerTx.length > 0
+    ? ledgerTx.map(tx => ({
+        id: tx.id,
+        childId: child.id,
+        description: tx.description,
+        amount: tx.amount,
+        type: tx.direction === 'credit' ? 'earned' as const : 'spent' as const,
+        date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
+      }))
+    : mockTransactions.filter((t) => t.childId === child.id);
+  
   const childDonations = mockDonations.filter((d) => d.childId === child.id);
   const totalDonated = childDonations.reduce((s, d) => s + d.amount, 0);
   const uniqueCauses = new Set(childDonations.map((d) => d.causeId)).size;
@@ -24,7 +40,7 @@ export default function ChildWallet() {
 
   const earned = transactions.filter((t) => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
   const spent = transactions.filter((t) => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
-  const saved = transactions.filter((t) => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
+  const saved = transactions.filter((t) => (t as any).type === 'saved').reduce((s, t) => s + t.amount, 0);
 
   const typeConfig: Record<string, any> = {
     earned: { icon: ArrowUpCircle, color: 'text-secondary', label: 'Ganho', bg: 'bg-[hsl(var(--kivara-light-green))]', sign: '+' },
@@ -62,12 +78,12 @@ export default function ChildWallet() {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <motion.span
-                    key={child.balance}
+                    key={balance}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="font-display text-5xl font-bold text-white"
                   >
-                    {child.balance}
+                    {balance}
                   </motion.span>
                   <span className="text-lg text-white/70 font-display font-medium">KivaCoins</span>
                 </div>
