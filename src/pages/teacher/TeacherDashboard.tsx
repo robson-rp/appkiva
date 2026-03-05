@@ -1,12 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockClassrooms, mockChallenges, mockLeaderboard, mockChildren } from '@/data/mock-data';
-import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles, BarChart3, Lightbulb, Info } from 'lucide-react';
+import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles, BarChart3, Lightbulb, Info, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { format } from 'date-fns';
 
 function getPedagogicalTips(cls: { name: string; icon: string; poupança: number; pontos: number; tarefas: number; alunos: number }) {
   const tips: { type: 'positive' | 'warning' | 'suggestion'; text: string }[] = [];
@@ -57,6 +61,50 @@ export default function TeacherDashboard() {
   ];
 
   const radarColors = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const today = format(new Date(), 'dd/MM/yyyy');
+
+    doc.setFontSize(18);
+    doc.text('Relatório Comparativo entre Turmas', 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Escola Sol Nascente · ${today}`, 14, 28);
+    doc.setTextColor(0);
+
+    autoTable(doc, {
+      startY: 35,
+      head: [['Turma', 'Alunos', 'Poupança (%)', 'Pontos (média)', 'Tarefas (média)']],
+      body: classComparison.map(c => [c.name, c.alunos, `${c.poupança}%`, c.pontos, c.tarefas]),
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [59, 130, 246] },
+    });
+
+    const finalY = (doc as any).lastAutoTable?.finalY ?? 80;
+    let y = finalY + 10;
+    doc.setFontSize(13);
+    doc.text('Dicas Pedagógicas', 14, y);
+    y += 8;
+    doc.setFontSize(10);
+
+    classComparison.forEach(cls => {
+      const tips = getPedagogicalTips(cls);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${cls.name}`, 14, y);
+      y += 6;
+      doc.setFont('helvetica', 'normal');
+      tips.forEach(tip => {
+        const lines = doc.splitTextToSize(tip.text, 175);
+        if (y + lines.length * 5 > 280) { doc.addPage(); y = 20; }
+        doc.text(lines, 18, y);
+        y += lines.length * 5 + 2;
+      });
+      y += 3;
+    });
+
+    doc.save(`relatorio-turmas-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+  };
 
   const stats = [
     { label: 'Turmas', value: mockClassrooms.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/teacher/classes' },
@@ -208,13 +256,16 @@ export default function TeacherDashboard() {
       <motion.div variants={item}>
         <Card className="border-border/50 overflow-hidden">
           <div className="h-0.5 bg-gradient-to-r from-primary via-secondary to-primary" />
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-display flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="h-4 w-4 text-primary" />
               </div>
               Comparativo entre Turmas
             </CardTitle>
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={exportPDF}>
+              <Download className="h-3.5 w-3.5" /> Exportar PDF
+            </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Bar Chart */}
