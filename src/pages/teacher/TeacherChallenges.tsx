@@ -397,6 +397,14 @@ export default function TeacherChallenges() {
                   <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">Concluídos</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{completedChallenges.length}</p>
                 </div>
+                {urgentActive.length > 0 && (
+                  <div className="bg-destructive/20 backdrop-blur-sm rounded-2xl px-4 py-2 text-center ring-1 ring-destructive/30">
+                    <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider flex items-center gap-1 justify-center">
+                      <AlertTriangle className="h-3 w-3" /> Urgentes
+                    </p>
+                    <p className="font-display text-xl font-bold text-primary-foreground">{urgentActive.length}</p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
