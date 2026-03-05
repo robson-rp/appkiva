@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle, Archive } from 'lucide-react';
+import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle, Archive, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockNotifications, mockTeacherNotifications, mockChallenges } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
@@ -78,20 +78,31 @@ export function NotificationDropdown() {
   const baseNotifs = isTeacher ? mockTeacherNotifications : mockNotifications;
   const [notifications, setNotifications] = useState([...challengeAlerts, ...streakNotifs, ...baseNotifs]);
   const [showBanner, setShowBanner] = useState(false);
+  const [muted, setMuted] = useState(() => localStorage.getItem('kivara-notif-muted') === 'true');
   const unreadCount = notifications.filter((n) => !n.read).length;
   const urgentNotif = notifications.find(n => n.urgent && !n.read);
+
+  const toggleMute = () => {
+    setMuted(prev => {
+      const next = !prev;
+      localStorage.setItem('kivara-notif-muted', String(next));
+      return next;
+    });
+  };
 
   // Show streak risk banner after a short delay
   useEffect(() => {
     if (urgentNotif) {
       const timer = setTimeout(() => {
         setShowBanner(true);
-        playUrgentAlert();
-        hapticUrgent();
+        if (!muted) {
+          playUrgentAlert();
+          hapticUrgent();
+        }
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [urgentNotif]);
+  }, [urgentNotif, muted]);
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
@@ -170,11 +181,22 @@ export function NotificationDropdown() {
               <p className="text-[10px] text-muted-foreground">{unreadCount} por ler</p>
             )}
           </div>
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" className="text-xs text-primary h-7 rounded-lg gap-1 hover:bg-primary/10" onClick={markAllRead}>
-              <CheckCheck className="h-3 w-3" /> Marcar tudo
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-7 w-7 rounded-lg ${muted ? 'text-muted-foreground' : 'text-primary'} hover:bg-primary/10`}
+              onClick={toggleMute}
+              title={muted ? 'Ativar som' : 'Silenciar'}
+            >
+              {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" className="text-xs text-primary h-7 rounded-lg gap-1 hover:bg-primary/10" onClick={markAllRead}>
+                <CheckCheck className="h-3 w-3" /> Marcar tudo
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* List */}
