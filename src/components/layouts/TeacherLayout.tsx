@@ -13,11 +13,18 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { mockChallenges } from '@/data/mock-data';
+import { Badge } from '@/components/ui/badge';
+
+// Count active challenges nearing completion (≥50% progress)
+const urgentChallengesCount = mockChallenges.filter(
+  c => c.status === 'active' && (c.currentAmount / c.targetAmount) >= 0.5
+).length;
 
 const navItems = [
   { title: 'Painel', url: '/teacher', icon: LayoutDashboard },
   { title: 'Turmas', url: '/teacher/classes', icon: Users },
-  { title: 'Desafios', url: '/teacher/challenges', icon: Trophy },
+  { title: 'Desafios', url: '/teacher/challenges', icon: Trophy, badge: urgentChallengesCount },
 ];
 
 function TeacherSidebar() {
@@ -53,6 +60,9 @@ function TeacherSidebar() {
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && item.badge ? (
+                        <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0">{item.badge}</Badge>
+                      ) : null}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -151,6 +161,9 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
                       activeClassName="text-primary"
                     >
                       <div className="relative p-2 rounded-xl">
+                        {item.badge ? (
+                          <span className="absolute -top-0.5 -right-0.5 z-20 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold px-1">{item.badge}</span>
+                        ) : null}
                         {isActive && (
                           <motion.div
                             layoutId="teacher-nav-bg"
