@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockClassrooms, mockChallenges, mockLeaderboard, mockChildren } from '@/data/mock-data';
-import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles } from 'lucide-react';
+import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -16,6 +17,24 @@ export default function TeacherDashboard() {
   const completedChallenges = mockChallenges.filter(c => c.status === 'completed');
   const totalStudents = new Set(mockClassrooms.flatMap(c => c.studentIds)).size;
   const topStudents = [...mockLeaderboard].sort((a, b) => b.kivaPoints - a.kivaPoints).slice(0, 5);
+
+  // Comparative data per classroom
+  const classComparison = mockClassrooms.map(cls => {
+    const students = mockLeaderboard.filter(s => cls.studentIds.includes(s.childId));
+    const avgSavings = students.length > 0 ? Math.round(students.reduce((a, s) => a + s.savingsRate, 0) / students.length) : 0;
+    const avgPoints = students.length > 0 ? Math.round(students.reduce((a, s) => a + s.kivaPoints, 0) / students.length) : 0;
+    const avgTasks = students.length > 0 ? Math.round(students.reduce((a, s) => a + s.tasksCompleted, 0) / students.length) : 0;
+    return { name: cls.name, icon: cls.icon, poupança: avgSavings, pontos: avgPoints, tarefas: avgTasks, alunos: cls.studentIds.length };
+  });
+
+  const radarData = [
+    { metric: 'Poupança', ...Object.fromEntries(classComparison.map(c => [c.name, c.poupança])) },
+    { metric: 'Pontos', ...Object.fromEntries(classComparison.map(c => [c.name, c.pontos])) },
+    { metric: 'Tarefas', ...Object.fromEntries(classComparison.map(c => [c.name, c.tarefas])) },
+    { metric: 'Alunos', ...Object.fromEntries(classComparison.map(c => [c.name, c.alunos * 10])) },
+  ];
+
+  const radarColors = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
 
   const stats = [
     { label: 'Turmas', value: mockClassrooms.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/teacher/classes' },
@@ -162,6 +181,108 @@ export default function TeacherDashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Class Comparison Panel */}
+      <motion.div variants={item}>
+        <Card className="border-border/50 overflow-hidden">
+          <div className="h-0.5 bg-gradient-to-r from-primary via-secondary to-primary" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-display flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+              Comparativo entre Turmas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Bar Chart */}
+            <div>
+              <p className="text-xs font-display font-semibold text-muted-foreground mb-3">Médias por turma</p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={classComparison} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '0.75rem',
+                        fontSize: '11px',
+                      }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                    <Bar dataKey="poupança" name="Poupança (%)" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="pontos" name="KivaPoints (média)" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="tarefas" name="Tarefas (média)" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Radar Chart */}
+            <div>
+              <p className="text-xs font-display font-semibold text-muted-foreground mb-3">Perfil comparativo</p>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={radarData}>
+                    <PolarGrid stroke="hsl(var(--border))" />
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                    <PolarRadiusAxis tick={{ fontSize: 9 }} stroke="hsl(var(--border))" />
+                    {classComparison.map((cls, i) => (
+                      <Radar
+                        key={cls.name}
+                        name={`${cls.icon} ${cls.name}`}
+                        dataKey={cls.name}
+                        stroke={radarColors[i % radarColors.length]}
+                        fill={radarColors[i % radarColors.length]}
+                        fillOpacity={0.15}
+                        strokeWidth={2}
+                      />
+                    ))}
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '0.75rem',
+                        fontSize: '11px',
+                      }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Summary Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border/50">
+                    <th className="text-left py-2 font-display font-semibold text-muted-foreground">Turma</th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Alunos</th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Poupança</th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Pontos</th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Tarefas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classComparison.map(cls => (
+                    <tr key={cls.name} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
+                      <td className="py-2.5 font-display font-semibold">{cls.icon} {cls.name}</td>
+                      <td className="text-center py-2.5">{cls.alunos}</td>
+                      <td className="text-center py-2.5 font-bold text-secondary">{cls.poupança}%</td>
+                      <td className="text-center py-2.5 font-bold text-primary">{cls.pontos}</td>
+                      <td className="text-center py-2.5">{cls.tarefas}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }
