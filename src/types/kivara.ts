@@ -238,9 +238,10 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'task' | 'mission' | 'achievement' | 'savings';
+  type: 'task' | 'mission' | 'achievement' | 'savings' | 'streak';
   read: boolean;
   date: string;
+  urgent?: boolean;
 }
 
 export interface Teacher {
