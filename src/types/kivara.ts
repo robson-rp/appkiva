@@ -238,7 +238,7 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'task' | 'mission' | 'achievement' | 'savings' | 'streak';
+  type: 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class';
   read: boolean;
   date: string;
   urgent?: boolean;

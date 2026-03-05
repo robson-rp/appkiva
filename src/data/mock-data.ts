@@ -124,6 +124,14 @@ export const mockNotifications: Notification[] = [
   { id: 'notif-3', title: 'Conquista desbloqueada!', message: 'Parabéns! Desbloqueaste "10 Tarefas Completas"!', type: 'achievement', read: true, date: '2026-03-01' },
 ];
 
+export const mockTeacherNotifications: Notification[] = [
+  { id: 'tnotif-1', title: '🎯 Desafio quase concluído!', message: '"Operação Mealheiro" atingiu 62% — a turma está a progredir bem!', type: 'class', read: false, date: '2026-03-05' },
+  { id: 'tnotif-2', title: '📝 Tarefas pendentes', message: '3 alunos da Turma dos Exploradores têm tarefas por avaliar.', type: 'task', read: false, date: '2026-03-05' },
+  { id: 'tnotif-3', title: '🏆 Nova conquista na turma!', message: 'Sofia desbloqueou "Guardador de Ouro" — a primeira da turma!', type: 'achievement', read: false, date: '2026-03-04' },
+  { id: 'tnotif-4', title: '📊 Relatório semanal', message: 'A Turma dos Exploradores poupou 420 KivaCoins esta semana. +15% vs semana anterior.', type: 'savings', read: true, date: '2026-03-03' },
+  { id: 'tnotif-5', title: '🆕 Desafio a iniciar', message: '"Desafio do Orçamento" começa em 5 dias. 0 inscrições até agora.', type: 'class', read: true, date: '2026-03-02' },
+];
+
 export const mockDiaryEntries: DiaryEntry[] = [
   { id: 'diary-1', childId: 'child-1', text: 'Hoje poupei 30 moedas para a bicicleta! Estou quase a chegar à meta 🚲', mood: '😄', date: '2026-03-05', tags: ['poupança'] },
   { id: 'diary-2', childId: 'child-1', text: 'Queria comprar uma skin nova mas decidi esperar. Foi difícil mas sinto que fiz bem!', mood: '😊', date: '2026-03-04', tags: ['autocontrolo'] },
