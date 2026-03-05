@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockClassrooms, mockLeaderboard } from '@/data/mock-data';
-import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil, Trash, Copy, Target, Check } from 'lucide-react';
+import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil, Trash, Copy, Target, Check, History } from 'lucide-react';
+import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -35,6 +36,7 @@ type ClassGoal = {
   target: number;
   current: number;
   completed: boolean;
+  completedAt?: string;
 };
 
 const initialGoals: ClassGoal[] = [
@@ -91,7 +93,7 @@ export default function TeacherClasses() {
   };
 
   const toggleGoalComplete = (goalId: string) => {
-    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, completed: !g.completed } : g));
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, completed: !g.completed, completedAt: !g.completed ? new Date().toISOString() : undefined } : g));
   };
 
   const deleteGoal = (goalId: string) => {
@@ -108,7 +110,7 @@ export default function TeacherClasses() {
       if (goal && old && !old.completed && old.current < old.target && goal.current >= goal.target) {
         const cls = classrooms.find(c => c.id === goal.classId);
         toast.success(`🎯 Meta atingida! "${goal.title}" na turma ${cls?.name ?? ''} chegou a 100%!`, { duration: 5000 });
-        return updated.map(g => g.id === goalId ? { ...g, completed: true } : g);
+        return updated.map(g => g.id === goalId ? { ...g, completed: true, completedAt: new Date().toISOString() } : g);
       }
       return updated;
     });
@@ -571,6 +573,35 @@ export default function TeacherClasses() {
                       );
                     })}
                   </div>
+
+                  {/* Completed Goals History */}
+                  {goals.filter(g => g.classId === classroom.id && g.completed).length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-display font-semibold text-muted-foreground flex items-center gap-1">
+                        <History className="h-3.5 w-3.5" /> 📜 Histórico
+                      </p>
+                      {goals.filter(g => g.classId === classroom.id && g.completed).map(goal => {
+                        const cat = GOAL_CATEGORIES.find(c => c.value === goal.category);
+                        return (
+                          <div key={goal.id} className="flex items-center gap-2 p-2.5 rounded-xl bg-secondary/5 border border-secondary/20">
+                            <span className="text-sm">{cat?.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-display font-semibold text-muted-foreground line-through">{goal.title}</p>
+                              <p className="text-[9px] text-muted-foreground">
+                                {goal.completedAt ? `Concluída em ${format(new Date(goal.completedAt), 'dd/MM/yyyy')}` : 'Concluída'}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="bg-secondary/15 text-secondary text-[9px] shrink-0">
+                              Concluída
+                            </Badge>
+                            <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Average Savings Progress */}
                   <div className="space-y-1.5">
