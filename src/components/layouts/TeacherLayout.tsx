@@ -15,11 +15,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { mockChallenges } from '@/data/mock-data';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-// Count active challenges nearing completion (≥50% progress)
-const urgentChallengesCount = mockChallenges.filter(
+// Active challenges nearing completion (≥50% progress)
+const urgentChallenges = mockChallenges.filter(
   c => c.status === 'active' && (c.currentAmount / c.targetAmount) >= 0.5
-).length;
+);
+const urgentChallengesCount = urgentChallenges.length;
 
 const navItems = [
   { title: 'Painel', url: '/teacher', icon: LayoutDashboard },
@@ -61,7 +63,22 @@ function TeacherSidebar() {
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                       {!collapsed && item.badge ? (
-                        <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0">{item.badge}</Badge>
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0 cursor-help">{item.badge}</Badge>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-[220px] p-3 space-y-1.5">
+                              <p className="font-display font-bold text-xs">Desafios próximos de terminar</p>
+                              {urgentChallenges.map(ch => (
+                                <div key={ch.id} className="flex items-center justify-between gap-2 text-[11px]">
+                                  <span>{ch.icon} {ch.title}</span>
+                                  <span className="font-bold text-primary">{Math.round((ch.currentAmount / ch.targetAmount) * 100)}%</span>
+                                </div>
+                              ))}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       ) : null}
                     </NavLink>
                   </SidebarMenuButton>
