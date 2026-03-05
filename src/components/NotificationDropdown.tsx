@@ -8,7 +8,7 @@ import {
   Popover, PopoverContent, PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { hapticLight } from '@/lib/celebration-effects';
+import { hapticLight, hapticUrgent, playUrgentAlert } from '@/lib/celebration-effects';
 import { useAuth } from '@/contexts/AuthContext';
 
 function generateStreakNotifications(): Notification[] {
@@ -86,7 +86,8 @@ export function NotificationDropdown() {
     if (urgentNotif) {
       const timer = setTimeout(() => {
         setShowBanner(true);
-        hapticLight();
+        playUrgentAlert();
+        hapticUrgent();
       }, 2000);
       return () => clearTimeout(timer);
     }
