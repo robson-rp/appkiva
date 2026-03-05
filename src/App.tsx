@@ -16,6 +16,7 @@ import ParentTasks from "./pages/parent/ParentTasks";
 import ParentAllowance from "./pages/parent/ParentAllowance";
 import ParentReports from "./pages/parent/ParentReports";
 import ParentProfile from "./pages/parent/ParentProfile";
+import ParentRewards from "./pages/parent/ParentRewards";
 import ChildDashboard from "./pages/child/ChildDashboard";
 import ChildWallet from "./pages/child/ChildWallet";
 import ChildMissions from "./pages/child/ChildMissions";
@@ -23,6 +24,7 @@ import ChildVaults from "./pages/child/ChildVaults";
 import ChildAchievements from "./pages/child/ChildAchievements";
 import ChildStore from "./pages/child/ChildStore";
 import ChildDiary from "./pages/child/ChildDiary";
+import ChildDreams from "./pages/child/ChildDreams";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,7 @@ function AppRoutes() {
         <Route path="/parent/tasks" element={<ParentLayout><ParentTasks /></ParentLayout>} />
         <Route path="/parent/allowance" element={<ParentLayout><ParentAllowance /></ParentLayout>} />
         <Route path="/parent/reports" element={<ParentLayout><ParentReports /></ParentLayout>} />
+        <Route path="/parent/rewards" element={<ParentLayout><ParentRewards /></ParentLayout>} />
         <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
@@ -61,6 +64,7 @@ function AppRoutes() {
       <Route path="/child/achievements" element={<ChildLayout><ChildAchievements /></ChildLayout>} />
       <Route path="/child/store" element={<ChildLayout><ChildStore /></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
+      <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
