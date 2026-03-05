@@ -4,12 +4,24 @@ import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+const CHART_COLORS = [
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
+  'hsl(var(--chart-5))',
+  'hsl(var(--primary))',
+  'hsl(var(--secondary))',
+];
 
 export default function TeenAnalytics() {
   const teen = mockTeens[0];
   const totalSpent = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
   const totalSaved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
   const totalIncome = mockTeenTransactions.filter(t => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
+  const totalDonated = mockTeenTransactions.filter(t => t.type === 'donated').reduce((s, t) => s + t.amount, 0);
   const savingsRate = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
   const budgetUsed = Math.round((totalSpent / teen.monthlyBudget) * 100);
 
@@ -22,6 +34,28 @@ export default function TeenAnalytics() {
 
   const sortedCategories = Object.entries(categorySpend).sort(([, a], [, b]) => b - a);
 
+  // Pie chart data
+  const pieData = sortedCategories.map(([cat, amount]) => ({
+    name: SPENDING_CATEGORIES[cat as SpendingCategory]?.label,
+    value: amount,
+    icon: SPENDING_CATEGORIES[cat as SpendingCategory]?.icon,
+  }));
+
+  // Bar chart data — money flow
+  const barData = [
+    { name: 'Recebido', value: totalIncome },
+    { name: 'Gasto', value: totalSpent },
+    { name: 'Poupado', value: totalSaved },
+    { name: 'Doado', value: totalDonated },
+  ];
+
+  const barColors = [
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-1))',
+    'hsl(var(--primary))',
+    'hsl(var(--chart-4))',
+  ];
+
   const insights = [
     savingsRate >= 30
       ? { type: 'positive' as const, icon: CheckCircle, text: `Taxa de poupança de ${savingsRate}% — excelente!`, color: 'text-chart-3' }
@@ -33,6 +67,19 @@ export default function TeenAnalytics() {
       ? { type: 'neutral' as const, icon: TrendingUp, text: `Maior gasto: ${SPENDING_CATEGORIES[sortedCategories[0][0] as SpendingCategory]?.label} (${sortedCategories[0][1]} 🪙)`, color: 'text-primary' }
       : null,
   ].filter(Boolean);
+
+  const CustomPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, icon }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    if (percent < 0.08) return null;
+    return (
+      <text x={x} y={y} textAnchor="middle" dominantBaseline="central" className="text-sm">
+        {icon}
+      </text>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -59,8 +106,105 @@ export default function TeenAnalytics() {
         ))}
       </div>
 
-      {/* Savings Rate */}
+      {/* Pie Chart — Category Breakdown */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-display">Despesas por Categoria</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                    label={CustomPieLabel}
+                    labelLine={false}
+                    animationBegin={200}
+                    animationDuration={800}
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={0} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value: number, name: string) => [`${value} 🪙`, name]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Legend */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 justify-center">
+              {pieData.map((entry, i) => (
+                <div key={entry.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  <span>{entry.icon} {entry.name}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Bar Chart — Money Flow */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-display">Fluxo de Dinheiro</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData} barCategoryGap="25%">
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={35}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value: number) => [`${value} 🪙`]}
+                    cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
+                  />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} animationDuration={800}>
+                    {barData.map((_, i) => (
+                      <Cell key={i} fill={barColors[i]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Savings Rate */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card className="border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-display">Taxa de Poupança</CardTitle>
@@ -72,37 +216,6 @@ export default function TeenAnalytics() {
             </div>
             <Progress value={savingsRate} className="h-3 mt-2" />
             <p className="text-[10px] text-muted-foreground mt-1">Meta recomendada: 30%</p>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Category Breakdown */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display">Despesas por Categoria</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {sortedCategories.map(([cat, amount]) => {
-              const config = SPENDING_CATEGORIES[cat as SpendingCategory];
-              const pct = (amount / totalSpent) * 100;
-              return (
-                <div key={cat}>
-                  <div className="flex justify-between items-center text-sm mb-1">
-                    <span>{config.icon} {config.label}</span>
-                    <span className="font-bold text-foreground">{amount} 🪙 <span className="text-muted-foreground font-normal">({Math.round(pct)}%)</span></span>
-                  </div>
-                  <div className="h-2 rounded-full bg-muted overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.6, delay: 0.3 }}
-                      className="h-full rounded-full bg-primary"
-                    />
-                  </div>
-                </div>
-              );
-            })}
           </CardContent>
         </Card>
       </motion.div>
