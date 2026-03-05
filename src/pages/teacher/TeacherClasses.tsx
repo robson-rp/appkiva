@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockClassrooms, mockLeaderboard } from '@/data/mock-data';
-import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil, Trash, Copy } from 'lucide-react';
+import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil, Trash, Copy, Target, Check } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,28 @@ import { toast } from 'sonner';
 
 const CLASS_ICONS = ['🎓', '📚', '🌟', '🚀', '🧠', '💡', '🎨', '🔬', '📐', '🌍', '💰', '🎵'];
 const SUBJECTS = ['Educação Financeira', 'Matemática', 'Português', 'Ciências', 'História', 'Geografia', 'Inglês', 'Artes'];
+const GOAL_CATEGORIES = [
+  { value: 'savings', label: 'Poupança', icon: '💰', unit: '%' },
+  { value: 'tasks', label: 'Tarefas', icon: '✅', unit: '' },
+  { value: 'points', label: 'KivaPoints', icon: '⭐', unit: 'pts' },
+  { value: 'custom', label: 'Personalizada', icon: '🎯', unit: '' },
+];
+
+type ClassGoal = {
+  id: string;
+  classId: string;
+  title: string;
+  category: string;
+  target: number;
+  current: number;
+  completed: boolean;
+};
+
+const initialGoals: ClassGoal[] = [
+  { id: 'goal-1', classId: 'class-1', title: 'Atingir 50% de taxa de poupança média', category: 'savings', target: 50, current: 43, completed: false },
+  { id: 'goal-2', classId: 'class-1', title: 'Todos completarem 15 tarefas', category: 'tasks', target: 15, current: 10, completed: false },
+  { id: 'goal-3', classId: 'class-2', title: 'Acumular 300 KivaPoints por aluno', category: 'points', target: 300, current: 180, completed: false },
+];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -40,6 +63,40 @@ export default function TeacherClasses() {
   const [editSubject, setEditSubject] = useState('');
   const [editSchedule, setEditSchedule] = useState('');
   const [editIcon, setEditIcon] = useState('🎓');
+
+  // Goals state
+  const [goals, setGoals] = useState<ClassGoal[]>(() => [...initialGoals]);
+  const [goalDialogClass, setGoalDialogClass] = useState<string | null>(null);
+  const [newGoalTitle, setNewGoalTitle] = useState('');
+  const [newGoalCategory, setNewGoalCategory] = useState('savings');
+  const [newGoalTarget, setNewGoalTarget] = useState('');
+
+  const addGoal = () => {
+    if (!goalDialogClass || !newGoalTitle.trim() || !newGoalTarget) return;
+    setGoals(prev => [...prev, {
+      id: `goal-${Date.now()}`,
+      classId: goalDialogClass,
+      title: newGoalTitle.trim(),
+      category: newGoalCategory,
+      target: Number(newGoalTarget),
+      current: 0,
+      completed: false,
+    }]);
+    toast.success('Meta adicionada');
+    setNewGoalTitle('');
+    setNewGoalCategory('savings');
+    setNewGoalTarget('');
+    setGoalDialogClass(null);
+  };
+
+  const toggleGoalComplete = (goalId: string) => {
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, completed: !g.completed } : g));
+  };
+
+  const deleteGoal = (goalId: string) => {
+    setGoals(prev => prev.filter(g => g.id !== goalId));
+    toast.success('Meta removida');
+  };
 
   const openEditDialog = (c: typeof classrooms[0]) => {
     setEditingClass(c.id);
@@ -441,6 +498,47 @@ export default function TeacherClasses() {
                     )}
                   </div>
 
+                  {/* Goals Section */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-display font-semibold text-muted-foreground flex items-center gap-1">
+                        <Target className="h-3.5 w-3.5" /> Metas
+                      </p>
+                      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-primary hover:bg-primary/10 rounded-lg" onClick={() => setGoalDialogClass(classroom.id)}>
+                        <Plus className="h-3.5 w-3.5" /> Adicionar
+                      </Button>
+                    </div>
+                    {goals.filter(g => g.classId === classroom.id).length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-2">Sem metas definidas</p>
+                    ) : goals.filter(g => g.classId === classroom.id).map(goal => {
+                      const cat = GOAL_CATEGORIES.find(c => c.value === goal.category);
+                      const pct = Math.min(100, Math.round((goal.current / goal.target) * 100));
+                      return (
+                        <div key={goal.id} className={`p-3 rounded-xl space-y-1.5 border transition-all ${goal.completed ? 'bg-secondary/5 border-secondary/30' : 'bg-muted/20 border-transparent'}`}>
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => toggleGoalComplete(goal.id)} className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${goal.completed ? 'bg-secondary border-secondary text-secondary-foreground' : 'border-muted-foreground/30 hover:border-primary'}`}>
+                              {goal.completed && <Check className="h-3 w-3" />}
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-xs font-display font-semibold ${goal.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                {cat?.icon} {goal.title}
+                              </p>
+                            </div>
+                            <Badge className={`text-[9px] border-0 shrink-0 ${pct >= 100 ? 'bg-secondary/10 text-secondary' : pct >= 50 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                              {goal.current}/{goal.target}{cat?.unit}
+                            </Badge>
+                            <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                          {!goal.completed && (
+                            <Progress value={pct} className="h-1.5" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
                   {/* Average Savings Progress */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs">
@@ -504,6 +602,43 @@ export default function TeacherClasses() {
             </div>
             <Button className="w-full rounded-xl font-display" onClick={saveEdit} disabled={!editName.trim()}>
               ✅ Guardar Alterações
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Goal Dialog */}
+      <Dialog open={!!goalDialogClass} onOpenChange={(open) => { if (!open) { setGoalDialogClass(null); setNewGoalTitle(''); setNewGoalTarget(''); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Nova Meta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Descrição *</Label>
+              <Input placeholder="Ex: Atingir 50% de poupança média" value={newGoalTitle} onChange={e => setNewGoalTitle(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Categoria</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {GOAL_CATEGORIES.map(cat => (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setNewGoalCategory(cat.value)}
+                    className={`p-2.5 rounded-xl text-xs font-display font-semibold flex items-center gap-2 transition-all ${newGoalCategory === cat.value ? 'bg-primary/15 ring-2 ring-primary' : 'bg-muted/30 hover:bg-muted/60'}`}
+                  >
+                    <span>{cat.icon}</span> {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Valor alvo *</Label>
+              <Input type="number" placeholder="Ex: 50" value={newGoalTarget} onChange={e => setNewGoalTarget(e.target.value)} />
+            </div>
+            <Button className="w-full rounded-xl font-display" onClick={addGoal} disabled={!newGoalTitle.trim() || !newGoalTarget}>
+              🎯 Criar Meta
             </Button>
           </div>
         </DialogContent>
