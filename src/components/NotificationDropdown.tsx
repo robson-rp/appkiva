@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle } from 'lucide-react';
+import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { mockNotifications, mockTeacherNotifications, mockChallenges } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
@@ -100,6 +100,10 @@ export function NotificationDropdown() {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
+  const archiveNotif = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   const relativeDate = (date: string) => {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
     if (diff === 0) return 'Hoje';
@@ -182,28 +186,40 @@ export function NotificationDropdown() {
                 const config = typeConfig[notif.type];
                 const Icon = config.icon;
                 return (
-                  <motion.button
+                  <motion.div
                     key={notif.id}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -60, height: 0, marginTop: 0, paddingTop: 0, paddingBottom: 0 }}
                     transition={{ delay: i * 0.03 }}
-                    onClick={() => markRead(notif.id)}
-                    className={`w-full text-left flex items-start gap-3 px-4 py-3 hover:bg-muted/40 transition-colors duration-150 border-b border-border/30 last:border-0 ${
+                    className={`flex items-start gap-3 px-4 py-3 border-b border-border/30 last:border-0 ${
                       notif.urgent && !notif.read ? 'bg-destructive/[0.06]' : !notif.read ? 'bg-primary/[0.03]' : ''
                     }`}
                   >
-                    <div className={`${config.bg} rounded-xl p-2 shrink-0 mt-0.5`}>
-                      <Icon className="h-3.5 w-3.5 text-foreground/70" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className={`text-xs font-display ${!notif.read ? 'font-bold' : 'font-medium'} truncate`}>{notif.title}</p>
-                        {!notif.read && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
+                    <button
+                      onClick={() => markRead(notif.id)}
+                      className="flex items-start gap-3 flex-1 min-w-0 text-left hover:bg-muted/40 rounded-lg transition-colors -m-1 p-1"
+                    >
+                      <div className={`${config.bg} rounded-xl p-2 shrink-0 mt-0.5`}>
+                        <Icon className="h-3.5 w-3.5 text-foreground/70" />
                       </div>
-                      <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{notif.message}</p>
-                      <p className="text-[10px] text-muted-foreground/60 mt-1">{relativeDate(notif.date)}</p>
-                    </div>
-                  </motion.button>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-xs font-display ${!notif.read ? 'font-bold' : 'font-medium'} truncate`}>{notif.title}</p>
+                          {!notif.read && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{notif.message}</p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-1">{relativeDate(notif.date)}</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => archiveNotif(notif.id)}
+                      className="shrink-0 p-1.5 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors mt-1"
+                      title="Arquivar"
+                    >
+                      <Archive className="h-3.5 w-3.5" />
+                    </button>
+                  </motion.div>
                 );
               })
             )}
