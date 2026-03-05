@@ -7,15 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
-};
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -29,10 +22,10 @@ export default function ParentDashboard() {
   const recentTransactions = mockTransactions.slice(0, 5);
 
   const stats = [
-    { label: 'Crianças', value: mockChildren.length, icon: Users, gradient: 'from-primary/10 to-primary/5', iconBg: 'bg-primary/10', iconColor: 'text-primary', to: '/parent/children' },
-    { label: 'Distribuído', value: totalDistributed, icon: PiggyBank, gradient: 'from-accent/10 to-accent/5', iconBg: 'bg-accent/10', iconColor: 'text-accent-foreground', to: '/parent/allowance', suffix: ' 🪙' },
-    { label: 'Concluídas', value: tasksCompleted, icon: CheckCircle, gradient: 'from-secondary/10 to-secondary/5', iconBg: 'bg-secondary/10', iconColor: 'text-secondary', to: '/parent/tasks' },
-    { label: 'A Aprovar', value: tasksPending, icon: ListTodo, gradient: 'from-destructive/10 to-destructive/5', iconBg: 'bg-destructive/10', iconColor: 'text-destructive', to: '/parent/tasks' },
+    { label: 'Crianças', value: mockChildren.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/parent/children' },
+    { label: 'Distribuído', value: totalDistributed, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/parent/allowance', suffix: ' 🪙' },
+    { label: 'Concluídas', value: tasksCompleted, icon: CheckCircle, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary', to: '/parent/tasks' },
+    { label: 'A Aprovar', value: tasksPending, icon: ListTodo, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive', to: '/parent/tasks' },
   ];
 
   const txIcon = (type: string) => {
@@ -41,21 +34,16 @@ export default function ParentDashboard() {
   };
 
   const statusConfig: Record<string, { label: string; className: string }> = {
-    pending: { label: 'Pendente', className: 'bg-accent/15 text-accent-foreground' },
-    in_progress: { label: 'Em Progresso', className: 'bg-primary/10 text-primary' },
-    completed: { label: 'A Aprovar', className: 'bg-secondary/10 text-secondary' },
-    approved: { label: 'Aprovada', className: 'bg-secondary/20 text-secondary' },
+    pending: { label: 'Pendente', className: 'bg-muted text-muted-foreground' },
+    in_progress: { label: 'Em Progresso', className: 'bg-[hsl(var(--kivara-light-blue))] text-primary' },
+    completed: { label: 'A Aprovar', className: 'bg-[hsl(var(--kivara-light-gold))] text-accent-foreground' },
+    approved: { label: 'Aprovada', className: 'bg-[hsl(var(--kivara-light-green))] text-secondary' },
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="space-y-6 max-w-5xl mx-auto"
-    >
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero Welcome */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
@@ -63,26 +51,24 @@ export default function ParentDashboard() {
           <CardContent className="relative z-10 p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-2">
-                <p className="text-white/70 text-sm font-body">Painel Familiar</p>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-white">
+                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Painel Familiar</p>
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">
                   Olá, {user?.name}! 👋
                 </h1>
-                <p className="text-white/60 text-sm max-w-md">
+                <p className="text-primary-foreground/60 text-sm max-w-md">
                   Acompanha a evolução financeira dos teus filhos. Pequenos hábitos, grandes futuros.
                 </p>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <p className="text-white/60 text-xs font-body">Saldo Total</p>
-                  <motion.p
-                    key={totalBalance}
-                    initial={{ scale: 1.15, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="font-display text-3xl md:text-4xl font-bold text-white"
-                  >
-                    {totalBalance} <span className="text-xl">🪙</span>
-                  </motion.p>
-                </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 text-center">
+                <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Saldo Total</p>
+                <motion.p
+                  key={totalBalance}
+                  initial={{ scale: 1.15, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mt-1"
+                >
+                  {totalBalance} <span className="text-xl">🪙</span>
+                </motion.p>
               </div>
             </div>
           </CardContent>
@@ -90,26 +76,20 @@ export default function ParentDashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {stats.map((stat) => (
+          <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
-              className="cursor-pointer border border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden"
+              className="cursor-pointer border-border/50 hover:shadow-kivara transition-all duration-300 overflow-hidden"
               onClick={() => navigate(stat.to)}
             >
-              <CardContent className="p-4 relative">
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-50`} />
-                <div className="relative z-10">
-                  <div className={`w-10 h-10 rounded-2xl ${stat.iconBg} flex items-center justify-center mb-3`}>
-                    <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
-                  </div>
-                  <p className="font-display text-2xl font-bold">{stat.value}{stat.suffix || ''}</p>
-                  <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase">{stat.label}</p>
+              <div className="h-0.5 gradient-kivara" />
+              <CardContent className="p-4">
+                <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-3`}>
+                  <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
+                <p className="font-display text-2xl font-bold">{stat.value}{stat.suffix || ''}</p>
+                <p className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">{stat.label}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -118,12 +98,13 @@ export default function ParentDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50 h-full">
+        <motion.div variants={item}>
+          <Card className="border-border/50 h-full overflow-hidden">
+            <div className="h-0.5 gradient-kivara" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="h-3.5 w-3.5 text-primary" />
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
+                  <Users className="h-4 w-4 text-primary" />
                 </div>
                 Crianças
               </CardTitle>
@@ -139,10 +120,10 @@ export default function ParentDashboard() {
                   <motion.div
                     key={child.id}
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50"
                     onClick={() => navigate('/parent/children')}
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-2xl shadow-sm">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-2xl shadow-sm">
                       {child.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -161,12 +142,13 @@ export default function ParentDashboard() {
         </motion.div>
 
         {/* Tasks to Approve */}
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50 h-full">
+        <motion.div variants={item}>
+          <Card className="border-border/50 h-full overflow-hidden">
+            <div className="h-0.5 gradient-gold" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
-                  <ListTodo className="h-3.5 w-3.5 text-secondary" />
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
+                  <ListTodo className="h-4 w-4 text-accent-foreground" />
                 </div>
                 Tarefas Recentes
               </CardTitle>
@@ -182,16 +164,16 @@ export default function ParentDashboard() {
                   <motion.div
                     key={task.id}
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-card shadow-sm flex items-center justify-center text-lg">
+                    <div className="w-10 h-10 rounded-xl bg-card shadow-sm flex items-center justify-center text-lg border border-border/30">
                       {child?.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{task.title}</p>
+                      <p className="text-sm font-display font-bold truncate">{task.title}</p>
                       <p className="text-[11px] text-muted-foreground">{child?.name} · +{task.reward} 🪙</p>
                     </div>
-                    <span className={`text-[10px] font-display font-semibold px-2.5 py-1 rounded-full ${status.className}`}>
+                    <span className={`text-[10px] font-display font-semibold px-2.5 py-1 rounded-xl ${status.className}`}>
                       {status.label}
                     </span>
                   </motion.div>
@@ -205,33 +187,34 @@ export default function ParentDashboard() {
       {/* Savings Overview + Recent Activity */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Savings */}
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50">
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-0.5 bg-secondary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <Target className="h-3.5 w-3.5 text-accent-foreground" />
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-green))] flex items-center justify-center">
+                  <Target className="h-4 w-4 text-secondary" />
                 </div>
                 Objectivos de Poupança
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
               {mockVaults.map((vault) => {
                 const child = mockChildren.find((c) => c.id === vault.childId);
                 const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
                 return (
-                  <div key={vault.id} className="space-y-1.5">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold flex items-center gap-1.5">
-                        <span className="text-base">{vault.icon}</span> {vault.name}
-                        <span className="text-[10px] text-muted-foreground font-normal">({child?.name})</span>
+                  <div key={vault.id} className="bg-muted/30 rounded-2xl p-4 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-display font-bold text-sm flex items-center gap-2">
+                        <span className="text-lg">{vault.icon}</span> {vault.name}
+                        <span className="text-[10px] text-muted-foreground font-normal bg-muted rounded-lg px-2 py-0.5">{child?.name}</span>
                       </span>
                       <span className="text-xs text-muted-foreground font-display font-bold">
                         {vault.currentAmount}/{vault.targetAmount} 🪙
                       </span>
                     </div>
                     <div className="relative">
-                      <Progress value={pct} className="h-3 rounded-full" />
+                      <Progress value={pct} className="h-2.5 rounded-full" />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
                         {pct}%
                       </span>
@@ -244,12 +227,13 @@ export default function ParentDashboard() {
         </motion.div>
 
         {/* Recent Activity */}
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50">
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 Actividade Recente
               </CardTitle>
@@ -258,13 +242,13 @@ export default function ParentDashboard() {
               {recentTransactions.map((tx) => {
                 const child = mockChildren.find((c) => c.id === tx.childId);
                 return (
-                  <div key={tx.id} className="flex items-center justify-between py-2.5 border-b border-border/30 last:border-0">
+                  <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center">
                         {txIcon(tx.type)}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{tx.description}</p>
+                        <p className="text-sm font-display font-bold">{tx.description}</p>
                         <p className="text-[11px] text-muted-foreground">{child?.name} · {tx.date}</p>
                       </div>
                     </div>

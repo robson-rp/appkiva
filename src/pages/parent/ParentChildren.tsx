@@ -18,25 +18,27 @@ export default function ParentChildren() {
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute bottom-0 left-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="font-display text-2xl font-bold">Gestão de Crianças</h1>
-            <p className="text-sm text-primary-foreground/70 mt-1">Gere os perfis das tuas crianças</p>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
+            <h1 className="font-display text-2xl font-bold mt-1">Crianças</h1>
+            <p className="text-sm text-primary-foreground/60 mt-1">Gere os perfis das tuas crianças</p>
           </div>
-          <Button className="rounded-2xl font-display gap-2 bg-white/20 hover:bg-white/30 text-primary-foreground border-0 backdrop-blur-sm">
+          <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
             <Plus className="h-4 w-4" /> Adicionar
           </Button>
         </div>
-        <div className="relative flex items-center gap-6 mt-4">
+        <div className="relative flex items-center gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
             <Users className="h-4 w-4" />
             <span className="font-display font-bold text-lg">{mockChildren.length}</span>
-            <span className="text-xs text-primary-foreground/70">crianças</span>
+            <span className="text-xs text-primary-foreground/60">crianças</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-lg">🪙 {totalBalance}</span>
-            <span className="text-xs text-primary-foreground/70">saldo total</span>
+            <span className="text-xs text-primary-foreground/60">saldo total</span>
           </div>
         </div>
       </motion.div>
@@ -46,13 +48,12 @@ export default function ParentChildren() {
         {mockChildren.map((child) => {
           const savingsPercent = Math.round((child.balance / (child.balance + child.weeklyAllowance * 4)) * 100);
           return (
-            <motion.div key={child.id} variants={item}>
-              <Card className="group hover:shadow-kivara transition-all duration-300 hover:-translate-y-1 overflow-hidden border-border/50">
-                {/* Color accent bar */}
+            <motion.div key={child.id} variants={item} whileHover={{ y: -4 }}>
+              <Card className="group hover:shadow-kivara transition-all duration-300 overflow-hidden border-border/50">
                 <div className="h-1 gradient-kivara" />
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-5">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-4xl shadow-sm group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-4xl shadow-sm group-hover:scale-110 transition-transform duration-300">
                       {child.avatar}
                     </div>
                     <div className="flex-1">
@@ -74,8 +75,8 @@ export default function ParentChildren() {
                   </div>
 
                   {/* Savings progress */}
-                  <div className="mb-5">
-                    <div className="flex justify-between items-center mb-1.5">
+                  <div className="mb-5 bg-muted/30 rounded-2xl p-4">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Hábito de poupança</span>
                       <span className="text-xs font-display font-bold text-secondary">{savingsPercent}%</span>
                     </div>
@@ -83,10 +84,10 @@ export default function ParentChildren() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 rounded-xl font-display gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors duration-200">
+                    <Button variant="outline" size="sm" className="flex-1 rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200">
                       <Edit className="h-3.5 w-3.5" /> Editar
                     </Button>
-                    <Button variant="outline" size="icon" className="rounded-xl text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors duration-200 h-9 w-9">
+                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9">
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>

@@ -24,20 +24,22 @@ export default function ParentAllowance() {
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+        <div className="absolute bottom-0 right-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
-          <h1 className="font-display text-2xl font-bold">Mesada Virtual</h1>
-          <p className="text-sm text-primary-foreground/70 mt-1">Define e envia a mesada semanal</p>
+          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
+          <h1 className="font-display text-2xl font-bold mt-1">Mesada Virtual</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">Define e envia a mesada semanal</p>
         </div>
         <div className="relative flex items-center gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
             <Calendar className="h-4 w-4" />
             <span className="font-display font-bold text-lg">🪙 {totalWeekly}</span>
-            <span className="text-xs text-primary-foreground/70">/semana</span>
+            <span className="text-xs text-primary-foreground/60">/semana</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-lg">🪙 {totalBalance}</span>
-            <span className="text-xs text-primary-foreground/70">em circulação</span>
+            <span className="text-xs text-primary-foreground/60">em circulação</span>
           </div>
         </div>
       </motion.div>
@@ -45,12 +47,12 @@ export default function ParentAllowance() {
       {/* Children Cards */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid md:grid-cols-2 gap-4">
         {mockChildren.map((child) => (
-          <motion.div key={child.id} variants={item}>
-            <Card className="group hover:shadow-kivara transition-all duration-300 hover:-translate-y-1 border-border/50 overflow-hidden">
+          <motion.div key={child.id} variants={item} whileHover={{ y: -4 }}>
+            <Card className="group hover:shadow-kivara transition-all duration-300 border-border/50 overflow-hidden">
               <div className="h-1 gradient-gold" />
               <CardContent className="p-6 space-y-5">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-gold))] to-[hsl(var(--kivara-light-blue))] flex items-center justify-center text-3xl shadow-sm group-hover:scale-105 transition-transform duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-gold))] to-[hsl(var(--kivara-light-blue))] flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-300">
                     {child.avatar}
                   </div>
                   <div className="flex-1">
@@ -76,7 +78,7 @@ export default function ParentAllowance() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border/30">
                   <Wallet className="h-3.5 w-3.5" />
                   <span>Última mesada enviada há 3 dias</span>
                 </div>
