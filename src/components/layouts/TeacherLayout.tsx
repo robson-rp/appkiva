@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -89,17 +90,19 @@ function TeacherSidebar() {
 
 export function TeacherLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const { logout } = useAuth();
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        <TeacherSidebar />
+        {!isMobile && <TeacherSidebar />}
         <div className="flex-1 flex flex-col">
           <header className="relative z-50">
             <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
             <div className="relative h-14 flex items-center justify-between px-4 gap-4">
               <div className="flex items-center gap-4">
-                <SidebarTrigger />
+                {!isMobile && <SidebarTrigger />}
                 <div className="flex items-center gap-2">
                   <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
                   <span className="text-[10px] font-display font-semibold text-muted-foreground bg-secondary/10 text-secondary px-2 py-0.5 rounded-lg">ESCOLA</span>
@@ -108,6 +111,11 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-1">
                 <ThemeToggle />
                 <NotificationDropdown />
+                {isMobile && (
+                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive">
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </header>
@@ -118,11 +126,56 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: -16, scale: 0.98, filter: 'blur(4px)' }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="flex-1 p-4 md:p-6 overflow-auto"
+              className={`flex-1 p-4 md:p-6 overflow-auto ${isMobile ? 'pb-24' : ''}`}
             >
               {children}
             </motion.main>
           </AnimatePresence>
+
+          {/* Mobile Bottom Navigation */}
+          {isMobile && (
+            <nav className="fixed bottom-0 left-0 right-0 z-40">
+              <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
+              <div className="relative px-3 py-2 flex justify-around items-center max-w-lg mx-auto">
+                {navItems.map((item) => {
+                  const isActive = item.url === '/teacher'
+                    ? location.pathname === '/teacher'
+                    : location.pathname.startsWith(item.url);
+
+                  return (
+                    <NavLink
+                      key={item.title}
+                      to={item.url}
+                      end={item.url === '/teacher'}
+                      className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all duration-200 text-muted-foreground"
+                      activeClassName="text-primary"
+                    >
+                      <div className={`relative p-1.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary/10' : ''}`}>
+                        {isActive && (
+                          <motion.div
+                            layoutId="teacher-nav-indicator"
+                            className="absolute inset-0 rounded-xl bg-primary/10"
+                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          />
+                        )}
+                        <item.icon className={`h-5 w-5 relative z-10 transition-all duration-200 ${isActive ? 'text-primary' : ''}`} />
+                      </div>
+                      <span className={`text-[10px] mt-0.5 font-semibold transition-all duration-200 ${isActive ? 'text-primary' : ''}`}>
+                        {item.title}
+                      </span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="teacher-nav-dot"
+                          className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </nav>
+          )}
         </div>
       </div>
     </SidebarProvider>
