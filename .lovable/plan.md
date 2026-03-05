@@ -1,27 +1,33 @@
 
 
-## Plan: Enhance "Nova Turma" Dialog Form
+## Plan: Student Profile Page (Teacher View)
 
 ### Overview
-Expand the existing "Nova Turma" dialog with additional fields to make it a complete classroom creation form, beyond the current name + grade + student picker.
+Create a new page at `/teacher/student/:studentId` showing an individual student's profile with their financial stats, tasks, achievements, and savings data — accessible by clicking a student row in any class card on TeacherClasses.
 
 ### Changes
 
-**`src/pages/teacher/TeacherClasses.tsx`**
+**1. New file: `src/pages/teacher/TeacherStudentProfile.tsx`**
 
-Add new state variables and form fields to the dialog:
+A dedicated profile page showing:
+- **Header**: Student avatar, name, level badge, KivaPoints
+- **Stats grid**: Balance, savings rate, tasks completed, KivaPoints
+- **Vaults section**: Student's active vaults with progress bars (from `mockVaults` filtered by childId)
+- **Tasks section**: Recent tasks (from `mockTasks` filtered by childId) with status indicators
+- **Achievements section**: Unlocked achievements (from `mockAchievements` filtered by childId)
+- **Transactions section**: Recent transaction history (from `mockTransactions` filtered by childId)
+- **Back button**: Navigate back to `/teacher/classes`
 
-- **Descrição** — `Textarea` for a short class description/notes
-- **Disciplina** — `Select` dropdown with predefined subjects (Matemática, Português, Ciências, Educação Financeira, etc.)
-- **Horário** — `Input` for schedule info (e.g., "Seg/Qua 10h-11h")
-- **Ícone** — clickable emoji grid to pick the class icon instead of random assignment
+Uses `useParams()` to get `studentId`, then looks up the student in `mockLeaderboard` + `mockChildren` for combined data. Follows existing page patterns (motion animations, Card components, gradient hero).
 
-Store these in new state variables (`newClassDesc`, `newClassSubject`, `newClassSchedule`, `newClassIcon`). Include the extra fields in the created classroom object (extend the local type inline or add optional fields).
+**2. `src/App.tsx`**
 
-Add a search/filter `Input` above the student list to quickly find students by name.
+Add route: `<Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />`
 
-Import `Textarea` and `Select` components (already available in the project).
+**3. `src/pages/teacher/TeacherClasses.tsx`**
 
-### UI Layout
-The dialog will use a two-column grid for shorter fields (grade + subject, schedule + icon) and full-width for name, description, and student picker. Reset all fields on dialog close.
+Wrap each student row in the class card with a `Link` (or `useNavigate` onClick) pointing to `/teacher/student/{student.childId}`. The row already has hover styles; add a click handler that navigates, keeping the remove button isolated with `stopPropagation`.
+
+### Data Sources
+All data comes from existing mock arrays: `mockChildren`, `mockLeaderboard`, `mockTasks`, `mockTransactions`, `mockVaults`, `mockAchievements` — filtered by the student's `childId`.
 
