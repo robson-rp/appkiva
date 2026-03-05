@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockClassrooms, mockLeaderboard } from '@/data/mock-data';
-import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search } from 'lucide-react';
+import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,32 @@ export default function TeacherClasses() {
   const [newClassStudents, setNewClassStudents] = useState<string[]>([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [addStudents, setAddStudents] = useState<string[]>([]);
+  const [editingClass, setEditingClass] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editGrade, setEditGrade] = useState('');
+  const [editSubject, setEditSubject] = useState('');
+  const [editSchedule, setEditSchedule] = useState('');
+  const [editIcon, setEditIcon] = useState('🎓');
+
+  const openEditDialog = (c: typeof classrooms[0]) => {
+    setEditingClass(c.id);
+    setEditName(c.name);
+    setEditGrade(c.grade);
+    setEditSubject((c as any).subject ?? '');
+    setEditSchedule((c as any).schedule ?? '');
+    setEditIcon(c.icon);
+  };
+
+  const saveEdit = () => {
+    if (!editingClass || !editName.trim()) return;
+    setClassrooms(prev => prev.map(c =>
+      c.id === editingClass
+        ? { ...c, name: editName.trim(), grade: editGrade.trim() || c.grade, icon: editIcon, subject: editSubject, schedule: editSchedule } as any
+        : c
+    ));
+    toast.success('Turma atualizada');
+    setEditingClass(null);
+  };
 
   const toggleNewStudent = (id: string) => {
     setNewClassStudents(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
@@ -250,8 +276,16 @@ export default function TeacherClasses() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <span className="block">{classroom.name}</span>
-                      <span className="text-xs text-muted-foreground font-normal">{classroom.grade} · Criada em {classroom.createdAt}</span>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {classroom.grade}
+                        {(classroom as any).subject ? ` · ${(classroom as any).subject}` : ''}
+                        {(classroom as any).schedule ? ` · ${(classroom as any).schedule}` : ''}
+                        {' · Criada em '}{classroom.createdAt}
+                      </span>
                     </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl shrink-0" onClick={() => openEditDialog(classroom)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -380,6 +414,57 @@ export default function TeacherClasses() {
           );
         })}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingClass} onOpenChange={(open) => { if (!open) setEditingClass(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Editar Turma</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Nome da turma *</Label>
+              <Input value={editName} onChange={e => setEditName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Ícone</Label>
+              <div className="flex flex-wrap gap-2">
+                {CLASS_ICONS.map(icon => (
+                  <button key={icon} type="button" onClick={() => setEditIcon(icon)} className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${editIcon === icon ? 'bg-primary/20 ring-2 ring-primary scale-110' : 'bg-muted/30 hover:bg-muted/60'}`}>
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Ano escolar</Label>
+                <Input value={editGrade} onChange={e => setEditGrade(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Disciplina</Label>
+                <Select value={editSubject} onValueChange={setEditSubject}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Selecionar..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUBJECTS.map(s => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Horário</Label>
+              <Input placeholder="Ex: Seg/Qua 10h-11h" value={editSchedule} onChange={e => setEditSchedule(e.target.value)} />
+            </div>
+            <Button className="w-full rounded-xl font-display" onClick={saveEdit} disabled={!editName.trim()}>
+              ✅ Guardar Alterações
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
