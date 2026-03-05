@@ -1,32 +1,81 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserRole } from '@/types/kivara';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
 
+type AuthMode = 'login' | 'signup';
+
+const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string }> = {
+  parent: { label: 'Encarregado', description: 'Gerir tarefas, mesadas e acompanhar o progresso', icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary' },
+  teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
+  child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
+  teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
+};
+
+const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher'];
+
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-  const { login } = useAuth();
+  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRole) return;
-    login(selectedRole);
-    navigate(selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : '/child');
+    setSubmitting(true);
+
+    try {
+      if (authMode === 'signup') {
+        const { error } = await signup(email, password, selectedRole, displayName || email);
+        if (error) {
+          toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
+        toast({ title: 'Conta criada!', description: 'Verifica o teu email para confirmar a conta.' });
+      } else {
+        const { error } = await login(email, password);
+        if (error) {
+          toast({ title: 'Erro ao entrar', description: error, variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : '/child';
+      navigate(dest);
+    } catch {
+      toast({ title: 'Erro inesperado', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setSelectedRole(null);
+    setEmail('');
+    setPassword('');
+    setDisplayName('');
+    setAuthMode('login');
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Hero Panel */}
       <div className="relative flex-1 flex flex-col items-center justify-center p-8 lg:p-16 gradient-kivara overflow-hidden">
-        {/* Decorative circles */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-white/5 blur-3xl" />
         
@@ -55,7 +104,6 @@ export default function Login() {
             Pequenos hábitos. Grandes futuros.
           </motion.p>
 
-          {/* Feature highlights */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -111,81 +159,27 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedRole('parent')}
-                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-primary bg-card hover:shadow-kivara transition-all text-left flex items-center gap-5 group"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <Shield className="h-8 w-8 text-primary" />
-                    </div>
-                    <div>
-                      <span className="font-display font-bold text-lg text-foreground block">
-                        Encarregado
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Gerir tarefas, mesadas e acompanhar o progresso
-                      </span>
-                    </div>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedRole('teen')}
-                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-chart-3 bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-chart-3/10 flex items-center justify-center group-hover:bg-chart-3/20 transition-colors">
-                      <Zap className="h-8 w-8 text-chart-3" />
-                    </div>
-                    <div>
-                      <span className="font-display font-bold text-lg text-foreground block">
-                        Adolescente
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Carteira avançada, categorias e orçamento
-                      </span>
-                    </div>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedRole('child')}
-                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-secondary bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                      <Sparkles className="h-8 w-8 text-secondary" />
-                    </div>
-                    <div>
-                      <span className="font-display font-bold text-lg text-foreground block">
-                        Criança
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Missões, poupanças e ganhar moedas
-                      </span>
-                    </div>
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setSelectedRole('teacher')}
-                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-accent bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
-                  >
-                    <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                      <GraduationCap className="h-8 w-8 text-accent-foreground" />
-                    </div>
-                    <div>
-                      <span className="font-display font-bold text-lg text-foreground block">
-                        Professor
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Gerir turmas e desafios colectivos
-                      </span>
-                    </div>
-                  </motion.button>
+                  {ROLE_ORDER.map(role => {
+                    const cfg = ROLE_CONFIG[role];
+                    const Icon = cfg.icon;
+                    return (
+                      <motion.button
+                        key={role}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSelectedRole(role)}
+                        className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
+                      >
+                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
+                          <Icon className={`h-8 w-8 ${cfg.colorClass}`} />
+                        </div>
+                        <div>
+                          <span className="font-display font-bold text-lg text-foreground block">{cfg.label}</span>
+                          <span className="text-sm text-muted-foreground">{cfg.description}</span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </motion.div>
             ) : (
@@ -198,81 +192,88 @@ export default function Login() {
               >
                 <div>
                   <button
-                    onClick={() => setSelectedRole(null)}
+                    onClick={resetForm}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 font-body"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Voltar
                   </button>
                   <h2 className="font-display text-3xl font-bold text-foreground mb-2">
-                    {selectedRole === 'parent' ? 'Área do Encarregado' : selectedRole === 'teacher' ? 'Área do Professor' : selectedRole === 'teen' ? 'Área do Adolescente' : 'Área da Criança'}
+                    {authMode === 'signup' ? 'Criar Conta' : `Área do ${ROLE_CONFIG[selectedRole].label}`}
                   </h2>
                   <p className="text-muted-foreground font-body">
-                    {selectedRole === 'parent'
-                      ? 'Insere as tuas credenciais para aceder ao painel'
-                      : selectedRole === 'teacher'
-                      ? 'Insere as tuas credenciais de professor'
-                      : 'Insere o teu nome de utilizador e PIN'}
+                    {authMode === 'signup'
+                      ? `Cria a tua conta como ${ROLE_CONFIG[selectedRole].label.toLowerCase()}`
+                      : 'Insere as tuas credenciais para aceder'}
                   </p>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-5">
-                  {(selectedRole === 'parent' || selectedRole === 'teacher') && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="font-semibold">Email</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="maria@example.com"
-                          defaultValue="maria@example.com"
-                          className="h-12 rounded-xl text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
-                        <Input
-                          id="password"
-                          type="password"
-                          placeholder="••••••••"
-                          defaultValue="123456"
-                          className="h-12 rounded-xl text-base"
-                        />
-                      </div>
-                    </>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {authMode === 'signup' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="displayName" className="font-semibold">Nome</Label>
+                      <Input
+                        id="displayName"
+                        placeholder="O teu nome"
+                        value={displayName}
+                        onChange={e => setDisplayName(e.target.value)}
+                        className="h-12 rounded-xl text-base"
+                        required
+                      />
+                    </div>
                   )}
-                  {(selectedRole === 'child' || selectedRole === 'teen') && (
-                    <>
-                      <div className="space-y-2">
-                        <Label htmlFor="username" className="font-semibold">Nome de utilizador</Label>
-                        <Input
-                          id="username"
-                          placeholder={selectedRole === 'teen' ? 'lucas_pro' : 'ana_star'}
-                          defaultValue={selectedRole === 'teen' ? 'lucas_pro' : 'ana_star'}
-                          className="h-12 rounded-xl text-base"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="pin" className="font-semibold">PIN</Label>
-                        <Input
-                          id="pin"
-                          type="password"
-                          maxLength={4}
-                          placeholder="••••"
-                          defaultValue={selectedRole === 'teen' ? '9999' : '1234'}
-                          className="h-12 rounded-xl text-base"
-                        />
-                      </div>
-                    </>
-                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="font-semibold">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="exemplo@email.com"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      className="h-12 rounded-xl text-base"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      className="h-12 rounded-xl text-base"
+                      minLength={6}
+                      required
+                    />
+                  </div>
 
                   <Button
                     type="submit"
                     className="w-full font-display font-bold h-13 rounded-xl text-base"
                     size="lg"
+                    disabled={submitting}
                   >
-                    Entrar
+                    {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : authMode === 'signup' ? 'Criar Conta' : 'Entrar'}
                   </Button>
+
+                  <p className="text-center text-sm text-muted-foreground">
+                    {authMode === 'login' ? (
+                      <>Não tens conta?{' '}
+                        <button type="button" onClick={() => setAuthMode('signup')} className="text-primary font-semibold hover:underline">
+                          Criar conta
+                        </button>
+                      </>
+                    ) : (
+                      <>Já tens conta?{' '}
+                        <button type="button" onClick={() => setAuthMode('login')} className="text-primary font-semibold hover:underline">
+                          Entrar
+                        </button>
+                      </>
+                    )}
+                  </p>
                 </form>
               </motion.div>
             )}

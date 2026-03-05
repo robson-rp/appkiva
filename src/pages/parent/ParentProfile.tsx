@@ -139,7 +139,7 @@ export default function ParentProfile() {
 
             <div className="space-y-2">
               <Label>ID da Família</Label>
-              <Input value={user?.familyId || 'family-1'} readOnly className="rounded-xl bg-muted/30 text-muted-foreground" />
+              <Input value={user?.householdId || '—'} readOnly className="rounded-xl bg-muted/30 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
