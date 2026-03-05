@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -99,6 +99,29 @@ export const mockDiaryEntries: DiaryEntry[] = [
   { id: 'diary-3', childId: 'child-1', text: 'A mesada chegou e já guardei metade no cofre. A outra metade vou usar com cuidado.', mood: '😊', date: '2026-03-03', tags: ['planeamento'] },
   { id: 'diary-4', childId: 'child-1', text: 'Gastei mais do que devia na loja... para a próxima vou pensar melhor antes de comprar.', mood: '😔', date: '2026-03-02', tags: ['reflexão'] },
   { id: 'diary-5', childId: 'child-1', text: 'Fiz a minha primeira doação! Doei 10 moedas para o projecto de livros. Senti-me muito bem!', mood: '😄', date: '2026-03-01', tags: ['doação', 'solidariedade'] },
+];
+
+export const mockSpendingLimits: SpendingLimit[] = [
+  { childId: 'child-1', weeklySpendLimit: 40, minSavingsPercent: 30, purchaseBlockEnabled: false },
+  { childId: 'child-2', weeklySpendLimit: 25, minSavingsPercent: 20, purchaseBlockEnabled: true },
+];
+
+export const mockAllowanceConfigs: AllowanceConfig[] = [
+  { childId: 'child-1', baseAmount: 50, frequency: 'weekly', taskBonus: 5, missionBonus: 10, lastSent: '2026-03-01' },
+  { childId: 'child-2', baseAmount: 30, frequency: 'weekly', taskBonus: 3, missionBonus: 8, lastSent: '2026-03-01' },
+];
+
+export const mockSharedGoals: SharedGoal[] = [
+  { id: 'goal-1', name: 'Bicicleta nova', icon: '🚲', targetAmount: 500, parentContribution: 200, childContribution: 180, childId: 'child-1', createdAt: '2026-02-15' },
+  { id: 'goal-2', name: 'Viagem ao Parque Aquático', icon: '🎢', targetAmount: 300, parentContribution: 100, childContribution: 50, childId: 'child-2', createdAt: '2026-03-01' },
+];
+
+export const mockInsights: BehavioralInsight[] = [
+  { id: 'ins-1', childId: 'child-1', type: 'positive', title: 'Excelente poupadora!', description: 'A Ana poupou 43% das moedas ganhas este mês — acima da média familiar.', metric: '43%', trend: 'up' },
+  { id: 'ins-2', childId: 'child-1', type: 'neutral', title: 'Gastos estáveis', description: 'Os gastos da Ana mantêm-se consistentes nas últimas 4 semanas.', metric: '15/sem', trend: 'stable' },
+  { id: 'ins-3', childId: 'child-2', type: 'warning', title: 'Poupança em queda', description: 'O Pedro poupou apenas 12% esta semana — abaixo do mínimo recomendado de 20%.', metric: '12%', trend: 'down' },
+  { id: 'ins-4', childId: 'child-2', type: 'positive', title: 'Tarefas em alta', description: 'O Pedro completou 3 tarefas esta semana — o melhor resultado do mês!', metric: '3 tarefas', trend: 'up' },
+  { id: 'ins-5', childId: 'child-1', type: 'warning', title: 'Compra impulsiva detectada', description: 'A Ana gastou 15 moedas logo após receber a mesada. Pode beneficiar de um período de espera.', trend: 'down' },
 ];
 
 export const KIVO_TIPS: Record<string, string[]> = {

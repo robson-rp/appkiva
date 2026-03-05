@@ -133,6 +133,43 @@ export interface DiaryEntry {
   tags?: string[];
 }
 
+export interface SpendingLimit {
+  childId: string;
+  weeklySpendLimit: number;
+  minSavingsPercent: number;
+  purchaseBlockEnabled: boolean;
+}
+
+export interface AllowanceConfig {
+  childId: string;
+  baseAmount: number;
+  frequency: 'weekly' | 'monthly';
+  taskBonus: number;
+  missionBonus: number;
+  lastSent?: string;
+}
+
+export interface SharedGoal {
+  id: string;
+  name: string;
+  icon: string;
+  targetAmount: number;
+  parentContribution: number;
+  childContribution: number;
+  childId: string;
+  createdAt: string;
+}
+
+export interface BehavioralInsight {
+  id: string;
+  childId: string;
+  type: 'positive' | 'warning' | 'neutral';
+  title: string;
+  description: string;
+  metric?: string;
+  trend?: 'up' | 'down' | 'stable';
+}
+
 export interface Notification {
   id: string;
   title: string;

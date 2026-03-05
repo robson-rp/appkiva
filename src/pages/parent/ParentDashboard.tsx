@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockChildren, mockTasks, mockTransactions, mockVaults } from '@/data/mock-data';
+import { mockChildren, mockTasks, mockTransactions, mockVaults, mockSharedGoals } from '@/data/mock-data';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target } from 'lucide-react';
+import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
@@ -262,6 +262,67 @@ export default function ParentDashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Shared Goals */}
+      {mockSharedGoals.length > 0 && (
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-0.5 bg-gradient-to-r from-primary via-accent to-secondary" />
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
+                  <Handshake className="h-4 w-4 text-accent-foreground" />
+                </div>
+                Metas Partilhadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mockSharedGoals.map((goal) => {
+                const child = mockChildren.find(c => c.id === goal.childId);
+                const total = goal.parentContribution + goal.childContribution;
+                const pct = Math.round((total / goal.targetAmount) * 100);
+                const parentPct = Math.round((goal.parentContribution / goal.targetAmount) * 100);
+                const childPct = Math.round((goal.childContribution / goal.targetAmount) * 100);
+                return (
+                  <div key={goal.id} className="bg-muted/30 rounded-2xl p-4 space-y-3 border border-border/30">
+                    <div className="flex justify-between items-center">
+                      <span className="font-display font-bold text-sm flex items-center gap-2">
+                        <span className="text-lg">{goal.icon}</span> {goal.name}
+                        <span className="text-[10px] text-muted-foreground font-normal bg-muted rounded-lg px-2 py-0.5">
+                          com {child?.name}
+                        </span>
+                      </span>
+                      <span className="font-display font-bold text-xs text-primary">{pct}%</span>
+                    </div>
+                    {/* Stacked progress bar */}
+                    <div className="relative h-3 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="absolute inset-y-0 left-0 bg-primary rounded-l-full"
+                        style={{ width: `${parentPct}%` }}
+                      />
+                      <div
+                        className="absolute inset-y-0 bg-secondary"
+                        style={{ left: `${parentPct}%`, width: `${childPct}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        <span>Pai: 🪙 {goal.parentContribution}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-secondary" />
+                        <span>{child?.name}: 🪙 {goal.childContribution}</span>
+                      </div>
+                      <span className="font-display font-bold">Meta: 🪙 {goal.targetAmount}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   );
 }
