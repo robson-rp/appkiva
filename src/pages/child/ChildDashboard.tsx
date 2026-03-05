@@ -94,7 +94,7 @@ export default function ChildDashboard() {
                       >
                         {child.balance}
                       </motion.span>
-                      <span className="text-sm text-white/60 font-display">KivaraCoins</span>
+                      <span className="text-sm text-white/60 font-display">KivaCoins</span>
                     </div>
                   </div>
                 </div>

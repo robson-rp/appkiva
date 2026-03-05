@@ -42,7 +42,7 @@ export default function ChildVaults() {
             </div>
             <div className="flex items-center gap-2 text-sm opacity-80">
               <Target className="h-4 w-4" />
-              <span>Meta total: {totalTarget} KivaraCoins</span>
+              <span>Meta total: {totalTarget} KivaCoins</span>
             </div>
             <Progress value={Math.round((totalSaved / totalTarget) * 100)} className="h-2 mt-3 bg-white/20" />
           </CardContent>
@@ -71,7 +71,7 @@ export default function ChildVaults() {
                 <Input placeholder="Ex: Bicicleta nova" />
               </div>
               <div className="space-y-2">
-                <Label>Meta (KivaraCoins)</Label>
+                <Label>Meta (KivaCoins)</Label>
                 <Input type="number" placeholder="500" />
               </div>
               <Button className="w-full rounded-xl font-display">Criar Cofre</Button>
