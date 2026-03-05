@@ -170,6 +170,40 @@ export interface BehavioralInsight {
   trend?: 'up' | 'down' | 'stable';
 }
 
+export interface DreamVaultItem {
+  id: string;
+  childId: string;
+  title: string;
+  description: string;
+  icon: string;
+  imageUrl?: string;
+  targetAmount: number;
+  currentAmount: number;
+  priority: 'high' | 'medium' | 'low';
+  parentComments: ParentComment[];
+  createdAt: string;
+}
+
+export interface ParentComment {
+  id: string;
+  text: string;
+  date: string;
+  emoji?: string;
+}
+
+export interface ParentReward {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  icon: string;
+  category: 'experience' | 'privilege' | 'physical' | 'digital';
+  createdBy: string;
+  childId?: string; // if null, available for all children
+  available: boolean;
+  claimedAt?: string;
+}
+
 export interface Notification {
   id: string;
   title: string;

@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight, DreamVaultItem, ParentReward } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -160,4 +160,64 @@ export const KIVO_TIPS: Record<string, string[]> = {
     'Reflectir é o primeiro passo para tomar melhores decisões!',
     'Tenta escrever todos os dias para manter a tua sequência! 🔥',
   ],
+  dreams: [
+    'O Cofre dos Sonhos guarda os teus maiores desejos! ✨',
+    'Adiciona imagens e descrições para te manteres motivado!',
+    'Os teus pais podem deixar mensagens de encorajamento! 💬',
+  ],
 };
+
+export const mockDreamVaults: DreamVaultItem[] = [
+  {
+    id: 'dream-1',
+    childId: 'child-1',
+    title: 'Ir à Disneylândia',
+    description: 'O meu sonho é visitar a Disneylândia com a família! Quero ver o castelo e andar nas montanhas-russas.',
+    icon: '🏰',
+    targetAmount: 1000,
+    currentAmount: 320,
+    priority: 'high',
+    parentComments: [
+      { id: 'pc-1', text: 'Adoramos este sonho! Continua a poupar e vamos ajudar-te! 💪', date: '2026-03-03', emoji: '❤️' },
+      { id: 'pc-2', text: 'Já poupaste muito! Estamos orgulhosos de ti.', date: '2026-03-05', emoji: '🌟' },
+    ],
+    createdAt: '2026-02-01',
+  },
+  {
+    id: 'dream-2',
+    childId: 'child-1',
+    title: 'Tablet para desenhar',
+    description: 'Quero um tablet para praticar desenho digital e criar as minhas próprias histórias.',
+    icon: '🎨',
+    targetAmount: 400,
+    currentAmount: 150,
+    priority: 'medium',
+    parentComments: [
+      { id: 'pc-3', text: 'Que bom objectivo criativo! Se chegares a 50%, complementamos o resto.', date: '2026-03-02', emoji: '🎯' },
+    ],
+    createdAt: '2026-02-20',
+  },
+  {
+    id: 'dream-3',
+    childId: 'child-2',
+    title: 'Equipamento de futebol',
+    description: 'Botas novas e uma camisola do meu jogador favorito!',
+    icon: '⚽',
+    targetAmount: 250,
+    currentAmount: 60,
+    priority: 'high',
+    parentComments: [
+      { id: 'pc-4', text: 'Boa escolha! Vamos acompanhar o teu progresso.', date: '2026-03-04', emoji: '💪' },
+    ],
+    createdAt: '2026-03-01',
+  },
+];
+
+export const mockParentRewards: ParentReward[] = [
+  { id: 'pr-1', name: 'Noite de cinema em família', description: 'Escolhe o filme e os snacks para uma sessão especial!', price: 100, icon: '🎬', category: 'experience', createdBy: 'parent-1', available: true },
+  { id: 'pr-2', name: 'Deitar 30min mais tarde', description: 'Podes ficar acordado mais 30 minutos numa noite à escolha', price: 50, icon: '🌙', category: 'privilege', createdBy: 'parent-1', available: true },
+  { id: 'pr-3', name: 'Escolher o jantar', description: 'Tu decides o que a família vai jantar!', price: 40, icon: '🍕', category: 'privilege', createdBy: 'parent-1', available: true },
+  { id: 'pr-4', name: 'Passeio ao parque aquático', description: 'Um dia especial no parque aquático com a família', price: 200, icon: '🎢', category: 'experience', createdBy: 'parent-1', available: true },
+  { id: 'pr-5', name: 'Livro à escolha', description: 'Escolhe um livro novo da livraria', price: 60, icon: '📖', category: 'physical', createdBy: 'parent-1', available: true },
+  { id: 'pr-6', name: 'Hora extra de ecrã', description: 'Uma hora adicional de tablet ou TV', price: 35, icon: '📱', category: 'privilege', createdBy: 'parent-1', available: true },
+];
