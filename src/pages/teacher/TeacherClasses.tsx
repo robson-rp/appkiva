@@ -5,13 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockClassrooms, mockLeaderboard } from '@/data/mock-data';
-import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2 } from 'lucide-react';
+import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+
+const CLASS_ICONS = ['🎓', '📚', '🌟', '🚀', '🧠', '💡', '🎨', '🔬', '📐', '🌍', '💰', '🎵'];
+const SUBJECTS = ['Educação Financeira', 'Matemática', 'Português', 'Ciências', 'História', 'Geografia', 'Inglês', 'Artes'];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -20,7 +25,12 @@ export default function TeacherClasses() {
   const [classrooms, setClassrooms] = useState(() => mockClassrooms.map(c => ({ ...c })));
   const [newClassName, setNewClassName] = useState('');
   const [newClassGrade, setNewClassGrade] = useState('');
+  const [newClassDesc, setNewClassDesc] = useState('');
+  const [newClassSubject, setNewClassSubject] = useState('');
+  const [newClassSchedule, setNewClassSchedule] = useState('');
+  const [newClassIcon, setNewClassIcon] = useState('🎓');
   const [newClassStudents, setNewClassStudents] = useState<string[]>([]);
+  const [studentSearch, setStudentSearch] = useState('');
   const [addStudents, setAddStudents] = useState<string[]>([]);
 
   const toggleNewStudent = (id: string) => {
@@ -31,23 +41,35 @@ export default function TeacherClasses() {
     setAddStudents(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   };
 
+  const resetNewClassForm = () => {
+    setNewClassName('');
+    setNewClassGrade('');
+    setNewClassDesc('');
+    setNewClassSubject('');
+    setNewClassSchedule('');
+    setNewClassIcon('🎓');
+    setNewClassStudents([]);
+    setStudentSearch('');
+  };
+
   const createClass = () => {
     if (!newClassName.trim()) return;
-    const icons = ['🎓', '📚', '🌟', '🚀', '🧠', '💡'];
     setClassrooms(prev => [...prev, {
       id: `class-${Date.now()}`,
       teacherId: 'teacher-1',
       name: newClassName.trim(),
       grade: newClassGrade.trim() || 'N/A',
-      icon: icons[Math.floor(Math.random() * icons.length)],
+      icon: newClassIcon,
       studentIds: newClassStudents,
       createdAt: new Date().toLocaleDateString('pt-PT'),
     }]);
     toast.success(`Turma "${newClassName.trim()}" criada com ${newClassStudents.length} aluno(s)`);
-    setNewClassName('');
-    setNewClassGrade('');
-    setNewClassStudents([]);
+    resetNewClassForm();
   };
+
+  const filteredStudents = mockLeaderboard.filter(s =>
+    s.name.toLowerCase().includes(studentSearch.toLowerCase())
+  );
 
   const addStudentsToClass = (classId: string) => {
     if (addStudents.length === 0) return;
@@ -104,37 +126,97 @@ export default function TeacherClasses() {
             <GraduationCap className="h-5 w-5 text-primary" /> Turmas
           </h2>
         </div>
-        <Dialog>
+        <Dialog onOpenChange={(open) => { if (!open) resetNewClassForm(); }}>
           <DialogTrigger asChild>
             <Button size="sm" className="rounded-xl font-display gap-1">
               <Plus className="h-4 w-4" /> Nova Turma
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="font-display">Criar Nova Turma</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+              {/* Name */}
               <div className="space-y-2">
-                <Label>Nome da turma</Label>
+                <Label>Nome da turma *</Label>
                 <Input placeholder="Ex: Turma dos Exploradores" value={newClassName} onChange={e => setNewClassName(e.target.value)} />
               </div>
+
+              {/* Icon picker */}
               <div className="space-y-2">
-                <Label>Ano escolar</Label>
-                <Input placeholder="Ex: 4.º Ano" value={newClassGrade} onChange={e => setNewClassGrade(e.target.value)} />
+                <Label>Ícone</Label>
+                <div className="flex flex-wrap gap-2">
+                  {CLASS_ICONS.map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setNewClassIcon(icon)}
+                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${newClassIcon === icon ? 'bg-primary/20 ring-2 ring-primary scale-110' : 'bg-muted/30 hover:bg-muted/60'}`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Grade + Subject */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Ano escolar</Label>
+                  <Input placeholder="Ex: 4.º Ano" value={newClassGrade} onChange={e => setNewClassGrade(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Disciplina</Label>
+                  <Select value={newClassSubject} onValueChange={setNewClassSubject}>
+                    <SelectTrigger className="rounded-xl">
+                      <SelectValue placeholder="Selecionar..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBJECTS.map(s => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Schedule */}
+              <div className="space-y-2">
+                <Label>Horário</Label>
+                <Input placeholder="Ex: Seg/Qua 10h-11h" value={newClassSchedule} onChange={e => setNewClassSchedule(e.target.value)} />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label>Descrição / Notas</Label>
+                <Textarea placeholder="Observações sobre a turma..." value={newClassDesc} onChange={e => setNewClassDesc(e.target.value)} className="rounded-xl resize-none" rows={3} />
+              </div>
+
+              {/* Student picker */}
               <div className="space-y-2">
                 <Label>Selecionar Alunos ({newClassStudents.length})</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Procurar aluno..." value={studentSearch} onChange={e => setStudentSearch(e.target.value)} className="pl-9 rounded-xl" />
+                </div>
                 <ScrollArea className="h-48 rounded-xl border border-border p-2">
-                  {mockLeaderboard.map(student => (
+                  {filteredStudents.map(student => (
                     <label key={student.childId} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
                       <Checkbox checked={newClassStudents.includes(student.childId)} onCheckedChange={() => toggleNewStudent(student.childId)} />
                       <span className="text-lg">{student.avatar}</span>
-                      <span className="text-sm font-display font-medium">{student.name}</span>
+                      <div>
+                        <p className="text-sm font-display font-medium">{student.name}</p>
+                        <p className="text-[10px] text-muted-foreground">⭐ {student.kivaPoints} pts</p>
+                      </div>
                     </label>
                   ))}
+                  {filteredStudents.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-4">Nenhum aluno encontrado</p>
+                  )}
                 </ScrollArea>
               </div>
+
               <DialogClose asChild>
                 <Button className="w-full rounded-xl font-display" onClick={createClass} disabled={!newClassName.trim()}>
                   🎓 Criar Turma
