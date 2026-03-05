@@ -1,11 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { mockChildren, mockTasks, mockTransactions, mockVaults } from '@/data/mock-data';
+import { mockChildren, mockTasks, mockTransactions, mockVaults, mockInsights } from '@/data/mock-data';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Area, AreaChart,
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, Lightbulb } from 'lucide-react';
+import { TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, Lightbulb, AlertTriangle, CheckCircle, Minus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -23,6 +23,11 @@ const weeklyTrend = [
   { week: 'Sem 2', ganho: 70, gasto: 35, poupado: 35 },
   { week: 'Sem 3', ganho: 55, gasto: 15, poupado: 40 },
   { week: 'Sem 4', ganho: 80, gasto: 30, poupado: 50 },
+];
+
+const periodComparison = [
+  { period: 'Fev', poupanca: 32, gasto: 45 },
+  { period: 'Mar (atual)', poupanca: 43, gasto: 28 },
 ];
 
 export default function ParentReports() {
@@ -54,6 +59,18 @@ export default function ParentReports() {
     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
   };
 
+  const insightConfig = {
+    positive: { icon: CheckCircle, color: 'text-secondary', bg: 'bg-[hsl(var(--kivara-light-green))]', border: 'border-secondary/20' },
+    warning: { icon: AlertTriangle, color: 'text-destructive', bg: 'bg-[hsl(var(--kivara-pink))]', border: 'border-destructive/20' },
+    neutral: { icon: Minus, color: 'text-muted-foreground', bg: 'bg-muted/60', border: 'border-border/50' },
+  };
+
+  const trendIcon = (trend?: string) => {
+    if (trend === 'up') return <TrendingUp className="h-3 w-3 text-secondary" />;
+    if (trend === 'down') return <TrendingDown className="h-3 w-3 text-destructive" />;
+    return <Minus className="h-3 w-3 text-muted-foreground" />;
+  };
+
   return (
     <div className="space-y-6">
       {/* Hero */}
@@ -62,8 +79,8 @@ export default function ParentReports() {
         <div className="absolute bottom-0 left-1/2 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
           <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Análise</p>
-          <h1 className="font-display text-2xl font-bold mt-1">Relatórios</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">Acompanha o progresso financeiro da família</p>
+          <h1 className="font-display text-2xl font-bold mt-1">Relatórios Educativos</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">Insights comportamentais e progresso financeiro</p>
         </div>
       </motion.div>
 
@@ -90,6 +107,87 @@ export default function ParentReports() {
             </Card>
           </motion.div>
         ))}
+      </motion.div>
+
+      {/* Behavioral Insights */}
+      <motion.div variants={item} initial="hidden" animate="show">
+        <Card className="border-border/50 overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-secondary via-accent to-destructive" />
+          <CardContent className="p-5">
+            <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
+              <span className="text-lg">🧠</span> Insights Comportamentais
+            </h3>
+            <div className="space-y-3">
+              {mockInsights.map((insight) => {
+                const cfg = insightConfig[insight.type];
+                const child = mockChildren.find(c => c.id === insight.childId);
+                return (
+                  <motion.div
+                    key={insight.id}
+                    whileHover={{ x: 4 }}
+                    className={`flex items-start gap-3 p-3.5 rounded-2xl border ${cfg.border} ${cfg.bg}/30 transition-all`}
+                  >
+                    <div className={`w-8 h-8 rounded-xl ${cfg.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                      <cfg.icon className={`h-4 w-4 ${cfg.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-sm font-display font-bold">{insight.title}</p>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">{child?.name}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {insight.metric && <span className="font-display font-bold text-xs">{insight.metric}</span>}
+                      {trendIcon(insight.trend)}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Period Comparison */}
+      <motion.div variants={item} initial="hidden" animate="show">
+        <Card className="border-border/50 overflow-hidden">
+          <div className="h-1 gradient-gold" />
+          <CardContent className="p-5">
+            <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
+              <span className="text-lg">📊</span> Comparação entre Períodos
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              {periodComparison.map((p, i) => (
+                <div key={p.period} className={`rounded-2xl p-4 border ${i === 1 ? 'border-primary/30 bg-primary/5' : 'border-border/30 bg-muted/30'}`}>
+                  <p className="text-xs font-display font-bold mb-3">{p.period}</p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-[10px] text-muted-foreground">Poupança</span>
+                        <span className="text-[10px] font-display font-bold text-secondary">{p.poupanca}%</span>
+                      </div>
+                      <Progress value={p.poupanca} className="h-1.5" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-[10px] text-muted-foreground">Gasto</span>
+                        <span className="text-[10px] font-display font-bold text-destructive">{p.gasto}%</span>
+                      </div>
+                      <Progress value={p.gasto} className="h-1.5" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center gap-2 bg-[hsl(var(--kivara-light-green))] rounded-xl p-3">
+              <TrendingUp className="h-4 w-4 text-secondary shrink-0" />
+              <p className="text-[11px] text-foreground">
+                <strong>Melhoria de +11%</strong> na taxa de poupança em relação ao mês anterior! 🎉
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Charts Row */}
@@ -259,7 +357,7 @@ export default function ParentReports() {
               <div>
                 <p className="font-display font-bold text-lg mb-1">Insight da Semana</p>
                 <p className="text-primary-foreground/70 text-sm leading-relaxed">
-                  A Ana poupou 40% das moedas ganhas este mês — excelente! 🎉 O Pedro precisa de mais incentivos para poupar. Considere criar uma meta de poupança para ele ou adicionar tarefas com recompensas maiores.
+                  A Ana poupou 43% das moedas ganhas este mês — excelente! 🎉 O Pedro precisa de mais incentivos para poupar. Considere criar uma meta partilhada ou aumentar o bónus por tarefas.
                 </p>
               </div>
             </div>
