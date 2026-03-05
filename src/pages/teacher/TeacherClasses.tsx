@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
 
 const CLASS_ICONS = ['🎓', '📚', '🌟', '🚀', '🧠', '💡', '🎨', '🔬', '📐', '🌍', '💰', '🎵'];
@@ -96,6 +97,10 @@ export default function TeacherClasses() {
   const deleteGoal = (goalId: string) => {
     setGoals(prev => prev.filter(g => g.id !== goalId));
     toast.success('Meta removida');
+  };
+
+  const updateGoalCurrent = (goalId: string, value: number) => {
+    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, current: Math.max(0, value) } : g));
   };
 
   const openEditDialog = (c: typeof classrooms[0]) => {
@@ -524,9 +529,26 @@ export default function TeacherClasses() {
                                 {cat?.icon} {goal.title}
                               </p>
                             </div>
-                            <Badge className={`text-[9px] border-0 shrink-0 ${pct >= 100 ? 'bg-secondary/10 text-secondary' : pct >= 50 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                              {goal.current}/{goal.target}{cat?.unit}
-                            </Badge>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button className={`text-[9px] font-semibold px-2 py-0.5 rounded-md shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all ${pct >= 100 ? 'bg-secondary/10 text-secondary' : pct >= 50 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                  {goal.current}/{goal.target}{cat?.unit}
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-48 p-3 space-y-2" side="top">
+                                <p className="text-[10px] font-display font-semibold text-muted-foreground">Atualizar progresso</p>
+                                <Input
+                                  type="number"
+                                  defaultValue={goal.current}
+                                  min={0}
+                                  max={goal.target}
+                                  className="h-8 text-xs rounded-lg"
+                                  onBlur={e => updateGoalCurrent(goal.id, Number(e.target.value))}
+                                  onKeyDown={e => { if (e.key === 'Enter') { updateGoalCurrent(goal.id, Number((e.target as HTMLInputElement).value)); (e.target as HTMLInputElement).blur(); } }}
+                                />
+                                <p className="text-[9px] text-muted-foreground">Meta: {goal.target}{cat?.unit}</p>
+                              </PopoverContent>
+                            </Popover>
                             <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                               <Trash2 className="h-3 w-3" />
                             </button>
