@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, Settings, LogOut } from 'lucide-react';
+import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -29,7 +30,7 @@ function ParentSidebar() {
         <div className="p-4 flex items-center gap-3">
           {!collapsed && (
             <div>
-              <h1 className="font-display text-lg font-bold text-sidebar-primary">KIVARA</h1>
+              <img src={kivaraLogo} alt="KIVARA" className="h-7 brightness-0 invert" />
               <p className="text-xs text-sidebar-foreground/70">Painel Familiar</p>
             </div>
           )}
@@ -92,7 +93,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center border-b px-4 bg-card">
             <SidebarTrigger className="mr-4" />
-            <h2 className="font-display font-semibold text-foreground">KIVARA</h2>
+            <img src={kivaraLogo} alt="KIVARA" className="h-6" />
           </header>
           <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
         </div>
