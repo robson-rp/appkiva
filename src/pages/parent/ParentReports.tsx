@@ -250,7 +250,7 @@ export default function ParentReports() {
                   <Tooltip contentStyle={customTooltipStyle} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-5 mt-3">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-5 mt-3">
                 {pieData.map((entry, i) => (
                   <div key={entry.name} className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: pieColors[i] }} />

@@ -56,16 +56,16 @@ export default function ParentAllowance() {
           <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
           <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
         </div>
-        <div className="relative flex items-center gap-4 mt-4">
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+        <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Calendar className="h-4 w-4" />
-            <span className="font-display font-bold text-lg">🪙 {totalWeekly}</span>
-            <span className="text-xs text-primary-foreground/60">base/sem</span>
+            <span className="font-display font-bold text-base sm:text-lg">🪙 {totalWeekly}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">base/sem</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
-            <span className="font-display font-bold text-lg">🪙 {totalBalance}</span>
-            <span className="text-xs text-primary-foreground/60">em circulação</span>
+            <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">em circulação</span>
           </div>
         </div>
       </motion.div>
@@ -134,10 +134,10 @@ export default function ParentAllowance() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm" onClick={() => handleSend(child.name, child.id)}>
-                      <Send className="h-4 w-4" /> Enviar Mesada
+                    <Button className="flex-1 rounded-xl font-display gap-1.5 sm:gap-2 bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm text-xs sm:text-sm" onClick={() => handleSend(child.name, child.id)}>
+                      <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Enviar Mesada
                     </Button>
-                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 h-10 w-10" onClick={() => setConfigOpen(child.id)}>
+                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 h-9 w-9 sm:h-10 sm:w-10" onClick={() => setConfigOpen(child.id)}>
                       <Settings className="h-4 w-4" />
                     </Button>
                   </div>

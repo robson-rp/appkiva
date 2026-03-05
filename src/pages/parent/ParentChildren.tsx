@@ -72,31 +72,31 @@ export default function ParentChildren() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 left-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
             <h1 className="font-display text-2xl font-bold mt-1">Crianças</h1>
             <p className="text-sm text-primary-foreground/60 mt-1">Gere os perfis das tuas crianças</p>
           </div>
           <div className="flex gap-2">
-            <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg" onClick={() => setInviteOpen(true)}>
-              <Link2 className="h-4 w-4" /> Convidar
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => setInviteOpen(true)}>
+              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Convidar
             </Button>
-            <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
-              <Plus className="h-4 w-4" /> Adicionar
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm">
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
             </Button>
           </div>
         </div>
-        <div className="relative flex items-center gap-4 mt-4">
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+        <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Users className="h-4 w-4" />
-            <span className="font-display font-bold text-lg">{mockChildren.length}</span>
-            <span className="text-xs text-primary-foreground/60">crianças</span>
+            <span className="font-display font-bold text-base sm:text-lg">{mockChildren.length}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">crianças</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+          <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
-            <span className="font-display font-bold text-lg">🪙 {totalBalance}</span>
-            <span className="text-xs text-primary-foreground/60">saldo total</span>
+            <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">saldo total</span>
           </div>
         </div>
       </motion.div>
@@ -166,11 +166,11 @@ export default function ParentChildren() {
                     <Progress value={savingsPercent} className="h-2 rounded-full" />
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200">
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm">
                       <Edit className="h-3.5 w-3.5" /> Editar
                     </Button>
-                    <Button variant="outline" size="sm" className="rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200" onClick={() => setLimitsOpen(child.id)}>
+                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs sm:text-sm" onClick={() => setLimitsOpen(child.id)}>
                       <Shield className="h-3.5 w-3.5" /> Limites
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9">
