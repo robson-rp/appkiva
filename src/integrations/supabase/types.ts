@@ -125,6 +125,114 @@ export type Database = {
         }
         Relationships: []
       }
+      ledger_entries: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string
+          credit_wallet_id: string
+          debit_wallet_id: string
+          description: string
+          entry_type: Database["public"]["Enums"]["ledger_entry_type"]
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          requires_approval: boolean
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by: string
+          credit_wallet_id: string
+          debit_wallet_id: string
+          description: string
+          entry_type: Database["public"]["Enums"]["ledger_entry_type"]
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          requires_approval?: boolean
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string
+          credit_wallet_id?: string
+          debit_wallet_id?: string
+          description?: string
+          entry_type?: Database["public"]["Enums"]["ledger_entry_type"]
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          requires_approval?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_balances"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_transactions"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_balances"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_transactions"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar: string | null
@@ -184,11 +292,135 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          profile_id: string
+          updated_at: string
+          wallet_type: Database["public"]["Enums"]["wallet_type"]
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          profile_id: string
+          updated_at?: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          profile_id?: string
+          updated_at?: string
+          wallet_type?: Database["public"]["Enums"]["wallet_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      wallet_balances: {
+        Row: {
+          balance: number | null
+          currency: string | null
+          profile_id: string | null
+          wallet_id: string | null
+          wallet_type: Database["public"]["Enums"]["wallet_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number | null
+          approved_at: string | null
+          created_at: string | null
+          credit_wallet_id: string | null
+          debit_wallet_id: string | null
+          description: string | null
+          direction: string | null
+          entry_type: Database["public"]["Enums"]["ledger_entry_type"] | null
+          id: string | null
+          metadata: Json | null
+          profile_id: string | null
+          requires_approval: boolean | null
+          wallet_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_balances"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_transactions"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_credit_wallet_id_fkey"
+            columns: ["credit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_balances"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallet_transactions"
+            referencedColumns: ["wallet_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_debit_wallet_id_fkey"
+            columns: ["debit_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_profile_balance: { Args: { _profile_id: string }; Returns: number }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -200,6 +432,19 @@ export type Database = {
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin"
+      ledger_entry_type:
+        | "allowance"
+        | "task_reward"
+        | "mission_reward"
+        | "purchase"
+        | "donation"
+        | "vault_deposit"
+        | "vault_withdraw"
+        | "vault_interest"
+        | "transfer"
+        | "adjustment"
+        | "refund"
+      wallet_type: "virtual" | "real"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -328,6 +573,20 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["parent", "child", "teen", "teacher", "admin"],
+      ledger_entry_type: [
+        "allowance",
+        "task_reward",
+        "mission_reward",
+        "purchase",
+        "donation",
+        "vault_deposit",
+        "vault_withdraw",
+        "vault_interest",
+        "transfer",
+        "adjustment",
+        "refund",
+      ],
+      wallet_type: ["virtual", "real"],
     },
   },
 } as const
