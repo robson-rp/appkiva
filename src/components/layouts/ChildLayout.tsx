@@ -62,10 +62,10 @@ export function ChildLayout({ children }: { children: ReactNode }) {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -12 }}
-          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, y: -16, scale: 0.98, filter: 'blur(4px)' }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="flex-1 p-4 pb-24 overflow-auto"
         >
           {children}
