@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, AlertTriangle, Archive, Volume2, VolumeX } from 'lucide-react';
+import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users, Archive, Volume2, VolumeX, Gift } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification, AppNotification } from '@/hooks/use-notifications';
 import { mockNotifications, mockTeacherNotifications, mockChallenges } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
 import { Notification } from '@/types/kivara';
@@ -61,26 +62,82 @@ function generateChallengeAlerts(): Notification[] {
     }));
 }
 
-const typeConfig: Record<Notification['type'], { icon: typeof Bell; bg: string }> = {
+type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward';
+
+const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
   task: { icon: ListTodo, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
   mission: { icon: Target, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
   achievement: { icon: Trophy, bg: 'bg-[hsl(var(--kivara-light-green))]' },
   savings: { icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-purple))]' },
   streak: { icon: Flame, bg: 'bg-destructive/15' },
   class: { icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
+  reward: { icon: Gift, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
 };
+
+// Unified notification shape for display
+interface DisplayNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: NotifType;
+  read: boolean;
+  date: string;
+  urgent?: boolean;
+  isReal?: boolean; // from database
+}
 
 export function NotificationDropdown() {
   const { user } = useAuth();
   const isTeacher = user?.role === 'teacher';
+
+  // Real notifications from database
+  const { data: realNotifications } = useNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
+  const deleteNotif = useDeleteNotification();
+
+  // Mock-based notifications (fallback / streaks / challenges)
   const streakNotifs = isTeacher ? [] : generateStreakNotifications();
   const challengeAlerts = isTeacher ? generateChallengeAlerts() : [];
-  const baseNotifs = isTeacher ? mockTeacherNotifications : mockNotifications;
-  const [notifications, setNotifications] = useState([...challengeAlerts, ...streakNotifs, ...baseNotifs]);
+  const baseMockNotifs = isTeacher ? mockTeacherNotifications : mockNotifications;
+
+  // Convert real notifications to display format
+  const realDisplay: DisplayNotification[] = (realNotifications ?? []).map(n => ({
+    id: n.id,
+    title: n.title,
+    message: n.message,
+    type: n.type as NotifType,
+    read: n.read,
+    date: n.createdAt,
+    urgent: n.urgent,
+    isReal: true,
+  }));
+
+  // Convert mock notifications
+  const mockDisplay: DisplayNotification[] = [...challengeAlerts, ...streakNotifs, ...baseMockNotifs].map(n => ({
+    id: n.id,
+    title: n.title,
+    message: n.message,
+    type: n.type as NotifType,
+    read: n.read,
+    date: n.date,
+    urgent: n.urgent,
+  }));
+
+  // If we have real notifications, show them first, then mock
+  const hasReal = realDisplay.length > 0;
+  const [dismissedMocks, setDismissedMocks] = useState<Set<string>>(new Set());
+  
+  const allNotifications = [
+    ...realDisplay,
+    ...(hasReal ? [] : mockDisplay.filter(n => !dismissedMocks.has(n.id))),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const unreadCount = allNotifications.filter((n) => !n.read).length;
+  const urgentNotif = allNotifications.find(n => n.urgent && !n.read);
+
   const [showBanner, setShowBanner] = useState(false);
   const [muted, setMuted] = useState(() => localStorage.getItem('kivara-notif-muted') === 'true');
-  const unreadCount = notifications.filter((n) => !n.read).length;
-  const urgentNotif = notifications.find(n => n.urgent && !n.read);
 
   const toggleMute = () => {
     setMuted(prev => {
@@ -90,7 +147,6 @@ export function NotificationDropdown() {
     });
   };
 
-  // Show streak risk banner after a short delay
   useEffect(() => {
     if (urgentNotif) {
       const timer = setTimeout(() => {
@@ -104,16 +160,22 @@ export function NotificationDropdown() {
     }
   }, [urgentNotif, muted]);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkRead = (id: string, isReal?: boolean) => {
+    if (isReal) {
+      markRead.mutate(id);
+    }
   };
 
-  const markRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+  const handleMarkAllRead = () => {
+    markAllRead.mutate();
   };
 
-  const archiveNotif = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  const handleArchive = (id: string, isReal?: boolean) => {
+    if (isReal) {
+      deleteNotif.mutate(id);
+    } else {
+      setDismissedMocks(prev => new Set(prev).add(id));
+    }
   };
 
   const relativeDate = (date: string) => {
@@ -125,7 +187,7 @@ export function NotificationDropdown() {
 
   return (
     <>
-      {/* Streak Risk Banner */}
+      {/* Urgent Banner */}
       <AnimatePresence>
         {showBanner && urgentNotif && (
           <motion.div
@@ -136,21 +198,14 @@ export function NotificationDropdown() {
             className="fixed top-16 left-2 right-2 z-[70] max-w-lg mx-auto"
           >
             <div className="bg-destructive text-destructive-foreground rounded-2xl p-3 shadow-lg flex items-center gap-3">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="text-2xl shrink-0"
-              >
+              <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-2xl shrink-0">
                 🔥
               </motion.div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-display font-bold">{urgentNotif.title}</p>
                 <p className="text-[11px] opacity-90 line-clamp-2">{urgentNotif.message}</p>
               </div>
-              <button
-                onClick={() => setShowBanner(false)}
-                className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors"
-              >
+              <button onClick={() => setShowBanner(false)} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -192,7 +247,7 @@ export function NotificationDropdown() {
               {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
             </Button>
             {unreadCount > 0 && (
-              <Button variant="ghost" size="sm" className="text-xs text-primary h-7 rounded-lg gap-1 hover:bg-primary/10" onClick={markAllRead}>
+              <Button variant="ghost" size="sm" className="text-xs text-primary h-7 rounded-lg gap-1 hover:bg-primary/10" onClick={handleMarkAllRead}>
                 <CheckCheck className="h-3 w-3" /> Marcar tudo
               </Button>
             )}
@@ -202,11 +257,11 @@ export function NotificationDropdown() {
         {/* List */}
         <div className="max-h-72 overflow-y-auto">
           <AnimatePresence>
-            {notifications.length === 0 ? (
+            {allNotifications.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">Sem notificações 🎉</div>
             ) : (
-              notifications.map((notif, i) => {
-                const config = typeConfig[notif.type];
+              allNotifications.map((notif, i) => {
+                const config = typeConfig[notif.type] ?? typeConfig.task;
                 const Icon = config.icon;
                 return (
                   <motion.div
@@ -220,7 +275,7 @@ export function NotificationDropdown() {
                     }`}
                   >
                     <button
-                      onClick={() => markRead(notif.id)}
+                      onClick={() => handleMarkRead(notif.id, notif.isReal)}
                       className="flex items-start gap-3 flex-1 min-w-0 text-left hover:bg-muted/40 rounded-lg transition-colors -m-1 p-1"
                     >
                       <div className={`${config.bg} rounded-xl p-2 shrink-0 mt-0.5`}>
@@ -236,7 +291,7 @@ export function NotificationDropdown() {
                       </div>
                     </button>
                     <button
-                      onClick={() => archiveNotif(notif.id)}
+                      onClick={() => handleArchive(notif.id, notif.isReal)}
                       className="shrink-0 p-1.5 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors mt-1"
                       title="Arquivar"
                     >
