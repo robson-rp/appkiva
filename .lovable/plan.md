@@ -1,5 +1,4 @@
 
-
 ## Análise: Arquitectura Técnica KIVARA — Estado Actual vs Visão
 
 ### O que existe hoje
@@ -25,18 +24,17 @@ O projecto KIVARA é actualmente um **frontend React com dados mock** (sem backe
 | Risk & Fraud | Inexistente | — |
 | School Portal | UI completa | Dashboard, turmas, desafios, PDF export |
 
-### O que isto significa
-
-A arquitectura que descreves é **a visão correcta para um produto fintech real**, mas está a vários saltos de distância do estado actual. O projecto precisa de uma **transição faseada** de frontend-only para uma plataforma com backend real.
-
 ### Caminho recomendado (dentro do Lovable)
 
-**Fase A — Fundação Backend (Lovable Cloud / Supabase)**
-1. Conectar Supabase ou activar Lovable Cloud
-2. Criar schema de base de dados: `users`, `profiles`, `households`, `children`, `user_roles`
-3. Implementar auth real (Supabase Auth) com RBAC via tabela `user_roles`
-4. RLS policies por household/família
-5. Migrar mock data para tabelas reais
+**Fase A — Fundação Backend ✅ CONCLUÍDA**
+1. ✅ Lovable Cloud activado
+2. ✅ Schema criado: `households`, `profiles`, `children`, `user_roles`, `consent_records`
+3. ✅ Enum `app_role` (parent, child, teen, teacher, admin)
+4. ✅ Funções SECURITY DEFINER: `has_role()`, `get_user_household_id()`
+5. ✅ RLS policies por household/família
+6. ✅ Trigger auto-create profile on signup
+7. 🔲 Implementar auth real (substituir AuthContext mock)
+8. 🔲 Migrar mock data para tabelas reais
 
 **Fase B — Ledger & Wallets**
 1. Tabela `ledger_entries` (double-entry: debit/credit, append-only)
@@ -53,7 +51,7 @@ A arquitectura que descreves é **a visão correcta para um produto fintech real
 **Fase D — Auditoria & Segurança**
 1. Tabela `audit_log` (append-only)
 2. Triggers em tabelas críticas
-3. Consent records para menores
+3. Consent records para menores ✅ (tabela criada)
 4. Pseudonimização nos rankings
 
 ### Limitação do Lovable
@@ -65,10 +63,3 @@ O Lovable suporta React + Supabase/Cloud. Consegue implementar:
 - Ledger como tabelas Supabase com RLS
 
 **Não consegue**: API Gateway dedicado, micro-serviços separados, processamento de pagamentos reais, KYC/AML, emissão de cartões. Estes componentes vivem fora do Lovable.
-
-### Próximo passo concreto
-
-Para avançar, o primeiro passo é **conectar um backend** (Supabase ou Lovable Cloud) e começar pela Fase A — schema de identidade e famílias com auth real.
-
-Queres que comece pela criação do schema de base de dados e autenticação real?
-
