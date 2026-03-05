@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { hapticLight } from '@/lib/celebration-effects';
+import { useAuth } from '@/contexts/AuthContext';
 
 function generateStreakNotifications(): Notification[] {
   const now = new Date();
@@ -55,7 +56,9 @@ const typeConfig: Record<Notification['type'], { icon: typeof Bell; bg: string }
 };
 
 export function NotificationDropdown() {
-  const streakNotifs = generateStreakNotifications();
+  const { user } = useAuth();
+  const isTeacher = user?.role === 'teacher';
+  const streakNotifs = isTeacher ? [] : generateStreakNotifications();
   const [notifications, setNotifications] = useState([...streakNotifs, ...mockNotifications]);
   const [showBanner, setShowBanner] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
