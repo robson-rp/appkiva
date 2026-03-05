@@ -37,6 +37,14 @@ const mockTeacherUser: User = {
   familyId: 'school-1',
 };
 
+const mockTeenUser: User = {
+  id: 'teen-1',
+  name: 'Lucas',
+  role: 'teen',
+  avatar: '🧑‍💻',
+  familyId: 'family-1',
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [currentChildId, setCurrentChildId] = useState<string | null>(null);
@@ -46,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(mockParent);
     } else if (role === 'teacher') {
       setUser(mockTeacherUser);
+    } else if (role === 'teen') {
+      setUser(mockTeenUser);
     } else {
       setUser(mockChildUser);
       setCurrentChildId('child-1');

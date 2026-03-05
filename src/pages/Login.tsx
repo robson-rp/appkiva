@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserRole } from '@/types/kivara';
-import { Shield, Sparkles, ArrowLeft, GraduationCap } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap } from 'lucide-react';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
 
@@ -19,7 +19,7 @@ export default function Login() {
     e.preventDefault();
     if (!selectedRole) return;
     login(selectedRole);
-    navigate(selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : '/child');
+    navigate(selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : '/child');
   };
 
   return (
@@ -133,6 +133,25 @@ export default function Login() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedRole('teen')}
+                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-chart-3 bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-chart-3/10 flex items-center justify-center group-hover:bg-chart-3/20 transition-colors">
+                      <Zap className="h-8 w-8 text-chart-3" />
+                    </div>
+                    <div>
+                      <span className="font-display font-bold text-lg text-foreground block">
+                        Adolescente
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Carteira avançada, categorias e orçamento
+                      </span>
+                    </div>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setSelectedRole('child')}
                     className="w-full p-6 rounded-2xl border-2 border-border hover:border-secondary bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
                   >
@@ -186,7 +205,7 @@ export default function Login() {
                     Voltar
                   </button>
                   <h2 className="font-display text-3xl font-bold text-foreground mb-2">
-                    {selectedRole === 'parent' ? 'Área do Encarregado' : selectedRole === 'teacher' ? 'Área do Professor' : 'Área da Criança'}
+                    {selectedRole === 'parent' ? 'Área do Encarregado' : selectedRole === 'teacher' ? 'Área do Professor' : selectedRole === 'teen' ? 'Área do Adolescente' : 'Área da Criança'}
                   </h2>
                   <p className="text-muted-foreground font-body">
                     {selectedRole === 'parent'
@@ -222,14 +241,14 @@ export default function Login() {
                       </div>
                     </>
                   )}
-                  {selectedRole === 'child' && (
+                  {(selectedRole === 'child' || selectedRole === 'teen') && (
                     <>
                       <div className="space-y-2">
                         <Label htmlFor="username" className="font-semibold">Nome de utilizador</Label>
                         <Input
                           id="username"
-                          placeholder="ana_star"
-                          defaultValue="ana_star"
+                          placeholder={selectedRole === 'teen' ? 'lucas_pro' : 'ana_star'}
+                          defaultValue={selectedRole === 'teen' ? 'lucas_pro' : 'ana_star'}
                           className="h-12 rounded-xl text-base"
                         />
                       </div>
@@ -240,7 +259,7 @@ export default function Login() {
                           type="password"
                           maxLength={4}
                           placeholder="••••"
-                          defaultValue="1234"
+                          defaultValue={selectedRole === 'teen' ? '9999' : '1234'}
                           className="h-12 rounded-xl text-base"
                         />
                       </div>
