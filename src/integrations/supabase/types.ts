@@ -158,6 +158,105 @@ export type Database = {
           },
         ]
       }
+      dream_vault_comments: {
+        Row: {
+          created_at: string
+          dream_vault_id: string
+          emoji: string | null
+          id: string
+          parent_profile_id: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          dream_vault_id: string
+          emoji?: string | null
+          id?: string
+          parent_profile_id: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          dream_vault_id?: string
+          emoji?: string | null
+          id?: string
+          parent_profile_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dream_vault_comments_dream_vault_id_fkey"
+            columns: ["dream_vault_id"]
+            isOneToOne: false
+            referencedRelation: "dream_vaults"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dream_vault_comments_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dream_vaults: {
+        Row: {
+          created_at: string
+          current_amount: number
+          description: string | null
+          household_id: string | null
+          icon: string
+          id: string
+          priority: string
+          profile_id: string
+          target_amount: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          household_id?: string | null
+          icon?: string
+          id?: string
+          priority?: string
+          profile_id: string
+          target_amount?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          household_id?: string | null
+          icon?: string
+          id?: string
+          priority?: string
+          profile_id?: string
+          target_amount?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dream_vaults_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dream_vaults_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       households: {
         Row: {
           created_at: string
@@ -382,6 +481,60 @@ export type Database = {
           {
             foreignKeyName: "rewards_parent_profile_id_fkey"
             columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_vaults: {
+        Row: {
+          created_at: string
+          current_amount: number
+          household_id: string | null
+          icon: string
+          id: string
+          interest_rate: number
+          name: string
+          profile_id: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_amount?: number
+          household_id?: string | null
+          icon?: string
+          id?: string
+          interest_rate?: number
+          name: string
+          profile_id: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_amount?: number
+          household_id?: string | null
+          icon?: string
+          id?: string
+          interest_rate?: number
+          name?: string
+          profile_id?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_vaults_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_vaults_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
