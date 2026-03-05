@@ -1,11 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockClassrooms, mockChallenges, mockLeaderboard, mockChildren } from '@/data/mock-data';
-import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles, BarChart3 } from 'lucide-react';
+import { Users, Trophy, TrendingUp, Target, ChevronRight, GraduationCap, Sparkles, BarChart3, Lightbulb, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
+function getPedagogicalTips(cls: { name: string; icon: string; poupança: number; pontos: number; tarefas: number; alunos: number }) {
+  const tips: { type: 'positive' | 'warning' | 'suggestion'; text: string }[] = [];
+
+  if (cls.poupança >= 40) tips.push({ type: 'positive', text: '🌟 Excelente taxa de poupança! Reforce este hábito com um desafio de manutenção.' });
+  else if (cls.poupança >= 25) tips.push({ type: 'suggestion', text: '💡 Poupança razoável. Experimente um desafio coletivo de poupança para elevar a média.' });
+  else tips.push({ type: 'warning', text: '⚠️ Poupança baixa. Considere atividades práticas sobre a importância de poupar.' });
+
+  if (cls.pontos >= 150) tips.push({ type: 'positive', text: '🏆 Alto engajamento em pontos! Os alunos estão motivados — mantenha a cadência.' });
+  else if (cls.pontos < 80) tips.push({ type: 'suggestion', text: '💡 Pontuação baixa. Introduza missões curtas e recompensas rápidas para aumentar a participação.' });
+
+  if (cls.tarefas >= 10) tips.push({ type: 'positive', text: '✅ Boa conclusão de tarefas! Aumente a complexidade gradualmente.' });
+  else if (cls.tarefas < 5) tips.push({ type: 'warning', text: '⚠️ Poucas tarefas concluídas. Simplifique as tarefas iniciais para criar momentum.' });
+
+  if (cls.alunos <= 2) tips.push({ type: 'suggestion', text: '💡 Turma pequena — ideal para atividades personalizadas e mentorias individuais.' });
+  else if (cls.alunos >= 5) tips.push({ type: 'suggestion', text: '💡 Turma grande — experimente dinâmicas de grupo e desafios por equipas.' });
+
+  return tips;
+}
+
+const tipColors = { positive: 'bg-secondary/10 border-secondary/30', warning: 'bg-destructive/10 border-destructive/30', suggestion: 'bg-primary/10 border-primary/30' };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -262,9 +284,24 @@ export default function TeacherDashboard() {
                   <tr className="border-b border-border/50">
                     <th className="text-left py-2 font-display font-semibold text-muted-foreground">Turma</th>
                     <th className="text-center py-2 font-display font-semibold text-muted-foreground">Alunos</th>
-                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Poupança</th>
-                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Pontos</th>
-                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">Tarefas</th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">
+                      <UITooltip>
+                        <TooltipTrigger className="inline-flex items-center gap-1">Poupança <Info className="h-3 w-3" /></TooltipTrigger>
+                        <TooltipContent><p className="text-xs max-w-48">Taxa média de poupança dos alunos. Acima de 30% é considerado saudável.</p></TooltipContent>
+                      </UITooltip>
+                    </th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">
+                      <UITooltip>
+                        <TooltipTrigger className="inline-flex items-center gap-1">Pontos <Info className="h-3 w-3" /></TooltipTrigger>
+                        <TooltipContent><p className="text-xs max-w-48">Média de KivaPoints acumulados. Reflete o engajamento com tarefas e missões.</p></TooltipContent>
+                      </UITooltip>
+                    </th>
+                    <th className="text-center py-2 font-display font-semibold text-muted-foreground">
+                      <UITooltip>
+                        <TooltipTrigger className="inline-flex items-center gap-1">Tarefas <Info className="h-3 w-3" /></TooltipTrigger>
+                        <TooltipContent><p className="text-xs max-w-48">Média de tarefas concluídas por aluno. Indicador de consistência e participação.</p></TooltipContent>
+                      </UITooltip>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -279,6 +316,26 @@ export default function TeacherDashboard() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pedagogical Tips per Class */}
+            <div className="space-y-3">
+              <p className="text-xs font-display font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Lightbulb className="h-3.5 w-3.5 text-primary" /> Dicas Pedagógicas
+              </p>
+              {classComparison.map(cls => {
+                const tips = getPedagogicalTips(cls);
+                return (
+                  <div key={cls.name} className="space-y-1.5">
+                    <p className="text-xs font-display font-bold">{cls.icon} {cls.name}</p>
+                    {tips.map((tip, i) => (
+                      <div key={i} className={`text-[11px] px-3 py-2 rounded-xl border ${tipColors[tip.type]}`}>
+                        {tip.text}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
