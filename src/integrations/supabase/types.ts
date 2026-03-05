@@ -274,6 +274,66 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          approved_at: string | null
+          category: Database["public"]["Enums"]["task_category"]
+          child_profile_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          parent_profile_id: string
+          reward: number
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          category?: Database["public"]["Enums"]["task_category"]
+          child_profile_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          parent_profile_id: string
+          reward?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          category?: Database["public"]["Enums"]["task_category"]
+          child_profile_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          parent_profile_id?: string
+          reward?: number
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_child_profile_id_fkey"
+            columns: ["child_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -444,6 +504,8 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      task_category: "cleaning" | "studying" | "helping" | "other"
+      task_status: "pending" | "in_progress" | "completed" | "approved"
       wallet_type: "virtual" | "real"
     }
     CompositeTypes: {
@@ -586,6 +648,8 @@ export const Constants = {
         "adjustment",
         "refund",
       ],
+      task_category: ["cleaning", "studying", "helping", "other"],
+      task_status: ["pending", "in_progress", "completed", "approved"],
       wallet_type: ["virtual", "real"],
     },
   },
