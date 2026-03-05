@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CollectibleBadge, BADGE_TIERS, BADGE_CATEGORIES } from '@/types/kivara';
 import { Sparkles } from 'lucide-react';
+import { playSparkleSound, playUnlockFanfare, playConfirmDing, hapticBurst, hapticLight, hapticSuccess } from '@/lib/celebration-effects';
 
 interface ConfettiPiece {
   id: number;
@@ -52,8 +53,16 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
   const catConfig = BADGE_CATEGORIES[badge.category];
 
   useEffect(() => {
+    // Burst phase: sparkle sound + haptic
+    playSparkleSound();
+    hapticBurst();
+
     const timers = [
-      setTimeout(() => setPhase('reveal'), 600),
+      setTimeout(() => {
+        setPhase('reveal');
+        playUnlockFanfare();
+        hapticSuccess();
+      }, 600),
       setTimeout(() => setPhase('done'), 3200),
       setTimeout(() => onComplete(), 3400),
     ];
@@ -208,7 +217,7 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
                     transition={{ delay: 1.4 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={onComplete}
+                    onClick={() => { playConfirmDing(); hapticLight(); onComplete(); }}
                     className="mt-5 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm"
                   >
                     Incrível! 🎉
