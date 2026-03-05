@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,8 +35,8 @@ export default function TeacherStudentProfile() {
   const child = mockChildren.find(c => c.id === studentId);
   const studentTransactions = mockTransactions.filter(t => t.childId === studentId);
   const balance = child?.balance ?? 0;
+  const [chartPeriod, setChartPeriod] = useState<'weekly' | 'monthly'>('weekly');
 
-  // Generate savings evolution data from transactions (must be before early return)
   const savingsChartData = useMemo(() => {
     const sorted = [...studentTransactions].sort((a, b) => a.date.localeCompare(b.date));
     let cumSaved = 0;
@@ -48,17 +48,25 @@ export default function TeacherStudentProfile() {
       const d = new Date(tx.date);
       return { date: `${d.getDate()}/${d.getMonth() + 1}`, poupança: cumSaved, saldo: Math.max(0, cumBalance) };
     });
-    if (points.length < 4) {
+
+    const base = balance > 0 ? balance : 100;
+    if (chartPeriod === 'weekly') {
+      if (points.length >= 4) return points;
       const weeks = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'];
-      const base = balance > 0 ? balance : 100;
       return weeks.map((w, i) => ({
         date: w,
-        poupança: Math.round(base * 0.15 * (i + 1) * (0.8 + Math.random() * 0.4)),
-        saldo: Math.round(base * (0.4 + i * 0.12) * (0.9 + Math.random() * 0.2)),
+        poupança: Math.round(base * 0.15 * (i + 1)),
+        saldo: Math.round(base * (0.4 + i * 0.12)),
       }));
     }
-    return points;
-  }, [studentTransactions, balance]);
+    // monthly
+    const months = ['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'];
+    return months.map((m, i) => ({
+      date: m,
+      poupança: Math.round(base * 0.08 * (i + 1) * (i + 1)),
+      saldo: Math.round(base * (0.2 + i * 0.16)),
+    }));
+  }, [studentTransactions, balance, chartPeriod]);
 
   if (!leaderboard) {
     return (
@@ -133,9 +141,29 @@ export default function TeacherStudentProfile() {
       <motion.div variants={item}>
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-secondary" /> Evolução da Poupança
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-secondary" /> Evolução da Poupança
+              </CardTitle>
+              <div className="flex gap-1">
+                <Button
+                  variant={chartPeriod === 'weekly' ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-7 text-[10px] rounded-lg px-3 font-display"
+                  onClick={() => setChartPeriod('weekly')}
+                >
+                  Semanal
+                </Button>
+                <Button
+                  variant={chartPeriod === 'monthly' ? 'default' : 'outline'}
+                  size="sm"
+                  className="h-7 text-[10px] rounded-lg px-3 font-display"
+                  onClick={() => setChartPeriod('monthly')}
+                >
+                  Mensal
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="h-64">
