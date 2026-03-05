@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { mockClassrooms, mockLeaderboard } from '@/data/mock-data';
-import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil } from 'lucide-react';
+import { Plus, Users, GraduationCap, TrendingUp, UserPlus, Trash2, Search, Pencil, Trash } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -114,6 +114,12 @@ export default function TeacherClasses() {
       c.id === classId ? { ...c, studentIds: c.studentIds.filter(id => id !== studentId) } : c
     ));
     toast.success(`${student?.name ?? 'Aluno'} removido da turma`);
+  };
+
+  const deleteClass = (classId: string) => {
+    const cls = classrooms.find(c => c.id === classId);
+    setClassrooms(prev => prev.filter(c => c.id !== classId));
+    toast.success(`Turma "${cls?.name ?? ''}" eliminada`);
   };
 
   return (
@@ -286,6 +292,27 @@ export default function TeacherClasses() {
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl shrink-0" onClick={() => openEditDialog(classroom)}>
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl shrink-0">
+                          <Trash className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="font-display">Eliminar turma?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tens a certeza que queres eliminar a turma <strong>{classroom.name}</strong> com {classroom.studentIds.length} aluno(s)? Esta ação não pode ser revertida.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                          <AlertDialogAction className="rounded-xl bg-destructive hover:bg-destructive/90" onClick={() => deleteClass(classroom.id)}>
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
