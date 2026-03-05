@@ -16,6 +16,7 @@ const bottomNavItems = [
   { title: 'Missões', url: '/child/missions', icon: Target },
   { title: 'Cofres', url: '/child/vaults', icon: PiggyBank },
   { title: 'Diário', url: '/child/diary', icon: BookOpen },
+  { title: 'Loja', url: '/child/store', icon: ShoppingBag },
 ];
 
 export function ChildLayout({ children }: { children: ReactNode }) {
