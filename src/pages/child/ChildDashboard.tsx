@@ -1,13 +1,17 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
+import { AvatarGlow } from '@/components/AvatarGlow';
+import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { Kivo } from '@/components/Kivo';
 import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements, mockDonations } from '@/data/mock-data';
 import { Progress } from '@/components/ui/progress';
 import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { LEVEL_CONFIG } from '@/types/kivara';
+import { LEVEL_CONFIG, Level } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
+import { Button } from '@/components/ui/button';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -20,6 +24,7 @@ const itemVariants = {
 
 export default function ChildDashboard() {
   const child = mockChildren[0];
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const pendingTasks = mockTasks.filter((t) => t.childId === child.id && t.status === 'pending');
   const activeMissions = mockMissions.filter((m) => m.status === 'available' || (m.status === 'in_progress' && m.childId === child.id));
   const vaults = mockVaults.filter((v) => v.childId === child.id);
@@ -27,6 +32,9 @@ export default function ChildDashboard() {
   const unlockedAchievements = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
   const navigate = useNavigate();
   const levelConfig = LEVEL_CONFIG[child.level];
+  const levels = Object.keys(LEVEL_CONFIG) as Level[];
+  const currentLevelIndex = levels.indexOf(child.level);
+  const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
   // Rankings data
   const rankings = mockChildren.map((c) => {
@@ -54,6 +62,15 @@ export default function ChildDashboard() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5 max-w-2xl mx-auto pb-4">
+      {/* Level Up Ceremony */}
+      {showLevelUp && (
+        <LevelUpCeremony
+          fromLevel={previousLevel}
+          toLevel={child.level}
+          onComplete={() => setShowLevelUp(false)}
+        />
+      )}
+
       {/* Hero Balance Card with Avatar */}
       <motion.div variants={itemVariants}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
@@ -64,17 +81,9 @@ export default function ChildDashboard() {
             <div className="flex justify-between items-start">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  {/* Evolved Avatar */}
-                  <motion.div
-                    key={child.level}
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                    className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg"
-                  >
-                    {levelConfig.avatar}
-                  </motion.div>
-                  <div>
+                   {/* Evolved Avatar with Glow */}
+                   <AvatarGlow level={child.level} size="md" />
+                   <div>
                     <p className="text-white/70 text-sm font-body">A tua carteira</p>
                     <div className="flex items-baseline gap-2">
                       <motion.span
@@ -101,6 +110,15 @@ export default function ChildDashboard() {
                 <img src={kivoImg} alt="Kivo" className="w-20 h-20 drop-shadow-2xl" />
               </motion.div>
             </div>
+            {/* Demo: Level Up button */}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowLevelUp(true)}
+              className="mt-2 text-[10px] text-white/50 hover:text-white/80 hover:bg-white/10 font-display"
+            >
+              ✨ Ver evolução
+            </Button>
           </CardContent>
         </Card>
       </motion.div>
