@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { mockChildren, mockTasks, mockTransactions, mockVaults, mockSharedGoals } from '@/data/mock-data';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake } from 'lucide-react';
+import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
+import { useChildren } from '@/hooks/use-children';
+import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -13,6 +17,8 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 export default function ParentDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: realChildren = [] } = useChildren();
+  const [allowanceOpen, setAllowanceOpen] = useState(false);
   const totalDistributed = mockTransactions
     .filter((t) => t.type === 'allowance')
     .reduce((s, t) => s + t.amount, 0);
@@ -75,7 +81,74 @@ export default function ParentDashboard() {
         </Card>
       </motion.div>
 
-      {/* Stats Grid */}
+      {/* Quick Action: Send Allowance */}
+      {realChildren.length > 0 && (
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden border-dashed border-2 border-secondary/40 bg-secondary/5">
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
+                  <Send className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-sm">Enviar Mesada</p>
+                  <p className="text-xs text-muted-foreground">
+                    {realChildren.length} {realChildren.length === 1 ? 'criança' : 'crianças'} · Saldo total: {realChildren.reduce((s, c) => s + c.balance, 0)} KVC
+                  </p>
+                </div>
+              </div>
+              <Button
+                className="rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground shadow-sm"
+                onClick={() => setAllowanceOpen(true)}
+              >
+                <Send className="h-4 w-4" /> Enviar Agora
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Real Children from DB */}
+      {realChildren.length > 0 && (
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-0.5 bg-secondary" />
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-green))] flex items-center justify-center">
+                  <Users className="h-4 w-4 text-secondary" />
+                </div>
+                Crianças (dados reais)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {realChildren.map((child) => (
+                <motion.div
+                  key={child.childId}
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-2xl shadow-sm">
+                    {child.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display font-bold text-sm">{child.displayName}</p>
+                    <p className="text-[11px] text-muted-foreground">💰 {child.balance} KVC</p>
+                  </div>
+                  <CoinDisplay amount={child.balance} size="sm" />
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      <SendAllowanceDialog
+        open={allowanceOpen}
+        onOpenChange={setAllowanceOpen}
+        children={realChildren}
+      />
+
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {stats.map((stat) => (
           <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
