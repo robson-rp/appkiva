@@ -1,4 +1,4 @@
-export type UserRole = 'parent' | 'child';
+export type UserRole = 'parent' | 'child' | 'teacher';
 
 export interface User {
   id: string;
@@ -211,4 +211,50 @@ export interface Notification {
   type: 'task' | 'mission' | 'achievement' | 'savings';
   read: boolean;
   date: string;
+}
+
+export interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+  school: string;
+  avatar: string;
+}
+
+export interface Classroom {
+  id: string;
+  name: string;
+  teacherId: string;
+  grade: string;
+  studentIds: string[];
+  icon: string;
+  createdAt: string;
+}
+
+export type ChallengeStatus = 'active' | 'upcoming' | 'completed';
+
+export interface CollectiveChallenge {
+  id: string;
+  title: string;
+  description: string;
+  classroomId: string;
+  icon: string;
+  type: 'saving' | 'budgeting' | 'teamwork';
+  targetAmount: number;
+  currentAmount: number;
+  status: ChallengeStatus;
+  participants: { childId: string; contribution: number }[];
+  reward: number;
+  kivaPointsReward: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ClassLeaderboard {
+  childId: string;
+  name: string;
+  avatar: string;
+  kivaPoints: number;
+  tasksCompleted: number;
+  savingsRate: number;
 }

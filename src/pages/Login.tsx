@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserRole } from '@/types/kivara';
-import { Shield, Sparkles, ArrowLeft } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap } from 'lucide-react';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
 
@@ -19,7 +19,7 @@ export default function Login() {
     e.preventDefault();
     if (!selectedRole) return;
     login(selectedRole);
-    navigate(selectedRole === 'parent' ? '/parent' : '/child');
+    navigate(selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : '/child');
   };
 
   return (
@@ -67,6 +67,7 @@ export default function Login() {
               'Missões de educação financeira',
               'Cofres de poupança com metas',
               'Supervisão parental completa',
+              'Modo escolar para professores',
             ].map((feat, i) => (
               <motion.div
                 key={feat}
@@ -147,6 +148,25 @@ export default function Login() {
                       </span>
                     </div>
                   </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedRole('teacher')}
+                    className="w-full p-6 rounded-2xl border-2 border-border hover:border-accent bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <GraduationCap className="h-8 w-8 text-accent-foreground" />
+                    </div>
+                    <div>
+                      <span className="font-display font-bold text-lg text-foreground block">
+                        Professor
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        Gerir turmas e desafios colectivos
+                      </span>
+                    </div>
+                  </motion.button>
                 </div>
               </motion.div>
             ) : (
@@ -166,17 +186,19 @@ export default function Login() {
                     Voltar
                   </button>
                   <h2 className="font-display text-3xl font-bold text-foreground mb-2">
-                    {selectedRole === 'parent' ? 'Área do Encarregado' : 'Área da Criança'}
+                    {selectedRole === 'parent' ? 'Área do Encarregado' : selectedRole === 'teacher' ? 'Área do Professor' : 'Área da Criança'}
                   </h2>
                   <p className="text-muted-foreground font-body">
                     {selectedRole === 'parent'
                       ? 'Insere as tuas credenciais para aceder ao painel'
+                      : selectedRole === 'teacher'
+                      ? 'Insere as tuas credenciais de professor'
                       : 'Insere o teu nome de utilizador e PIN'}
                   </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-5">
-                  {selectedRole === 'parent' && (
+                  {(selectedRole === 'parent' || selectedRole === 'teacher') && (
                     <>
                       <div className="space-y-2">
                         <Label htmlFor="email" className="font-semibold">Email</Label>
