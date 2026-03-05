@@ -35,6 +35,7 @@ import TeenWallet from "./pages/teen/TeenWallet";
 import TeenMissions from "./pages/teen/TeenMissions";
 import TeenVaults from "./pages/teen/TeenVaults";
 import TeenAnalytics from "./pages/teen/TeenAnalytics";
+import LearnPage from "./pages/shared/LearnPage";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="/teen/missions" element={<TeenLayout><TeenMissions /></TeenLayout>} />
         <Route path="/teen/vaults" element={<TeenLayout><TeenVaults /></TeenLayout>} />
         <Route path="/teen/analytics" element={<TeenLayout><TeenAnalytics /></TeenLayout>} />
+        <Route path="/teen/learn" element={<TeenLayout><LearnPage /></TeenLayout>} />
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>
     );
@@ -99,6 +101,7 @@ function AppRoutes() {
       <Route path="/child/store" element={<ChildLayout><ChildStore /></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
+      <Route path="/child/learn" element={<ChildLayout><LearnPage /></ChildLayout>} />
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );

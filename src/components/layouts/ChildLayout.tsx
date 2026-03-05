@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 const bottomNavItems = [
   { title: 'Início', url: '/child', icon: Home },
   { title: 'Carteira', url: '/child/wallet', icon: Wallet },
-  { title: 'Missões', url: '/child/missions', icon: Target },
+  { title: 'Aprender', url: '/child/learn', icon: BookOpen },
   { title: 'Cofres', url: '/child/vaults', icon: PiggyBank },
   { title: 'Sonhos', url: '/child/dreams', icon: Sparkles },
   { title: 'Loja', url: '/child/store', icon: ShoppingBag },

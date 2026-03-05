@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockTeens } from '@/data/mock-data';
@@ -13,7 +13,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 const bottomNavItems = [
   { title: 'Início', url: '/teen', icon: Home },
   { title: 'Carteira', url: '/teen/wallet', icon: Wallet },
-  { title: 'Missões', url: '/teen/missions', icon: Target },
+  { title: 'Aprender', url: '/teen/learn', icon: BookOpen },
   { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank },
   { title: 'Análise', url: '/teen/analytics', icon: BarChart3 },
 ];
