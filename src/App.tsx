@@ -22,6 +22,7 @@ import ChildMissions from "./pages/child/ChildMissions";
 import ChildVaults from "./pages/child/ChildVaults";
 import ChildAchievements from "./pages/child/ChildAchievements";
 import ChildStore from "./pages/child/ChildStore";
+import ChildDiary from "./pages/child/ChildDiary";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ function AppRoutes() {
       <Route path="/child/vaults" element={<ChildLayout><ChildVaults /></ChildLayout>} />
       <Route path="/child/achievements" element={<ChildLayout><ChildAchievements /></ChildLayout>} />
       <Route path="/child/store" element={<ChildLayout><ChildStore /></ChildLayout>} />
+      <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
