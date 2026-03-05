@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { mockChallenges } from '@/data/mock-data';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 
 // Active challenges nearing completion (≥50% progress)
 const urgentChallenges = mockChallenges.filter(
@@ -63,22 +63,22 @@ function TeacherSidebar() {
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                       {!collapsed && item.badge ? (
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge className="ml-auto h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0 cursor-help">{item.badge}</Badge>
-                            </TooltipTrigger>
-                            <TooltipContent side="right" className="max-w-[220px] p-3 space-y-1.5">
-                              <p className="font-display font-bold text-xs">Desafios próximos de terminar</p>
-                              {urgentChallenges.map(ch => (
-                                <div key={ch.id} className="flex items-center justify-between gap-2 text-[11px]">
-                                  <span>{ch.icon} {ch.title}</span>
-                                  <span className="font-bold text-primary">{Math.round((ch.currentAmount / ch.targetAmount) * 100)}%</span>
-                                </div>
-                              ))}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                        <HoverCard openDelay={150} closeDelay={100}>
+                          <HoverCardTrigger asChild>
+                            <button type="button" onClick={(e) => e.preventDefault()} className="ml-auto cursor-help">
+                              <Badge className="h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0">{item.badge}</Badge>
+                            </button>
+                          </HoverCardTrigger>
+                          <HoverCardContent side="right" className="w-56 p-3 space-y-1.5">
+                            <p className="font-display font-bold text-xs">Desafios próximos de terminar</p>
+                            {urgentChallenges.map(ch => (
+                              <div key={ch.id} className="flex items-center justify-between gap-2 text-[11px]">
+                                <span>{ch.icon} {ch.title}</span>
+                                <span className="font-bold text-primary">{Math.round((ch.currentAmount / ch.targetAmount) * 100)}%</span>
+                              </div>
+                            ))}
+                          </HoverCardContent>
+                        </HoverCard>
                       ) : null}
                     </NavLink>
                   </SidebarMenuButton>
