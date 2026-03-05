@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight, DreamVaultItem, ParentReward } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight, DreamVaultItem, ParentReward, Teacher, Classroom, CollectiveChallenge, ClassLeaderboard } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -220,4 +220,41 @@ export const mockParentRewards: ParentReward[] = [
   { id: 'pr-4', name: 'Passeio ao parque aquático', description: 'Um dia especial no parque aquático com a família', price: 200, icon: '🎢', category: 'experience', createdBy: 'parent-1', available: true },
   { id: 'pr-5', name: 'Livro à escolha', description: 'Escolhe um livro novo da livraria', price: 60, icon: '📖', category: 'physical', createdBy: 'parent-1', available: true },
   { id: 'pr-6', name: 'Hora extra de ecrã', description: 'Uma hora adicional de tablet ou TV', price: 35, icon: '📱', category: 'privilege', createdBy: 'parent-1', available: true },
+];
+
+export const mockTeachers: Teacher[] = [
+  { id: 'teacher-1', name: 'Prof. Carlos Mendes', email: 'carlos@escola.mz', school: 'Escola Primária Sol Nascente', avatar: '👨‍🏫' },
+];
+
+export const mockClassrooms: Classroom[] = [
+  { id: 'class-1', name: 'Turma dos Exploradores', teacherId: 'teacher-1', grade: '4.º Ano', studentIds: ['child-1', 'child-2'], icon: '🧭', createdAt: '2026-02-01' },
+  { id: 'class-2', name: 'Turma dos Inventores', teacherId: 'teacher-1', grade: '5.º Ano', studentIds: ['child-1'], icon: '💡', createdAt: '2026-02-15' },
+];
+
+export const mockChallenges: CollectiveChallenge[] = [
+  {
+    id: 'ch-1', title: 'Operação Mealheiro', description: 'Juntos, a turma deve poupar 1000 KivaCoins esta semana!',
+    classroomId: 'class-1', icon: '🐷', type: 'saving', targetAmount: 1000, currentAmount: 620,
+    status: 'active', participants: [{ childId: 'child-1', contribution: 380 }, { childId: 'child-2', contribution: 240 }],
+    reward: 50, kivaPointsReward: 30, startDate: '2026-03-03', endDate: '2026-03-10',
+  },
+  {
+    id: 'ch-2', title: 'Desafio do Orçamento', description: 'Cada aluno recebe 200 moedas virtuais. Quem gere melhor ganha!',
+    classroomId: 'class-1', icon: '📊', type: 'budgeting', targetAmount: 200, currentAmount: 0,
+    status: 'upcoming', participants: [], reward: 40, kivaPointsReward: 25, startDate: '2026-03-10', endDate: '2026-03-17',
+  },
+  {
+    id: 'ch-3', title: 'Feira Solidária', description: 'A turma organiza uma feira virtual. Objectivo: angariar 500 moedas para doação.',
+    classroomId: 'class-2', icon: '🤝', type: 'teamwork', targetAmount: 500, currentAmount: 500,
+    status: 'completed', participants: [{ childId: 'child-1', contribution: 500 }],
+    reward: 60, kivaPointsReward: 40, startDate: '2026-02-24', endDate: '2026-03-03',
+  },
+];
+
+export const mockLeaderboard: ClassLeaderboard[] = [
+  { childId: 'child-1', name: 'Ana', avatar: '🦊', kivaPoints: 180, tasksCompleted: 12, savingsRate: 43 },
+  { childId: 'child-2', name: 'Pedro', avatar: '🐻', kivaPoints: 75, tasksCompleted: 8, savingsRate: 22 },
+  { childId: 'child-3', name: 'Sofia', avatar: '🐱', kivaPoints: 210, tasksCompleted: 15, savingsRate: 55 },
+  { childId: 'child-4', name: 'Tomás', avatar: '🐶', kivaPoints: 95, tasksCompleted: 6, savingsRate: 30 },
+  { childId: 'child-5', name: 'Inês', avatar: '🦋', kivaPoints: 160, tasksCompleted: 11, savingsRate: 48 },
 ];

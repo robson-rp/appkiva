@@ -28,6 +28,15 @@ const mockChildUser: User = {
   familyId: 'family-1',
 };
 
+const mockTeacherUser: User = {
+  id: 'teacher-1',
+  name: 'Prof. Carlos Mendes',
+  email: 'carlos@escola.mz',
+  role: 'teacher',
+  avatar: '👨‍🏫',
+  familyId: 'school-1',
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [currentChildId, setCurrentChildId] = useState<string | null>(null);
@@ -35,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (role: UserRole) => {
     if (role === 'parent') {
       setUser(mockParent);
+    } else if (role === 'teacher') {
+      setUser(mockTeacherUser);
     } else {
       setUser(mockChildUser);
       setCurrentChildId('child-1');

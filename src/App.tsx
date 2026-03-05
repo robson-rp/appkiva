@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ParentLayout } from "@/components/layouts/ParentLayout";
 import { ChildLayout } from "@/components/layouts/ChildLayout";
+import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -25,6 +26,9 @@ import ChildAchievements from "./pages/child/ChildAchievements";
 import ChildStore from "./pages/child/ChildStore";
 import ChildDiary from "./pages/child/ChildDiary";
 import ChildDreams from "./pages/child/ChildDreams";
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import TeacherClasses from "./pages/teacher/TeacherClasses";
+import TeacherChallenges from "./pages/teacher/TeacherChallenges";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +55,17 @@ function AppRoutes() {
         <Route path="/parent/rewards" element={<ParentLayout><ParentRewards /></ParentLayout>} />
         <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
         <Route path="*" element={<Navigate to="/parent" replace />} />
+      </Routes>
+    );
+  }
+
+  if (user.role === 'teacher') {
+    return (
+      <Routes>
+        <Route path="/teacher" element={<TeacherLayout><TeacherDashboard /></TeacherLayout>} />
+        <Route path="/teacher/classes" element={<TeacherLayout><TeacherClasses /></TeacherLayout>} />
+        <Route path="/teacher/challenges" element={<TeacherLayout><TeacherChallenges /></TeacherLayout>} />
+        <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>
     );
   }
