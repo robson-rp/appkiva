@@ -274,6 +274,66 @@ export type Database = {
           },
         ]
       }
+      rewards: {
+        Row: {
+          available: boolean
+          category: Database["public"]["Enums"]["reward_category"]
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          parent_profile_id: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          available?: boolean
+          category?: Database["public"]["Enums"]["reward_category"]
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          parent_profile_id: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          available?: boolean
+          category?: Database["public"]["Enums"]["reward_category"]
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          parent_profile_id?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_claimed_by_fkey"
+            columns: ["claimed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rewards_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           approved_at: string | null
@@ -504,6 +564,7 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      reward_category: "experience" | "privilege" | "physical" | "digital"
       task_category: "cleaning" | "studying" | "helping" | "other"
       task_status: "pending" | "in_progress" | "completed" | "approved"
       wallet_type: "virtual" | "real"
@@ -648,6 +709,7 @@ export const Constants = {
         "adjustment",
         "refund",
       ],
+      reward_category: ["experience", "privilege", "physical", "digital"],
       task_category: ["cleaning", "studying", "helping", "other"],
       task_status: ["pending", "in_progress", "completed", "approved"],
       wallet_type: ["virtual", "real"],
