@@ -147,27 +147,36 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
                       key={item.title}
                       to={item.url}
                       end={item.url === '/teacher'}
-                      className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all duration-200 text-muted-foreground"
+                      className="relative flex flex-col items-center py-1.5 px-5 rounded-2xl transition-all duration-200 text-muted-foreground"
                       activeClassName="text-primary"
                     >
-                      <div className={`relative p-1.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary/10' : ''}`}>
+                      <div className="relative p-2 rounded-xl">
                         {isActive && (
                           <motion.div
-                            layoutId="teacher-nav-indicator"
+                            layoutId="teacher-nav-bg"
                             className="absolute inset-0 rounded-xl bg-primary/10"
-                            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                           />
                         )}
-                        <item.icon className={`h-5 w-5 relative z-10 transition-all duration-200 ${isActive ? 'text-primary' : ''}`} />
+                        <motion.div
+                          animate={isActive ? { scale: 1.15, y: -2 } : { scale: 1, y: 0 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        >
+                          <item.icon className={`h-5 w-5 relative z-10 transition-colors duration-200 ${isActive ? 'text-primary' : ''}`} />
+                        </motion.div>
                       </div>
-                      <span className={`text-[10px] mt-0.5 font-semibold transition-all duration-200 ${isActive ? 'text-primary' : ''}`}>
+                      <motion.span
+                        animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0.7, y: 2 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className={`text-[10px] mt-0.5 font-semibold ${isActive ? 'text-primary' : ''}`}
+                      >
                         {item.title}
-                      </span>
+                      </motion.span>
                       {isActive && (
                         <motion.div
                           layoutId="teacher-nav-dot"
                           className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
-                          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                         />
                       )}
                     </NavLink>
