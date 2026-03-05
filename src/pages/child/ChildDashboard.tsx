@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { LEVEL_CONFIG, Level } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
 import { Button } from '@/components/ui/button';
+import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
+import { useAuth } from '@/contexts/AuthContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -25,11 +27,23 @@ const itemVariants = {
 
 export default function ChildDashboard() {
   const child = mockChildren[0];
+  const { user } = useAuth();
+  const { data: walletBalance } = useWalletBalance();
+  const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
+  const balance = walletBalance?.balance ?? child.balance;
   const [showLevelUp, setShowLevelUp] = useState(false);
   const pendingTasks = mockTasks.filter((t) => t.childId === child.id && t.status === 'pending');
   const activeMissions = mockMissions.filter((m) => m.status === 'available' || (m.status === 'in_progress' && m.childId === child.id));
   const vaults = mockVaults.filter((v) => v.childId === child.id);
-  const recentTransactions = mockTransactions.filter((t) => t.childId === child.id).slice(0, 4);
+  const recentTransactions = ledgerTransactions && ledgerTransactions.length > 0
+    ? ledgerTransactions.map(tx => ({
+        id: tx.id,
+        description: tx.description,
+        amount: tx.amount,
+        type: tx.direction === 'credit' ? 'earned' : 'spent',
+        date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
+      }))
+    : mockTransactions.filter((t) => t.childId === child.id).slice(0, 4);
   const unlockedAchievements = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
   const navigate = useNavigate();
   const levelConfig = LEVEL_CONFIG[child.level];
@@ -88,12 +102,12 @@ export default function ChildDashboard() {
                     <p className="text-white/70 text-sm font-body">A tua carteira</p>
                     <div className="flex items-baseline gap-2">
                       <motion.span
-                        key={child.balance}
+                        key={balance}
                         initial={{ scale: 1.2, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         className="font-display text-4xl font-bold text-white"
                       >
-                        {child.balance}
+                        {balance}
                       </motion.span>
                       <span className="text-sm text-white/60 font-display">KivaCoins</span>
                     </div>
