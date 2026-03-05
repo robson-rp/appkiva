@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowance_configs: {
+        Row: {
+          base_amount: number
+          child_profile_id: string
+          created_at: string
+          frequency: string
+          id: string
+          last_sent_at: string | null
+          mission_bonus: number
+          parent_profile_id: string
+          task_bonus: number
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number
+          child_profile_id: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          last_sent_at?: string | null
+          mission_bonus?: number
+          parent_profile_id: string
+          task_bonus?: number
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          child_profile_id?: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          last_sent_at?: string | null
+          mission_bonus?: number
+          parent_profile_id?: string
+          task_bonus?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allowance_configs_child_profile_id_fkey"
+            columns: ["child_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "allowance_configs_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           created_at: string
