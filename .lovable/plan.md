@@ -1,104 +1,135 @@
+# Plano: Arquitectura Funcional Completa da Plataforma KIVARA
 
+## Situacao Actual
 
-# KIVARA — Financial Education Platform for Kids & Families
+A plataforma ja tem implementado (com UI/mock):
 
-## Overview
-A gamified financial education web app with two experiences: a **Parent Dashboard** (management & oversight) and a **Child Experience** (gamified learning). Built with mock data and basic authentication to distinguish parent/child roles.
+- Carteira virtual com historico de transacoes
+- Tarefas com aprovacao parental
+- Missoes financeiras semanais
+- Cofres de poupanca com metas e progresso
+- Loja virtual com compras
+- Dashboard do encarregado com relatorios e graficos
+- Mesada configuravel por crianca
+- Sistema de niveis e conquistas
+- Mascote Kivo com dicas contextuais
+- Convites por codigo (mock)
 
-## Brand & Design System
-- **Colors**: Deep Blue (`#2c5b8f`), Green (`#45a188`), Gold (`#fbb845`), with soft pastels for the child interface
-- **Style**: Rounded corners, card-based layouts, friendly typography, fintech-inspired dashboards
-- **Child UI**: Playful, colorful, large touch-friendly elements with animations
-- **Parent UI**: Clean, professional dashboard with data visualizations
+## Funcionalidades Novas a Implementar
 
-## Authentication & Roles
-- Login/signup page with role selection (Parent or Child)
-- Parents create child accounts linked to their family
-- Children log in with simplified credentials (username + PIN)
-- Basic auth using Supabase (email/password for parents, managed child accounts)
+Organizadas por prioridade e complexidade, em 4 fases:
 
-## Module 1 — Parent Dashboard
-- **Overview**: Family financial summary — total coins distributed, savings progress, tasks completed
-- **Child Management**: Add/edit/remove child profiles with avatar selection
-- **Task Management**: Create tasks with coin rewards, approve completed tasks
-- **Allowance Settings**: Set weekly virtual allowance per child
-- **Reports**: Charts showing spending vs saving habits, task completion rates, mission progress
+---
 
-## Module 2 — Child Dashboard
-- Welcome screen with Kivo (interactive mascot) giving daily tips via speech bubbles
-- Quick stats: wallet balance, pending tasks, active missions, savings progress
-- Level indicator with progress bar (Apprentice → Saver → Planner → Investor → Master)
-- Notification center for pending approvals, new missions, achievements
+### FASE 1 — Enriquecimento da Conta da Crianca
 
-## Module 3 — Wallet (KivaraCoins)
-- Balance display with animated coin counter
-- Transaction history (earned, spent, saved)
-- Quick actions: transfer to vault, spend in store
-- Visual breakdown: earned vs spent vs saved (pie chart)
+**1.1 Renomear moeda para** KivaraCoins
 
-## Module 4 — Tasks & Rewards
-- List of parent-assigned tasks with coin rewards
-- Task states: pending, in progress, completed, approved
-- Child marks task as done → parent approves → coins credited
-- Task categories with icons (cleaning, studying, helping)
+**1.2 Juros Simulados nos Cofres**
 
-## Module 5 — Financial Missions
-- Weekly themed missions (e.g., "Save 50 coins", "Budget 100 coins wisely")
-- Interactive decision scenarios with Kivo explaining outcomes
-- Mission completion awards KivaPoints and coins
-- Mission history and streaks
+- Adicionar campo `interestRate` ao tipo `Vault` (default 1%/mes)
+- Mostrar juros acumulados e projecao no card de cada cofre
+- Indicador visual "+X moedas este mes" com animacao
 
-## Module 6 — Savings Vaults
-- Create named savings goals with target amounts
-- Visual progress bars with percentage and estimated time
-- Optional simulated interest (coins grow over time)
-- Celebrate goal completion with confetti animation
+**1.3 Sistema de Doacoes**
 
-## Module 7 — Virtual Store
-- Browse items: avatar skins, accessories, badges, digital items
-- Purchase with KivaraCoins
-- Inventory of purchased items
-- Items displayed as colorful cards with prices
+- Novo tipo `Donation` e mock data com causas (educativas, solidarias)
+- Nova seccao na Carteira: botao "Doar" com seleccao de causa e montante
+- Novo tipo de transacao `donated`
+- Card de impacto: "Ja doaste X moedas para Y causas"
 
-## Kivo — Interactive Mascot
-- Smart African squirrel character appearing as speech bubble overlays
-- Contextual tips on each page (e.g., "Great job saving! Keep it up!")
-- Guides children through first-time experiences
-- Celebrates achievements with animated reactions
+**1.4 Avatar Evolutivo**
 
-## Gamification System
-- **Levels**: Apprentice (0) → Saver (100pts) → Planner (300pts) → Investor (600pts) → Master (1000pts)
-- **Achievements**: Badges for milestones (first save, 10 tasks completed, etc.)
-- **Leaderboard**: Family ranking among siblings
-- **Weekly Challenges**: Time-limited goals for bonus rewards
+- Expandir o sistema de niveis com avatares visuais por nivel
+- Mostrar evolucao do avatar no dashboard da crianca
+- Animacao de transicao ao subir de nivel
 
-## Notifications
-- Toast notifications for: task approvals, mission availability, milestones reached, achievements unlocked
-- Notification bell with unread count in the header
+**1.5 Rankings Familiares**
 
-## Navigation Structure
-- **Parent**: Sidebar with Dashboard, Children, Tasks, Allowance, Reports, Settings
-- **Child**: Bottom navigation bar (Dashboard, Wallet, Missions, Vaults, Store) + header with profile/notifications
+- Nova seccao no ChildDashboard: "Ranking Familiar"
+- Categorias: Melhor Poupador, Melhor Planeador, Maior Doador
+- Cards animados com posicao e pontuacao
 
-## Pages Summary
-| Route | Role | Description |
-|-------|------|-------------|
-| `/login` | All | Login with role selection |
-| `/signup` | Parent | Parent registration |
-| `/parent` | Parent | Parent dashboard overview |
-| `/parent/children` | Parent | Manage child accounts |
-| `/parent/tasks` | Parent | Create & approve tasks |
-| `/parent/allowance` | Parent | Weekly allowance settings |
-| `/parent/reports` | Parent | Activity reports & charts |
-| `/child` | Child | Child dashboard with Kivo |
-| `/child/wallet` | Child | Wallet & transactions |
-| `/child/missions` | Child | Weekly missions |
-| `/child/vaults` | Child | Savings goals |
-| `/child/achievements` | Child | Badges & levels |
-| `/child/store` | Child | Virtual store |
+---
 
-## Data Approach
-- Mock data with React state management for the initial build
-- Structured to easily replace with Supabase queries later
-- Data models: Users, Children, Tasks, Transactions, Vaults, Missions, Achievements, StoreItems
+### FASE 2 — Enriquecimento da Conta do Encarregado
 
+**2.1 Limites de Gasto**
+
+- Novo painel em ParentChildren: definir minimo de poupanca, limite semanal, bloqueio de compras
+- Indicadores visuais no dashboard da crianca quando limites estao activos
+
+**2.2 Mesada Inteligente (Variavel)**
+
+- Expandir ParentAllowance: mesada base + bonus por tarefas + bonus por missoes
+- Configuracao: semanal vs mensal
+- Resumo visual da composicao da mesada
+
+**2.3 Metas Partilhadas**
+
+- Novo tipo `SharedGoal` com contribuicoes de pai e crianca
+- Pagina/seccao partilhada visivel em ambos os dashboards
+- Progress bar com contribuicoes separadas por cor
+
+**2.4 Relatorios Educativos Avancados**
+
+- Adicionar insights automaticos: tendencia de poupanca, impulsividade, consistencia
+- Cards de "alerta" quando comportamento muda
+- Comparacao entre periodos
+
+---
+
+### FASE 3 — Novas Funcionalidades de Engajamento
+
+**3.1 Diario Financeiro**
+
+- Nova pagina `/child/diary`
+- Crianca escreve reflexoes: "Hoje poupei porque..."
+- Lista cronologica com emojis de humor
+- Contador de dias consecutivos
+
+**3.2 Cofre dos Sonhos**
+
+- Evolucao dos cofres: crianca regista sonhos e planos com descricao longa
+- Pais podem comentar e encorajar
+- Visualizacao tipo "vision board" com imagens/emojis
+
+**3.3 Recompensas Definidas pelos Pais na Loja**
+
+- Pais criam itens customizados na loja (ex: "Ida ao cinema", "1h extra de jogo")
+- Novo CRUD em ParentChildren ou nova pagina ParentStore
+
+---
+
+### FASE 4 — Modo Escolar
+
+**4.1 Portal Escolar (nova area)**
+
+- Novo role `teacher` no AuthContext
+- Layout dedicado para professores
+- Rotas: `/school`, `/school/classes`, `/school/challenges`, `/school/reports`
+
+**4.2 Gestao de Turmas**
+
+- Criar turmas, adicionar criancas
+- Desafios colectivos por turma
+
+**4.3 Rankings e Relatorios Escolares**
+
+- Rankings por turma/escola
+- Relatorios pedagogicos para professores
+
+---
+
+## Abordagem Tecnica
+
+- **Tudo UI/mock** — sem backend, dados em `mock-data.ts` e estado local React
+- **Tipos primeiro** — actualizar `kivara.ts` com novos interfaces antes de criar UI
+- **Navegacao** — novas rotas no `App.tsx`, novos links nos layouts
+- **Estilo consistente** — manter glassmorphism, framer-motion stagger, gradient-kivara
+
+## Recomendacao
+
+Implementar por fases, comecando pela Fase 1 (maior impacto na experiencia da crianca). Cada fase pode ser dividida em mensagens individuais para manter qualidade e controlo.
+
+Qual fase preferes comecar?
