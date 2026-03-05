@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Wallet, Target, CheckCircle2, Trophy, TrendingUp, Clock, Coins } from 'lucide-react';
 import { mockChildren, mockLeaderboard, mockTasks, mockTransactions, mockVaults, mockAchievements } from '@/data/mock-data';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -31,6 +33,32 @@ export default function TeacherStudentProfile() {
 
   const leaderboard = mockLeaderboard.find(s => s.childId === studentId);
   const child = mockChildren.find(c => c.id === studentId);
+  const studentTransactions = mockTransactions.filter(t => t.childId === studentId);
+  const balance = child?.balance ?? 0;
+
+  // Generate savings evolution data from transactions (must be before early return)
+  const savingsChartData = useMemo(() => {
+    const sorted = [...studentTransactions].sort((a, b) => a.date.localeCompare(b.date));
+    let cumSaved = 0;
+    let cumBalance = 0;
+    const points = sorted.map(tx => {
+      if (tx.type === 'saved') cumSaved += tx.amount;
+      if (tx.type === 'allowance' || tx.type === 'earned') cumBalance += tx.amount;
+      if (tx.type === 'spent' || tx.type === 'donated') cumBalance -= tx.amount;
+      const d = new Date(tx.date);
+      return { date: `${d.getDate()}/${d.getMonth() + 1}`, poupança: cumSaved, saldo: Math.max(0, cumBalance) };
+    });
+    if (points.length < 4) {
+      const weeks = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'];
+      const base = balance > 0 ? balance : 100;
+      return weeks.map((w, i) => ({
+        date: w,
+        poupança: Math.round(base * 0.15 * (i + 1) * (0.8 + Math.random() * 0.4)),
+        saldo: Math.round(base * (0.4 + i * 0.12) * (0.9 + Math.random() * 0.2)),
+      }));
+    }
+    return points;
+  }, [studentTransactions, balance]);
 
   if (!leaderboard) {
     return (
@@ -42,12 +70,9 @@ export default function TeacherStudentProfile() {
       </div>
     );
   }
-
   const studentVaults = mockVaults.filter(v => v.childId === studentId);
   const studentTasks = mockTasks.filter(t => t.childId === studentId);
-  const studentTransactions = mockTransactions.filter(t => t.childId === studentId);
   const studentAchievements = mockAchievements.filter(a => a.childId === studentId);
-  const balance = child?.balance ?? 0;
   const kivaPoints = leaderboard.kivaPoints;
   const completedTasks = studentTasks.filter(t => t.status === 'completed' || t.status === 'approved').length;
 
@@ -102,6 +127,48 @@ export default function TeacherStudentProfile() {
             </CardContent>
           </Card>
         ))}
+      </motion.div>
+
+      {/* Savings Evolution Chart */}
+      <motion.div variants={item}>
+        <Card className="border-border/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-display flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-secondary" /> Evolução da Poupança
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={savingsChartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="colorPoupanca" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '0.75rem',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Area type="monotone" dataKey="saldo" stroke="hsl(var(--secondary))" fill="url(#colorSaldo)" strokeWidth={2} name="Saldo" />
+                  <Area type="monotone" dataKey="poupança" stroke="hsl(var(--primary))" fill="url(#colorPoupanca)" strokeWidth={2} name="Poupança" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
