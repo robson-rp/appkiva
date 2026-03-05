@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, Bell, LogOut } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockNotifications, mockChildren } from '@/data/mock-data';
+import { mockChildren } from '@/data/mock-data';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -19,7 +20,6 @@ const bottomNavItems = [
 export function ChildLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
   const child = mockChildren[0];
 
   return (
@@ -48,18 +48,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95">
               <Trophy className="h-4.5 w-4.5 text-muted-foreground" />
             </NavLink>
-            <button className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95">
-              <Bell className="h-4.5 w-4.5 text-muted-foreground" />
-              {unreadCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm"
-                >
-                  {unreadCount}
-                </motion.span>
-              )}
-            </button>
+            <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">
               <LogOut className="h-4 w-4" />
             </Button>

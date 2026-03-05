@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut } from 'lucide-react';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -98,9 +99,12 @@ export function ParentLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col">
           <header className="relative z-50">
             <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
-            <div className="relative h-14 flex items-center px-4 gap-4">
-              <SidebarTrigger />
-              <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
+            <div className="relative h-14 flex items-center justify-between px-4 gap-4">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
+              </div>
+              <NotificationDropdown />
             </div>
           </header>
           <AnimatePresence mode="wait">
