@@ -121,3 +121,37 @@ export function hapticSuccess() {
     // Vibration not supported
   }
 }
+
+/** Play an urgent alert tone (descending two-note) */
+export function playUrgentAlert() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    // Two descending notes for urgency
+    const notes = [880, 660]; // A5 → E5
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now + i * 0.18);
+      gain.gain.setValueAtTime(0, now + i * 0.18);
+      gain.gain.linearRampToValueAtTime(0.1, now + i * 0.18 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.18 + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + i * 0.18);
+      osc.stop(now + i * 0.18 + 0.3);
+    });
+  } catch {
+    // Audio not supported
+  }
+}
+
+/** Strong haptic burst for urgent notifications */
+export function hapticUrgent() {
+  try {
+    navigator?.vibrate?.([50, 80, 50, 80, 100]);
+  } catch {
+    // Vibration not supported
+  }
+}
