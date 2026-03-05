@@ -93,14 +93,14 @@ export default function TeacherChallenges() {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2 border-t border-border/30 text-xs text-muted-foreground">
+            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between pt-2 border-t border-border/30 text-xs text-muted-foreground gap-1">
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3 text-accent-foreground" /> +{challenge.reward} 🪙
                 </span>
                 <span>+{challenge.kivaPointsReward} pts</span>
               </div>
-              <span>{challenge.startDate} → {challenge.endDate}</span>
+              <span className="text-[10px] sm:text-xs">{challenge.startDate} → {challenge.endDate}</span>
             </div>
           </CardContent>
         </Card>
@@ -109,17 +109,17 @@ export default function TeacherChallenges() {
   };
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 bg-gradient-to-br from-accent via-primary to-secondary" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-6 md:p-8">
+          <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-2">
                 <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Educação Financeira</p>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">Desafios Colectivos</h1>
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">Desafios Colectivos</h1>
                 <p className="text-primary-foreground/60 text-sm">Cria desafios que envolvem toda a turma</p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -209,15 +209,15 @@ export default function TeacherChallenges() {
 
       {/* Tabs */}
       <Tabs defaultValue="active" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 rounded-xl h-11">
-          <TabsTrigger value="active" className="rounded-lg font-display text-xs gap-1.5">
-            <Target className="h-3.5 w-3.5" /> Em Curso ({activeChallenges.length})
+        <TabsList className="w-full grid grid-cols-3 rounded-xl h-10 sm:h-11">
+          <TabsTrigger value="active" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+            <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Em Curso</span> ({activeChallenges.length})
           </TabsTrigger>
-          <TabsTrigger value="upcoming" className="rounded-lg font-display text-xs gap-1.5">
-            <Clock className="h-3.5 w-3.5" /> Brevemente ({upcomingChallenges.length})
+          <TabsTrigger value="upcoming" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+            <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Brevemente</span> ({upcomingChallenges.length})
           </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-lg font-display text-xs gap-1.5">
-            <Trophy className="h-3.5 w-3.5" /> Concluídos ({completedChallenges.length})
+          <TabsTrigger value="completed" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+            <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Concluídos</span> ({completedChallenges.length})
           </TabsTrigger>
         </TabsList>
 
