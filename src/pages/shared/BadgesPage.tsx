@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,9 +7,19 @@ import { Progress } from '@/components/ui/progress';
 import { mockBadges } from '@/data/badges-data';
 import { BADGE_CATEGORIES, BADGE_TIERS, BadgeCategory, CollectibleBadge } from '@/types/kivara';
 import { Award, Lock, Sparkles, Trophy } from 'lucide-react';
+import { BadgeUnlockCeremony } from '@/components/BadgeUnlockCeremony';
 
 export default function BadgesPage() {
   const [selectedBadge, setSelectedBadge] = useState<CollectibleBadge | null>(null);
+  const [unlockingBadge, setUnlockingBadge] = useState<CollectibleBadge | null>(null);
+
+  const handleSimulateUnlock = useCallback((badge: CollectibleBadge) => {
+    if (!badge.unlockedAt) {
+      setUnlockingBadge(badge);
+    } else {
+      setSelectedBadge(badge);
+    }
+  }, []);
 
   const unlocked = mockBadges.filter(b => b.unlockedAt);
   const locked = mockBadges.filter(b => !b.unlockedAt);
@@ -89,7 +99,7 @@ export default function BadgesPage() {
                 cat={cat}
                 badges={catBadges}
                 progress={prog}
-                onSelect={setSelectedBadge}
+                onSelect={handleSimulateUnlock}
               />
             );
           })}
@@ -105,7 +115,7 @@ export default function BadgesPage() {
                 cat={cat}
                 badges={catBadges}
                 progress={prog}
-                onSelect={setSelectedBadge}
+                onSelect={handleSimulateUnlock}
               />
             </TabsContent>
           );
@@ -133,6 +143,15 @@ export default function BadgesPage() {
               <BadgeDetail badge={selectedBadge} onClose={() => setSelectedBadge(null)} />
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Badge Unlock Ceremony */}
+      <AnimatePresence>
+        {unlockingBadge && (
+          <BadgeUnlockCeremony
+            badge={unlockingBadge}
+            onComplete={() => setUnlockingBadge(null)}
+          />
         )}
       </AnimatePresence>
     </div>
