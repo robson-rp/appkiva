@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight, DreamVaultItem, ParentReward, Teacher, Classroom, CollectiveChallenge, ClassLeaderboard } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry, SpendingLimit, AllowanceConfig, SharedGoal, BehavioralInsight, DreamVaultItem, ParentReward, Teacher, Classroom, CollectiveChallenge, ClassLeaderboard, Teen } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -29,6 +29,37 @@ export const mockChildren: Child[] = [
   },
 ];
 
+export const mockTeens: Teen[] = [
+  {
+    id: 'teen-1',
+    name: 'Lucas',
+    username: 'lucas_pro',
+    pin: '9999',
+    avatar: '🧑‍💻',
+    parentId: 'parent-1',
+    familyId: 'family-1',
+    balance: 780,
+    kivaPoints: 420,
+    level: 'planner',
+    weeklyAllowance: 120,
+    weeklySpendLimit: 200,
+    spendingCategories: ['food', 'entertainment', 'education', 'transport', 'clothing', 'tech'],
+    monthlyBudget: 500,
+  },
+];
+
+export const mockTeenTransactions: Transaction[] = [
+  { id: 'ttx-1', childId: 'teen-1', amount: 120, type: 'allowance', description: 'Mesada semanal', date: '2026-03-03', category: 'other' },
+  { id: 'ttx-2', childId: 'teen-1', amount: 35, type: 'spent', description: 'Almoço com amigos', date: '2026-03-04', category: 'food' },
+  { id: 'ttx-3', childId: 'teen-1', amount: 25, type: 'spent', description: 'Spotify Premium', date: '2026-03-03', category: 'entertainment' },
+  { id: 'ttx-4', childId: 'teen-1', amount: 50, type: 'saved', description: 'Cofre: Portátil novo', date: '2026-03-04', category: 'tech' },
+  { id: 'ttx-5', childId: 'teen-1', amount: 40, type: 'earned', description: 'Tarefa: Organizar garagem', date: '2026-03-02' },
+  { id: 'ttx-6', childId: 'teen-1', amount: 15, type: 'spent', description: 'Passe de autocarro', date: '2026-03-05', category: 'transport' },
+  { id: 'ttx-7', childId: 'teen-1', amount: 20, type: 'spent', description: 'Livro de programação', date: '2026-03-01', category: 'education' },
+  { id: 'ttx-8', childId: 'teen-1', amount: 45, type: 'spent', description: 'T-shirt nova', date: '2026-02-28', category: 'clothing' },
+  { id: 'ttx-9', childId: 'teen-1', amount: 100, type: 'saved', description: 'Cofre: Portátil novo', date: '2026-02-27', category: 'tech' },
+  { id: 'ttx-10', childId: 'teen-1', amount: 30, type: 'donated', description: 'Doação: Livros para Todos', date: '2026-03-01' },
+];
 export const mockTasks: Task[] = [
   { id: 'task-1', title: 'Arrumar o quarto', description: 'Organizar a cama, brinquedos e secretária', reward: 20, category: 'cleaning', status: 'pending', childId: 'child-1', parentId: 'parent-1', createdAt: '2026-03-01' },
   { id: 'task-2', title: 'Lavar a loiça', description: 'Lavar e secar os pratos do jantar', reward: 15, category: 'cleaning', status: 'completed', childId: 'child-1', parentId: 'parent-1', createdAt: '2026-03-02', completedAt: '2026-03-02' },

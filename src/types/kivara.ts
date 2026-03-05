@@ -1,4 +1,4 @@
-export type UserRole = 'parent' | 'child' | 'teacher';
+export type UserRole = 'parent' | 'child' | 'teen' | 'teacher';
 
 export interface User {
   id: string;
@@ -51,6 +51,35 @@ export interface Task {
 
 export type TransactionType = 'earned' | 'spent' | 'saved' | 'allowance' | 'donated';
 
+export type SpendingCategory = 'food' | 'entertainment' | 'education' | 'transport' | 'clothing' | 'tech' | 'other';
+
+export const SPENDING_CATEGORIES: Record<SpendingCategory, { label: string; icon: string; color: string }> = {
+  food: { label: 'Alimentação', icon: '🍔', color: 'hsl(var(--chart-1))' },
+  entertainment: { label: 'Entretenimento', icon: '🎮', color: 'hsl(var(--chart-2))' },
+  education: { label: 'Educação', icon: '📚', color: 'hsl(var(--chart-3))' },
+  transport: { label: 'Transporte', icon: '🚌', color: 'hsl(var(--chart-4))' },
+  clothing: { label: 'Roupa', icon: '👕', color: 'hsl(var(--chart-5))' },
+  tech: { label: 'Tecnologia', icon: '💻', color: 'hsl(var(--primary))' },
+  other: { label: 'Outros', icon: '📦', color: 'hsl(var(--muted-foreground))' },
+};
+
+export interface Teen {
+  id: string;
+  name: string;
+  username: string;
+  pin: string;
+  avatar: string;
+  parentId: string;
+  familyId: string;
+  balance: number;
+  kivaPoints: number;
+  level: Level;
+  weeklyAllowance: number;
+  weeklySpendLimit: number;
+  spendingCategories: SpendingCategory[];
+  monthlyBudget: number;
+}
+
 export interface Transaction {
   id: string;
   childId: string;
@@ -58,6 +87,7 @@ export interface Transaction {
   type: TransactionType;
   description: string;
   date: string;
+  category?: SpendingCategory;
 }
 
 export interface Vault {
