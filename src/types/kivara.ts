@@ -374,6 +374,36 @@ export interface CollectibleBadge {
   childId?: string;
 }
 
+// ── Weekly Challenges ──
+
+export type WeeklyChallengeType = 'saving' | 'tasks' | 'learning' | 'mixed';
+export type WeeklyChallengeStatus = 'active' | 'completed' | 'expired';
+
+export interface WeeklyChallenge {
+  id: string;
+  title: string;
+  description: string;
+  type: WeeklyChallengeType;
+  icon: string;
+  targetValue: number;
+  currentValue: number;
+  reward: number;
+  kivaPointsReward: number;
+  status: WeeklyChallengeStatus;
+  weekStart: string;
+  weekEnd: string;
+  participantCount: number;
+}
+
+export interface ClassLeaderboardEntry {
+  rank: number;
+  name: string;
+  avatar: string;
+  score: number;
+  challengesCompleted: number;
+  isCurrentUser?: boolean;
+}
+
 // ── Daily Streaks ──
 
 export interface StreakData {
