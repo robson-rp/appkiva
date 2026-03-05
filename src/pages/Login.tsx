@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserRole } from '@/types/kivara';
 import kivaraLogo from '@/assets/logo-kivara.svg';
+import kivoImg from '@/assets/kivo.svg';
 
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -33,9 +34,9 @@ export default function Login() {
           <motion.div
             animate={{ y: [0, -8, 0] }}
             transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="text-6xl mb-4"
+            className="mb-4"
           >
-            🐿️
+            <img src={kivoImg} alt="Kivo" className="w-24 h-24 mx-auto" />
           </motion.div>
           <img src={kivaraLogo} alt="KIVARA" className="h-12 mx-auto mb-2 brightness-0 invert" />
           <p className="text-white/80 font-body">Educação financeira para toda a família</p>

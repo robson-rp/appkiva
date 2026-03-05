@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { KIVO_TIPS } from '@/data/mock-data';
+import kivoImg from '@/assets/kivo.svg';
 
 interface KivoProps {
   page: keyof typeof KIVO_TIPS;
@@ -44,10 +45,10 @@ export function Kivo({ page }: KivoProps) {
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="text-4xl cursor-pointer select-none flex-shrink-0"
+            className="cursor-pointer select-none flex-shrink-0"
             onClick={() => setVisible(true)}
           >
-            🐿️
+            <img src={kivoImg} alt="Kivo" className="w-16 h-16" />
           </motion.div>
         </motion.div>
       )}
