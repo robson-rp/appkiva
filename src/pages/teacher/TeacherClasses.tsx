@@ -100,7 +100,18 @@ export default function TeacherClasses() {
   };
 
   const updateGoalCurrent = (goalId: string, value: number) => {
-    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, current: Math.max(0, value) } : g));
+    const clamped = Math.max(0, value);
+    setGoals(prev => {
+      const updated = prev.map(g => g.id === goalId ? { ...g, current: clamped } : g);
+      const goal = updated.find(g => g.id === goalId);
+      const old = prev.find(g => g.id === goalId);
+      if (goal && old && !old.completed && old.current < old.target && goal.current >= goal.target) {
+        const cls = classrooms.find(c => c.id === goal.classId);
+        toast.success(`🎯 Meta atingida! "${goal.title}" na turma ${cls?.name ?? ''} chegou a 100%!`, { duration: 5000 });
+        return updated.map(g => g.id === goalId ? { ...g, completed: true } : g);
+      }
+      return updated;
+    });
   };
 
   const openEditDialog = (c: typeof classrooms[0]) => {
