@@ -10,6 +10,10 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChildren } from '@/hooks/use-children';
 import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
+import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -18,6 +22,7 @@ export default function ParentDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: realChildren = [] } = useChildren();
+  const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const totalDistributed = mockTransactions
     .filter((t) => t.type === 'allowance')
@@ -25,7 +30,6 @@ export default function ParentDashboard() {
   const totalBalance = mockChildren.reduce((s, c) => s + c.balance, 0);
   const tasksCompleted = mockTasks.filter((t) => t.status === 'completed' || t.status === 'approved').length;
   const tasksPending = mockTasks.filter((t) => t.status === 'completed').length;
-  const recentTransactions = mockTransactions.slice(0, 5);
 
   const stats = [
     { label: 'Crianças', value: mockChildren.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/parent/children' },
@@ -299,7 +303,7 @@ export default function ParentDashboard() {
           </Card>
         </motion.div>
 
-        {/* Recent Activity */}
+        {/* Recent Activity — Real Data */}
         <motion.div variants={item}>
           <Card className="border-border/50 overflow-hidden">
             <div className="h-0.5 bg-primary" />
@@ -312,25 +316,64 @@ export default function ParentDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {recentTransactions.map((tx) => {
-                const child = mockChildren.find((c) => c.id === tx.childId);
-                return (
-                  <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
+              {txLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center">
-                        {txIcon(tx.type)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-display font-bold">{tx.description}</p>
-                        <p className="text-[11px] text-muted-foreground">{child?.name} · {tx.date}</p>
+                      <Skeleton className="w-9 h-9 rounded-xl" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-20" />
                       </div>
                     </div>
-                    <span className={`text-sm font-display font-bold ${tx.type === 'earned' || tx.type === 'allowance' ? 'text-secondary' : 'text-destructive'}`}>
-                      {tx.type === 'earned' || tx.type === 'allowance' ? '+' : '-'}{tx.amount}
-                    </span>
+                    <Skeleton className="h-4 w-12" />
                   </div>
-                );
-              })}
+                ))
+              ) : realTransactions.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-muted-foreground text-sm">Ainda sem transacções.</p>
+                  <p className="text-muted-foreground text-xs mt-1">Envia uma mesada para começar!</p>
+                </div>
+              ) : (
+                realTransactions.map((tx) => {
+                  const isCredit = tx.direction === 'in';
+                  const formattedDate = tx.createdAt
+                    ? format(new Date(tx.createdAt), "d MMM, HH:mm", { locale: pt })
+                    : '';
+                  const entryLabel: Record<string, string> = {
+                    allowance: 'Mesada',
+                    task_reward: 'Tarefa',
+                    mission_reward: 'Missão',
+                    purchase: 'Compra',
+                    donation: 'Doação',
+                    vault_deposit: 'Cofre ↓',
+                    vault_withdraw: 'Cofre ↑',
+                    transfer: 'Transferência',
+                    adjustment: 'Ajuste',
+                    refund: 'Reembolso',
+                  };
+                  return (
+                    <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center">
+                          {isCredit
+                            ? <ArrowDownLeft className="h-3.5 w-3.5 text-secondary" />
+                            : <ArrowUpRight className="h-3.5 w-3.5 text-destructive" />}
+                        </div>
+                        <div>
+                          <p className="text-sm font-display font-bold">{tx.description || entryLabel[tx.entryType] || tx.entryType}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {tx.avatar} {tx.displayName} · {formattedDate}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-sm font-display font-bold ${isCredit ? 'text-secondary' : 'text-destructive'}`}>
+                        {isCredit ? '+' : '-'}{tx.amount} 🪙
+                      </span>
+                    </div>
+                  );
+                })
+              )}
             </CardContent>
           </Card>
         </motion.div>
