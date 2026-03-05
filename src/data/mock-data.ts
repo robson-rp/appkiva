@@ -1,4 +1,4 @@
-import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation } from '@/types/kivara';
+import { Child, Task, Transaction, Vault, Mission, Achievement, StoreItem, Notification, DonationCause, Donation, DiaryEntry } from '@/types/kivara';
 
 export const mockChildren: Child[] = [
   {
@@ -93,6 +93,14 @@ export const mockNotifications: Notification[] = [
   { id: 'notif-3', title: 'Conquista desbloqueada!', message: 'Parabéns! Desbloqueaste "10 Tarefas Completas"!', type: 'achievement', read: true, date: '2026-03-01' },
 ];
 
+export const mockDiaryEntries: DiaryEntry[] = [
+  { id: 'diary-1', childId: 'child-1', text: 'Hoje poupei 30 moedas para a bicicleta! Estou quase a chegar à meta 🚲', mood: '😄', date: '2026-03-05', tags: ['poupança'] },
+  { id: 'diary-2', childId: 'child-1', text: 'Queria comprar uma skin nova mas decidi esperar. Foi difícil mas sinto que fiz bem!', mood: '😊', date: '2026-03-04', tags: ['autocontrolo'] },
+  { id: 'diary-3', childId: 'child-1', text: 'A mesada chegou e já guardei metade no cofre. A outra metade vou usar com cuidado.', mood: '😊', date: '2026-03-03', tags: ['planeamento'] },
+  { id: 'diary-4', childId: 'child-1', text: 'Gastei mais do que devia na loja... para a próxima vou pensar melhor antes de comprar.', mood: '😔', date: '2026-03-02', tags: ['reflexão'] },
+  { id: 'diary-5', childId: 'child-1', text: 'Fiz a minha primeira doação! Doei 10 moedas para o projecto de livros. Senti-me muito bem!', mood: '😄', date: '2026-03-01', tags: ['doação', 'solidariedade'] },
+];
+
 export const KIVO_TIPS: Record<string, string[]> = {
   dashboard: [
     'Olá! Eu sou o Kivo! 🐿️ Bem-vindo à tua página principal!',
@@ -123,5 +131,10 @@ export const KIVO_TIPS: Record<string, string[]> = {
     'As conquistas mostram o quanto já aprendeste! 🏆',
     'Cada badge conta uma história do teu progresso!',
     'Continua a completar tarefas para desbloquear mais!',
+  ],
+  diary: [
+    'Escrever sobre o teu dia ajuda-te a perceber como usas o dinheiro! 📝',
+    'Reflectir é o primeiro passo para tomar melhores decisões!',
+    'Tenta escrever todos os dias para manter a tua sequência! 🔥',
   ],
 };

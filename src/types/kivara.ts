@@ -122,6 +122,17 @@ export interface StoreItem {
   owned?: boolean;
 }
 
+export type DiaryMood = '😄' | '😊' | '😐' | '😔' | '😤';
+
+export interface DiaryEntry {
+  id: string;
+  childId: string;
+  text: string;
+  mood: DiaryMood;
+  date: string;
+  tags?: string[];
+}
+
 export interface Notification {
   id: string;
   title: string;
