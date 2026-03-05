@@ -37,6 +37,7 @@ import TeenVaults from "./pages/teen/TeenVaults";
 import TeenAnalytics from "./pages/teen/TeenAnalytics";
 import LearnPage from "./pages/shared/LearnPage";
 import BadgesPage from "./pages/shared/BadgesPage";
+import StreaksPage from "./pages/shared/StreaksPage";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ function AppRoutes() {
         <Route path="/teen/analytics" element={<TeenLayout><TeenAnalytics /></TeenLayout>} />
         <Route path="/teen/learn" element={<TeenLayout><LearnPage /></TeenLayout>} />
         <Route path="/teen/badges" element={<TeenLayout><BadgesPage /></TeenLayout>} />
+        <Route path="/teen/streaks" element={<TeenLayout><StreaksPage /></TeenLayout>} />
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>
     );
@@ -101,6 +103,7 @@ function AppRoutes() {
       <Route path="/child/vaults" element={<ChildLayout><ChildVaults /></ChildLayout>} />
       <Route path="/child/achievements" element={<ChildLayout><ChildAchievements /></ChildLayout>} />
       <Route path="/child/badges" element={<ChildLayout><BadgesPage /></ChildLayout>} />
+      <Route path="/child/streaks" element={<ChildLayout><StreaksPage /></ChildLayout>} />
       <Route path="/child/store" element={<ChildLayout><ChildStore /></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
