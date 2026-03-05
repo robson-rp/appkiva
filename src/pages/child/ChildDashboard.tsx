@@ -7,6 +7,7 @@ import { mockChildren, mockTasks, mockMissions, mockVaults } from '@/data/mock-d
 import { Progress } from '@/components/ui/progress';
 import { ListTodo, Target, PiggyBank, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import kivoImg from '@/assets/kivo.svg';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -41,13 +42,12 @@ export default function ChildDashboard() {
                 </div>
                 <LevelBadge level={child.level} points={child.kivaPoints} showProgress />
               </div>
-              <motion.span
+              <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="text-5xl"
               >
-                {child.avatar}
-              </motion.span>
+                <img src={kivoImg} alt="Kivo" className="w-16 h-16" />
+              </motion.div>
             </div>
           </CardContent>
         </Card>
