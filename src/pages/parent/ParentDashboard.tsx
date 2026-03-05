@@ -305,7 +305,7 @@ export default function ParentDashboard() {
                         style={{ left: `${parentPct}%`, width: `${childPct}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <div className="flex flex-wrap justify-between gap-1 text-[10px] text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-primary" />
                         <span>Pai: 🪙 {goal.parentContribution}</span>
