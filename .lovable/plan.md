@@ -1,33 +1,30 @@
 
 
-## Plan: Student Profile Page (Teacher View)
+## Plano: Histórico de Metas Concluídas por Turma
 
-### Overview
-Create a new page at `/teacher/student/:studentId` showing an individual student's profile with their financial stats, tasks, achievements, and savings data — accessible by clicking a student row in any class card on TeacherClasses.
+### O que muda
 
-### Changes
+Adicionar um campo `completedAt` ao tipo `ClassGoal` e uma secção de "Histórico" em cada card de turma que lista as metas concluídas com a respetiva data.
 
-**1. New file: `src/pages/teacher/TeacherStudentProfile.tsx`**
+### Alterações em `src/pages/teacher/TeacherClasses.tsx`
 
-A dedicated profile page showing:
-- **Header**: Student avatar, name, level badge, KivaPoints
-- **Stats grid**: Balance, savings rate, tasks completed, KivaPoints
-- **Vaults section**: Student's active vaults with progress bars (from `mockVaults` filtered by childId)
-- **Tasks section**: Recent tasks (from `mockTasks` filtered by childId) with status indicators
-- **Achievements section**: Unlocked achievements (from `mockAchievements` filtered by childId)
-- **Transactions section**: Recent transaction history (from `mockTransactions` filtered by childId)
-- **Back button**: Navigate back to `/teacher/classes`
+1. **Tipo `ClassGoal`** — adicionar `completedAt?: string` ao tipo.
 
-Uses `useParams()` to get `studentId`, then looks up the student in `mockLeaderboard` + `mockChildren` for combined data. Follows existing page patterns (motion animations, Card components, gradient hero).
+2. **Dados iniciais** — sem alteração (metas iniciais não têm `completedAt`).
 
-**2. `src/App.tsx`**
+3. **Registar data de conclusão** — em `toggleGoalComplete` e `updateGoalCurrent`, quando `completed` passa a `true`, gravar `completedAt: new Date().toISOString()`. Quando desmarcada, limpar o campo.
 
-Add route: `<Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />`
+4. **Nova secção "Histórico"** — abaixo das metas ativas de cada turma, mostrar as metas com `completed === true` numa lista compacta com:
+   - Ícone da categoria + título
+   - Badge "Concluída" verde
+   - Data formatada (ex: "05/03/2026") usando `date-fns` `format`
+   - Botão de eliminar (já existente)
 
-**3. `src/pages/teacher/TeacherClasses.tsx`**
+5. **Import** — adicionar `import { format } from 'date-fns'` e ícone `History` do lucide-react.
 
-Wrap each student row in the class card with a `Link` (or `useNavigate` onClick) pointing to `/teacher/student/{student.childId}`. The row already has hover styles; add a click handler that navigates, keeping the remove button isolated with `stopPropagation`.
+### Resumo visual
 
-### Data Sources
-All data comes from existing mock arrays: `mockChildren`, `mockLeaderboard`, `mockTasks`, `mockTransactions`, `mockVaults`, `mockAchievements` — filtered by the student's `childId`.
+Cada card de turma terá:
+- Metas ativas (como está)
+- Separador "📜 Histórico" com lista das concluídas + datas
 
