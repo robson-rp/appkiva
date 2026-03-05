@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X } from 'lucide-react';
+import { Bell, CheckCheck, ListTodo, Target, Trophy, PiggyBank, Flame, X, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { mockNotifications } from '@/data/mock-data';
+import { mockNotifications, mockTeacherNotifications } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
 import { Notification } from '@/types/kivara';
 import {
@@ -53,13 +53,15 @@ const typeConfig: Record<Notification['type'], { icon: typeof Bell; bg: string }
   achievement: { icon: Trophy, bg: 'bg-[hsl(var(--kivara-light-green))]' },
   savings: { icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-purple))]' },
   streak: { icon: Flame, bg: 'bg-destructive/15' },
+  class: { icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
 };
 
 export function NotificationDropdown() {
   const { user } = useAuth();
   const isTeacher = user?.role === 'teacher';
   const streakNotifs = isTeacher ? [] : generateStreakNotifications();
-  const [notifications, setNotifications] = useState([...streakNotifs, ...mockNotifications]);
+  const baseNotifs = isTeacher ? mockTeacherNotifications : mockNotifications;
+  const [notifications, setNotifications] = useState([...streakNotifs, ...baseNotifs]);
   const [showBanner, setShowBanner] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
   const urgentNotif = notifications.find(n => n.urgent && !n.read);
