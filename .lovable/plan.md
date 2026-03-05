@@ -1,26 +1,27 @@
 
 
-## Plan: Add/Remove Students from Teacher Classes
+## Plan: Enhance "Nova Turma" Dialog Form
 
 ### Overview
-Add interactive student management to the TeacherClasses page: a multi-select student picker in the "Nova Turma" dialog and add/remove student actions on each class card. All state is local (mock data, no backend).
+Expand the existing "Nova Turma" dialog with additional fields to make it a complete classroom creation form, beyond the current name + grade + student picker.
 
 ### Changes
 
-**1. `src/pages/teacher/TeacherClasses.tsx`**
+**`src/pages/teacher/TeacherClasses.tsx`**
 
-- Convert `mockClassrooms` into local `useState` so additions/removals are reflected live.
-- **"Nova Turma" dialog**: Add a multi-select checklist of all available students (`mockLeaderboard`) with `Checkbox` components. On submit, create a new classroom object with the selected `studentIds`.
-- **Each class card**: Add two actions:
-  - **"Adicionar Aluno" button** (opens a Dialog/Popover with checkboxes of students NOT already in the class). Selecting and confirming adds them to `studentIds`.
-  - **Remove button per student row** (small `X` or `Trash2` icon on each student item). Clicking removes that student from the class with an `AnimatePresence` exit animation.
-- Use `AlertDialog` for remove confirmation to prevent accidental removals.
-- Import `Checkbox`, `UserPlus`, `Trash2` from respective packages.
+Add new state variables and form fields to the dialog:
 
-**2. No other files need changes.** All UI components (`Dialog`, `Checkbox`, `AlertDialog`, `Button`) already exist. Mock data provides the student pool via `mockLeaderboard`.
+- **Descrição** — `Textarea` for a short class description/notes
+- **Disciplina** — `Select` dropdown with predefined subjects (Matemática, Português, Ciências, Educação Financeira, etc.)
+- **Horário** — `Input` for schedule info (e.g., "Seg/Qua 10h-11h")
+- **Ícone** — clickable emoji grid to pick the class icon instead of random assignment
 
-### UI Details
-- Student picker: scrollable list with avatar + name + checkbox, inside a `DialogContent`.
-- Remove action: small ghost/destructive icon button on each student row's right side.
-- Toast confirmation on add/remove via `sonner`.
+Store these in new state variables (`newClassDesc`, `newClassSubject`, `newClassSchedule`, `newClassIcon`). Include the extra fields in the created classroom object (extend the local type inline or add optional fields).
+
+Add a search/filter `Input` above the student list to quickly find students by name.
+
+Import `Textarea` and `Select` components (already available in the project).
+
+### UI Layout
+The dialog will use a two-column grid for shorter fields (grade + subject, schedule + icon) and full-width for name, description, and student picker. Reset all fields on dialog close.
 
