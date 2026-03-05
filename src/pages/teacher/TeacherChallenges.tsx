@@ -164,11 +164,12 @@ export default function TeacherChallenges() {
     const status = statusConfig[challenge.status];
     const StatusIcon = status.icon;
     const canEdit = challenge.status !== 'completed';
+    const isCritical = challenge.status === 'active' && pct >= 80;
 
     return (
       <motion.div key={challenge.id} variants={item}>
-        <Card className="border-border/50 overflow-hidden hover:shadow-lg transition-all duration-300">
-          <div className="h-0.5 bg-gradient-to-r from-primary to-secondary" />
+        <Card className={`border-border/50 overflow-hidden hover:shadow-lg transition-all duration-300 ${isCritical ? 'ring-2 ring-destructive/40 border-destructive/30' : ''}`}>
+          <div className={`h-0.5 ${isCritical ? 'bg-gradient-to-r from-destructive to-destructive/60' : 'bg-gradient-to-r from-primary to-secondary'}`} />
           <CardContent className="p-5 space-y-4">
             <div className="flex items-start justify-between flex-wrap gap-2">
               <div className="flex items-center gap-3">
@@ -180,7 +181,10 @@ export default function TeacherChallenges() {
                   {challenge.icon}
                 </motion.div>
                 <div>
-                  <h3 className="font-display font-bold text-base">{challenge.title}</h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-display font-bold text-base">{challenge.title}</h3>
+                    {isCritical && <AlertTriangle className="h-4 w-4 text-destructive animate-pulse" />}
+                  </div>
                   <p className="text-[11px] text-muted-foreground">{classroom?.name} · {typeLabels[challenge.type]}</p>
                 </div>
               </div>
