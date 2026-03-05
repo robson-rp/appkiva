@@ -2,3 +2,6 @@ project_id = "rflgjdpfisfuyowtrcil"
 
 [functions.create-transaction]
 verify_jwt = false
+
+[functions.claim-reward]
+verify_jwt = false
