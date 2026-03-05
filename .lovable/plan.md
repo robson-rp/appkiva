@@ -36,11 +36,18 @@ O projecto KIVARA é actualmente um **frontend React com dados mock** (sem backe
 7. 🔲 Implementar auth real (substituir AuthContext mock)
 8. 🔲 Migrar mock data para tabelas reais
 
-**Fase B — Ledger & Wallets**
-1. Tabela `ledger_entries` (double-entry: debit/credit, append-only)
-2. Views derivadas para saldos (nunca campo directo)
-3. Edge functions para transacções (validação server-side)
-4. Separação virtual wallet vs preparação para real wallet
+**Fase B — Ledger & Wallets ✅ CONCLUÍDA**
+1. ✅ Tabela `wallets` com tipo (virtual/real) e moeda (KVC)
+2. ✅ Tabela `ledger_entries` (double-entry: debit/credit, append-only, imutável)
+3. ✅ Enum `ledger_entry_type` com 11 tipos de transacção
+4. ✅ View `wallet_balances` — saldos derivados do ledger (nunca campo directo)
+5. ✅ View `wallet_transactions` — transacções com direcção (credit/debit)
+6. ✅ Função `get_profile_balance()` — SECURITY DEFINER
+7. ✅ Trigger auto-create wallet on profile creation
+8. ✅ RLS policies por household (append-only, sem UPDATE/DELETE)
+9. ✅ Hook `useWalletBalance()` e `useWalletTransactions()` no frontend
+10. 🔲 Edge function para criar transacções com validação server-side
+11. 🔲 Migrar componentes de mock balance para ledger real
 
 **Fase C — Policy Engine & Workflows**
 1. Tabela `policies` + `policy_assignments`
