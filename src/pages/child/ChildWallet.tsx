@@ -38,7 +38,7 @@ export default function ChildWallet() {
     const amount = parseInt(donateAmount);
     if (!selectedCause || !amount || amount <= 0) return;
     const cause = mockDonationCauses.find((c) => c.id === selectedCause);
-    toast({ title: 'Doação realizada! 💜', description: `Doaste ${amount} KivaraCoins para "${cause?.name}". Obrigado!` });
+    toast({ title: 'Doação realizada! 💜', description: `Doaste ${amount} KivaCoins para "${cause?.name}". Obrigado!` });
     setSelectedCause(null);
     setDonateAmount('');
   };
@@ -69,7 +69,7 @@ export default function ChildWallet() {
                   >
                     {child.balance}
                   </motion.span>
-                  <span className="text-lg text-white/70 font-display font-medium">KivaraCoins</span>
+                  <span className="text-lg text-white/70 font-display font-medium">KivaCoins</span>
                 </div>
               </div>
               <motion.div
@@ -142,7 +142,7 @@ export default function ChildWallet() {
                       ))}
                     </div>
                     <div className="space-y-2">
-                      <p className="text-xs font-medium">Quanto queres doar? (KivaraCoins)</p>
+                      <p className="text-xs font-medium">Quanto queres doar? (KivaCoins)</p>
                       <Input
                         type="number"
                         placeholder="Ex: 10"
