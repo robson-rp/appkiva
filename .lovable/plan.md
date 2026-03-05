@@ -1,30 +1,44 @@
 
 
-## Plano: Histórico de Metas Concluídas por Turma
+## Plano: Exportar Relatório Comparativo em PDF
 
-### O que muda
+### Abordagem
 
-Adicionar um campo `completedAt` ao tipo `ClassGoal` e uma secção de "Histórico" em cada card de turma que lista as metas concluídas com a respetiva data.
+Usar a biblioteca **jsPDF** + **jspdf-autotable** para gerar um PDF client-side com os dados comparativos das turmas e as dicas pedagógicas. Sem necessidade de backend.
 
-### Alterações em `src/pages/teacher/TeacherClasses.tsx`
+### Alterações
 
-1. **Tipo `ClassGoal`** — adicionar `completedAt?: string` ao tipo.
+**1. Instalar dependência**
+- `jspdf` (geração de PDF)
+- `jspdf-autotable` (tabelas formatadas no PDF)
 
-2. **Dados iniciais** — sem alteração (metas iniciais não têm `completedAt`).
+**2. `src/pages/teacher/TeacherDashboard.tsx`**
 
-3. **Registar data de conclusão** — em `toggleGoalComplete` e `updateGoalCurrent`, quando `completed` passa a `true`, gravar `completedAt: new Date().toISOString()`. Quando desmarcada, limpar o campo.
+- Importar `jsPDF` e `autoTable`
+- Importar ícone `Download` do lucide-react
+- Importar `Button` de `@/components/ui/button`
+- Adicionar função `exportPDF()` que:
+  - Cria documento A4 com título "Relatório Comparativo entre Turmas"
+  - Adiciona subtítulo com data atual e nome da escola
+  - Gera tabela com colunas: Turma, Alunos, Poupança (%), Pontos (média), Tarefas (média) usando `autoTable`
+  - Adiciona secção de dicas pedagógicas por turma (texto corrido)
+  - Faz download do ficheiro `relatorio-turmas-YYYY-MM-DD.pdf`
+- Adicionar botão "Exportar PDF" no header do card "Comparativo entre Turmas" (ao lado do título), usando o `Button` com variante `outline` e ícone `Download`
 
-4. **Nova secção "Histórico"** — abaixo das metas ativas de cada turma, mostrar as metas com `completed === true` numa lista compacta com:
-   - Ícone da categoria + título
-   - Badge "Concluída" verde
-   - Data formatada (ex: "05/03/2026") usando `date-fns` `format`
-   - Botão de eliminar (já existente)
+### Conteúdo do PDF
 
-5. **Import** — adicionar `import { format } from 'date-fns'` e ícone `History` do lucide-react.
-
-### Resumo visual
-
-Cada card de turma terá:
-- Metas ativas (como está)
-- Separador "📜 Histórico" com lista das concluídas + datas
+```text
+┌─────────────────────────────────────┐
+│  Relatório Comparativo entre Turmas │
+│  Escola Sol Nascente · 05/03/2026   │
+├─────────────────────────────────────┤
+│  Turma │ Alunos │ Poup. │ Pts │ Tar │
+│  ───── │ ────── │ ───── │ ─── │ ─── │
+│  ...   │  ...   │  ...  │ ... │ ... │
+├─────────────────────────────────────┤
+│  Dicas Pedagógicas                  │
+│  🌟 Turma A: Excelente poupança...  │
+│  ⚠️ Turma B: Poupança baixa...      │
+└─────────────────────────────────────┘
+```
 
