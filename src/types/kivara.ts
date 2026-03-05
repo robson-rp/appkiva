@@ -288,3 +288,56 @@ export interface ClassLeaderboard {
   tasksCompleted: number;
   savingsRate: number;
 }
+
+// ── Educational Engine ──
+
+export type LessonDifficulty = 'beginner' | 'intermediate' | 'advanced';
+export type LessonCategory = 'saving' | 'budgeting' | 'investing' | 'earning' | 'donating';
+
+export interface QuizOption {
+  id: string;
+  text: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  options: QuizOption[];
+  correctOptionId: string;
+  explanation: string;
+}
+
+export interface LessonBlock {
+  type: 'text' | 'tip' | 'example' | 'highlight';
+  content: string;
+  icon?: string;
+}
+
+export interface MicroLesson {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: LessonCategory;
+  difficulty: LessonDifficulty;
+  blocks: LessonBlock[];
+  quiz: QuizQuestion[];
+  kivaPointsReward: number;
+  estimatedMinutes: number;
+  completed?: boolean;
+  score?: number;
+}
+
+export const LESSON_CATEGORIES: Record<LessonCategory, { label: string; icon: string; color: string }> = {
+  saving: { label: 'Poupança', icon: '🐷', color: 'hsl(var(--chart-3))' },
+  budgeting: { label: 'Orçamento', icon: '📊', color: 'hsl(var(--chart-2))' },
+  investing: { label: 'Investimento', icon: '📈', color: 'hsl(var(--chart-4))' },
+  earning: { label: 'Ganhar', icon: '💰', color: 'hsl(var(--chart-1))' },
+  donating: { label: 'Doar', icon: '🤝', color: 'hsl(var(--chart-5))' },
+};
+
+export const DIFFICULTY_CONFIG: Record<LessonDifficulty, { label: string; color: string }> = {
+  beginner: { label: 'Iniciante', color: 'bg-chart-3/15 text-chart-3' },
+  intermediate: { label: 'Intermédio', color: 'bg-chart-2/15 text-chart-2' },
+  advanced: { label: 'Avançado', color: 'bg-chart-1/15 text-chart-1' },
+};
