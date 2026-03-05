@@ -2,26 +2,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { mockChildren, mockTasks, mockTransactions, mockVaults } from '@/data/mock-data';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart,
+  PieChart, Pie, Cell, Area, AreaChart,
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, PiggyBank, ListTodo, Lightbulb, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, Lightbulb } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
+const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 const COLORS = {
   green: 'hsl(160, 54%, 40%)',
   gold: 'hsl(39, 89%, 57%)',
   blue: 'hsl(214, 64%, 33%)',
   red: 'hsl(0, 72%, 55%)',
-  lightGreen: 'hsl(160, 50%, 93%)',
-  lightBlue: 'hsl(214, 60%, 95%)',
-  lightGold: 'hsl(39, 85%, 93%)',
 };
 
-// Weekly trend mock
 const weeklyTrend = [
   { week: 'Sem 1', ganho: 45, gasto: 20, poupado: 25 },
   { week: 'Sem 2', ganho: 70, gasto: 35, poupado: 35 },
@@ -55,7 +51,7 @@ export default function ParentReports() {
     borderRadius: '12px',
     padding: '8px 12px',
     fontSize: '12px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
   };
 
   return (
@@ -65,8 +61,9 @@ export default function ParentReports() {
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 left-1/2 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
-          <h1 className="font-display text-2xl font-bold">Relatórios</h1>
-          <p className="text-sm text-primary-foreground/70 mt-1">Acompanha o progresso financeiro da família</p>
+          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Análise</p>
+          <h1 className="font-display text-2xl font-bold mt-1">Relatórios</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">Acompanha o progresso financeiro da família</p>
         </div>
       </motion.div>
 
@@ -78,10 +75,11 @@ export default function ParentReports() {
           { label: 'Total Poupado', value: totalSaved, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-blue))]', color: 'text-primary' },
           { label: 'Taxa Poupança', value: `${savingsRate}%`, icon: ArrowUpRight, bg: 'bg-[hsl(var(--kivara-light-gold))]', color: 'text-accent-foreground' },
         ].map((s) => (
-          <motion.div key={s.label} variants={item}>
-            <Card className="border-border/50 hover:shadow-md transition-all duration-200">
+          <motion.div key={s.label} variants={item} whileHover={{ scale: 1.03, y: -2 }}>
+            <Card className="border-border/50 hover:shadow-kivara transition-all duration-300 overflow-hidden">
+              <div className="h-0.5 gradient-kivara" />
               <CardContent className="p-4">
-                <div className={`${s.bg} rounded-xl p-2 w-fit mb-2`}>
+                <div className={`${s.bg} rounded-2xl p-2.5 w-fit mb-2`}>
                   <s.icon className={`h-4 w-4 ${s.color}`} />
                 </div>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
@@ -101,7 +99,9 @@ export default function ParentReports() {
           <Card className="border-border/50 overflow-hidden">
             <div className="h-1 gradient-kivara" />
             <CardContent className="p-5">
-              <h3 className="font-display font-bold text-sm mb-4">📈 Tendência Semanal</h3>
+              <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="text-lg">📈</span> Tendência Semanal
+              </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={weeklyTrend}>
                   <defs>
@@ -120,7 +120,6 @@ export default function ParentReports() {
                   <Tooltip contentStyle={customTooltipStyle} />
                   <Area type="monotone" dataKey="ganho" stroke={COLORS.green} fill="url(#gradGanho)" strokeWidth={2} />
                   <Area type="monotone" dataKey="poupado" stroke={COLORS.blue} fill="url(#gradPoupado)" strokeWidth={2} />
-                  <Line type="monotone" dataKey="gasto" stroke={COLORS.red} strokeWidth={2} strokeDasharray="5 5" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
               <div className="flex justify-center gap-4 mt-3">
@@ -140,7 +139,9 @@ export default function ParentReports() {
           <Card className="border-border/50 overflow-hidden">
             <div className="h-1 gradient-gold" />
             <CardContent className="p-5">
-              <h3 className="font-display font-bold text-sm mb-4">🍩 Distribuição Financeira</h3>
+              <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="text-lg">🍩</span> Distribuição Financeira
+              </h3>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" strokeWidth={0}>
@@ -167,12 +168,13 @@ export default function ParentReports() {
 
       {/* Tasks Bar Chart + Child Progress */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid md:grid-cols-2 gap-4">
-        {/* Bar Chart */}
         <motion.div variants={item}>
           <Card className="border-border/50 overflow-hidden">
             <div className="h-1 bg-secondary" />
             <CardContent className="p-5">
-              <h3 className="font-display font-bold text-sm mb-4">📊 Tarefas por Criança</h3>
+              <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
+                <span className="text-lg">📊</span> Tarefas por Criança
+              </h3>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={taskData} barGap={2}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(210, 20%, 92%)" />
@@ -196,12 +198,13 @@ export default function ParentReports() {
           </Card>
         </motion.div>
 
-        {/* Child Progress Cards */}
         <motion.div variants={item}>
           <Card className="border-border/50 overflow-hidden">
             <div className="h-1 bg-accent" />
             <CardContent className="p-5 space-y-4">
-              <h3 className="font-display font-bold text-sm">🎯 Progresso por Criança</h3>
+              <h3 className="font-display font-bold text-sm flex items-center gap-2">
+                <span className="text-lg">🎯</span> Progresso por Criança
+              </h3>
               {mockChildren.map((child) => {
                 const childVaults = mockVaults.filter(v => v.childId === child.id);
                 const totalTarget = childVaults.reduce((s, v) => s + v.targetAmount, 0);
@@ -212,9 +215,9 @@ export default function ParentReports() {
                 const taskProgress = childTasks.length > 0 ? Math.round((completedTasks / childTasks.length) * 100) : 0;
 
                 return (
-                  <div key={child.id} className="bg-muted/30 rounded-2xl p-4 space-y-3">
+                  <div key={child.id} className="bg-muted/30 rounded-2xl p-4 space-y-3 border border-border/30">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-xl">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-xl shadow-sm">
                         {child.avatar}
                       </div>
                       <div className="flex-1">
@@ -245,17 +248,17 @@ export default function ParentReports() {
       </motion.div>
 
       {/* Insight Card */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+      <motion.div variants={item}>
         <Card className="gradient-kivara text-primary-foreground border-0 overflow-hidden relative">
           <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
           <CardContent className="p-6 relative">
             <div className="flex items-start gap-3">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2.5 shrink-0">
+              <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-3 shrink-0">
                 <Lightbulb className="h-5 w-5" />
               </div>
               <div>
                 <p className="font-display font-bold text-lg mb-1">Insight da Semana</p>
-                <p className="text-primary-foreground/80 text-sm leading-relaxed">
+                <p className="text-primary-foreground/70 text-sm leading-relaxed">
                   A Ana poupou 40% das moedas ganhas este mês — excelente! 🎉 O Pedro precisa de mais incentivos para poupar. Considere criar uma meta de poupança para ele ou adicionar tarefas com recompensas maiores.
                 </p>
               </div>
