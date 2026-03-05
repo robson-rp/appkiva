@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } 
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function TeacherClasses() {
+  const navigate = useNavigate();
   const [classrooms, setClassrooms] = useState(() => mockClassrooms.map(c => ({ ...c })));
   const [newClassName, setNewClassName] = useState('');
   const [newClassGrade, setNewClassGrade] = useState('');
@@ -318,8 +320,8 @@ export default function TeacherClasses() {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
-                          whileHover={{ x: 4 }}
-                          className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20 hover:bg-muted/50 transition-all"
+                          className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20 hover:bg-muted/50 transition-all cursor-pointer"
+                          onClick={() => navigate(`/teacher/student/${student.childId}`)}
                         >
                           <span className="text-lg">{student.avatar}</span>
                           <div className="flex-1 min-w-0">
@@ -335,7 +337,7 @@ export default function TeacherClasses() {
                           </div>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg shrink-0">
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg shrink-0" onClick={e => e.stopPropagation()}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
