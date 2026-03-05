@@ -1,0 +1,114 @@
+export type UserRole = 'parent' | 'child';
+
+export interface User {
+  id: string;
+  name: string;
+  email?: string;
+  role: UserRole;
+  avatar: string;
+  familyId: string;
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  username: string;
+  pin: string;
+  avatar: string;
+  parentId: string;
+  familyId: string;
+  balance: number;
+  kivaPoints: number;
+  level: Level;
+  weeklyAllowance: number;
+}
+
+export type Level = 'apprentice' | 'saver' | 'planner' | 'investor' | 'master';
+
+export const LEVEL_CONFIG: Record<Level, { label: string; minPoints: number; color: string }> = {
+  apprentice: { label: 'Aprendiz', minPoints: 0, color: 'kivara-blue' },
+  saver: { label: 'Guardador', minPoints: 100, color: 'kivara-green' },
+  planner: { label: 'Planeador', minPoints: 300, color: 'kivara-gold' },
+  investor: { label: 'Investidor', minPoints: 600, color: 'kivara-purple' },
+  master: { label: 'Mestre', minPoints: 1000, color: 'kivara-pink' },
+};
+
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'approved';
+export type TaskCategory = 'cleaning' | 'studying' | 'helping' | 'other';
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  reward: number;
+  category: TaskCategory;
+  status: TaskStatus;
+  childId: string;
+  parentId: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export type TransactionType = 'earned' | 'spent' | 'saved' | 'allowance';
+
+export interface Transaction {
+  id: string;
+  childId: string;
+  amount: number;
+  type: TransactionType;
+  description: string;
+  date: string;
+}
+
+export interface Vault {
+  id: string;
+  childId: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  icon: string;
+  createdAt: string;
+}
+
+export type MissionStatus = 'available' | 'in_progress' | 'completed';
+
+export interface Mission {
+  id: string;
+  title: string;
+  description: string;
+  type: 'saving' | 'budgeting' | 'planning';
+  targetAmount?: number;
+  reward: number;
+  kivaPointsReward: number;
+  status: MissionStatus;
+  childId?: string;
+  week: number;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlockedAt?: string;
+  childId?: string;
+}
+
+export interface StoreItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: 'avatar' | 'accessory' | 'badge' | 'digital';
+  image: string;
+  owned?: boolean;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'task' | 'mission' | 'achievement' | 'savings';
+  read: boolean;
+  date: string;
+}
