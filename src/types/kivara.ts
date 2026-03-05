@@ -372,3 +372,31 @@ export interface CollectibleBadge {
   unlockedAt?: string;
   childId?: string;
 }
+
+// ── Daily Streaks ──
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  totalActiveDays: number;
+  lastActiveDate: string;
+  activeDates: string[]; // ISO date strings
+  streakRewards: StreakReward[];
+}
+
+export interface StreakReward {
+  days: number;
+  label: string;
+  icon: string;
+  kivaPoints: number;
+  claimed: boolean;
+}
+
+export const STREAK_MILESTONES: StreakReward[] = [
+  { days: 3, label: '3 Dias Seguidos', icon: '🔥', kivaPoints: 10, claimed: false },
+  { days: 7, label: 'Semana Completa', icon: '⭐', kivaPoints: 25, claimed: false },
+  { days: 14, label: '2 Semanas', icon: '💪', kivaPoints: 50, claimed: false },
+  { days: 30, label: 'Mês Inteiro', icon: '🏆', kivaPoints: 100, claimed: false },
+  { days: 60, label: '2 Meses', icon: '💎', kivaPoints: 200, claimed: false },
+  { days: 100, label: 'Centenário', icon: '👑', kivaPoints: 500, claimed: false },
+];
