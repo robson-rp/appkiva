@@ -25,21 +25,21 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[35%] h-[60%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-6 md:p-8">
+          <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Modo Escolar</p>
                   <span className="text-[10px] bg-white/20 text-primary-foreground px-2 py-0.5 rounded-lg font-display font-semibold">BETA</span>
                 </div>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">
                   Olá, {user?.name}! 📚
                 </h1>
                 <p className="text-primary-foreground/60 text-sm max-w-md">
@@ -56,7 +56,7 @@ export default function TeacherDashboard() {
       </motion.div>
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <motion.div variants={item} className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {stats.map((stat) => (
           <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
@@ -64,19 +64,19 @@ export default function TeacherDashboard() {
               onClick={() => stat.to && navigate(stat.to)}
             >
               <div className="h-0.5 bg-gradient-to-r from-primary to-secondary" />
-              <CardContent className="p-4">
-                <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-3`}>
-                  <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+              <CardContent className="p-3 sm:p-4">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-2 sm:mb-3`}>
+                  <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.iconColor}`} />
                 </div>
-                <p className="font-display text-2xl font-bold">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">{stat.label}</p>
+                <p className="font-display text-xl sm:text-2xl font-bold">{stat.value}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">{stat.label}</p>
               </CardContent>
             </Card>
           </motion.div>
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
         {/* Active Challenges */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full overflow-hidden">

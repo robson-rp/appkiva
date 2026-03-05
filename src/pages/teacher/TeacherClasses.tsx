@@ -13,17 +13,17 @@ const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transiti
 
 export default function TeacherClasses() {
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-6 md:p-8">
+          <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-2">
                 <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Gestão</p>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">As Minhas Turmas</h1>
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">As Minhas Turmas</h1>
                 <p className="text-primary-foreground/60 text-sm">Gere turmas e acompanha o progresso dos alunos</p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -76,7 +76,7 @@ export default function TeacherClasses() {
       </motion.div>
 
       {/* Classes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
         {mockClassrooms.map((classroom) => {
           const students = mockLeaderboard.filter(s =>
             classroom.studentIds.includes(s.childId)
