@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { mockNotifications, mockChildren } from '@/data/mock-data';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const bottomNavItems = [
   { title: 'Início', url: '/child', icon: Home },
@@ -67,8 +67,19 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="flex-1 p-4 pb-24 overflow-auto">{children}</main>
+      {/* Content with page transitions */}
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={location.pathname}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          className="flex-1 p-4 pb-24 overflow-auto"
+        >
+          {children}
+        </motion.main>
+      </AnimatePresence>
 
       {/* Premium Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40">
