@@ -2,20 +2,17 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements } from '@/data/mock-data';
+import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements, mockDonations } from '@/data/mock-data';
 import { Progress } from '@/components/ui/progress';
-import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight } from 'lucide-react';
+import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LEVEL_CONFIG } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } },
@@ -29,6 +26,20 @@ export default function ChildDashboard() {
   const recentTransactions = mockTransactions.filter((t) => t.childId === child.id).slice(0, 4);
   const unlockedAchievements = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
   const navigate = useNavigate();
+  const levelConfig = LEVEL_CONFIG[child.level];
+
+  // Rankings data
+  const rankings = mockChildren.map((c) => {
+    const childVaults = mockVaults.filter((v) => v.childId === c.id);
+    const totalSaved = childVaults.reduce((s, v) => s + v.currentAmount, 0);
+    const childDonations = mockDonations.filter((d) => d.childId === c.id);
+    const totalDonated = childDonations.reduce((s, d) => s + d.amount, 0);
+    return { ...c, totalSaved, totalDonated };
+  });
+
+  const bestSaver = [...rankings].sort((a, b) => b.totalSaved - a.totalSaved);
+  const bestDonor = [...rankings].sort((a, b) => b.totalDonated - a.totalDonated);
+  const bestPlanner = [...rankings].sort((a, b) => b.kivaPoints - a.kivaPoints);
 
   const stats = [
     { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/wallet' },
@@ -42,13 +53,8 @@ export default function ChildDashboard() {
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="space-y-5 max-w-2xl mx-auto pb-4"
-    >
-      {/* Hero Balance Card */}
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5 max-w-2xl mx-auto pb-4">
+      {/* Hero Balance Card with Avatar */}
       <motion.div variants={itemVariants}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
@@ -57,20 +63,34 @@ export default function ChildDashboard() {
           <CardContent className="relative z-10 p-6">
             <div className="flex justify-between items-start">
               <div className="space-y-3">
-                <p className="text-white/70 text-sm font-body">A tua carteira</p>
-                <div className="flex items-baseline gap-2">
-                  <motion.span
-                    key={child.balance}
-                    initial={{ scale: 1.2, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="font-display text-5xl font-bold text-white"
+                <div className="flex items-center gap-3">
+                  {/* Evolved Avatar */}
+                  <motion.div
+                    key={child.level}
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+                    className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg"
                   >
-                    {child.balance}
-                  </motion.span>
-                  <span className="text-2xl">🪙</span>
+                    {levelConfig.avatar}
+                  </motion.div>
+                  <div>
+                    <p className="text-white/70 text-sm font-body">A tua carteira</p>
+                    <div className="flex items-baseline gap-2">
+                      <motion.span
+                        key={child.balance}
+                        initial={{ scale: 1.2, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="font-display text-4xl font-bold text-white"
+                      >
+                        {child.balance}
+                      </motion.span>
+                      <span className="text-sm text-white/60 font-display">KivaraCoins</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="pt-1">
-                  <LevelBadge level={child.level} points={child.kivaPoints} showProgress />
+                  <LevelBadge level={child.level} points={child.kivaPoints} showProgress showAvatar={false} />
                 </div>
               </div>
               <motion.div
@@ -88,15 +108,8 @@ export default function ChildDashboard() {
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
         {stats.map((stat) => (
-          <motion.div
-            key={stat.label}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            <Card
-              className="cursor-pointer border border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden"
-              onClick={() => navigate(stat.to)}
-            >
+          <motion.div key={stat.label} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Card className="cursor-pointer border border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden" onClick={() => navigate(stat.to)}>
               <CardContent className="p-4 text-center relative">
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-40`} />
                 <div className="relative z-10">
@@ -110,6 +123,48 @@ export default function ChildDashboard() {
             </Card>
           </motion.div>
         ))}
+      </motion.div>
+
+      {/* Family Rankings */}
+      <motion.div variants={itemVariants}>
+        <Card className="border border-border/50 overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500" />
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-display flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
+                <Crown className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              Ranking Familiar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { title: '🏆 Poupador', data: bestSaver, metric: (c: any) => `${c.totalSaved} 🪙`, icon: PiggyBank },
+                { title: '🎯 Planeador', data: bestPlanner, metric: (c: any) => `${c.kivaPoints} pts`, icon: Target },
+                { title: '💜 Doador', data: bestDonor, metric: (c: any) => `${c.totalDonated} 🪙`, icon: Medal },
+              ].map((cat) => (
+                <motion.div
+                  key={cat.title}
+                  whileHover={{ scale: 1.03 }}
+                  className="bg-muted/40 rounded-xl p-3 text-center border border-border/30"
+                >
+                  <p className="text-[10px] font-display font-bold mb-2">{cat.title}</p>
+                  {cat.data.slice(0, 2).map((c, i) => (
+                    <div key={c.id} className={`flex items-center gap-1.5 justify-center mb-1 ${i === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      <span className="text-xs">{i === 0 ? '🥇' : '🥈'}</span>
+                      <span className="text-lg">{c.avatar}</span>
+                      <div className="text-left">
+                        <p className={`text-[10px] font-bold ${i === 0 ? '' : 'font-normal'}`}>{c.name}</p>
+                        <p className="text-[9px] text-muted-foreground">{cat.metric(c)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Active Tasks Preview */}
@@ -169,15 +224,25 @@ export default function ChildDashboard() {
             <CardContent className="space-y-3">
               {vaults.map((vault) => {
                 const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
+                const monthlyInterest = Math.round(vault.currentAmount * (vault.interestRate / 100));
                 return (
                   <div key={vault.id} className="space-y-1.5">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-semibold flex items-center gap-1.5">
                         <span className="text-base">{vault.icon}</span> {vault.name}
                       </span>
-                      <span className="text-xs text-muted-foreground font-display font-bold">
-                        {vault.currentAmount}/{vault.targetAmount} 🪙
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <motion.span
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="text-[10px] text-secondary font-display font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md"
+                        >
+                          +{monthlyInterest}/mês
+                        </motion.span>
+                        <span className="text-xs text-muted-foreground font-display font-bold">
+                          {vault.currentAmount}/{vault.targetAmount} 🪙
+                        </span>
+                      </div>
                     </div>
                     <div className="relative">
                       <Progress value={pct} className="h-3 rounded-full" />
@@ -242,11 +307,7 @@ export default function ChildDashboard() {
               </div>
               <div className="flex gap-3 overflow-x-auto pb-1">
                 {unlockedAchievements.map((ach) => (
-                  <motion.div
-                    key={ach.id}
-                    whileHover={{ scale: 1.05 }}
-                    className="flex-shrink-0 w-20 text-center"
-                  >
+                  <motion.div key={ach.id} whileHover={{ scale: 1.05 }} className="flex-shrink-0 w-20 text-center">
                     <div className="w-14 h-14 rounded-2xl bg-card shadow-sm flex items-center justify-center mx-auto mb-1 text-2xl">
                       {ach.icon}
                     </div>
