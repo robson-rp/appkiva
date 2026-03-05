@@ -22,6 +22,7 @@ const urgentChallenges = mockChallenges.filter(
   c => c.status === 'active' && (c.currentAmount / c.targetAmount) >= 0.5
 );
 const urgentChallengesCount = urgentChallenges.length;
+const hasCriticalChallenges = urgentChallenges.some(c => (c.currentAmount / c.targetAmount) >= 0.8);
 
 const navItems = [
   { title: 'Painel', url: '/teacher', icon: LayoutDashboard },
@@ -66,7 +67,7 @@ function TeacherSidebar() {
                         <HoverCard openDelay={150} closeDelay={100}>
                           <HoverCardTrigger asChild>
                             <button type="button" onClick={(e) => e.preventDefault()} className="ml-auto cursor-help">
-                              <Badge className="h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0">{item.badge}</Badge>
+                              <Badge className={`h-5 min-w-5 px-1.5 text-[10px] bg-destructive text-destructive-foreground border-0 ${hasCriticalChallenges ? 'animate-pulse' : ''}`}>{item.badge}</Badge>
                             </button>
                           </HoverCardTrigger>
                           <HoverCardContent side="right" className="w-56 p-3 space-y-1.5">
@@ -179,7 +180,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
                     >
                       <div className="relative p-2 rounded-xl">
                         {item.badge ? (
-                          <span className="absolute -top-0.5 -right-0.5 z-20 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold px-1">{item.badge}</span>
+                          <span className={`absolute -top-0.5 -right-0.5 z-20 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold px-1 ${hasCriticalChallenges ? 'animate-pulse' : ''}`}>{item.badge}</span>
                         ) : null}
                         {isActive && (
                           <motion.div
