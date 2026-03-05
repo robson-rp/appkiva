@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -104,7 +105,10 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                 <SidebarTrigger />
                 <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
               </div>
-              <NotificationDropdown />
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <NotificationDropdown />
+              </div>
             </div>
           </header>
           <AnimatePresence mode="wait">

@@ -5,6 +5,7 @@ import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockChildren } from '@/data/mock-data';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -48,6 +49,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95">
               <Trophy className="h-4.5 w-4.5 text-muted-foreground" />
             </NavLink>
+            <ThemeToggle />
             <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">
               <LogOut className="h-4 w-4" />
