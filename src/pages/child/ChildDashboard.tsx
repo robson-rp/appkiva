@@ -173,7 +173,7 @@ export default function ChildDashboard() {
       </motion.div>
 
       {/* Savings */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} data-onboarding="dreams">
         <ChildSavingsProgress vaults={vaults} />
       </motion.div>
 
