@@ -17,6 +17,12 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
   completed: { label: 'Concluído', variant: 'outline' },
 };
 
+const statusFlow: Record<string, string[]> = {
+  draft: ['active'],
+  active: ['completed'],
+  completed: [],
+};
+
 export default function PartnerChallenges() {
   const { data: challenges, isLoading } = useSponsoredChallenges();
   const deleteChallenge = useDeleteSponsoredChallenge();
