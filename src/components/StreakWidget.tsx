@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { useStreakData } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StreakWidgetProps {
   onClick?: () => void;
