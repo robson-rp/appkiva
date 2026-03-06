@@ -74,6 +74,19 @@ export default function ParentReports() {
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
 
+  if (!reportsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-3xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Relatórios Educativos"
+          description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Hero */}

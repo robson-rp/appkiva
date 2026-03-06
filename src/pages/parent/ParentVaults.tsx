@@ -121,6 +121,19 @@ export default function ParentVaults() {
     }
   };
 
+  if (!vaultsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-3xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Gestão de Cofres"
+          description="Gere os cofres de poupança dos teus filhos, configura taxas de juro e acompanha o progresso. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero */}

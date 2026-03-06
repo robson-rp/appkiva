@@ -136,6 +136,19 @@ export default function ChildVaults() {
 
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
 
+  if (!vaultsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Cofres de Poupança"
+          description="Poupa com metas, ganha juros e vê o teu dinheiro crescer. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Hero Card */}
