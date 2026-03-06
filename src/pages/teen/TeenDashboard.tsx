@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { mockTeens, mockTeenTransactions, mockVaults } from '@/data/mock-data';
+import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
+import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { mockStreakData } from '@/data/streaks-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { LEVEL_CONFIG } from '@/types/kivara';
@@ -11,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 export default function TeenDashboard() {
   const teen = mockTeens[0];
   const navigate = useNavigate();
+  const { data: realBudget } = useTeenBudget();
+  const monthlyBudget = realBudget && realBudget > 0 ? realBudget : teen.monthlyBudget;
   const levelConfig = LEVEL_CONFIG[teen.level];
   const nextLevel = Object.entries(LEVEL_CONFIG).find(([, v]) => v.minPoints > teen.kivaPoints);
   const progressToNext = nextLevel ? ((teen.kivaPoints - levelConfig.minPoints) / (nextLevel[1].minPoints - levelConfig.minPoints)) * 100 : 100;
@@ -18,7 +21,7 @@ export default function TeenDashboard() {
   const recentTx = mockTeenTransactions.slice(0, 5);
   const totalSpent = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
   const totalSaved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
-  const budgetUsed = (totalSpent / teen.monthlyBudget) * 100;
+  const budgetUsed = monthlyBudget > 0 ? (totalSpent / monthlyBudget) * 100 : 0;
 
   // Spending by category
   const categorySpend = mockTeenTransactions
@@ -79,11 +82,11 @@ export default function TeenDashboard() {
           <CardContent>
             <div className="flex justify-between text-xs text-muted-foreground mb-2">
               <span>{totalSpent} gasto</span>
-              <span>{teen.monthlyBudget} limite</span>
+              <span>{monthlyBudget} limite</span>
             </div>
             <Progress value={budgetUsed} className="h-3" />
             <p className="text-xs text-muted-foreground mt-2">
-              Resta <span className="font-bold text-foreground">{teen.monthlyBudget - totalSpent} 🪙</span> este mês
+              Resta <span className="font-bold text-foreground">{monthlyBudget - totalSpent} 🪙</span> este mês
             </p>
           </CardContent>
         </Card>
