@@ -45,7 +45,6 @@ export function TeenLayout({ children }: { children: ReactNode }) {
               <span className="text-sm">🪙</span>
               <span className="text-sm font-display font-bold text-accent-foreground">{teen.balance}</span>
             </div>
-            <RestartOnboardingButton />
             <ThemeToggle />
             <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">

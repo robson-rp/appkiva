@@ -144,7 +144,6 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <RestartOnboardingButton />
                 <ThemeToggle />
                 <NotificationDropdown />
                 {isMobile && (
