@@ -57,7 +57,7 @@ export default function Login() {
         }
       }
 
-      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : '/child';
+      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : selectedRole === 'admin' ? '/admin' : selectedRole === 'partner' ? '/partner' : '/child';
       navigate(dest);
     } catch {
       toast({ title: 'Erro inesperado', variant: 'destructive' });

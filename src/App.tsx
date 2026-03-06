@@ -92,6 +92,18 @@ function AppRoutes() {
     );
   }
 
+  if (user.role === 'partner') {
+    return (
+      <Routes>
+        <Route path="/partner" element={<PartnerLayout><PartnerDashboard /></PartnerLayout>} />
+        <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
+        <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
+        <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
+        <Route path="*" element={<Navigate to="/partner" replace />} />
+      </Routes>
+    );
+  }
+
   if (user.role === 'parent') {
     return (
       <Routes>

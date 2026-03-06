@@ -5,7 +5,7 @@ import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
-export type UserRole = 'parent' | 'child' | 'teen' | 'teacher' | 'admin';
+export type UserRole = 'parent' | 'child' | 'teen' | 'teacher' | 'admin' | 'partner';
 
 export interface KivaraUser {
   id: string;
