@@ -7,6 +7,8 @@ import {
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, Lightbulb, AlertTriangle, CheckCircle, Minus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -31,6 +33,7 @@ const periodComparison = [
 ];
 
 export default function ParentReports() {
+  const { allowed: reportsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const taskData = mockChildren.map((child) => ({
     name: child.name,
     completas: mockTasks.filter((t) => t.childId === child.id && (t.status === 'completed' || t.status === 'approved')).length,
@@ -70,6 +73,19 @@ export default function ParentReports() {
     if (trend === 'down') return <TrendingDown className="h-3 w-3 text-destructive" />;
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
+
+  if (!reportsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-3xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Relatórios Educativos"
+          description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

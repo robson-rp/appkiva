@@ -13,6 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -25,6 +27,7 @@ const priorityConfig = {
 
 export default function ChildDreams() {
   const { user } = useAuth();
+  const { allowed: dreamVaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.DREAM_VAULTS);
   const { data: dbDreams, isLoading } = useDreamVaults(user?.profileId);
   const createDream = useCreateDreamVault();
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -58,6 +61,19 @@ export default function ChildDreams() {
   // Set first expanded if not set
   if (!expandedId && dreams.length > 0 && dreams[0].parentComments.length > 0) {
     setExpandedId(dreams[0].id);
+  }
+
+  if (!dreamVaultsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Cofres de Sonhos"
+          description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
   }
 
   return (

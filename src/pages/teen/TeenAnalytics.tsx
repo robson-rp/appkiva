@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -20,6 +22,7 @@ const CHART_COLORS = [
 ];
 
 export default function TeenAnalytics() {
+  const { allowed: analyticsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const [summaryMonths, setSummaryMonths] = useState<3 | 6 | 12>(6);
   const { data: monthlySummary } = useMonthlySummary(summaryMonths);
   const { data: realBudget } = useTeenBudget();
@@ -87,6 +90,19 @@ export default function TeenAnalytics() {
       </text>
     );
   };
+
+  if (!analyticsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Relatórios Avançados"
+          description="Gráficos de despesa, taxa de poupança e análise por categorias. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

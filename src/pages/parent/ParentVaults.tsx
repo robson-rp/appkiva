@@ -15,11 +15,14 @@ import { useHouseholdVaults, useUpdateVaultInterestRate, useDeleteSavingsVault, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { createNotification } from '@/hooks/use-notifications';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ParentVaults() {
+  const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: children = [], isLoading: childrenLoading } = useChildren();
   const { data: allVaults = [], isLoading: vaultsLoading } = useHouseholdVaults();
   const updateRate = useUpdateVaultInterestRate();
@@ -117,6 +120,19 @@ export default function ParentVaults() {
       toast({ title: 'Erro', description: 'Não foi possível criar o cofre.', variant: 'destructive' });
     }
   };
+
+  if (!vaultsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-3xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Gestão de Cofres"
+          description="Gere os cofres de poupança dos teus filhos, configura taxas de juro e acompanha o progresso. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">

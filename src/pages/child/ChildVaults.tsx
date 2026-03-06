@@ -17,9 +17,12 @@ import { toast } from 'sonner';
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { VaultInterestHistory } from '@/components/VaultInterestHistory';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 export default function ChildVaults() {
   const { user } = useAuth();
+  const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: dbVaults, isLoading } = useSavingsVaults(user?.profileId);
   const { data: walletBalance } = useWalletBalance();
   const createVault = useCreateSavingsVault();
@@ -132,6 +135,19 @@ export default function ChildVaults() {
   };
 
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
+
+  if (!vaultsAllowed && !gateLoading) {
+    return (
+      <div className="max-w-2xl mx-auto py-12">
+        <UpgradePrompt
+          featureName="Cofres de Poupança"
+          description="Poupa com metas, ganha juros e vê o teu dinheiro crescer. Disponível no plano Família Premium."
+          currentTier={tierName}
+          variant="inline"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
