@@ -11,6 +11,7 @@ import { useChildren } from '@/hooks/use-children';
 import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -142,6 +143,13 @@ export default function ParentDashboard() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Children Streaks */}
+      {children.length > 0 && (
+        <motion.div variants={item}>
+          <ParentChildrenStreaks children={children} />
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
