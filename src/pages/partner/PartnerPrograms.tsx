@@ -1,24 +1,31 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Users, School, Search } from 'lucide-react';
+import { Users, School, Search, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-
-const programs = [
-  { id: '1', name: 'Escola Primária Sol', type: 'school' as const, children: 85, status: 'active' as const, since: 'Jan 2026' },
-  { id: '2', name: 'Família Ferreira', type: 'family' as const, children: 3, status: 'active' as const, since: 'Fev 2026' },
-  { id: '3', name: 'Colégio Esperança', type: 'school' as const, children: 120, status: 'active' as const, since: 'Nov 2025' },
-  { id: '4', name: 'Família Santos', type: 'family' as const, children: 2, status: 'active' as const, since: 'Mar 2026' },
-  { id: '5', name: 'Escola Básica Norte', type: 'school' as const, children: 65, status: 'pending' as const, since: 'Mar 2026' },
-  { id: '6', name: 'Família Costa', type: 'family' as const, children: 4, status: 'active' as const, since: 'Dez 2025' },
-];
+import { usePartnerPrograms } from '@/hooks/use-partner-data';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 export default function PartnerPrograms() {
   const [search, setSearch] = useState('');
+  const { data: programs, isLoading } = usePartnerPrograms();
 
-  const filtered = programs.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+  const filtered = (programs ?? []).filter(p =>
+    p.program_name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const schools = filtered.filter(p => p.program_type === 'school');
+  const families = filtered.filter(p => p.program_type === 'family');
+  const totalChildren = filtered.reduce((sum, p) => sum + p.children_count, 0);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -43,23 +50,29 @@ export default function PartnerPrograms() {
             <CardContent className="p-5">
               <div className="flex items-start justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                  {prog.type === 'school' ? (
+                  {prog.program_type === 'school' ? (
                     <School className="h-5 w-5 text-chart-3" />
                   ) : (
                     <Users className="h-5 w-5 text-primary" />
                   )}
                 </div>
                 <Badge variant={prog.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
-                  {prog.status === 'active' ? 'Activo' : 'Pendente'}
+                  {prog.status === 'active' ? 'Activo' : prog.status === 'pending' ? 'Pendente' : 'Inactivo'}
                 </Badge>
               </div>
-              <h3 className="font-display font-bold text-foreground">{prog.name}</h3>
+              <h3 className="font-display font-bold text-foreground">{prog.program_name}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {prog.children} crianças • Desde {prog.since}
+                {prog.children_count} crianças • Desde {format(new Date(prog.started_at), 'MMM yyyy', { locale: pt })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Investimento: €{Number(prog.investment_amount).toLocaleString()}
               </p>
             </CardContent>
           </Card>
         ))}
+        {filtered.length === 0 && (
+          <p className="text-sm text-muted-foreground col-span-3 text-center py-8">Nenhum programa encontrado</p>
+        )}
       </div>
 
       <Card className="rounded-2xl border-border/50">
@@ -69,21 +82,15 @@ export default function PartnerPrograms() {
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="font-display text-2xl font-bold text-foreground">
-                {programs.filter(p => p.type === 'school').length}
-              </p>
+              <p className="font-display text-2xl font-bold text-foreground">{schools.length}</p>
               <p className="text-xs text-muted-foreground">Escolas</p>
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-foreground">
-                {programs.filter(p => p.type === 'family').length}
-              </p>
+              <p className="font-display text-2xl font-bold text-foreground">{families.length}</p>
               <p className="text-xs text-muted-foreground">Famílias</p>
             </div>
             <div>
-              <p className="font-display text-2xl font-bold text-foreground">
-                {programs.reduce((sum, p) => sum + p.children, 0)}
-              </p>
+              <p className="font-display text-2xl font-bold text-foreground">{totalChildren}</p>
               <p className="text-xs text-muted-foreground">Total Crianças</p>
             </div>
           </div>

@@ -1,24 +1,39 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, School, TrendingUp, Trophy, ArrowUpRight } from 'lucide-react';
+import { Users, School, TrendingUp, Trophy, ArrowUpRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-
-const kpis = [
-  { label: 'Famílias Patrocinadas', value: 48, icon: Users, change: '+12%', color: 'text-primary' },
-  { label: 'Escolas Associadas', value: 6, icon: School, change: '+2', color: 'text-chart-3' },
-  { label: 'Crianças Impactadas', value: 312, icon: Users, change: '+8%', color: 'text-secondary' },
-  { label: 'Desafios Activos', value: 5, icon: Trophy, change: '3 novos', color: 'text-accent-foreground' },
-];
-
-const recentActivity = [
-  { text: 'Escola Primária Sol concluiu o desafio "Poupar para o Futuro"', time: '2h atrás' },
-  { text: '15 novas famílias aderiram ao programa', time: '1 dia atrás' },
-  { text: 'Relatório mensal de Fevereiro gerado', time: '3 dias atrás' },
-  { text: 'Desafio "Mercado Escolar" lançado em 3 escolas', time: '5 dias atrás' },
-];
+import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
 
 export default function PartnerDashboard() {
   const { user } = useAuth();
+  const { data: programs, isLoading: loadingPrograms } = usePartnerPrograms();
+  const { data: challenges, isLoading: loadingChallenges } = useSponsoredChallenges();
+
+  const isLoading = loadingPrograms || loadingChallenges;
+
+  const totalFamilies = programs?.filter(p => p.program_type === 'family' && p.status === 'active').length ?? 0;
+  const totalSchools = programs?.filter(p => p.program_type === 'school' && p.status === 'active').length ?? 0;
+  const totalChildren = programs?.reduce((sum, p) => sum + p.children_count, 0) ?? 0;
+  const activeChallenges = challenges?.filter(c => c.status === 'active').length ?? 0;
+  const totalInvestment = programs?.reduce((sum, p) => sum + Number(p.investment_amount), 0) ?? 0;
+  const avgCompletion = challenges?.length
+    ? Math.round(challenges.filter(c => c.status !== 'draft').reduce((sum, c) => sum + Number(c.completion_rate), 0) / challenges.filter(c => c.status !== 'draft').length)
+    : 0;
+
+  const kpis = [
+    { label: 'Famílias Patrocinadas', value: totalFamilies, icon: Users, color: 'text-primary' },
+    { label: 'Escolas Associadas', value: totalSchools, icon: School, color: 'text-chart-3' },
+    { label: 'Crianças Impactadas', value: totalChildren, icon: Users, color: 'text-secondary' },
+    { label: 'Desafios Activos', value: activeChallenges, icon: Trophy, color: 'text-accent-foreground' },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -34,13 +49,9 @@ export default function PartnerDashboard() {
           <Card key={kpi.label} className="rounded-2xl border-border/50">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center`}>
+                <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                   <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
                 </div>
-                <Badge variant="secondary" className="text-[10px] font-semibold gap-1">
-                  <ArrowUpRight className="h-3 w-3" />
-                  {kpi.change}
-                </Badge>
               </div>
               <p className="font-display text-2xl font-bold text-foreground">{kpi.value}</p>
               <p className="text-xs text-muted-foreground mt-1">{kpi.label}</p>
@@ -59,20 +70,20 @@ export default function PartnerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <p className="font-display text-4xl font-bold text-foreground">€12.450</p>
+              <p className="font-display text-4xl font-bold text-foreground">€{totalInvestment.toLocaleString()}</p>
               <p className="text-sm text-muted-foreground mt-2">Investimento acumulado no programa</p>
               <div className="flex justify-center gap-6 mt-6 text-sm">
                 <div>
-                  <p className="font-bold text-foreground">€2.100</p>
-                  <p className="text-muted-foreground text-xs">Este mês</p>
+                  <p className="font-bold text-foreground">{programs?.length ?? 0}</p>
+                  <p className="text-muted-foreground text-xs">Programas</p>
                 </div>
                 <div>
-                  <p className="font-bold text-foreground">92%</p>
-                  <p className="text-muted-foreground text-xs">Taxa de engajamento</p>
+                  <p className="font-bold text-foreground">{avgCompletion}%</p>
+                  <p className="text-muted-foreground text-xs">Taxa de conclusão</p>
                 </div>
                 <div>
-                  <p className="font-bold text-foreground">4.8/5</p>
-                  <p className="text-muted-foreground text-xs">Satisfação</p>
+                  <p className="font-bold text-foreground">{challenges?.length ?? 0}</p>
+                  <p className="text-muted-foreground text-xs">Total desafios</p>
                 </div>
               </div>
             </div>
@@ -81,19 +92,24 @@ export default function PartnerDashboard() {
 
         <Card className="rounded-2xl border-border/50">
           <CardHeader>
-            <CardTitle className="font-display text-lg">Actividade Recente</CardTitle>
+            <CardTitle className="font-display text-lg">Programas Recentes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((item, i) => (
-                <div key={i} className="flex items-start gap-3">
+              {programs?.slice(0, 4).map((prog) => (
+                <div key={prog.id} className="flex items-start gap-3">
                   <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                   <div>
-                    <p className="text-sm text-foreground">{item.text}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
+                    <p className="text-sm text-foreground">{prog.program_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {prog.children_count} crianças • {prog.program_type === 'school' ? 'Escola' : 'Família'}
+                    </p>
                   </div>
                 </div>
               ))}
+              {(!programs || programs.length === 0) && (
+                <p className="text-sm text-muted-foreground text-center py-4">Nenhum programa registado</p>
+              )}
             </div>
           </CardContent>
         </Card>

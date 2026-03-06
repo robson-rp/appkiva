@@ -1,25 +1,59 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, TrendingUp, BookOpen, Trophy, Download } from 'lucide-react';
+import { BarChart3, TrendingUp, BookOpen, Trophy, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-const monthlyData = [
-  { month: 'Set', families: 20, children: 110 },
-  { month: 'Out', families: 28, children: 165 },
-  { month: 'Nov', families: 34, children: 210 },
-  { month: 'Dez', families: 38, children: 245 },
-  { month: 'Jan', families: 42, children: 280 },
-  { month: 'Fev', families: 48, children: 312 },
-];
-
-const impactMetrics = [
-  { label: 'Lições Completadas', value: '4.230', icon: BookOpen, color: 'text-primary' },
-  { label: 'Desafios Concluídos', value: '18', icon: Trophy, color: 'text-chart-3' },
-  { label: 'Poupança Média/Criança', value: '€32', icon: TrendingUp, color: 'text-secondary' },
-  { label: 'Taxa de Retenção', value: '94%', icon: BarChart3, color: 'text-accent-foreground' },
-];
+import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
 
 export default function PartnerReports() {
+  const { data: programs, isLoading: loadingP } = usePartnerPrograms();
+  const { data: challenges, isLoading: loadingC } = useSponsoredChallenges();
+
+  const isLoading = loadingP || loadingC;
+
+  const totalChildren = programs?.reduce((sum, p) => sum + p.children_count, 0) ?? 0;
+  const totalInvestment = programs?.reduce((sum, p) => sum + Number(p.investment_amount), 0) ?? 0;
+  const totalParticipants = challenges?.reduce((sum, c) => sum + c.participants_count, 0) ?? 0;
+  const completedChallenges = challenges?.filter(c => c.status === 'completed').length ?? 0;
+  const avgCompletion = challenges?.filter(c => c.status !== 'draft').length
+    ? Math.round(challenges.filter(c => c.status !== 'draft').reduce((sum, c) => sum + Number(c.completion_rate), 0) / challenges.filter(c => c.status !== 'draft').length)
+    : 0;
+  const avgSavingsPerChild = totalChildren > 0 ? Math.round(totalInvestment / totalChildren) : 0;
+
+  // Build chart from programs by grouping by month of started_at
+  const chartData = (() => {
+    if (!programs) return [];
+    const months: Record<string, { families: number; children: number }> = {};
+    programs.forEach(p => {
+      const d = new Date(p.started_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('pt', { month: 'short' }).replace('.', '');
+      if (!months[key]) months[key] = { families: 0, children: 0 };
+      months[key].families += 1;
+      months[key].children += p.children_count;
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, val]) => {
+        const d = new Date(key + '-01');
+        return { month: d.toLocaleDateString('pt', { month: 'short' }).replace('.', ''), ...val };
+      });
+  })();
+
+  const impactMetrics = [
+    { label: 'Total Participantes', value: totalParticipants.toLocaleString(), icon: BookOpen, color: 'text-primary' },
+    { label: 'Desafios Concluídos', value: String(completedChallenges), icon: Trophy, color: 'text-chart-3' },
+    { label: 'Investimento/Criança', value: `€${avgSavingsPerChild}`, icon: TrendingUp, color: 'text-secondary' },
+    { label: 'Taxa Média Conclusão', value: `${avgCompletion}%`, icon: BarChart3, color: 'text-accent-foreground' },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -47,53 +81,55 @@ export default function PartnerReports() {
         ))}
       </div>
 
-      <Card className="rounded-2xl border-border/50">
-        <CardHeader>
-          <CardTitle className="font-display text-lg flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Evolução Mensal
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                <XAxis dataKey="month" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar dataKey="families" name="Famílias" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="children" name="Crianças" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {chartData.length > 0 && (
+        <Card className="rounded-2xl border-border/50">
+          <CardHeader>
+            <CardTitle className="font-display text-lg flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Programas por Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="month" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Bar dataKey="families" name="Programas" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="children" name="Crianças" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="rounded-2xl border-border/50">
         <CardHeader>
-          <CardTitle className="font-display text-lg">Resumo de Literacia Financeira</CardTitle>
+          <CardTitle className="font-display text-lg">Resumo Geral</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 rounded-xl bg-muted/50">
-              <p className="font-display text-3xl font-bold text-foreground">87%</p>
-              <p className="text-sm text-muted-foreground mt-1">Compreendem conceito de poupança</p>
+              <p className="font-display text-3xl font-bold text-foreground">{programs?.length ?? 0}</p>
+              <p className="text-sm text-muted-foreground mt-1">Programas activos</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
-              <p className="font-display text-3xl font-bold text-foreground">72%</p>
-              <p className="text-sm text-muted-foreground mt-1">Definem metas financeiras</p>
+              <p className="font-display text-3xl font-bold text-foreground">{totalChildren}</p>
+              <p className="text-sm text-muted-foreground mt-1">Crianças impactadas</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
-              <p className="font-display text-3xl font-bold text-foreground">65%</p>
-              <p className="text-sm text-muted-foreground mt-1">Diferenciam necessidade vs desejo</p>
+              <p className="font-display text-3xl font-bold text-foreground">€{totalInvestment.toLocaleString()}</p>
+              <p className="text-sm text-muted-foreground mt-1">Investimento total</p>
             </div>
           </div>
         </CardContent>
