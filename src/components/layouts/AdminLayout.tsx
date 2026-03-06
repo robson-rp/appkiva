@@ -107,6 +107,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
               </div>
               <div className="flex items-center gap-1">
+                <RestartOnboardingButton />
                 <ThemeToggle />
               </div>
             </div>
