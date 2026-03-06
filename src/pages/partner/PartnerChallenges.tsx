@@ -114,9 +114,29 @@ export default function PartnerChallenges() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-display font-bold text-foreground">{ch.title}</h3>
-                        <Badge variant={cfg.variant} className="text-[10px]">
-                          {cfg.label}
-                        </Badge>
+                        {nextStatuses.length > 0 ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="inline-flex items-center gap-1 cursor-pointer">
+                                <Badge variant={cfg.variant} className="text-[10px]">
+                                  {cfg.label}
+                                  <ChevronRight className="h-3 w-3 ml-0.5" />
+                                </Badge>
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              {nextStatuses.map(ns => (
+                                <DropdownMenuItem key={ns} onClick={() => handleStatusChange(ch.id, ns)}>
+                                  Mover para {statusConfig[ns]?.label ?? ns}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <Badge variant={cfg.variant} className="text-[10px]">
+                            {cfg.label}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{ch.description}</p>
                       <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
