@@ -100,6 +100,41 @@ export function useCreateTask() {
   });
 }
 
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (input: {
+      taskId: string;
+      title: string;
+      reward: number;
+      category: TaskCategory;
+    }) => {
+      if (!user?.profileId) throw new Error('Não autenticado');
+
+      const { error } = await supabase
+        .from('tasks')
+        .update({
+          title: input.title,
+          reward: input.reward,
+          category: input.category,
+        })
+        .eq('id', input.taskId)
+        .eq('parent_profile_id', user.profileId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      toast({ title: 'Tarefa actualizada ✏️', description: 'As alterações foram guardadas.' });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível actualizar a tarefa.', variant: 'destructive' });
+    },
+  });
+}
+
 export function useDeleteTask() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
