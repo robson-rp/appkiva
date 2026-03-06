@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useChildren, useUpdateChildBudget } from '@/hooks/use-children';
+import { usePendingBudgetExceptions, useResolveBudgetException } from '@/hooks/use-budget-exceptions';
 import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -25,6 +26,8 @@ function generateCode() {
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
   const updateBudget = useUpdateChildBudget();
+  const { data: pendingExceptions = [] } = usePendingBudgetExceptions();
+  const resolveException = useResolveBudgetException();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState(() => generateCode());
@@ -121,6 +124,59 @@ export default function ParentChildren() {
           </div>
         </div>
       </motion.div>
+
+      {/* Pending Budget Exceptions */}
+      {pendingExceptions.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-chart-1/30 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-chart-1 to-accent" />
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-chart-1/10 flex items-center justify-center">
+                  <Send className="h-3.5 w-3.5 text-chart-1" />
+                </div>
+                <div>
+                  <p className="text-sm font-display font-bold">Pedidos de Exceção</p>
+                  <p className="text-[10px] text-muted-foreground">{pendingExceptions.length} pedido(s) pendente(s)</p>
+                </div>
+              </div>
+              {pendingExceptions.map((req) => (
+                <div key={req.id} className="flex items-center justify-between gap-3 bg-muted/40 rounded-xl p-3 border border-border/30">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xl">{req.reward_icon || '🎁'}</span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-display font-bold truncate">{req.child_name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {req.reward_name} — 🪙 {req.amount}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl h-8 px-2.5 text-xs font-display gap-1 border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => resolveException.mutate({ requestId: req.id, action: 'reject' })}
+                      disabled={resolveException.isPending}
+                    >
+                      {resolveException.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3" />}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-xl h-8 px-2.5 text-xs font-display gap-1"
+                      onClick={() => resolveException.mutate({ requestId: req.id, action: 'approve' })}
+                      disabled={resolveException.isPending}
+                    >
+                      {resolveException.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                      Aprovar
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Children Grid */}
       {isLoading ? (

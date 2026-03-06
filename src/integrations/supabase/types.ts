@@ -68,6 +68,74 @@ export type Database = {
           },
         ]
       }
+      budget_exception_requests: {
+        Row: {
+          amount: number
+          child_profile_id: string
+          created_at: string
+          id: string
+          parent_profile_id: string
+          reason: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          reward_id: string
+          status: Database["public"]["Enums"]["budget_exception_status"]
+        }
+        Insert: {
+          amount: number
+          child_profile_id: string
+          created_at?: string
+          id?: string
+          parent_profile_id: string
+          reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          reward_id: string
+          status?: Database["public"]["Enums"]["budget_exception_status"]
+        }
+        Update: {
+          amount?: number
+          child_profile_id?: string
+          created_at?: string
+          id?: string
+          parent_profile_id?: string
+          reason?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          reward_id?: string
+          status?: Database["public"]["Enums"]["budget_exception_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_exception_requests_child_profile_id_fkey"
+            columns: ["child_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_exception_requests_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_exception_requests_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_exception_requests_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           created_at: string
@@ -806,6 +874,7 @@ export type Database = {
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin"
+      budget_exception_status: "pending" | "approved" | "rejected"
       ledger_entry_type:
         | "allowance"
         | "task_reward"
@@ -950,6 +1019,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["parent", "child", "teen", "teacher", "admin"],
+      budget_exception_status: ["pending", "approved", "rejected"],
       ledger_entry_type: [
         "allowance",
         "task_reward",

@@ -14,6 +14,7 @@ export interface ChildReward {
   available: boolean;
   claimedBy: string | null;
   claimedAt: string | null;
+  parentProfileId: string;
 }
 
 export function useChildRewards() {
@@ -43,6 +44,7 @@ export function useChildRewards() {
         available: r.available,
         claimedBy: r.claimed_by,
         claimedAt: r.claimed_at,
+        parentProfileId: r.parent_profile_id,
       }));
     },
     enabled: !!user?.profileId && (user?.role === 'child' || user?.role === 'teen'),
