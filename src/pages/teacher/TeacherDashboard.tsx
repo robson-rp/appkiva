@@ -145,7 +145,7 @@ export default function TeacherDashboard() {
       </motion.div>
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+      <motion.div variants={item} className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4" data-onboarding="students">
         {stats.map((stat) => (
           <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
