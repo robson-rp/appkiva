@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trophy, Plus, Users, Calendar, Loader2, Pencil, Trash2 } from 'lucide-react';
-import { useSponsoredChallenges, useDeleteSponsoredChallenge, type SponsoredChallenge } from '@/hooks/use-partner-data';
+import { Trophy, Plus, Users, Calendar, Loader2, Pencil, Trash2, ChevronRight } from 'lucide-react';
+import { useSponsoredChallenges, useDeleteSponsoredChallenge, useUpdateSponsoredChallenge, type SponsoredChallenge } from '@/hooks/use-partner-data';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import ChallengeFormDialog from '@/components/partner/ChallengeFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
   active: { label: 'Activo', variant: 'default' },
@@ -16,11 +17,18 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
   completed: { label: 'Concluído', variant: 'outline' },
 };
 
+const statusFlow: Record<string, string[]> = {
+  draft: ['active'],
+  active: ['completed'],
+  completed: [],
+};
+
 export default function PartnerChallenges() {
   const { data: challenges, isLoading } = useSponsoredChallenges();
   const deleteChallenge = useDeleteSponsoredChallenge();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<SponsoredChallenge | null>(null);
+  const updateChallenge = useUpdateSponsoredChallenge();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   function handleEdit(ch: SponsoredChallenge) {
@@ -42,6 +50,15 @@ export default function PartnerChallenges() {
       toast.error('Erro ao eliminar desafio');
     }
     setDeleteId(null);
+  }
+
+  async function handleStatusChange(id: string, newStatus: string) {
+    try {
+      await updateChallenge.mutateAsync({ id, status: newStatus });
+      toast.success(`Status alterado para ${statusConfig[newStatus]?.label ?? newStatus}`);
+    } catch {
+      toast.error('Erro ao alterar status');
+    }
   }
 
   if (isLoading) {
@@ -85,6 +102,7 @@ export default function PartnerChallenges() {
       <div className="space-y-4">
         {(challenges ?? []).map(ch => {
           const cfg = statusConfig[ch.status] ?? statusConfig.draft;
+          const nextStatuses = statusFlow[ch.status] ?? [];
           return (
             <Card key={ch.id} className="rounded-2xl border-border/50">
               <CardContent className="p-5">
@@ -96,9 +114,29 @@ export default function PartnerChallenges() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-display font-bold text-foreground">{ch.title}</h3>
-                        <Badge variant={cfg.variant} className="text-[10px]">
-                          {cfg.label}
-                        </Badge>
+                        {nextStatuses.length > 0 ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="inline-flex items-center gap-1 cursor-pointer">
+                                <Badge variant={cfg.variant} className="text-[10px]">
+                                  {cfg.label}
+                                  <ChevronRight className="h-3 w-3 ml-0.5" />
+                                </Badge>
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                              {nextStatuses.map(ns => (
+                                <DropdownMenuItem key={ns} onClick={() => handleStatusChange(ch.id, ns)}>
+                                  Mover para {statusConfig[ns]?.label ?? ns}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <Badge variant={cfg.variant} className="text-[10px]">
+                            {cfg.label}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">{ch.description}</p>
                       <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
