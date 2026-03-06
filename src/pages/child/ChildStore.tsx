@@ -6,8 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Kivo } from '@/components/Kivo';
 import { ShoppingBag, Gift, Star, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { useWalletBalance } from '@/hooks/use-wallet';
 import { useChildRewards, useClaimReward } from '@/hooks/use-child-rewards';
+import { useTeenBudget } from '@/hooks/use-teen-budget';
+import { useMonthlySpending } from '@/hooks/use-monthly-spending';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   AlertDialog,
@@ -38,12 +41,16 @@ export default function ChildStore() {
   const { user } = useAuth();
   const { data: walletData, isLoading: loadingWallet } = useWalletBalance();
   const { data: rewards = [], isLoading: loadingRewards } = useChildRewards();
+  const { data: monthlyBudget = 0 } = useTeenBudget();
+  const { data: monthlySpent = 0 } = useMonthlySpending();
   const claimReward = useClaimReward();
 
   const [confirmReward, setConfirmReward] = useState<{ id: string; name: string; price: number } | null>(null);
 
   const balance = Number(walletData?.balance) || 0;
   const isLoading = loadingWallet || loadingRewards;
+  const budgetRemaining = monthlyBudget > 0 ? monthlyBudget - monthlySpent : Infinity;
+  const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
 
   const handleClaim = () => {
     if (!confirmReward) return;
@@ -83,6 +90,33 @@ export default function ChildStore() {
         </Card>
       </motion.div>
 
+      {/* Monthly Budget Indicator */}
+      {monthlyBudget > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="border-border/50">
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-display font-bold">Limite Mensal</span>
+                <span className={`font-display font-bold ${budgetPct >= 100 ? 'text-destructive' : budgetPct >= 80 ? 'text-warning' : 'text-muted-foreground'}`}>
+                  🪙 {monthlySpent} / {monthlyBudget}
+                </span>
+              </div>
+              <Progress value={budgetPct} className="h-2" />
+              {budgetPct >= 100 && (
+                <p className="text-[11px] text-destructive font-display">
+                  ⚠️ Atingiste o teu limite de gastos mensal!
+                </p>
+              )}
+              {budgetPct >= 80 && budgetPct < 100 && (
+                <p className="text-[11px] text-muted-foreground font-display">
+                  Quase a atingir o limite — resta {Math.floor(budgetRemaining)} 🪙
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Rewards */}
       <div className="space-y-1 mb-2">
         <div className="flex items-center gap-2 text-sm">
@@ -109,7 +143,9 @@ export default function ChildStore() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {rewards.map((reward, i) => {
-            const canBuy = balance >= reward.price;
+            const canAfford = balance >= reward.price;
+            const withinBudget = budgetRemaining >= reward.price;
+            const canBuy = canAfford && withinBudget;
             return (
               <motion.div
                 key={reward.id}
@@ -150,7 +186,7 @@ export default function ChildStore() {
                         ) : (
                           <Gift className="h-3 w-3" />
                         )}
-                        {canBuy ? 'Resgatar' : 'Sem saldo'}
+                        {canBuy ? 'Resgatar' : !canAfford ? 'Sem saldo' : 'Limite atingido'}
                       </Button>
                     </div>
                   </CardContent>
@@ -169,9 +205,16 @@ export default function ChildStore() {
             <AlertDialogDescription>
               Tens a certeza que queres resgatar <strong>"{confirmReward?.name}"</strong> por <strong>🪙 {confirmReward?.price} KVC</strong>?
               {confirmReward && (
-                <span className="block mt-2 text-xs">
-                  Saldo actual: {balance} KVC → Novo saldo: {balance - confirmReward.price} KVC
-                </span>
+                <>
+                  <span className="block mt-2 text-xs">
+                    Saldo actual: {balance} KVC → Novo saldo: {balance - confirmReward.price} KVC
+                  </span>
+                  {monthlyBudget > 0 && (
+                    <span className="block mt-1 text-xs">
+                      Limite mensal: {monthlySpent} + {confirmReward.price} = {monthlySpent + confirmReward.price} / {monthlyBudget} KVC
+                    </span>
+                  )}
+                </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
