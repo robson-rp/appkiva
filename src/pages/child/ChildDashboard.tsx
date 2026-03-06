@@ -168,7 +168,7 @@ export default function ChildDashboard() {
       </motion.div>
 
       {/* Pending Tasks */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} data-onboarding="missions">
         <ChildPendingTasks tasks={pendingTasks} />
       </motion.div>
 
