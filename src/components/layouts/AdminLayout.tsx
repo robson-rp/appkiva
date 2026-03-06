@@ -11,6 +11,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
 
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
@@ -106,6 +107,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
               </div>
               <div className="flex items-center gap-1">
+                <RestartOnboardingButton />
                 <ThemeToggle />
               </div>
             </div>
@@ -124,6 +126,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </AnimatePresence>
         </div>
       </div>
+      <OnboardingWalkthrough />
     </SidebarProvider>
   );
 }

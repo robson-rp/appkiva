@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
+import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
 
 const bottomNavItems = [
   { title: 'Início', url: '/child', icon: Home },
@@ -50,6 +51,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95">
               <Trophy className="h-4.5 w-4.5 text-muted-foreground" />
             </NavLink>
+            <RestartOnboardingButton />
             <ThemeToggle />
             <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">
@@ -115,6 +117,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+      <OnboardingWalkthrough />
     </div>
   );
 }

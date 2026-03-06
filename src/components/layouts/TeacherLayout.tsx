@@ -13,6 +13,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
 import { mockChallenges } from '@/data/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -143,6 +144,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                <RestartOnboardingButton />
                 <ThemeToggle />
                 <NotificationDropdown />
                 {isMobile && (
@@ -224,6 +226,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
           )}
         </div>
       </div>
+      <OnboardingWalkthrough />
     </SidebarProvider>
   );
 }
