@@ -1,0 +1,1 @@
+ALTER TABLE public.children ADD COLUMN monthly_budget numeric NOT NULL DEFAULT 0;

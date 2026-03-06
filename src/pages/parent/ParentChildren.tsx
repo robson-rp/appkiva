@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { useChildren } from '@/hooks/use-children';
+import { Label } from '@/components/ui/label';
+import { useChildren, useUpdateChildBudget } from '@/hooks/use-children';
+import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
@@ -22,10 +24,44 @@ function generateCode() {
 
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
+  const updateBudget = useUpdateChildBudget();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState(() => generateCode());
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
+
+  // Budget edit dialog
+  const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+  const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number } | null>(null);
+  const [budgetValue, setBudgetValue] = useState('');
+
+  const openBudgetDialog = (child: typeof budgetChild & {}) => {
+    setBudgetChild(child);
+    setBudgetValue(String(child.monthlyBudget || ''));
+    setBudgetDialogOpen(true);
+  };
+
+  const handleSaveBudget = async () => {
+    if (!budgetChild) return;
+    const val = Number(budgetValue);
+    if (isNaN(val) || val < 0) return;
+    try {
+      await updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: val });
+      toast({ title: 'Limite atualizado! 💰', description: `Limite de gasto mensal definido para ${val} 🪙.` });
+      createNotification({
+        profileId: budgetChild.profileId,
+        title: 'Limite de gasto atualizado 💰',
+        message: val > 0
+          ? `O teu limite de gasto mensal foi definido para ${val} 🪙.`
+          : 'O teu limite de gasto mensal foi removido.',
+        type: 'vault',
+        metadata: { monthlyBudget: val },
+      });
+      setBudgetDialogOpen(false);
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível atualizar o limite.', variant: 'destructive' });
+    }
+  };
 
   const inviteLink = `${window.location.origin}/join/${inviteCode}`;
 
@@ -138,14 +174,35 @@ export default function ParentChildren() {
                     </div>
                   </div>
 
-                  <div className="bg-[hsl(var(--kivara-light-blue))] rounded-2xl p-3.5 text-center mb-5">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Saldo</p>
-                    <CoinDisplay amount={child.balance} size="sm" />
+                  <div className="grid grid-cols-2 gap-2 mb-5">
+                    <div className="bg-[hsl(var(--kivara-light-blue))] rounded-2xl p-3.5 text-center">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Saldo</p>
+                      <CoinDisplay amount={child.balance} size="sm" />
+                    </div>
+                    <div
+                      className="bg-muted/50 rounded-2xl p-3.5 text-center cursor-pointer hover:bg-muted/80 transition-colors group/budget"
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                    >
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
+                        <Wallet className="h-3 w-3" /> Limite Mensal
+                      </p>
+                      <p className="font-display font-bold text-lg text-foreground">
+                        {child.monthlyBudget > 0 ? `${child.monthlyBudget} 🪙` : <span className="text-muted-foreground text-sm">Definir</span>}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm">
                       <Edit className="h-3.5 w-3.5" /> Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs sm:text-sm"
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                    >
+                      <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9">
                       <Trash2 className="h-3.5 w-3.5" />
@@ -225,6 +282,63 @@ export default function ParentChildren() {
                 </p>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Budget Dialog */}
+      <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Wallet className="h-5 w-5 text-primary" />
+              Limite de Gasto Mensal
+            </DialogTitle>
+            <DialogDescription>
+              Define quanto {budgetChild?.displayName} pode gastar por mês.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Limite mensal (KivaCoins)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 500"
+                value={budgetValue}
+                onChange={e => setBudgetValue(e.target.value)}
+                min={0}
+                className="rounded-xl text-lg font-display text-center"
+              />
+              <p className="text-[10px] text-muted-foreground text-center">
+                Define 0 para remover o limite
+              </p>
+            </div>
+
+            <div className="flex gap-2 flex-wrap justify-center">
+              {[100, 250, 500, 1000].map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setBudgetValue(String(v))}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
+                    budgetValue === String(v)
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {v} 🪙
+                </button>
+              ))}
+            </div>
+
+            <Button
+              className="w-full rounded-xl font-display gap-2"
+              onClick={handleSaveBudget}
+              disabled={updateBudget.isPending}
+            >
+              <Wallet className="h-4 w-4" />
+              {updateBudget.isPending ? 'A guardar...' : 'Guardar Limite'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
