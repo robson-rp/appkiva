@@ -34,7 +34,7 @@ export default function ParentTasks() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [reward, setReward] = useState('');
+  const [reward, setReward] = useState('20');
   const [category, setCategory] = useState<TaskCategory>('other');
   const [selectedChild, setSelectedChild] = useState('');
 

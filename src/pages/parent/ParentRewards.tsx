@@ -39,7 +39,7 @@ export default function ParentRewards() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState('50');
   const [category, setCategory] = useState<RewardCategory>('experience');
   const [icon, setIcon] = useState('🎁');
 
