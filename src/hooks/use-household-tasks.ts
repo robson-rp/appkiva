@@ -100,6 +100,32 @@ export function useCreateTask() {
   });
 }
 
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (taskId: string) => {
+      if (!user?.profileId) throw new Error('Não autenticado');
+
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId)
+        .eq('parent_profile_id', user.profileId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      toast({ title: 'Tarefa eliminada 🗑️', description: 'A tarefa foi removida com sucesso.' });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível eliminar a tarefa.', variant: 'destructive' });
+    },
+  });
+}
+
 export function useApproveTask() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
