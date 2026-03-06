@@ -15,6 +15,8 @@ import { useHouseholdVaults, useUpdateVaultInterestRate, useDeleteSavingsVault, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { createNotification } from '@/hooks/use-notifications';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
