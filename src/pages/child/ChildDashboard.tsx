@@ -20,7 +20,7 @@ import { useMonthlySpending } from '@/hooks/use-monthly-spending';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 import { MonthlyEvolutionChart } from '@/components/MonthlyEvolutionChart';
 import { useWeeklySparkline } from '@/hooks/use-weekly-sparkline';
-import { LineChart, Line, XAxis, ResponsiveContainer } from 'recharts';
+import { WeeklySparkline } from '@/components/WeeklySparkline';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -153,31 +153,7 @@ export default function ChildDashboard() {
       {/* Weekly Sparkline Summary */}
       {weeklyData && weeklyData.points.length > 0 && (
         <motion.div variants={itemVariants}>
-          <Card className="border border-border/50 overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <Sparkles className="h-3 w-3 text-secondary" />
-                  </div>
-                  <span className="text-xs font-display font-bold text-foreground">Esta Semana</span>
-                </div>
-                <div className="flex items-center gap-3 text-[10px] font-display">
-                  <span className="text-secondary font-bold">+{weeklyData.totalEarned} 🪙</span>
-                  <span className="text-destructive font-bold">-{weeklyData.totalSpent} 🪙</span>
-                </div>
-              </div>
-              <div className="h-16">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={weeklyData.points}>
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} />
-                    <Line type="monotone" dataKey="earned" stroke="hsl(var(--secondary))" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="spent" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} strokeDasharray="4 2" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <WeeklySparkline points={weeklyData.points} totalEarned={weeklyData.totalEarned} totalSpent={weeklyData.totalSpent} />
         </motion.div>
       )}
 
