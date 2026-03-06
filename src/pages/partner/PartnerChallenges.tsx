@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Trophy, Plus, Users, Calendar, Loader2 } from 'lucide-react';
 import { useSponsoredChallenges } from '@/hooks/use-partner-data';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import CreateChallengeDialog from '@/components/partner/CreateChallengeDialog';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
   active: { label: 'Activo', variant: 'default' },
@@ -14,6 +16,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 
 export default function PartnerChallenges() {
   const { data: challenges, isLoading } = useSponsoredChallenges();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -30,11 +33,13 @@ export default function PartnerChallenges() {
           <h1 className="font-display text-2xl font-bold text-foreground">Desafios Patrocinados 🏆</h1>
           <p className="text-muted-foreground font-body">Crie e gira desafios para as escolas e famílias do programa</p>
         </div>
-        <Button className="rounded-xl gap-2">
+        <Button className="rounded-xl gap-2" onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Novo Desafio
         </Button>
       </div>
+
+      <CreateChallengeDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
       <div className="space-y-4">
         {(challenges ?? []).map(ch => {
