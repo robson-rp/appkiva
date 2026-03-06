@@ -41,7 +41,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
   const isHot = sd.currentStreak >= 7;
 
   return (
-    <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
+    <motion.div whileHover={{ scale: 1.005 }} whileTap={{ scale: 0.995 }} transition={{ duration: 0.3 }}>
       <Card
         className="border border-border/50 cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden relative"
         onClick={onClick}
