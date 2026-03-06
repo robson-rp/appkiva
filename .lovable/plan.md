@@ -1,128 +1,122 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Walkthrough / Onboarding Interactivo — Plano de Implementacao
 
-## Current State Assessment
+## Overview
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+Build a role-based interactive onboarding walkthrough that appears on first login, highlighting key UI elements with step-by-step guidance, Kivo mascot presence, and skip/resume capability. Completion is persisted in the database.
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+## Database Changes
 
-## What Lovable Can and Cannot Build
+**New table: `onboarding_progress`**
+- `id` uuid PK
+- `profile_id` uuid (unique, references profiles)
+- `completed` boolean default false
+- `current_step` integer default 0
+- `completed_at` timestamptz nullable
+- `skipped` boolean default false
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+RLS: users can read/insert/update their own record (matched via `profiles.user_id = auth.uid()`).
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+## New Components
 
-## Implementation Plan (4 Phases)
+### 1. `src/components/OnboardingWalkthrough.tsx`
+Main orchestrator component:
+- Fetches/creates `onboarding_progress` for current user profile
+- If `completed = true`, renders nothing (unless triggered from help menu)
+- Renders an overlay with spotlight highlight on target elements
+- Shows a modal-like card at each step with: icon/illustration, title, description, "Next" button, "Skip" link, step counter
+- Uses `framer-motion` for transitions between steps
+- On completion or skip, updates the database record
 
-### Phase 1 — Multi-Tenant Foundation
+### 2. `src/data/onboarding-steps.ts`
+Defines step configurations per role:
 
-**Database migrations:**
+```typescript
+interface OnboardingStep {
+  title: string;
+  description: string;
+  icon: string; // emoji or illustration reference
+  highlightSelector?: string; // CSS selector for spotlight (optional)
+  position?: 'center' | 'bottom' | 'top';
+}
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+const ONBOARDING_STEPS: Record<UserRole, OnboardingStep[]> = {
+  parent: [ /* 6 steps as specified */ ],
+  child: [ /* 5 steps */ ],
+  teen: [ /* 5 steps, similar to child with teen-specific wording */ ],
+  teacher: [ /* 3 steps */ ],
+  admin: [ /* 3 steps */ ],
+  partner: [ /* 3 steps, similar structure */ ],
+};
+```
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+### 3. `src/hooks/use-onboarding.ts`
+Custom hook to:
+- Query `onboarding_progress` for current profile
+- Provide `startWalkthrough()`, `completeStep()`, `skipWalkthrough()`, `resetWalkthrough()` mutations
+- Return `{ showOnboarding, currentStep, totalSteps, ... }`
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+## UI Integration
 
-4. Expand `app_role` enum to include `admin`
+### Spotlight Overlay
+- Full-screen semi-transparent overlay (`bg-black/50`) with a "cutout" around the highlighted element using CSS `clip-path` or a portal-based approach
+- Step card positioned near the highlighted element or centered when no element is highlighted (e.g., welcome step)
+- Card style: rounded, glassmorphism (`bg-card/95 backdrop-blur-xl`), with Kivo mascot image on welcome steps
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+### Step Card Design
+- Kivo mascot SVG on welcome/intro steps
+- Emoji icon for other steps (matching the specification)
+- Title in `font-display font-bold`
+- Description with bullet points where specified
+- "Seguinte" (Next) primary button, "Saltar" (Skip) ghost link
+- Step indicator dots at bottom
+- KIVARA color palette: deep blue, green, gold accents
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+### Dashboard Integration
+- Render `<OnboardingWalkthrough />` inside each layout component (ParentLayout, ChildLayout, TeenLayout, TeacherLayout, AdminLayout, PartnerLayout) so it appears above the dashboard
+- Only renders on dashboard routes (not sub-pages)
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+### Help Menu Access
+- Add "Rever tutorial" option to the existing header/nav area for each role
+- Calls `resetWalkthrough()` to re-trigger the walkthrough
 
-**Database:**
+## Step Content (Portuguese)
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+**Parent (6 steps):** Bem-vindo ao KIVARA > Painel Familiar > Atribuir Tarefas > Gestao de Mesada > Metas de Poupanca > Relatorios
 
-2. Add `real_money_enabled` flag to tenants
+**Child (5 steps):** Conhece o Kivo > A Tua Carteira > Completa Missoes > Poupa para os Teus Sonhos > Conquistas
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+**Teen (5 steps):** Similar to child but with teen-specific financial management language
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+**Teacher (3 steps):** Painel Escolar > Gerir Alunos > Desafios Financeiros
 
-### Phase 3 — Audit Logging & Compliance
+**Admin (3 steps):** Visao Geral > Gestao de Tenants > Gestao de Subscricoes
 
-**Database:**
+**Partner (3 steps):** Painel do Parceiro > Programas > Desafios Patrocinados
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+## Analytics
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+Track events by inserting into `audit_log` table (already exists):
+- `walkthrough_started`
+- `walkthrough_completed`
+- `walkthrough_skipped`
+- `walkthrough_step_viewed` (with step number in metadata)
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+## Files to Create/Modify
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+| File | Action |
+|------|--------|
+| `src/data/onboarding-steps.ts` | Create — step definitions per role |
+| `src/hooks/use-onboarding.ts` | Create — DB queries and mutations |
+| `src/components/OnboardingWalkthrough.tsx` | Create — main walkthrough UI |
+| `src/components/layouts/ParentLayout.tsx` | Add walkthrough + help menu item |
+| `src/components/layouts/ChildLayout.tsx` | Add walkthrough + help menu item |
+| `src/components/layouts/TeenLayout.tsx` | Add walkthrough + help menu item |
+| `src/components/layouts/TeacherLayout.tsx` | Add walkthrough + help menu item |
+| `src/components/layouts/AdminLayout.tsx` | Add walkthrough + help menu item |
+| `src/components/layouts/PartnerLayout.tsx` | Add walkthrough + help menu item |
+| DB migration | Create `onboarding_progress` table with RLS |
 
