@@ -74,20 +74,13 @@ export default function ParentReports() {
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
 
-  if (!reportsAllowed && !gateLoading) {
-    return (
-      <div className="max-w-3xl mx-auto py-12">
-        <UpgradePrompt
-          featureName="Relatórios Educativos"
-          description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
-          currentTier={tierName}
-          variant="inline"
-        />
-      </div>
-    );
-  }
-
   return (
+    <FeatureGateWrapper
+      allowed={reportsAllowed || gateLoading}
+      featureName="Relatórios Educativos"
+      description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6">
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
