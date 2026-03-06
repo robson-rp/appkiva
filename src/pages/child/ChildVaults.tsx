@@ -184,6 +184,7 @@ export default function ChildVaults() {
             const pct = vault.targetAmount > 0 ? Math.round((vault.currentAmount / vault.targetAmount) * 100) : 0;
             const monthlyInterest = calcMonthlyInterest(vault.currentAmount, vault.interestRate);
             const projection3m = calcProjection(vault.currentAmount, vault.interestRate, 3);
+            const projection6m = calcProjection(vault.currentAmount, vault.interestRate, 6);
             return (
               <motion.div key={vault.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 30 }}>
                 <Card className="hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm hover:-translate-y-0.5">
@@ -248,7 +249,7 @@ export default function ChildVaults() {
                         <Sparkles className="h-3.5 w-3.5 text-secondary" />
                         <span className="text-xs font-display font-bold text-secondary">Juros: {vault.interestRate}%/mês</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-3 gap-2">
                         <div className="bg-card/60 rounded-lg p-2 text-center">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Este mês</p>
                           <p className="font-display font-bold text-sm text-secondary">+{monthlyInterest} 🪙</p>
@@ -256,6 +257,10 @@ export default function ChildVaults() {
                         <div className="bg-card/60 rounded-lg p-2 text-center">
                           <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 3 meses</p>
                           <p className="font-display font-bold text-sm text-primary">{projection3m} 🪙</p>
+                        </div>
+                        <div className="bg-card/60 rounded-lg p-2 text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 6 meses</p>
+                          <p className="font-display font-bold text-sm text-accent-foreground">{projection6m} 🪙</p>
                         </div>
                       </div>
                     </div>
