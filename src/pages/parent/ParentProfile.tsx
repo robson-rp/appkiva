@@ -50,9 +50,15 @@ export default function ParentProfile() {
             <div>
               <h1 className="font-display text-2xl font-bold">{name}</h1>
               <p className="text-sm opacity-80">{email}</p>
-              <div className="flex items-center gap-1.5 mt-2 bg-white/15 rounded-full px-3 py-1 w-fit">
-                <Shield className="h-3 w-3" />
-                <span className="text-xs font-medium">Encarregado</span>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1">
+                  <Shield className="h-3 w-3" />
+                  <span className="text-xs font-medium">Encarregado</span>
+                </div>
+                <Link to="/parent/subscription" className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 rounded-full px-3 py-1 transition-colors">
+                  <Crown className="h-3 w-3" />
+                  <span className="text-xs font-medium">{tierName ?? 'Gratuito'}</span>
+                </Link>
               </div>
             </div>
           </CardContent>
