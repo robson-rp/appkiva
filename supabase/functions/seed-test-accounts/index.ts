@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
 
     if (error) {
       // User likely already exists — find them via sign in
-      const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
+      const { data: signInData } = await lookupClient.auth.signInWithPassword({
         email: acc.email,
         password,
       });
