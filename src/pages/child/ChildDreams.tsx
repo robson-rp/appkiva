@@ -25,6 +25,7 @@ const priorityConfig = {
 
 export default function ChildDreams() {
   const { user } = useAuth();
+  const { allowed: dreamVaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.DREAM_VAULTS);
   const { data: dbDreams, isLoading } = useDreamVaults(user?.profileId);
   const createDream = useCreateDreamVault();
   const [expandedId, setExpandedId] = useState<string | null>(null);
