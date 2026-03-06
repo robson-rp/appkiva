@@ -87,7 +87,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               </div>
               <div>
                 <p className="text-sm font-display font-bold">Sequência Diária</p>
-                <p className="text-xs text-muted-foreground">{mockStreakData.totalActiveDays} dias activos no total</p>
+                <p className="text-xs text-muted-foreground">{sd.totalActiveDays} dias activos no total</p>
               </div>
             </div>
             <div className="text-right">
