@@ -17,6 +17,8 @@ import { toast } from 'sonner';
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { VaultInterestHistory } from '@/components/VaultInterestHistory';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 export default function ChildVaults() {
   const { user } = useAuth();
