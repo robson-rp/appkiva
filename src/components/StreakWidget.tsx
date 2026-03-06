@@ -159,6 +159,12 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
           )}
         </CardContent>
       </Card>
-    </div>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">
+          <p>Último dia activo: {lastDateFormatted}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
