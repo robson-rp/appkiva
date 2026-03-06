@@ -33,11 +33,13 @@ export default function PartnerChallenges() {
           <h1 className="font-display text-2xl font-bold text-foreground">Desafios Patrocinados 🏆</h1>
           <p className="text-muted-foreground font-body">Crie e gira desafios para as escolas e famílias do programa</p>
         </div>
-        <Button className="rounded-xl gap-2">
+        <Button className="rounded-xl gap-2" onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Novo Desafio
         </Button>
       </div>
+
+      <CreateChallengeDialog open={dialogOpen} onOpenChange={setDialogOpen} />
 
       <div className="space-y-4">
         {(challenges ?? []).map(ch => {
