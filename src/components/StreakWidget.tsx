@@ -112,7 +112,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
             </div>
           </div>
 
-          {/* Activity dots with staggered spring animation */}
+          {/* Activity dots with day labels */}
           <div className="flex gap-1.5 mt-3">
             <AnimatePresence>
               {Array.from({ length: 7 }).map((_, i) => {
@@ -121,28 +121,34 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 const dateStr = d.toISOString().split('T')[0];
                 const isActiveDay = sd.activeDates.includes(dateStr);
                 const dayLabel = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric' });
+                const shortDay = d.toLocaleDateString('pt-PT', { weekday: 'short' }).replace('.', '').slice(0, 3);
                 return (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
-                      <motion.div
-                        custom={i}
-                        variants={dayDotVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className={`flex-1 h-2.5 rounded-full relative overflow-hidden cursor-default ${
-                          isActiveDay
-                            ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
-                            : 'bg-muted/50'
-                        }`}
-                      >
-                        {isActiveDay && (
-                          <motion.div
-                            className="absolute inset-0 bg-white/20 rounded-full"
-                            animate={{ x: ['-100%', '200%'] }}
-                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
-                          />
-                        )}
-                      </motion.div>
+                      <div className="flex-1 flex flex-col items-center gap-1 cursor-default">
+                        <motion.div
+                          custom={i}
+                          variants={dayDotVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className={`w-full h-2.5 rounded-full relative overflow-hidden ${
+                            isActiveDay
+                              ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
+                              : 'bg-muted/50'
+                          }`}
+                        >
+                          {isActiveDay && (
+                            <motion.div
+                              className="absolute inset-0 bg-white/20 rounded-full"
+                              animate={{ x: ['-100%', '200%'] }}
+                              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+                            />
+                          )}
+                        </motion.div>
+                        <span className={`text-[9px] capitalize leading-none ${isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
+                          {shortDay}
+                        </span>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-xs capitalize">
                       <p>{dayLabel} {isActiveDay ? '✅' : '—'}</p>
