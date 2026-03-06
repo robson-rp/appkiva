@@ -339,6 +339,87 @@ Deno.serve(async (req) => {
         }
       }
     }
+
+
+    // ─── 6b. Seed streak data ────────────────────────────────
+    const { data: childProfile2 } = await supabaseAdmin
+      .from("profiles").select("id").eq("user_id", results.child).single();
+    const { data: teenProfile2 } = await supabaseAdmin
+      .from("profiles").select("id").eq("user_id", results.teen).single();
+
+    const today = new Date();
+    const toISO = (d: Date) => d.toISOString().split("T")[0];
+    const daysAgo = (n: number) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - n);
+      return toISO(d);
+    };
+
+    const streakProfiles = [
+      {
+        profile: childProfile2,
+        currentStreak: 12,
+        longestStreak: 12,
+        // 12-day streak + 5 older days + 3 scattered = 20 days
+        activeDays: [
+          ...Array.from({ length: 12 }, (_, i) => daysAgo(i)),
+          ...Array.from({ length: 5 }, (_, i) => daysAgo(14 + i)),
+          daysAgo(25), daysAgo(26), daysAgo(27),
+        ],
+        claimedMilestones: [3, 7], // claimed 3-day and 7-day
+      },
+      {
+        profile: teenProfile2,
+        currentStreak: 5,
+        longestStreak: 8,
+        // 5-day streak + older 8-day streak + scattered = 16 days
+        activeDays: [
+          ...Array.from({ length: 5 }, (_, i) => daysAgo(i)),
+          ...Array.from({ length: 8 }, (_, i) => daysAgo(10 + i)),
+          daysAgo(22), daysAgo(23), daysAgo(24),
+        ],
+        claimedMilestones: [3],
+      },
+    ];
+
+    for (const sp of streakProfiles) {
+      if (!sp.profile) continue;
+      const pid = sp.profile.id;
+
+      // Upsert streak summary
+      const { data: existingStreak } = await supabaseAdmin
+        .from("streaks").select("id").eq("profile_id", pid).maybeSingle();
+
+      if (!existingStreak) {
+        await supabaseAdmin.from("streaks").insert({
+          profile_id: pid,
+          current_streak: sp.currentStreak,
+          longest_streak: sp.longestStreak,
+          total_active_days: sp.activeDays.length,
+          last_active_date: toISO(today),
+        });
+      } else {
+        await supabaseAdmin.from("streaks").update({
+          current_streak: sp.currentStreak,
+          longest_streak: sp.longestStreak,
+          total_active_days: sp.activeDays.length,
+          last_active_date: toISO(today),
+        }).eq("id", existingStreak.id);
+      }
+
+      // Insert activity dates (ignore conflicts)
+      for (const date of sp.activeDays) {
+        await supabaseAdmin.from("streak_activities")
+          .upsert({ profile_id: pid, active_date: date }, { onConflict: "profile_id,active_date" });
+      }
+
+      // Insert claimed milestones
+      for (const days of sp.claimedMilestones) {
+        const pts = days === 3 ? 10 : days === 7 ? 25 : days === 14 ? 50 : days === 30 ? 100 : 0;
+        await supabaseAdmin.from("streak_reward_claims")
+          .upsert({ profile_id: pid, milestone_days: days, kiva_points: pts }, { onConflict: "profile_id,milestone_days" });
+      }
+    }
   }
 
   // ─── 7. Partner tenant & seed data ─────────────────────────
