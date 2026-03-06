@@ -196,7 +196,6 @@ export function FeatureGateWrapper({
   tierName,
   children,
   variant = 'overlay',
-  onUpgrade,
   className,
 }: {
   allowed: boolean;
@@ -205,20 +204,32 @@ export function FeatureGateWrapper({
   tierName?: string | null;
   children: React.ReactNode;
   variant?: 'inline' | 'overlay';
-  onUpgrade?: () => void;
   className?: string;
 }) {
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const { data: tiers = [] } = useSubscriptionTiers();
+  const { upgrade } = useUpgradeSubscription();
+
   return (
     <div className={cn('relative', className)}>
       {children}
       {!allowed && (
-        <UpgradePrompt
-          featureName={featureName}
-          description={description}
-          currentTier={tierName}
-          variant={variant}
-          onUpgrade={onUpgrade}
-        />
+        <>
+          <UpgradePrompt
+            featureName={featureName}
+            description={description}
+            currentTier={tierName}
+            variant={variant}
+            onUpgrade={() => setPaymentOpen(true)}
+          />
+          <PaymentSimulator
+            open={paymentOpen}
+            onOpenChange={setPaymentOpen}
+            currentTierName={tierName}
+            tiers={tiers}
+            onConfirmUpgrade={upgrade}
+          />
+        </>
       )}
     </div>
   );
