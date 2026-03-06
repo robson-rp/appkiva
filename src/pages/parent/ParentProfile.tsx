@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, User, Mail, Phone, Shield, Users } from 'lucide-react';
+import { Camera, Save, User, Mail, Phone, Shield, Users, Crown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAllFeatures } from '@/hooks/use-feature-gate';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
