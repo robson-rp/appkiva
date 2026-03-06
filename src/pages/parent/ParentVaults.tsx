@@ -9,9 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { PiggyBank, Sparkles, TrendingUp, Settings2, Trash2, Users } from 'lucide-react';
+import { PiggyBank, Sparkles, TrendingUp, Settings2, Trash2, Users, Plus } from 'lucide-react';
 import { useChildren } from '@/hooks/use-children';
-import { useHouseholdVaults, useUpdateVaultInterestRate, useDeleteSavingsVault } from '@/hooks/use-savings-vaults';
+import { useHouseholdVaults, useUpdateVaultInterestRate, useDeleteSavingsVault, useCreateSavingsVault } from '@/hooks/use-savings-vaults';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -22,11 +23,20 @@ export default function ParentVaults() {
   const { data: allVaults = [], isLoading: vaultsLoading } = useHouseholdVaults();
   const updateRate = useUpdateVaultInterestRate();
   const deleteVault = useDeleteSavingsVault();
+  const createVault = useCreateSavingsVault();
 
   // Interest rate edit dialog
   const [rateDialogOpen, setRateDialogOpen] = useState(false);
   const [editVault, setEditVault] = useState<{ id: string; name: string; icon: string; interestRate: number } | null>(null);
   const [newRate, setNewRate] = useState(1);
+
+  // Create vault dialog
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newVaultName, setNewVaultName] = useState('');
+  const [newVaultTarget, setNewVaultTarget] = useState('');
+  const [newVaultRate, setNewVaultRate] = useState(1);
+  const [newVaultChild, setNewVaultChild] = useState('');
+  const [newVaultIcon, setNewVaultIcon] = useState('🐷');
 
   const isLoading = childrenLoading || vaultsLoading;
 
@@ -63,6 +73,30 @@ export default function ParentVaults() {
     );
   };
 
+  const handleCreateVault = async () => {
+    if (!newVaultName.trim() || !newVaultTarget || !newVaultChild) return;
+    const target = Number(newVaultTarget);
+    if (target <= 0) return;
+    try {
+      await createVault.mutateAsync({
+        name: newVaultName.trim().slice(0, 100),
+        icon: newVaultIcon,
+        targetAmount: target,
+        interestRate: newVaultRate,
+        profileId: newVaultChild,
+      });
+      toast({ title: 'Cofre criado! 🐷', description: `Cofre "${newVaultName}" criado com sucesso.` });
+      setCreateDialogOpen(false);
+      setNewVaultName('');
+      setNewVaultTarget('');
+      setNewVaultRate(1);
+      setNewVaultChild('');
+      setNewVaultIcon('🐷');
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível criar o cofre.', variant: 'destructive' });
+    }
+  };
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
@@ -78,8 +112,17 @@ export default function ParentVaults() {
                   <PiggyBank className="h-7 w-7" /> Cofres dos Filhos
                 </h1>
                 <p className="text-primary-foreground/60 text-sm max-w-md">
-                  Acompanha e gere as poupanças dos teus filhos. Ajusta taxas de juro e elimina cofres vazios.
+                  Acompanha e gere as poupanças dos teus filhos. Ajusta taxas de juro e cria novos cofres.
                 </p>
+                {children.length > 0 && (
+                  <Button
+                    size="sm"
+                    className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg mt-2"
+                    onClick={() => setCreateDialogOpen(true)}
+                  >
+                    <Plus className="h-4 w-4" /> Criar Cofre
+                  </Button>
+                )}
               </div>
               <div className="flex gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
@@ -291,6 +334,107 @@ export default function ParentVaults() {
             >
               <Sparkles className="h-4 w-4" />
               {updateRate.isPending ? 'A guardar...' : 'Guardar Taxa'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Vault Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Plus className="h-5 w-5 text-primary" />
+              Criar Cofre para Filho
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Criança</Label>
+              <Select value={newVaultChild} onValueChange={setNewVaultChild}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Seleciona uma criança" />
+                </SelectTrigger>
+                <SelectContent>
+                  {children.map((c) => (
+                    <SelectItem key={c.profileId} value={c.profileId}>
+                      <span className="flex items-center gap-2">
+                        <span>{c.avatar}</span> {c.displayName}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nome do cofre</Label>
+              <Input
+                placeholder="Ex: Bicicleta nova"
+                value={newVaultName}
+                onChange={e => setNewVaultName(e.target.value)}
+                maxLength={100}
+                className="rounded-xl"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Meta (KivaCoins)</Label>
+                <Input
+                  type="number"
+                  placeholder="500"
+                  value={newVaultTarget}
+                  onChange={e => setNewVaultTarget(e.target.value)}
+                  min={1}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Ícone</Label>
+                <div className="flex gap-1.5 flex-wrap">
+                  {['🐷', '🎯', '🚲', '📱', '🎮', '📚', '✈️', '🎸'].map((icon) => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setNewVaultIcon(icon)}
+                      className={`w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all ${
+                        newVaultIcon === icon
+                          ? 'bg-primary/15 ring-2 ring-primary scale-110'
+                          : 'bg-muted/50 hover:bg-muted'
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs">Taxa de juro: {newVaultRate}%/mês</Label>
+              <Slider
+                value={[newVaultRate]}
+                onValueChange={([v]) => setNewVaultRate(v)}
+                min={0}
+                max={10}
+                step={0.5}
+                className="py-2"
+              />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>0%</span>
+                <span>5%</span>
+                <span>10%</span>
+              </div>
+            </div>
+
+            <Button
+              className="w-full rounded-xl font-display gap-2"
+              onClick={handleCreateVault}
+              disabled={createVault.isPending || !newVaultChild || !newVaultName.trim() || !newVaultTarget}
+            >
+              <PiggyBank className="h-4 w-4" />
+              {createVault.isPending ? 'A criar...' : 'Criar Cofre'}
             </Button>
           </div>
         </DialogContent>

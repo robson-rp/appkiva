@@ -54,10 +54,11 @@ export function useCreateSavingsVault() {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (input: { name: string; icon?: string; targetAmount: number; interestRate?: number }) => {
+    mutationFn: async (input: { name: string; icon?: string; targetAmount: number; interestRate?: number; profileId?: string }) => {
       if (!user) throw new Error('Not authenticated');
+      const targetProfileId = input.profileId || user.profileId;
       const { error } = await supabase.from('savings_vaults').insert({
-        profile_id: user.profileId,
+        profile_id: targetProfileId,
         household_id: user.householdId,
         name: input.name,
         icon: input.icon ?? '🐷',
