@@ -4,7 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useSavingsVaults, useCreateSavingsVault } from '@/hooks/use-savings-vaults';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
+
+const calcMonthlyInterest = (amount: number, rate: number) =>
+  Math.round(amount * (rate / 100));
+
+const calcProjection = (amount: number, rate: number, months: number) =>
+  Math.round(amount * Math.pow(1 + rate / 100, months));
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -66,6 +72,9 @@ export default function TeenVaults() {
         <div className="space-y-3">
           {vaults.map((vault, i) => {
             const pct = vault.targetAmount > 0 ? (vault.currentAmount / vault.targetAmount) * 100 : 0;
+            const monthlyInterest = calcMonthlyInterest(vault.currentAmount, vault.interestRate);
+            const projection3m = calcProjection(vault.currentAmount, vault.interestRate, 3);
+            const projection6m = calcProjection(vault.currentAmount, vault.interestRate, 6);
             return (
               <motion.div key={vault.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <Card className="border-border/50">
@@ -85,6 +94,28 @@ export default function TeenVaults() {
                     </div>
                     <Progress value={pct} className="h-2" />
                     <p className="text-[10px] text-muted-foreground mt-1">{Math.round(pct)}% concluído</p>
+
+                    {/* Interest projections */}
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-1.5">
+                        <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                        <span className="text-xs font-display font-bold text-secondary">Projeção de juros</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="bg-muted/50 rounded-lg p-2 text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Este mês</p>
+                          <p className="font-display font-bold text-sm text-secondary">+{monthlyInterest} 🪙</p>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-2 text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 3 meses</p>
+                          <p className="font-display font-bold text-sm text-primary">{projection3m} 🪙</p>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-2 text-center">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 6 meses</p>
+                          <p className="font-display font-bold text-sm text-accent-foreground">{projection6m} 🪙</p>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
