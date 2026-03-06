@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { useStreakData, useClaimStreakReward } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
-import { STREAK_MILESTONES, StreakReward } from '@/types/kivara';
+import { StreakReward } from '@/types/kivara';
 import { Flame, Trophy, CalendarDays, Zap, Gift, CheckCircle, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { playSparkleSound, hapticLight } from '@/lib/celebration-effects';
