@@ -1,72 +1,128 @@
 
-## Análise: Arquitectura Técnica KIVARA — Estado Actual vs Visão
 
-### O que existe hoje
+# Plan: KIVARA Core Platform Architecture Evolution
 
-O projecto KIVARA é actualmente um **frontend React com dados mock** (sem backend real). Toda a lógica vive no cliente com `useState`, ficheiros de mock data, e autenticação simulada via `AuthContext` com utilizadores hardcoded.
+## Current State Assessment
 
-**Cobertura actual por domínio:**
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-| Domínio da Arquitectura | Estado | Notas |
-|---|---|---|
-| Identity & Access | Simulado | Mock users, sem auth real, sem MFA |
-| Family Graph | Parcial | Relações pai→filho nos mocks, sem modelo formal |
-| Virtual Wallet | UI existe | Saldos em mock, sem ledger |
-| Real Money Wallet | Inexistente | Fase 2 fintech |
-| Ledger Service | Inexistente | Saldo é campo directo, não derivado |
-| Rules & Policy Engine | Parcial | Limites de gasto como dados estáticos |
-| Missions & Learning | UI completa | Lições, quizzes, missões — tudo mock |
-| Chores & Rewards | UI completa | Workflow tarefa→aprovação visual |
-| Gamification | UI completa | Badges, levels, streaks, avatares |
-| Store | UI existe | Catálogo mock |
-| Notifications | UI existe | Dados estáticos |
-| Analytics & Insights | Parcial | Gráficos recharts com dados mock |
-| Risk & Fraud | Inexistente | — |
-| School Portal | UI completa | Dashboard, turmas, desafios, PDF export |
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-### Caminho recomendado (dentro do Lovable)
+## What Lovable Can and Cannot Build
 
-**Fase A — Fundação Backend ✅ CONCLUÍDA**
-1. ✅ Lovable Cloud activado
-2. ✅ Schema criado: `households`, `profiles`, `children`, `user_roles`, `consent_records`
-3. ✅ Enum `app_role` (parent, child, teen, teacher, admin)
-4. ✅ Funções SECURITY DEFINER: `has_role()`, `get_user_household_id()`
-5. ✅ RLS policies por household/família
-6. ✅ Trigger auto-create profile on signup
-7. 🔲 Implementar auth real (substituir AuthContext mock)
-8. 🔲 Migrar mock data para tabelas reais
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-**Fase B — Ledger & Wallets ✅ CONCLUÍDA**
-1. ✅ Tabela `wallets` com tipo (virtual/real) e moeda (KVC)
-2. ✅ Tabela `ledger_entries` (double-entry: debit/credit, append-only, imutável)
-3. ✅ Enum `ledger_entry_type` com 11 tipos de transacção
-4. ✅ View `wallet_balances` — saldos derivados do ledger (nunca campo directo)
-5. ✅ View `wallet_transactions` — transacções com direcção (credit/debit)
-6. ✅ Função `get_profile_balance()` — SECURITY DEFINER
-7. ✅ Trigger auto-create wallet on profile creation
-8. ✅ RLS policies por household (append-only, sem UPDATE/DELETE)
-9. ✅ Hook `useWalletBalance()` e `useWalletTransactions()` no frontend
-10. 🔲 Edge function para criar transacções com validação server-side
-11. 🔲 Migrar componentes de mock balance para ledger real
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-**Fase C — Policy Engine & Workflows**
-1. Tabela `policies` + `policy_assignments`
-2. Edge functions que validam regras antes de cada transacção
-3. Workflow de aprovação parental (tarefa → aprovação → ledger entry)
-4. Limites de gasto enforced server-side
+## Implementation Plan (4 Phases)
 
-**Fase D — Auditoria & Segurança**
-1. Tabela `audit_log` (append-only)
-2. Triggers em tabelas críticas
-3. Consent records para menores ✅ (tabela criada)
-4. Pseudonimização nos rankings
+### Phase 1 — Multi-Tenant Foundation
 
-### Limitação do Lovable
+**Database migrations:**
 
-O Lovable suporta React + Supabase/Cloud. Consegue implementar:
-- Auth real com RLS e RBAC
-- Schema relacional completo
-- Edge functions (Deno) para lógica server-side
-- Ledger como tabelas Supabase com RLS
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-**Não consegue**: API Gateway dedicado, micro-serviços separados, processamento de pagamentos reais, KYC/AML, emissão de cartões. Estes componentes vivem fora do Lovable.
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+
+4. Expand `app_role` enum to include `admin`
+
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
+
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+
