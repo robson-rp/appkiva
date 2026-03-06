@@ -64,6 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<KivaraUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentChildId, setCurrentChildId] = useState<string | null>(null);
+  const streakRecorded = useRef(false);
+
+  // Auto-record daily activity for streak tracking
+  useEffect(() => {
+    if (!user?.profileId || streakRecorded.current) return;
+    streakRecorded.current = true;
+    supabase
+      .rpc('record_daily_activity', { _profile_id: user.profileId })
+      .then(({ error }) => {
+        if (error) console.warn('[streak] record_daily_activity:', error.message);
+      });
+  }, [user?.profileId]);
 
   useEffect(() => {
     // Set up auth listener FIRST
