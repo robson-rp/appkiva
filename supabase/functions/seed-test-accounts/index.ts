@@ -39,36 +39,30 @@ Deno.serve(async (req) => {
       },
     });
 
-    if (error && error.message.includes("already been registered")) {
-      // Find existing user by signing in
-      const { data: signInData, error: signInErr } = await supabaseAdmin.auth.signInWithPassword({
+    if (error) {
+      // User likely already exists — find them via sign in
+      const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
         email: acc.email,
         password,
       });
 
-      if (signInErr || !signInData.user) {
-        results[acc.role] = "skipped";
-        continue;
-      }
+      if (signInData?.user) {
+        results[acc.role] = signInData.user.id;
 
-      results[acc.role] = signInData.user.id;
+        // Ensure role exists
+        const { data: existingRoles } = await supabaseAdmin
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", signInData.user.id)
+          .eq("role", acc.role);
 
-      // Ensure role exists
-      const { data: existingRoles } = await supabaseAdmin
-        .from("user_roles")
-        .select("id")
-        .eq("user_id", signInData.user.id)
-        .eq("role", acc.role);
-
-      if (!existingRoles || existingRoles.length === 0) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: signInData.user.id, role: acc.role });
+        if (!existingRoles || existingRoles.length === 0) {
+          await supabaseAdmin.from("user_roles").insert({ user_id: signInData.user.id, role: acc.role });
+        }
+      } else {
+        results[acc.role] = `skipped: ${error.message}`;
       }
       continue;
-    } else if (error) {
-      return new Response(JSON.stringify({ error: `Failed to create ${acc.role}: ${error.message}` }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
     results[acc.role] = data.user.id;
