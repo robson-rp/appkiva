@@ -20,16 +20,35 @@ export default function ChildWallet() {
   const { data: ledgerTx } = useWalletTransactions();
   const balance = walletBalance?.balance ?? child.balance;
   
+  // Map entry_type to display type
+  const mapTxType = (tx: { entry_type: string; direction: string }): string => {
+    switch (tx.entry_type) {
+      case 'vault_deposit': return 'saved';
+      case 'vault_withdraw': return 'earned';
+      case 'vault_interest': return 'saved';
+      case 'allowance': return 'allowance';
+      case 'purchase': return 'spent';
+      case 'donation': return 'donated';
+      default: return tx.direction === 'credit' ? 'earned' : 'spent';
+    }
+  };
+
   // Use ledger transactions if available, fallback to mock
   const transactions = ledgerTx && ledgerTx.length > 0
-    ? ledgerTx.map(tx => ({
-        id: tx.id,
-        childId: child.id,
-        description: tx.description,
-        amount: tx.amount,
-        type: tx.direction === 'credit' ? 'earned' as const : 'spent' as const,
-        date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
-      }))
+    ? ledgerTx
+        .filter(tx => tx.entry_type !== 'vault_interest') // interest only affects vault, not wallet
+        .map(tx => ({
+          id: tx.id,
+          childId: child.id,
+          description: tx.entry_type === 'vault_deposit'
+            ? `Poupança: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            : tx.entry_type === 'vault_withdraw'
+            ? `Levantamento: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            : tx.description,
+          amount: tx.amount,
+          type: mapTxType(tx) as 'earned' | 'spent' | 'saved' | 'allowance' | 'donated',
+          date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
+        }))
     : mockTransactions.filter((t) => t.childId === child.id);
   
   const childDonations = mockDonations.filter((d) => d.childId === child.id);
