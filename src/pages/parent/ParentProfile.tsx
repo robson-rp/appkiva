@@ -14,6 +14,7 @@ import { useAllFeatures } from '@/hooks/use-feature-gate';
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
 export default function ParentProfile() {
+  const { tierName } = useAllFeatures();
   const { user } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
