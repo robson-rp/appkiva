@@ -34,6 +34,7 @@ const categoryColors: Record<string, string> = {
 const iconOptions = ['🎬', '🌙', '🍕', '🎢', '📖', '📱', '🎮', '⚽', '🎨', '🎁', '🏖️', '🍦'];
 
 export default function ParentRewards() {
+  const { allowed: rewardsAllowed, loading: gateLoading } = useFeatureGate(FEATURES.CUSTOM_REWARDS);
   const { data: rewards = [], isLoading } = useRewards();
   const createReward = useCreateReward();
   const deleteReward = useDeleteReward();
