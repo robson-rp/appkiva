@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
-import UpgradePrompt from '@/components/UpgradePrompt';
+import UpgradePrompt, { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -63,20 +63,13 @@ export default function ChildDreams() {
     setExpandedId(dreams[0].id);
   }
 
-  if (!dreamVaultsAllowed && !gateLoading) {
-    return (
-      <div className="max-w-2xl mx-auto py-12">
-        <UpgradePrompt
-          featureName="Cofres de Sonhos"
-          description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
-          currentTier={tierName}
-          variant="inline"
-        />
-      </div>
-    );
-  }
-
   return (
+    <FeatureGateWrapper
+      allowed={dreamVaultsAllowed || gateLoading}
+      featureName="Cofres de Sonhos"
+      description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -219,5 +212,6 @@ export default function ChildDreams() {
 
       <Kivo page="dreams" />
     </div>
+    </FeatureGateWrapper>
   );
 }

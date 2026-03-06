@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, Lightbulb, AlertTriangle, CheckCircle, Minus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
-import UpgradePrompt from '@/components/UpgradePrompt';
+import UpgradePrompt, { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -74,20 +74,13 @@ export default function ParentReports() {
     return <Minus className="h-3 w-3 text-muted-foreground" />;
   };
 
-  if (!reportsAllowed && !gateLoading) {
-    return (
-      <div className="max-w-3xl mx-auto py-12">
-        <UpgradePrompt
-          featureName="Relatórios Educativos"
-          description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
-          currentTier={tierName}
-          variant="inline"
-        />
-      </div>
-    );
-  }
-
   return (
+    <FeatureGateWrapper
+      allowed={reportsAllowed || gateLoading}
+      featureName="Relatórios Educativos"
+      description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6">
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
@@ -381,5 +374,6 @@ export default function ParentReports() {
         </Card>
       </motion.div>
     </div>
+    </FeatureGateWrapper>
   );
 }

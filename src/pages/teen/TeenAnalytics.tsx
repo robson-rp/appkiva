@@ -9,7 +9,7 @@ import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } fr
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
-import UpgradePrompt from '@/components/UpgradePrompt';
+import UpgradePrompt, { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -91,20 +91,13 @@ export default function TeenAnalytics() {
     );
   };
 
-  if (!analyticsAllowed && !gateLoading) {
-    return (
-      <div className="max-w-2xl mx-auto py-12">
-        <UpgradePrompt
-          featureName="Relatórios Avançados"
-          description="Gráficos de despesa, taxa de poupança e análise por categorias. Disponível no plano Família Premium."
-          currentTier={tierName}
-          variant="inline"
-        />
-      </div>
-    );
-  }
-
   return (
+    <FeatureGateWrapper
+      allowed={analyticsAllowed || gateLoading}
+      featureName="Relatórios Avançados"
+      description="Gráficos de despesa, taxa de poupança e análise por categorias. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold text-foreground">Análise Financeira</h1>
@@ -341,5 +334,6 @@ export default function TeenAnalytics() {
         </Card>
       </motion.div>
     </div>
+    </FeatureGateWrapper>
   );
 }
