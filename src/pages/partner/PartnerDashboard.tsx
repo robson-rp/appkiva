@@ -44,7 +44,7 @@ export default function PartnerDashboard() {
         <p className="text-muted-foreground font-body">Painel do programa de parceria institucional</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-onboarding="programs" data-onboarding="programs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" data-onboarding="programs">
         {kpis.map((kpi) => (
           <Card key={kpi.label} className="rounded-2xl border-border/50">
             <CardContent className="p-5">
