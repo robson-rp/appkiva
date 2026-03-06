@@ -82,9 +82,14 @@ export default function TeenDashboard() {
         ))}
       </div>
 
+      {/* Streak */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <StreakWidget onClick={() => navigate('/teen/streaks')} />
+      </motion.div>
+
       {/* Weekly Sparkline */}
       {weeklyData && weeklyData.points.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <WeeklySparkline points={weeklyData.points} totalEarned={weeklyData.totalEarned} totalSpent={weeklyData.totalSpent} />
         </motion.div>
       )}
@@ -106,15 +111,10 @@ export default function TeenDashboard() {
 
       {/* Monthly Chart */}
       {monthlySummary.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
           <MonthlyEvolutionChart data={monthlySummary} />
         </motion.div>
       )}
-
-      {/* Streak */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-        <StreakWidget onClick={() => navigate('/teen/streaks')} />
-      </motion.div>
     </div>
   );
 }
