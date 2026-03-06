@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 
 export default function ChildVaults() {
   const { user } = useAuth();
@@ -174,6 +175,13 @@ export default function ChildVaults() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Growth Chart */}
+      {!isLoading && vaults.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <VaultGrowthChart vaults={vaults} />
+        </motion.div>
+      )}
 
       {/* Vault Cards */}
       {isLoading ? (

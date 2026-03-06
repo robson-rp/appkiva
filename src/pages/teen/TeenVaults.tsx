@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 
 const teenVaultsFallback = [
   { id: 'tvault-1', profileId: '', householdId: null, name: 'Portátil novo', targetAmount: 2000, currentAmount: 850, icon: '💻', createdAt: '2026-01-15', interestRate: 2 },
@@ -65,6 +66,12 @@ export default function TeenVaults() {
           </DialogContent>
         </Dialog>
       </motion.div>
+      {/* Growth Chart */}
+      {!isLoading && vaults.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <VaultGrowthChart vaults={vaults} />
+        </motion.div>
+      )}
 
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">A carregar cofres...</div>
