@@ -238,5 +238,6 @@ export default function ParentRewards() {
         </motion.div>
       )}
     </motion.div>
+    </FeatureGateWrapper>
   );
 }
