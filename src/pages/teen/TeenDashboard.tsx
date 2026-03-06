@@ -6,12 +6,12 @@ import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { mockStreakData } from '@/data/streaks-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { LEVEL_CONFIG } from '@/types/kivara';
-import { Wallet, TrendingUp, PiggyBank, Target, ArrowUpRight, ArrowDownRight, Flame, Sparkles } from 'lucide-react';
+import { Wallet, TrendingUp, PiggyBank, Target, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 import { useWeeklySparkline } from '@/hooks/use-weekly-sparkline';
 import { MonthlyEvolutionChart } from '@/components/MonthlyEvolutionChart';
-import { LineChart, Line, XAxis, ResponsiveContainer } from 'recharts';
+import { WeeklySparkline } from '@/components/WeeklySparkline';
 
 export default function TeenDashboard() {
   const teen = mockTeens[0];
@@ -82,31 +82,7 @@ export default function TeenDashboard() {
       {/* Weekly Sparkline Summary */}
       {weeklyData && weeklyData.points.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-          <Card className="border border-border/50 overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <Sparkles className="h-3 w-3 text-secondary" />
-                  </div>
-                  <span className="text-xs font-display font-bold text-foreground">Esta Semana</span>
-                </div>
-                <div className="flex items-center gap-3 text-[10px] font-display">
-                  <span className="text-secondary font-bold">+{weeklyData.totalEarned} 🪙</span>
-                  <span className="text-destructive font-bold">-{weeklyData.totalSpent} 🪙</span>
-                </div>
-              </div>
-              <div className="h-16">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={weeklyData.points}>
-                    <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} />
-                    <Line type="monotone" dataKey="earned" stroke="hsl(var(--secondary))" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="spent" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} strokeDasharray="4 2" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
+          <WeeklySparkline points={weeklyData.points} totalEarned={weeklyData.totalEarned} totalSpent={weeklyData.totalSpent} />
         </motion.div>
       )}
 
