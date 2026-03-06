@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CoinDisplay } from '@/components/CoinDisplay';
+import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -26,14 +26,13 @@ export default function ParentDashboard() {
 
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
 
-  // Compute distributed from real transactions
   const totalDistributed = realTransactions
     .filter((t) => t.entryType === 'allowance' && t.direction === 'in')
     .reduce((s, t) => s + t.amount, 0);
 
   const stats = [
     { label: 'Crianças', value: children.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/parent/children' },
-    { label: 'Distribuído', value: totalDistributed, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/parent/allowance', suffix: ' 🪙' },
+    { label: 'Distribuído', value: totalDistributed, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/parent/allowance', isCurrency: true },
     { label: 'Transacções', value: realTransactions.length, icon: CheckCircle, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary', to: '/parent/tasks' },
     { label: 'Crianças', value: children.length, icon: ListTodo, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive', to: '/parent/children' },
   ];
@@ -72,14 +71,14 @@ export default function ParentDashboard() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 text-center">
                 <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Saldo Total</p>
-                <motion.p
+                <motion.div
                   key={totalBalance}
                   initial={{ scale: 1.15, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="font-display text-3xl md:text-4xl font-bold text-primary-foreground mt-1"
+                  className="mt-1"
                 >
-                  {totalBalance} <span className="text-xl">🪙</span>
-                </motion.p>
+                  <CurrencyDisplay amount={totalBalance} size="xl" className="text-primary-foreground" />
+                </motion.div>
               </div>
             </div>
           </CardContent>
@@ -98,7 +97,7 @@ export default function ParentDashboard() {
                 <div>
                   <p className="font-display font-bold text-sm">Enviar Mesada</p>
                   <p className="text-xs text-muted-foreground">
-                    {children.length} {children.length === 1 ? 'criança' : 'crianças'} · Saldo total: {totalBalance} KVC
+                    {children.length} {children.length === 1 ? 'criança' : 'crianças'} · Saldo total: <CurrencyDisplay amount={totalBalance} size="sm" className="inline" />
                   </p>
                 </div>
               </div>
@@ -132,7 +131,11 @@ export default function ParentDashboard() {
                 <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-3`}>
                   <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
-                <p className="font-display text-2xl font-bold">{stat.value}{stat.suffix || ''}</p>
+                {(stat as any).isCurrency ? (
+                  <CurrencyDisplay amount={stat.value} size="xl" className="font-display" />
+                ) : (
+                  <p className="font-display text-2xl font-bold">{stat.value}</p>
+                )}
                 <p className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">{stat.label}</p>
               </CardContent>
             </Card>
@@ -141,7 +144,7 @@ export default function ParentDashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Children Overview — Real Data */}
+        {/* Children Overview */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 gradient-kivara" />
@@ -186,9 +189,9 @@ export default function ParentDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-display font-bold text-sm">{child.displayName}</p>
-                      <span className="text-[11px] text-muted-foreground">💰 {child.balance} KVC</span>
+                      <CurrencyDisplay amount={child.balance} size="sm" className="text-muted-foreground" />
                     </div>
-                    <CoinDisplay amount={child.balance} size="sm" />
+                    <CurrencyDisplay amount={child.balance} size="sm" />
                   </motion.div>
                 ))
               )}
@@ -196,7 +199,7 @@ export default function ParentDashboard() {
           </Card>
         </motion.div>
 
-        {/* Recent Activity — Real Data */}
+        {/* Recent Activity */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
@@ -248,9 +251,11 @@ export default function ParentDashboard() {
                           </p>
                         </div>
                       </div>
-                      <span className={`text-sm font-display font-bold ${isCredit ? 'text-secondary' : 'text-destructive'}`}>
-                        {isCredit ? '+' : '-'}{tx.amount} 🪙
-                      </span>
+                      <CurrencyDisplay
+                        amount={tx.amount}
+                        size="sm"
+                        className={`font-display font-bold ${isCredit ? 'text-secondary' : 'text-destructive'}`}
+                      />
                     </div>
                   );
                 })
