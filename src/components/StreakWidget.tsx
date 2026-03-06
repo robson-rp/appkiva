@@ -155,8 +155,9 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
                             />
                           )}
-                        </motion.div>
-                        <span className={`text-[9px] capitalize leading-none ${isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
+                         </motion.div>
+                        </div>
+                        <span className={`text-[9px] capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
                           {shortDay}
                         </span>
                       </div>
