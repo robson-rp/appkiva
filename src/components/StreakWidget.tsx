@@ -120,23 +120,34 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 d.setDate(d.getDate() - (6 - i));
                 const dateStr = d.toISOString().split('T')[0];
                 const isActiveDay = sd.activeDates.includes(dateStr);
+                const isToday = i === 6;
                 const dayLabel = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric' });
                 const shortDay = d.toLocaleDateString('pt-PT', { weekday: 'short' }).replace('.', '').slice(0, 3);
                 return (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
                       <div className="flex-1 flex flex-col items-center gap-1 cursor-default">
-                        <motion.div
-                          custom={i}
-                          variants={dayDotVariants}
-                          initial="hidden"
-                          animate="visible"
-                          className={`w-full h-3.5 rounded-full relative overflow-hidden ${
-                            isActiveDay
-                              ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
-                              : 'bg-muted/50'
-                          }`}
-                        >
+                        <div className="relative w-full">
+                          {isToday && (
+                            <motion.div
+                              className="absolute -inset-0.5 rounded-full bg-destructive/20"
+                              animate={{ opacity: [0.4, 0.15, 0.4], scale: [1, 1.15, 1] }}
+                              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                            />
+                          )}
+                          <motion.div
+                            custom={i}
+                            variants={dayDotVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className={`w-full h-3.5 rounded-full relative overflow-hidden ${
+                              isActiveDay
+                                ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
+                                : isToday
+                                  ? 'bg-muted/70 ring-1 ring-destructive/30'
+                                  : 'bg-muted/50'
+                            }`}
+                          >
                           {isActiveDay && (
                             <motion.div
                               className="absolute inset-0 bg-white/20 rounded-full"
@@ -144,8 +155,9 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                               transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
                             />
                           )}
-                        </motion.div>
-                        <span className={`text-[9px] capitalize leading-none ${isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
+                         </motion.div>
+                        </div>
+                        <span className={`text-[9px] capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
                           {shortDay}
                         </span>
                       </div>
