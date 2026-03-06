@@ -28,6 +28,7 @@ export default function PartnerChallenges() {
   const deleteChallenge = useDeleteSponsoredChallenge();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<SponsoredChallenge | null>(null);
+  const updateChallenge = useUpdateSponsoredChallenge();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   function handleEdit(ch: SponsoredChallenge) {
