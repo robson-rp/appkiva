@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import UpgradePrompt from '@/components/UpgradePrompt';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
