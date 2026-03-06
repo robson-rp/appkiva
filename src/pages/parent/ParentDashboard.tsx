@@ -120,7 +120,7 @@ export default function ParentDashboard() {
       />
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3" data-onboarding="tasks">
         {stats.map((stat, i) => (
           <motion.div key={`${stat.label}-${i}`} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
