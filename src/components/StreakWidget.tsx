@@ -151,6 +151,6 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
