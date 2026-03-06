@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award } from 'lucide-react';
+import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useHouseholdTasks, useCreateTask, useApproveTask, type TaskCategory } from '@/hooks/use-household-tasks';
+import { useHouseholdTasks, useCreateTask, useApproveTask, useDeleteTask, type TaskCategory } from '@/hooks/use-household-tasks';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useChildren } from '@/hooks/use-children';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -30,6 +31,7 @@ export default function ParentTasks() {
   const { data: children = [] } = useChildren();
   const createTask = useCreateTask();
   const approveTask = useApproveTask();
+  const deleteTask = useDeleteTask();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -225,6 +227,36 @@ export default function ParentTasks() {
                           >
                             <CheckCircle className="h-3.5 w-3.5" /> Aprovar
                           </Button>
+                        )}
+                        {task.status !== 'approved' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-xl h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="font-display">Eliminar tarefa?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  A tarefa "{task.title}" será eliminada permanentemente. Esta acção não pode ser revertida.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => deleteTask.mutate(task.id)}
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         )}
                       </div>
                     </div>
