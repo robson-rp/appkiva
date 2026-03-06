@@ -50,6 +50,10 @@ import AdminCurrencies from "./pages/admin/AdminCurrencies";
 import AdminAudit from "./pages/admin/AdminAudit";
 import AdminRisk from "./pages/admin/AdminRisk";
 import AdminCompliance from "./pages/admin/AdminCompliance";
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import PartnerPrograms from "./pages/partner/PartnerPrograms";
+import PartnerChallenges from "./pages/partner/PartnerChallenges";
+import PartnerReports from "./pages/partner/PartnerReports";
 
 const queryClient = new QueryClient();
 
