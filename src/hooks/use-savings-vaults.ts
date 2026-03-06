@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 export interface SavingsVault {
   id: string;
@@ -74,19 +75,33 @@ export function useDepositToVault() {
 
   return useMutation({
     mutationFn: async ({ vaultId, amount }: { vaultId: string; amount: number }) => {
-      const { data: vault, error: fetchErr } = await supabase
-        .from('savings_vaults')
-        .select('current_amount')
-        .eq('id', vaultId)
-        .single();
-      if (fetchErr) throw fetchErr;
+      const { data, error } = await supabase.functions.invoke('vault-deposit', {
+        body: { vault_id: vaultId, amount },
+      });
 
-      const { error } = await supabase
-        .from('savings_vaults')
-        .update({ current_amount: Number(vault.current_amount) + amount })
-        .eq('id', vaultId);
       if (error) throw error;
+
+      // Check for application-level errors
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      return data as { deposited: number; vault_balance: number; wallet_balance: number };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['savings-vaults'] }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['savings-vaults'] });
+      qc.invalidateQueries({ queryKey: ['wallet-balance'] });
+      qc.invalidateQueries({ queryKey: ['wallet-transactions'] });
+      toast({
+        title: 'Depósito realizado! 🐷',
+        description: `Depositaste ${data.deposited} KivaCoins no cofre.`,
+      });
+    },
+    onError: (err: Error) => {
+      const msg = err.message.includes('Saldo insuficiente')
+        ? 'Não tens KivaCoins suficientes para este depósito.'
+        : 'Não foi possível realizar o depósito.';
+      toast({ title: 'Erro', description: msg, variant: 'destructive' });
+    },
   });
 }
