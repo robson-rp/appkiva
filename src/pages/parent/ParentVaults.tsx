@@ -14,6 +14,7 @@ import { useChildren } from '@/hooks/use-children';
 import { useHouseholdVaults, useUpdateVaultInterestRate, useDeleteSavingsVault, useCreateSavingsVault } from '@/hooks/use-savings-vaults';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { createNotification } from '@/hooks/use-notifications';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -68,6 +69,17 @@ export default function ParentVaults() {
         onSuccess: () => {
           setRateDialogOpen(false);
           toast({ title: 'Taxa atualizada! 📊', description: `Taxa de juro alterada para ${newRate}%/mês.` });
+          // Notify the child
+          const vault = allVaults.find(v => v.id === editVault.id);
+          if (vault) {
+            createNotification({
+              profileId: vault.profileId,
+              title: 'Taxa de juro atualizada 📊',
+              message: `A taxa de juro do cofre "${editVault.name}" foi alterada para ${newRate}%/mês.`,
+              type: 'vault',
+              metadata: { vaultId: editVault.id, newRate },
+            });
+          }
         },
       }
     );
@@ -86,6 +98,15 @@ export default function ParentVaults() {
         profileId: newVaultChild,
       });
       toast({ title: 'Cofre criado! 🐷', description: `Cofre "${newVaultName}" criado com sucesso.` });
+      // Notify the child
+      const childInfo = childMap.get(newVaultChild);
+      createNotification({
+        profileId: newVaultChild,
+        title: 'Novo cofre criado! 🐷',
+        message: `${childInfo?.displayName ?? 'O teu encarregado'} criou o cofre "${newVaultName}" com meta de ${target} 🪙.`,
+        type: 'vault',
+        metadata: { vaultName: newVaultName, targetAmount: target, interestRate: newVaultRate },
+      });
       setCreateDialogOpen(false);
       setNewVaultName('');
       setNewVaultTarget('');
