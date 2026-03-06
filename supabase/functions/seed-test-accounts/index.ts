@@ -28,12 +28,39 @@ Deno.serve(async (req) => {
 
   // Create users
   for (const acc of accounts) {
-    // Check if user already exists
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existing = existingUsers?.users?.find((u) => u.email === acc.email);
+    // Check if user already exists by email
+    const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const existing = listData?.users?.find((u) => u.email === acc.email);
 
     if (existing) {
       results[acc.role] = existing.id;
+
+      // Ensure role exists for this user
+      const { data: existingRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", existing.id)
+        .eq("role", acc.role);
+
+      if (!existingRoles || existingRoles.length === 0) {
+        await supabaseAdmin.from("user_roles").insert({ user_id: existing.id, role: acc.role });
+      }
+
+      // Ensure profile exists
+      const { data: existingProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("user_id", existing.id)
+        .single();
+
+      if (!existingProfile) {
+        await supabaseAdmin.from("profiles").insert({
+          user_id: existing.id,
+          display_name: acc.name,
+          avatar: acc.avatar,
+        });
+      }
+
       continue;
     }
 
