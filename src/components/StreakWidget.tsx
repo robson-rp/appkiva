@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
+import { useStreakData } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
 
 interface StreakWidgetProps {
@@ -34,8 +35,10 @@ const dayDotVariants = {
 };
 
 export function StreakWidget({ onClick }: StreakWidgetProps) {
-  const isActive = mockStreakData.currentStreak > 0;
-  const isHot = mockStreakData.currentStreak >= 7;
+  const { data: streakData } = useStreakData();
+  const sd = streakData ?? mockStreakData;
+  const isActive = sd.currentStreak > 0;
+  const isHot = sd.currentStreak >= 7;
 
   return (
     <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
@@ -84,20 +87,20 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               </div>
               <div>
                 <p className="text-sm font-display font-bold">Sequência Diária</p>
-                <p className="text-xs text-muted-foreground">{mockStreakData.totalActiveDays} dias activos no total</p>
+                <p className="text-xs text-muted-foreground">{sd.totalActiveDays} dias activos no total</p>
               </div>
             </div>
             <div className="text-right">
               <motion.p
-                key={mockStreakData.currentStreak}
+                key={sd.currentStreak}
                 initial={{ scale: 1.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
                 className={`text-2xl font-display font-bold ${isHot ? 'text-destructive' : 'text-destructive/80'}`}
               >
-                {mockStreakData.currentStreak} 🔥
+                {sd.currentStreak} 🔥
               </motion.p>
-              <p className="text-[10px] text-muted-foreground">Recorde: {mockStreakData.longestStreak}</p>
+              <p className="text-[10px] text-muted-foreground">Recorde: {sd.longestStreak}</p>
             </div>
           </div>
 
@@ -108,7 +111,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 const d = new Date();
                 d.setDate(d.getDate() - (6 - i));
                 const dateStr = d.toISOString().split('T')[0];
-                const isActiveDay = mockStreakData.activeDates.includes(dateStr);
+                const isActiveDay = sd.activeDates.includes(dateStr);
                 return (
                   <motion.div
                     key={i}

@@ -914,6 +914,108 @@ export type Database = {
           },
         ]
       }
+      streak_activities: {
+        Row: {
+          active_date: string
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          active_date: string
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          active_date?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_activities_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streak_reward_claims: {
+        Row: {
+          claimed_at: string
+          id: string
+          kiva_points: number
+          milestone_days: number
+          profile_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          id?: string
+          kiva_points?: number
+          milestone_days: number
+          profile_id: string
+        }
+        Update: {
+          claimed_at?: string
+          id?: string
+          kiva_points?: number
+          milestone_days?: number
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_reward_claims_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_active_date: string | null
+          longest_streak: number
+          profile_id: string
+          total_active_days: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          profile_id: string
+          total_active_days?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          longest_streak?: number
+          profile_id?: string
+          total_active_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streaks_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_tiers: {
         Row: {
           created_at: string
@@ -1249,6 +1351,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_daily_activity: { Args: { _profile_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin" | "partner"

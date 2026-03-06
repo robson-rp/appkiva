@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { useStreakData, useClaimStreakReward } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
-import { STREAK_MILESTONES, StreakReward } from '@/types/kivara';
+import { StreakReward } from '@/types/kivara';
 import { Flame, Trophy, CalendarDays, Zap, Gift, CheckCircle, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { playSparkleSound, hapticLight } from '@/lib/celebration-effects';
@@ -22,7 +23,9 @@ function getMonthDays(year: number, month: number) {
 const WEEKDAYS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 export default function StreaksPage() {
-  const [streakData, setStreakData] = useState(mockStreakData);
+  const { data: streakDataFromDb } = useStreakData();
+  const streakData = streakDataFromDb ?? mockStreakData;
+  const claimReward = useClaimStreakReward();
   const today = new Date();
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -39,16 +42,24 @@ export default function StreaksPage() {
     if (reward.claimed || streakData.currentStreak < reward.days) return;
     playSparkleSound();
     hapticLight();
-    setStreakData(prev => ({
-      ...prev,
-      streakRewards: prev.streakRewards.map(r =>
-        r.days === reward.days ? { ...r, claimed: true } : r
-      ),
-    }));
-    toast({
-      title: `${reward.icon} Recompensa reclamada!`,
-      description: `+${reward.kivaPoints} KivaPoints pelo marco de ${reward.label}!`,
-    });
+    claimReward.mutate(
+      { milestoneDays: reward.days, kivaPoints: reward.kivaPoints },
+      {
+        onSuccess: () => {
+          toast({
+            title: `${reward.icon} Recompensa reclamada!`,
+            description: `+${reward.kivaPoints} KivaPoints pelo marco de ${reward.label}!`,
+          });
+        },
+        onError: () => {
+          toast({
+            title: 'Erro',
+            description: 'Não foi possível reclamar a recompensa. Tenta novamente.',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
   };
 
   const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('pt-PT', { month: 'long', year: 'numeric' });
