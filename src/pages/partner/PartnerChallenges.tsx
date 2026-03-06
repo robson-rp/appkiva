@@ -52,6 +52,15 @@ export default function PartnerChallenges() {
     setDeleteId(null);
   }
 
+  async function handleStatusChange(id: string, newStatus: string) {
+    try {
+      await updateChallenge.mutateAsync({ id, status: newStatus });
+      toast.success(`Status alterado para ${statusConfig[newStatus]?.label ?? newStatus}`);
+    } catch {
+      toast.error('Erro ao alterar status');
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
