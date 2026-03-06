@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Separate client for sign-in lookups (won't pollute admin client session)
   const lookupClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -32,7 +31,7 @@ Deno.serve(async (req) => {
 
   const results: Record<string, string> = {};
 
-  // Create or find users
+  // ─── 1. Create or find users ───────────────────────────────
   for (const acc of accounts) {
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: acc.email,
@@ -46,7 +45,6 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
-      // User likely already exists — find them via sign in
       const { data: signInData } = await lookupClient.auth.signInWithPassword({
         email: acc.email,
         password,
@@ -55,7 +53,6 @@ Deno.serve(async (req) => {
       if (signInData?.user) {
         results[acc.role] = signInData.user.id;
 
-        // Ensure role exists
         const { data: existingRoles } = await supabaseAdmin
           .from("user_roles")
           .select("id")
@@ -74,33 +71,199 @@ Deno.serve(async (req) => {
     results[acc.role] = data.user.id;
   }
 
-  // Create household
+  // ─── 2. Supported currencies ───────────────────────────────
+  const currencies = [
+    { code: "EUR", symbol: "€", name: "Euro", decimal_places: 2 },
+    { code: "USD", symbol: "$", name: "US Dollar", decimal_places: 2 },
+    { code: "AOA", symbol: "Kz", name: "Kwanza Angolano", decimal_places: 0 },
+    { code: "BRL", symbol: "R$", name: "Real Brasileiro", decimal_places: 2 },
+    { code: "KES", symbol: "KSh", name: "Kenyan Shilling", decimal_places: 0 },
+    { code: "NGN", symbol: "₦", name: "Nigerian Naira", decimal_places: 0 },
+  ];
+
+  for (const cur of currencies) {
+    await supabaseAdmin
+      .from("supported_currencies")
+      .upsert(cur, { onConflict: "code" });
+  }
+
+  // ─── 3. Subscription tiers ─────────────────────────────────
+  const tiers = [
+    {
+      name: "Gratuito",
+      tier_type: "free",
+      price_monthly: 0,
+      price_yearly: 0,
+      max_children: 2,
+      max_classrooms: 0,
+      features: JSON.stringify(["savings_vaults"]),
+    },
+    {
+      name: "Família Premium",
+      tier_type: "family_premium",
+      price_monthly: 4.99,
+      price_yearly: 49.99,
+      max_children: 10,
+      max_classrooms: 0,
+      features: JSON.stringify([
+        "savings_vaults",
+        "dream_vaults",
+        "custom_rewards",
+        "budget_exceptions",
+        "multi_child",
+        "advanced_analytics",
+        "export_reports",
+        "real_money_wallet",
+      ]),
+    },
+    {
+      name: "Escola Institucional",
+      tier_type: "school_institutional",
+      price_monthly: 29.99,
+      price_yearly: 299.99,
+      max_children: 500,
+      max_classrooms: 20,
+      features: JSON.stringify([
+        "savings_vaults",
+        "dream_vaults",
+        "custom_rewards",
+        "classroom_mode",
+        "advanced_analytics",
+        "export_reports",
+        "multi_child",
+        "priority_support",
+      ]),
+    },
+    {
+      name: "Parceiro",
+      tier_type: "partner_program",
+      price_monthly: 0,
+      price_yearly: 0,
+      max_children: 1000,
+      max_classrooms: 50,
+      features: JSON.stringify([
+        "savings_vaults",
+        "dream_vaults",
+        "custom_rewards",
+        "budget_exceptions",
+        "classroom_mode",
+        "advanced_analytics",
+        "export_reports",
+        "multi_child",
+        "real_money_wallet",
+        "priority_support",
+      ]),
+    },
+  ];
+
+  // Upsert tiers by tier_type (unique name)
+  const tierIds: Record<string, string> = {};
+  for (const tier of tiers) {
+    // Check if exists
+    const { data: existing } = await supabaseAdmin
+      .from("subscription_tiers")
+      .select("id")
+      .eq("tier_type", tier.tier_type)
+      .maybeSingle();
+
+    if (existing) {
+      await supabaseAdmin
+        .from("subscription_tiers")
+        .update({ ...tier, features: JSON.parse(tier.features) })
+        .eq("id", existing.id);
+      tierIds[tier.tier_type] = existing.id;
+    } else {
+      const { data: inserted } = await supabaseAdmin
+        .from("subscription_tiers")
+        .insert({ ...tier, features: JSON.parse(tier.features) })
+        .select("id")
+        .single();
+      if (inserted) tierIds[tier.tier_type] = inserted.id;
+    }
+  }
+
+  // ─── 4. Create household ──────────────────────────────────
   const { data: household, error: hhError } = await supabaseAdmin
     .from("households")
     .insert({ name: "Família Teste" })
     .select("id")
     .single();
 
-  if (hhError && !hhError.message.includes("duplicate")) {
-    return new Response(JSON.stringify({ error: `Household error: ${hhError.message}` }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  // If household already exists, find it
+  let householdId = household?.id;
+  if (hhError) {
+    // Try to find existing household via parent profile
+    const { data: parentProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("household_id")
+      .eq("user_id", results.parent)
+      .single();
+    householdId = parentProfile?.household_id ?? undefined;
   }
 
-  const householdId = household?.id;
+  // ─── 5. Create tenant & link to household ──────────────────
+  let tenantId: string | undefined;
 
   if (householdId) {
-    // Link parent, child, teen to household
-    for (const role of ["parent", "child", "teen"]) {
-      const userId = results[role];
+    // Check if tenant already exists for this household
+    const { data: existingHousehold } = await supabaseAdmin
+      .from("households")
+      .select("tenant_id")
+      .eq("id", householdId)
+      .single();
+
+    if (existingHousehold?.tenant_id) {
+      tenantId = existingHousehold.tenant_id;
+      // Update existing tenant to use Family Premium tier
       await supabaseAdmin
-        .from("profiles")
-        .update({ household_id: householdId })
-        .eq("user_id", userId);
+        .from("tenants")
+        .update({
+          subscription_tier_id: tierIds["family_premium"],
+          currency: "EUR",
+          real_money_enabled: true,
+        })
+        .eq("id", tenantId);
+    } else {
+      // Create new tenant
+      const { data: tenant } = await supabaseAdmin
+        .from("tenants")
+        .insert({
+          name: "Família Teste",
+          tenant_type: "family",
+          currency: "EUR",
+          subscription_tier_id: tierIds["family_premium"],
+          real_money_enabled: true,
+        })
+        .select("id")
+        .single();
+
+      tenantId = tenant?.id;
+
+      if (tenantId) {
+        // Link household to tenant
+        await supabaseAdmin
+          .from("households")
+          .update({ tenant_id: tenantId })
+          .eq("id", householdId);
+      }
     }
 
-    // Get profile IDs
+    // Link all family profiles to tenant
+    if (tenantId) {
+      for (const role of ["parent", "child", "teen"]) {
+        const userId = results[role];
+        if (userId && !userId.startsWith("skipped")) {
+          await supabaseAdmin
+            .from("profiles")
+            .update({ household_id: householdId, tenant_id: tenantId })
+            .eq("user_id", userId);
+        }
+      }
+    }
+  }
+
+  // ─── 6. Link profiles, create children, initial balances ───
+  if (householdId) {
     const { data: parentProfile } = await supabaseAdmin
       .from("profiles")
       .select("id")
@@ -119,7 +282,6 @@ Deno.serve(async (req) => {
       .eq("user_id", results.teen)
       .single();
 
-    // Create children records linking child and teen to parent
     if (parentProfile && childProfile) {
       await supabaseAdmin
         .from("children")
@@ -138,9 +300,8 @@ Deno.serve(async (req) => {
         );
     }
 
-    // Give child and teen some initial balance (100 KivaCoins each)
     for (const profileData of [childProfile, teenProfile]) {
-      if (!profileData) continue;
+      if (!profileData || !parentProfile) continue;
       const { data: wallet } = await supabaseAdmin
         .from("wallets")
         .select("id")
@@ -151,19 +312,30 @@ Deno.serve(async (req) => {
       const { data: parentWallet } = await supabaseAdmin
         .from("wallets")
         .select("id")
-        .eq("profile_id", parentProfile!.id)
+        .eq("profile_id", parentProfile.id)
         .eq("wallet_type", "virtual")
         .single();
 
       if (wallet && parentWallet) {
-        await supabaseAdmin.from("ledger_entries").insert({
-          debit_wallet_id: parentWallet.id,
-          credit_wallet_id: wallet.id,
-          amount: 100,
-          entry_type: "allowance",
-          description: "Saldo inicial de teste",
-          created_by: parentProfile!.id,
-        });
+        // Check if initial balance already exists
+        const { data: existingEntry } = await supabaseAdmin
+          .from("ledger_entries")
+          .select("id")
+          .eq("credit_wallet_id", wallet.id)
+          .eq("entry_type", "allowance")
+          .eq("description", "Saldo inicial de teste")
+          .maybeSingle();
+
+        if (!existingEntry) {
+          await supabaseAdmin.from("ledger_entries").insert({
+            debit_wallet_id: parentWallet.id,
+            credit_wallet_id: wallet.id,
+            amount: 100,
+            entry_type: "allowance",
+            description: "Saldo inicial de teste",
+            created_by: parentProfile.id,
+          });
+        }
       }
     }
   }
@@ -171,9 +343,12 @@ Deno.serve(async (req) => {
   return new Response(
     JSON.stringify({
       success: true,
-      message: "Test accounts created successfully",
+      message: "Test accounts seeded with subscription tiers and tenant",
       accounts: accounts.map((a) => ({ email: a.email, role: a.role, password })),
       household_id: householdId,
+      tenant_id: tenantId,
+      subscription_tiers: tierIds,
+      currencies: currencies.map((c) => c.code),
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
