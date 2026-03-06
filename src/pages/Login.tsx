@@ -167,7 +167,18 @@ export default function Login() {
                         key={role}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setSelectedRole(role)}
+                        onClick={() => {
+                          const testEmails: Record<UserRole, string> = {
+                            parent: 'encarregado@kivara.com',
+                            child: 'crianca@kivara.com',
+                            teen: 'adolescente@kivara.com',
+                            teacher: 'professor@kivara.com',
+                          };
+                          setSelectedRole(role);
+                          setEmail(testEmails[role]);
+                          setPassword('Test1234!');
+                          setAuthMode('login');
+                        }}
                         className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
                       >
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
@@ -279,36 +290,7 @@ export default function Login() {
             )}
           </AnimatePresence>
 
-          {/* Quick access test accounts */}
-          <div className="mt-8 p-4 rounded-2xl border border-dashed border-border bg-muted/30">
-            <p className="text-xs font-semibold text-muted-foreground mb-3 text-center uppercase tracking-wider">Contas de Teste</p>
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                { email: 'encarregado@kivara.com', role: 'parent' as UserRole, emoji: '👩' },
-                { email: 'crianca@kivara.com', role: 'child' as UserRole, emoji: '🦊' },
-                { email: 'adolescente@kivara.com', role: 'teen' as UserRole, emoji: '🧑‍💻' },
-                { email: 'professor@kivara.com', role: 'teacher' as UserRole, emoji: '👨‍🏫' },
-              ]).map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  onClick={() => {
-                    setSelectedRole(acc.role);
-                    setEmail(acc.email);
-                    setPassword('Test1234!');
-                    setAuthMode('login');
-                  }}
-                  className="flex items-center gap-2 p-2 rounded-xl text-left text-xs hover:bg-accent/50 transition-colors border border-transparent hover:border-border"
-                >
-                  <span className="text-base">{acc.emoji}</span>
-                  <span className="text-muted-foreground truncate">{ROLE_CONFIG[acc.role].label}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-[10px] text-muted-foreground/60 text-center mt-2">Palavra-passe: Test1234!</p>
-          </div>
-
-          <p className="text-center text-xs text-muted-foreground mt-6">
+          <p className="text-center text-xs text-muted-foreground mt-10">
             © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
           </p>
         </motion.div>
