@@ -11,7 +11,7 @@ const flameVariants = {
   idle: {
     scale: [1, 1.15, 1],
     rotate: [0, -5, 5, 0],
-    transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
+    transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' as const },
   },
 };
 
@@ -20,7 +20,7 @@ const pulseRing = {
   animate: {
     scale: [0.8, 1.4],
     opacity: [0.5, 0],
-    transition: { duration: 1.6, repeat: Infinity, ease: 'easeOut' },
+    transition: { duration: 1.6, repeat: Infinity, ease: 'easeOut' as const },
   },
 };
 
@@ -29,7 +29,7 @@ const dayDotVariants = {
   visible: (i: number) => ({
     scale: 1,
     opacity: 1,
-    transition: { delay: i * 0.06, type: 'spring', stiffness: 400, damping: 15 },
+    transition: { delay: i * 0.06, type: 'spring' as const, stiffness: 400, damping: 15 },
   }),
 };
 
