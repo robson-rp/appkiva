@@ -5,7 +5,7 @@ import type { Database } from '@/integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
-export type UserRole = 'parent' | 'child' | 'teen' | 'teacher';
+export type UserRole = 'parent' | 'child' | 'teen' | 'teacher' | 'admin';
 
 export interface KivaraUser {
   id: string;
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           display_name: displayName,
           role,
-          avatar: role === 'parent' ? '👩' : role === 'teacher' ? '👨‍🏫' : role === 'teen' ? '🧑‍💻' : '🦊',
+          avatar: role === 'parent' ? '👩' : role === 'teacher' ? '👨‍🏫' : role === 'teen' ? '🧑‍💻' : role === 'admin' ? '🛡️' : '🦊',
         },
         emailRedirectTo: window.location.origin,
       },
