@@ -17,11 +17,11 @@ const flameVariants = {
 };
 
 const pulseRing = {
-  initial: { scale: 0.8, opacity: 0.6 },
+  initial: { scale: 0.9, opacity: 0.4 },
   animate: {
-    scale: [0.8, 1.4],
-    opacity: [0.5, 0],
-    transition: { duration: 1.6, repeat: Infinity, ease: 'easeOut' as const },
+    scale: [0.9, 1.2],
+    opacity: [0.4, 0],
+    transition: { duration: 2.2, repeat: Infinity, ease: 'easeOut' as const },
   },
 };
 
