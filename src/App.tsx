@@ -21,6 +21,7 @@ import ParentReports from "./pages/parent/ParentReports";
 import ParentProfile from "./pages/parent/ParentProfile";
 import ParentRewards from "./pages/parent/ParentRewards";
 import ParentVaults from "./pages/parent/ParentVaults";
+import ParentSubscription from "./pages/parent/ParentSubscription";
 import ChildDashboard from "./pages/child/ChildDashboard";
 import ChildWallet from "./pages/child/ChildWallet";
 import ChildMissions from "./pages/child/ChildMissions";
