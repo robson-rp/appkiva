@@ -72,6 +72,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          monthly_budget: number
           nickname: string | null
           parent_profile_id: string
           pin_hash: string | null
@@ -81,6 +82,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          monthly_budget?: number
           nickname?: string | null
           parent_profile_id: string
           pin_hash?: string | null
@@ -90,6 +92,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          monthly_budget?: number
           nickname?: string | null
           parent_profile_id?: string
           pin_hash?: string | null
