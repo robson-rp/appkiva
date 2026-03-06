@@ -66,7 +66,7 @@ export default function TeenDashboard() {
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" data-onboarding="wallet">
         {stats.map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card className="border-border/50">
@@ -95,12 +95,12 @@ export default function TeenDashboard() {
       )}
 
       {/* Budget */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} data-onboarding="missions">
         <TeenBudgetBar totalSpent={totalSpent} monthlyBudget={monthlyBudget} budgetUsed={budgetUsed} />
       </motion.div>
 
       {/* Categories */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} data-onboarding="vaults">
         <TeenCategoryBreakdown topCategories={topCategories} totalSpent={totalSpent} />
       </motion.div>
 
@@ -111,7 +111,7 @@ export default function TeenDashboard() {
 
       {/* Monthly Chart */}
       {monthlySummary.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} data-onboarding="analytics">
           <MonthlyEvolutionChart data={monthlySummary} />
         </motion.div>
       )}

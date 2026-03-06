@@ -145,7 +145,7 @@ export default function TeacherDashboard() {
       </motion.div>
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+      <motion.div variants={item} className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4" data-onboarding="students">
         {stats.map((stat) => (
           <motion.div key={stat.label} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
@@ -167,7 +167,7 @@ export default function TeacherDashboard() {
 
       <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
         {/* Active Challenges */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="challenges">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-gradient-to-r from-accent to-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">

@@ -54,7 +54,7 @@ export default function ParentDashboard() {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero Welcome */}
-      <motion.div variants={item}>
+      <motion.div variants={item} data-onboarding="dashboard">
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
@@ -88,7 +88,7 @@ export default function ParentDashboard() {
 
       {/* Quick Action: Send Allowance */}
       {children.length > 0 && (
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="allowance">
           <Card className="border-border/50 overflow-hidden border-dashed border-2 border-secondary/40 bg-secondary/5">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export default function ParentDashboard() {
       />
 
       {/* Stats */}
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3" data-onboarding="tasks">
         {stats.map((stat, i) => (
           <motion.div key={`${stat.label}-${i}`} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
             <Card
@@ -153,7 +153,7 @@ export default function ParentDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="vaults">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 gradient-kivara" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -208,7 +208,7 @@ export default function ParentDashboard() {
         </motion.div>
 
         {/* Recent Activity */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="reports">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">

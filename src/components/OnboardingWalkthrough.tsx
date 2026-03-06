@@ -1,19 +1,75 @@
+import { useEffect, useState, useCallback } from 'react';
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { X, ChevronRight, RotateCcw } from 'lucide-react';
 import kivoSvg from '@/assets/kivo.svg';
 
+function useHighlightRect(selector?: string, step?: number) {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  useEffect(() => {
+    if (!selector) { setRect(null); return; }
+
+    // Small delay to let dashboard render
+    const timer = setTimeout(() => {
+      const el = document.querySelector(selector);
+      if (el) {
+        setRect(el.getBoundingClientRect());
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        setRect(null);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [selector, step]);
+
+  return rect;
+}
+
 export function OnboardingWalkthrough() {
   const { showOnboarding, currentStep, totalSteps, steps, nextStep, skipWalkthrough } = useOnboarding();
 
-  if (!showOnboarding || steps.length === 0) return null;
-
   const step = steps[currentStep];
-  if (!step) return null;
+  const rect = useHighlightRect(step?.highlightSelector, currentStep);
+
+  if (!showOnboarding || steps.length === 0 || !step) return null;
 
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
+  const hasHighlight = !!rect;
+  const pad = 8;
+
+  // Build clip-path to create spotlight cutout
+  const clipPath = hasHighlight
+    ? `polygon(
+        0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
+        ${rect.left - pad}px ${rect.top - pad}px,
+        ${rect.left - pad}px ${rect.bottom + pad}px,
+        ${rect.right + pad}px ${rect.bottom + pad}px,
+        ${rect.right + pad}px ${rect.top - pad}px,
+        ${rect.left - pad}px ${rect.top - pad}px
+      )`
+    : undefined;
+
+  // Position card near highlight or center
+  const cardStyle: React.CSSProperties = {};
+  if (hasHighlight) {
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow > 320) {
+      cardStyle.position = 'absolute';
+      cardStyle.top = rect.bottom + pad + 16;
+      cardStyle.left = '50%';
+      cardStyle.transform = 'translateX(-50%)';
+    } else if (spaceAbove > 320) {
+      cardStyle.position = 'absolute';
+      cardStyle.bottom = window.innerHeight - rect.top + pad + 16;
+      cardStyle.left = '50%';
+      cardStyle.transform = 'translateX(-50%)';
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -24,8 +80,27 @@ export function OnboardingWalkthrough() {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       >
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={skipWalkthrough} />
+        {/* Backdrop with optional spotlight cutout */}
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-all duration-500"
+          style={clipPath ? { clipPath } : undefined}
+          onClick={skipWalkthrough}
+        />
+
+        {/* Highlight ring around target element */}
+        {hasHighlight && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="absolute pointer-events-none rounded-2xl border-2 border-primary shadow-[0_0_24px_4px_hsl(var(--primary)/0.3)]"
+            style={{
+              top: rect.top - pad,
+              left: rect.left - pad,
+              width: rect.width + pad * 2,
+              height: rect.height + pad * 2,
+            }}
+          />
+        )}
 
         {/* Card */}
         <motion.div
@@ -35,6 +110,7 @@ export function OnboardingWalkthrough() {
           exit={{ opacity: 0, y: -20, scale: 0.95 }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="relative w-full max-w-md bg-card/95 backdrop-blur-xl rounded-3xl border border-border/50 shadow-2xl overflow-hidden"
+          style={cardStyle}
         >
           {/* Top accent bar */}
           <div className="h-1.5 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
