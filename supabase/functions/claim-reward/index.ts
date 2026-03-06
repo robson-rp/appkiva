@@ -131,6 +131,42 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 6b. Check monthly budget limit
+    const { data: childRecord } = await supabaseAdmin
+      .from("children")
+      .select("monthly_budget")
+      .eq("profile_id", callerProfile.id)
+      .maybeSingle();
+
+    const monthlyBudget = Number(childRecord?.monthly_budget) || 0;
+    if (monthlyBudget > 0) {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const { data: monthPurchases } = await supabaseAdmin
+        .from("ledger_entries")
+        .select("amount")
+        .eq("debit_wallet_id", childWallet.id)
+        .eq("entry_type", "purchase")
+        .gte("created_at", monthStart);
+
+      const totalSpent = (monthPurchases ?? []).reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+      const remaining = monthlyBudget - totalSpent;
+
+      if (remaining < Number(reward.price)) {
+        return new Response(
+          JSON.stringify({
+            error: "Limite mensal de gastos excedido",
+            monthly_budget: monthlyBudget,
+            spent_this_month: totalSpent,
+            remaining,
+            price: reward.price,
+          }),
+          { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // 7. Get parent wallet for debit/credit
     const { data: parentWallet } = await supabaseAdmin
       .from("wallets")
