@@ -20,10 +20,17 @@ const FEATURE_LABELS: Record<string, string> = {
   budget_exceptions: 'Exceções de Orçamento',
   multi_child: 'Multi-Criança',
   advanced_analytics: 'Relatórios Avançados',
+  analytics: 'Relatórios Avançados',
   export_reports: 'Exportar Relatórios',
   real_money_wallet: 'Carteira Dinheiro Real',
   classroom_mode: 'Modo Sala de Aula',
   priority_support: 'Suporte Prioritário',
+  basic_wallet: 'Carteira Básica',
+  basic_tasks: 'Tarefas Básicas',
+  basic_rewards: 'Recompensas Básicas',
+  teacher_dashboard: 'Painel do Professor',
+  api_access: 'Acesso API',
+  custom_branding: 'Marca Personalizada',
 };
 
 const ALL_FEATURES = Object.keys(FEATURE_LABELS);
