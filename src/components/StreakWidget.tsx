@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { useStreakData } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StreakWidgetProps {
   onClick?: () => void;
@@ -40,12 +41,19 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
   const isActive = sd.currentStreak > 0;
   const isHot = sd.currentStreak >= 7;
 
+  const lastDateFormatted = sd.lastActiveDate
+    ? new Date(sd.lastActiveDate + 'T00:00:00').toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' })
+    : 'Sem actividade registada';
+
   return (
-    <div>
-      <Card
-        className="border border-border/50 cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden relative"
-        onClick={onClick}
-      >
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Card
+              className="border border-border/50 cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden relative"
+              onClick={onClick}
+            >
         {/* Top gradient bar with glow when hot */}
         <div className={`h-1.5 ${isHot
           ? 'bg-gradient-to-r from-destructive via-chart-1 to-accent'
@@ -151,6 +159,12 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
           )}
         </CardContent>
       </Card>
-    </div>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">
+          <p>Último dia activo: {lastDateFormatted}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
