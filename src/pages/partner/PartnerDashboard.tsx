@@ -60,7 +60,7 @@ export default function PartnerDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-c data-onboarding="challenges"ols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-onboarding="challenges">
         <Card className="rounded-2xl border-border/50">
           <CardHeader>
             <CardTitle className="font-display text-lg flex items-center gap-2">
