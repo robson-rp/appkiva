@@ -6,13 +6,16 @@ import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { mockStreakData } from '@/data/streaks-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { LEVEL_CONFIG } from '@/types/kivara';
-import { Wallet, TrendingUp, PiggyBank, Target, ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react';
+import { Wallet, TrendingUp, PiggyBank, Target, ArrowUpRight, ArrowDownRight, Flame, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useMonthlySummary } from '@/hooks/use-monthly-summary';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 export default function TeenDashboard() {
   const teen = mockTeens[0];
   const navigate = useNavigate();
   const { data: realBudget } = useTeenBudget();
+  const { data: monthlySummary = [] } = useMonthlySummary(6);
   const monthlyBudget = realBudget && realBudget > 0 ? realBudget : teen.monthlyBudget;
   const levelConfig = LEVEL_CONFIG[teen.level];
   const nextLevel = Object.entries(LEVEL_CONFIG).find(([, v]) => v.minPoints > teen.kivaPoints);
@@ -153,6 +156,51 @@ export default function TeenDashboard() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Monthly Spending Chart */}
+      {monthlySummary.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
+          <Card className="border border-border/50 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary to-secondary" />
+            <CardHeader className="pb-1">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                </div>
+                Evolução Mensal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlySummary} barGap={4}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} width={32} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', fontSize: 12, fontFamily: 'var(--font-display)' }}
+                      formatter={(value: number, name: string) => [`🪙 ${value}`, name === 'income' ? 'Ganho' : 'Gasto']}
+                      labelFormatter={(label) => `Mês: ${label}`}
+                    />
+                    <Bar dataKey="income" name="income" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                    <Bar dataKey="expenses" name="expenses" fill="hsl(var(--destructive))" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-secondary" />
+                  <span className="text-[10px] text-muted-foreground font-medium">Ganho</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-destructive" />
+                  <span className="text-[10px] text-muted-foreground font-medium">Gasto</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Streak Widget */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
