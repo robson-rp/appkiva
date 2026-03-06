@@ -10,6 +10,7 @@ import { ChildLayout } from "@/components/layouts/ChildLayout";
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { TeenLayout } from "@/components/layouts/TeenLayout";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
+import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
