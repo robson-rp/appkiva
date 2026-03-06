@@ -92,15 +92,15 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
             </div>
             <div className="text-right">
               <motion.p
-                key={mockStreakData.currentStreak}
+                key={sd.currentStreak}
                 initial={{ scale: 1.4, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 12 }}
                 className={`text-2xl font-display font-bold ${isHot ? 'text-destructive' : 'text-destructive/80'}`}
               >
-                {mockStreakData.currentStreak} 🔥
+                {sd.currentStreak} 🔥
               </motion.p>
-              <p className="text-[10px] text-muted-foreground">Recorde: {mockStreakData.longestStreak}</p>
+              <p className="text-[10px] text-muted-foreground">Recorde: {sd.longestStreak}</p>
             </div>
           </div>
 
