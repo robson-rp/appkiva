@@ -35,8 +35,10 @@ const dayDotVariants = {
 };
 
 export function StreakWidget({ onClick }: StreakWidgetProps) {
-  const isActive = mockStreakData.currentStreak > 0;
-  const isHot = mockStreakData.currentStreak >= 7;
+  const { data: streakData } = useStreakData();
+  const sd = streakData ?? mockStreakData;
+  const isActive = sd.currentStreak > 0;
+  const isHot = sd.currentStreak >= 7;
 
   return (
     <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
