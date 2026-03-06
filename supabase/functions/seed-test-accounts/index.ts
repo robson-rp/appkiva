@@ -21,6 +21,7 @@ Deno.serve(async (req) => {
     { email: "crianca@kivara.com", role: "child", name: "Criança Teste", avatar: "🦊" },
     { email: "adolescente@kivara.com", role: "teen", name: "Adolescente Teste", avatar: "🧑‍💻" },
     { email: "professor@kivara.com", role: "teacher", name: "Professor Teste", avatar: "👨‍🏫" },
+    { email: "admin@kivara.com", role: "admin", name: "Admin KIVARA", avatar: "🛡️" },
   ];
 
   const results: Record<string, string> = {};
