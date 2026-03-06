@@ -4,11 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { useSavingsVaults, useCreateSavingsVault, useDepositToVault } from '@/hooks/use-savings-vaults';
+import { useSavingsVaults, useCreateSavingsVault, useDepositToVault, useWithdrawFromVault } from '@/hooks/use-savings-vaults';
 import { useWalletBalance } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVaults, mockChildren } from '@/data/mock-data';
-import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine } from 'lucide-react';
+import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ export default function ChildVaults() {
   const { data: walletBalance } = useWalletBalance();
   const createVault = useCreateSavingsVault();
   const depositToVault = useDepositToVault();
+  const withdrawFromVault = useWithdrawFromVault();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
@@ -28,6 +29,11 @@ export default function ChildVaults() {
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [depositVault, setDepositVault] = useState<{ id: string; name: string; icon: string; currentAmount: number; targetAmount: number } | null>(null);
   const [depositAmount, setDepositAmount] = useState('');
+
+  // Withdraw dialog state
+  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
+  const [withdrawVault, setWithdrawVault] = useState<{ id: string; name: string; icon: string; currentAmount: number } | null>(null);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
 
   const balance = walletBalance?.balance ?? 0;
 
@@ -82,6 +88,30 @@ export default function ChildVaults() {
 
   const remaining = depositVault ? Math.max(0, depositVault.targetAmount - depositVault.currentAmount) : 0;
   const maxDeposit = Math.min(balance, remaining > 0 ? remaining : balance);
+
+  const openWithdrawDialog = (vault: typeof withdrawVault) => {
+    setWithdrawVault(vault);
+    setWithdrawAmount('');
+    setWithdrawDialogOpen(true);
+  };
+
+  const handleWithdraw = () => {
+    if (!withdrawVault || !withdrawAmount) return;
+    const amount = Number(withdrawAmount);
+    if (amount <= 0) return;
+    withdrawFromVault.mutate(
+      { vaultId: withdrawVault.id, amount },
+      {
+        onSuccess: () => {
+          setWithdrawDialogOpen(false);
+          setWithdrawVault(null);
+          setWithdrawAmount('');
+        },
+      }
+    );
+  };
+
+  const maxWithdraw = withdrawVault?.currentAmount ?? 0;
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -179,20 +209,37 @@ export default function ChildVaults() {
                     <Progress value={pct} className="h-3 mb-3" />
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm text-muted-foreground font-medium">🪙 {vault.currentAmount} / {vault.targetAmount}</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-primary hover:text-primary-foreground transition-colors"
-                        onClick={() => openDepositDialog({
-                          id: vault.id,
-                          name: vault.name,
-                          icon: vault.icon,
-                          currentAmount: vault.currentAmount,
-                          targetAmount: vault.targetAmount,
-                        })}
-                      >
-                        <ArrowDownToLine className="h-3 w-3" /> Depositar
-                      </Button>
+                      <div className="flex gap-2">
+                        {vault.currentAmount > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+                            onClick={() => openWithdrawDialog({
+                              id: vault.id,
+                              name: vault.name,
+                              icon: vault.icon,
+                              currentAmount: vault.currentAmount,
+                            })}
+                          >
+                            <ArrowUpFromLine className="h-3 w-3" /> Levantar
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-primary hover:text-primary-foreground transition-colors"
+                          onClick={() => openDepositDialog({
+                            id: vault.id,
+                            name: vault.name,
+                            icon: vault.icon,
+                            currentAmount: vault.currentAmount,
+                            targetAmount: vault.targetAmount,
+                          })}
+                        >
+                          <ArrowDownToLine className="h-3 w-3" /> Depositar
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Interest Rate Info */}
@@ -301,6 +348,84 @@ export default function ChildVaults() {
 
             {Number(depositAmount) > balance && (
               <p className="text-xs text-destructive text-center">Saldo insuficiente!</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Withdraw Dialog */}
+      <Dialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <span className="text-2xl">{withdrawVault?.icon}</span>
+              Levantar de {withdrawVault?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-muted/50 rounded-xl p-3 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Saldo da carteira</span>
+                <span className="font-display font-bold">🪙 {balance}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">No cofre</span>
+                <span className="font-display font-bold text-primary">🪙 {withdrawVault?.currentAmount ?? 0}</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Montante a levantar</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 10"
+                value={withdrawAmount}
+                onChange={e => setWithdrawAmount(e.target.value)}
+                max={maxWithdraw}
+                min={1}
+              />
+              {maxWithdraw > 0 && (
+                <div className="flex gap-2">
+                  {[5, 10, 25].filter(v => v <= maxWithdraw).map(v => (
+                    <Button
+                      key={v}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg text-xs font-display h-7"
+                      onClick={() => setWithdrawAmount(String(v))}
+                    >
+                      {v} KVC
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg text-xs font-display h-7"
+                    onClick={() => setWithdrawAmount(String(maxWithdraw))}
+                  >
+                    Tudo ({maxWithdraw})
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <Button
+              className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending}
+              onClick={handleWithdraw}
+            >
+              {withdrawFromVault.isPending ? (
+                'A levantar...'
+              ) : (
+                <>
+                  <ArrowUpFromLine className="h-4 w-4" />
+                  Levantar {withdrawAmount ? `${withdrawAmount} KVC` : ''}
+                </>
+              )}
+            </Button>
+
+            {Number(withdrawAmount) > maxWithdraw && maxWithdraw > 0 && (
+              <p className="text-xs text-destructive text-center">Montante excede o saldo do cofre!</p>
             )}
           </div>
         </DialogContent>
