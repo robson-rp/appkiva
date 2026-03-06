@@ -20,7 +20,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: 
   admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
 };
 
-const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher'];
+const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'admin'];
 
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);

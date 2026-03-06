@@ -8,11 +8,17 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const supabaseAdmin = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    { auth: { autoRefreshToken: false, persistSession: false } }
-  );
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  // Separate client for sign-in lookups (won't pollute admin client session)
+  const lookupClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 
   const password = "Test1234!";
 
@@ -21,21 +27,13 @@ Deno.serve(async (req) => {
     { email: "crianca@kivara.com", role: "child", name: "Criança Teste", avatar: "🦊" },
     { email: "adolescente@kivara.com", role: "teen", name: "Adolescente Teste", avatar: "🧑‍💻" },
     { email: "professor@kivara.com", role: "teacher", name: "Professor Teste", avatar: "👨‍🏫" },
+    { email: "admin@kivara.com", role: "admin", name: "Admin KIVARA", avatar: "🛡️" },
   ];
 
   const results: Record<string, string> = {};
 
-  // Create users
+  // Create or find users
   for (const acc of accounts) {
-    // Check if user already exists
-    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-    const existing = existingUsers?.users?.find((u) => u.email === acc.email);
-
-    if (existing) {
-      results[acc.role] = existing.id;
-      continue;
-    }
-
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: acc.email,
       password,
@@ -48,10 +46,29 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
-      return new Response(JSON.stringify({ error: `Failed to create ${acc.role}: ${error.message}` }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      // User likely already exists — find them via sign in
+      const { data: signInData } = await lookupClient.auth.signInWithPassword({
+        email: acc.email,
+        password,
       });
+
+      if (signInData?.user) {
+        results[acc.role] = signInData.user.id;
+
+        // Ensure role exists
+        const { data: existingRoles } = await supabaseAdmin
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", signInData.user.id)
+          .eq("role", acc.role);
+
+        if (!existingRoles || existingRoles.length === 0) {
+          await supabaseAdmin.from("user_roles").insert({ user_id: signInData.user.id, role: acc.role });
+        }
+      } else {
+        results[acc.role] = `skipped: ${error.message}`;
+      }
+      continue;
     }
 
     results[acc.role] = data.user.id;
