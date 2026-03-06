@@ -209,7 +209,58 @@ Deno.serve(async (req) => {
       metadata: { reward_id: reward.id, reward_name: reward.name },
     });
 
-    // 11. Get new balance
+    // 12. Check monthly budget threshold (80%) and notify parent
+    const { data: childRecord } = await supabaseAdmin
+      .from("children")
+      .select("monthly_budget, parent_profile_id, profile_id")
+      .eq("profile_id", callerProfile.id)
+      .maybeSingle();
+
+    if (childRecord && Number(childRecord.monthly_budget) > 0) {
+      const monthlyBudget = Number(childRecord.monthly_budget);
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+      const { data: monthPurchases } = await supabaseAdmin
+        .from("ledger_entries")
+        .select("amount")
+        .eq("debit_wallet_id", childWallet.id)
+        .eq("entry_type", "purchase")
+        .gte("created_at", monthStart);
+
+      const totalSpent = (monthPurchases ?? []).reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+      const pct = (totalSpent / monthlyBudget) * 100;
+
+      // Get child display name
+      const { data: childProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("display_name")
+        .eq("id", callerProfile.id)
+        .single();
+
+      const childName = childProfile?.display_name ?? "O teu filho(a)";
+
+      if (pct >= 100) {
+        await supabaseAdmin.from("notifications").insert({
+          profile_id: childRecord.parent_profile_id,
+          title: "🚨 Limite mensal atingido!",
+          message: `${childName} atingiu 100% do limite mensal de ${monthlyBudget} KVC (gastou ${totalSpent} KVC).`,
+          type: "budget",
+          urgent: true,
+          metadata: { child_profile_id: callerProfile.id, spent: totalSpent, budget: monthlyBudget, pct: Math.round(pct) },
+        });
+      } else if (pct >= 80) {
+        await supabaseAdmin.from("notifications").insert({
+          profile_id: childRecord.parent_profile_id,
+          title: "⚠️ Limite mensal quase atingido",
+          message: `${childName} já gastou ${Math.round(pct)}% do limite mensal (${totalSpent}/${monthlyBudget} KVC).`,
+          type: "budget",
+          metadata: { child_profile_id: callerProfile.id, spent: totalSpent, budget: monthlyBudget, pct: Math.round(pct) },
+        });
+      }
+    }
+
+    // 13. Get new balance
     const { data: newBalanceData } = await supabaseAdmin
       .from("wallet_balances")
       .select("balance")
