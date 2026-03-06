@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
 import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements, mockDonations } from '@/data/mock-data';
+import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements } from '@/data/mock-data';
 import { StreakWidget } from '@/components/StreakWidget';
-import { Progress } from '@/components/ui/progress';
-import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon } from 'lucide-react';
+import { ListTodo, Target, PiggyBank } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LEVEL_CONFIG, Level } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
@@ -21,6 +20,12 @@ import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 import { MonthlyEvolutionChart } from '@/components/MonthlyEvolutionChart';
 import { useWeeklySparkline } from '@/hooks/use-weekly-sparkline';
 import { WeeklySparkline } from '@/components/WeeklySparkline';
+import { TeenBudgetBar } from '@/components/teen/TeenBudgetBar';
+import { ChildFamilyRankings } from '@/components/child/ChildFamilyRankings';
+import { ChildPendingTasks } from '@/components/child/ChildPendingTasks';
+import { ChildSavingsProgress } from '@/components/child/ChildSavingsProgress';
+import { ChildRecentActivity } from '@/components/child/ChildRecentActivity';
+import { ChildAchievementsStrip } from '@/components/child/ChildAchievementsStrip';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,8 +47,9 @@ export default function ChildDashboard() {
   const { data: weeklyData } = useWeeklySparkline();
   const balance = walletBalance?.balance ?? child.balance;
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const navigate = useNavigate();
+
   const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
-  const budgetRemaining = monthlyBudget > 0 ? Math.max(monthlyBudget - monthlySpent, 0) : 0;
   const pendingTasks = mockTasks.filter((t) => t.childId === child.id && t.status === 'pending');
   const activeMissions = mockMissions.filter((m) => m.status === 'available' || (m.status === 'in_progress' && m.childId === child.id));
   const vaults = mockVaults.filter((v) => v.childId === child.id);
@@ -57,24 +63,10 @@ export default function ChildDashboard() {
       }))
     : mockTransactions.filter((t) => t.childId === child.id).slice(0, 4);
   const unlockedAchievements = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
-  const navigate = useNavigate();
-  const levelConfig = LEVEL_CONFIG[child.level];
+
   const levels = Object.keys(LEVEL_CONFIG) as Level[];
   const currentLevelIndex = levels.indexOf(child.level);
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
-
-  // Rankings data
-  const rankings = mockChildren.map((c) => {
-    const childVaults = mockVaults.filter((v) => v.childId === c.id);
-    const totalSaved = childVaults.reduce((s, v) => s + v.currentAmount, 0);
-    const childDonations = mockDonations.filter((d) => d.childId === c.id);
-    const totalDonated = childDonations.reduce((s, d) => s + d.amount, 0);
-    return { ...c, totalSaved, totalDonated };
-  });
-
-  const bestSaver = [...rankings].sort((a, b) => b.totalSaved - a.totalSaved);
-  const bestDonor = [...rankings].sort((a, b) => b.totalDonated - a.totalDonated);
-  const bestPlanner = [...rankings].sort((a, b) => b.kivaPoints - a.kivaPoints);
 
   const stats = [
     { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/wallet' },
@@ -82,23 +74,13 @@ export default function ChildDashboard() {
     { label: 'Cofres', value: vaults.length, icon: PiggyBank, gradient: 'from-kivara-gold/10 to-kivara-light-gold', iconColor: 'text-accent', to: '/child/vaults' },
   ];
 
-  const txIcon = (type: string) => {
-    if (type === 'earned' || type === 'allowance') return <ArrowDownLeft className="h-3.5 w-3.5 text-secondary" />;
-    return <ArrowUpRight className="h-3.5 w-3.5 text-destructive" />;
-  };
-
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5 max-w-2xl mx-auto pb-4">
-      {/* Level Up Ceremony */}
       {showLevelUp && (
-        <LevelUpCeremony
-          fromLevel={previousLevel}
-          toLevel={child.level}
-          onComplete={() => setShowLevelUp(false)}
-        />
+        <LevelUpCeremony fromLevel={previousLevel} toLevel={child.level} onComplete={() => setShowLevelUp(false)} />
       )}
 
-      {/* Hero Balance Card with Avatar */}
+      {/* Hero Balance Card */}
       <motion.div variants={itemVariants}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
@@ -108,17 +90,11 @@ export default function ChildDashboard() {
             <div className="flex justify-between items-start">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                   {/* Evolved Avatar with Glow */}
-                   <AvatarGlow level={child.level} size="md" />
-                   <div>
+                  <AvatarGlow level={child.level} size="md" />
+                  <div>
                     <p className="text-white/70 text-sm font-body">A tua carteira</p>
                     <div className="flex items-baseline gap-2">
-                      <motion.span
-                        key={balance}
-                        initial={{ scale: 1.2, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        className="font-display text-4xl font-bold text-white"
-                      >
+                      <motion.span key={balance} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl font-bold text-white">
                         {balance}
                       </motion.span>
                       <span className="text-sm text-white/60 font-display">KivaCoins</span>
@@ -129,28 +105,18 @@ export default function ChildDashboard() {
                   <LevelBadge level={child.level} points={child.kivaPoints} showProgress showAvatar={false} />
                 </div>
               </div>
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                className="mt-1"
-              >
+              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} className="mt-1">
                 <img src={kivoImg} alt="Kivo" className="w-20 h-20 drop-shadow-2xl" />
               </motion.div>
             </div>
-            {/* Demo: Level Up button */}
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setShowLevelUp(true)}
-              className="mt-2 text-[10px] text-white/50 hover:text-white/80 hover:bg-white/10 font-display"
-            >
+            <Button size="sm" variant="ghost" onClick={() => setShowLevelUp(true)} className="mt-2 text-[10px] text-white/50 hover:text-white/80 hover:bg-white/10 font-display">
               ✨ Ver evolução
             </Button>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Weekly Sparkline Summary */}
+      {/* Weekly Sparkline */}
       {weeklyData && weeklyData.points.length > 0 && (
         <motion.div variants={itemVariants}>
           <WeeklySparkline points={weeklyData.points} totalEarned={weeklyData.totalEarned} totalSpent={weeklyData.totalSpent} />
@@ -177,40 +143,14 @@ export default function ChildDashboard() {
         ))}
       </motion.div>
 
-      {/* Monthly Budget Indicator */}
+      {/* Monthly Budget */}
       {monthlyBudget > 0 && (
         <motion.div variants={itemVariants}>
-          <Card className="border border-border/50 overflow-hidden">
-            <div className={`h-1 bg-gradient-to-r ${budgetPct >= 100 ? 'from-destructive to-destructive/60' : budgetPct >= 80 ? 'from-chart-1 to-accent' : 'from-secondary to-primary'}`} />
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <span className="text-sm">💰</span>
-                  </div>
-                  <span className="text-sm font-display font-bold">Limite Mensal</span>
-                </div>
-                <span className={`text-xs font-display font-bold ${budgetPct >= 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                  🪙 {monthlySpent} / {monthlyBudget}
-                </span>
-              </div>
-              <div className="relative">
-                <Progress value={budgetPct} className="h-3 rounded-full" />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
-                  {Math.round(budgetPct)}%
-                </span>
-              </div>
-              <p className={`text-[11px] font-display ${budgetPct >= 100 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-                {budgetPct >= 100
-                  ? '⚠️ Atingiste o teu limite de gastos este mês!'
-                  : `Ainda podes gastar ${budgetRemaining} 🪙 este mês`}
-              </p>
-            </CardContent>
-          </Card>
+          <TeenBudgetBar totalSpent={monthlySpent} monthlyBudget={monthlyBudget} budgetUsed={budgetPct} />
         </motion.div>
       )}
 
-      {/* Monthly Spending Chart */}
+      {/* Monthly Chart */}
       {monthlySummary.length > 0 && (
         <motion.div variants={itemVariants}>
           <MonthlyEvolutionChart data={monthlySummary} />
@@ -219,202 +159,33 @@ export default function ChildDashboard() {
 
       {/* Family Rankings */}
       <motion.div variants={itemVariants}>
-        <Card className="border border-border/50 overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-500" />
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
-                <Crown className="h-3.5 w-3.5 text-accent-foreground" />
-              </div>
-              Ranking Familiar
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { title: '🏆 Poupador', data: bestSaver, metric: (c: any) => `${c.totalSaved} 🪙`, icon: PiggyBank },
-                { title: '🎯 Planeador', data: bestPlanner, metric: (c: any) => `${c.kivaPoints} pts`, icon: Target },
-                { title: '💜 Doador', data: bestDonor, metric: (c: any) => `${c.totalDonated} 🪙`, icon: Medal },
-              ].map((cat) => (
-                <motion.div
-                  key={cat.title}
-                  whileHover={{ scale: 1.03 }}
-                  className="bg-muted/40 rounded-xl p-3 text-center border border-border/30"
-                >
-                  <p className="text-[10px] font-display font-bold mb-2">{cat.title}</p>
-                  {cat.data.slice(0, 2).map((c, i) => (
-                    <div key={c.id} className={`flex items-center gap-1.5 justify-center mb-1 ${i === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                      <span className="text-xs">{i === 0 ? '🥇' : '🥈'}</span>
-                      <span className="text-lg">{c.avatar}</span>
-                      <div className="text-left">
-                        <p className={`text-[10px] font-bold ${i === 0 ? '' : 'font-normal'}`}>{c.name}</p>
-                        <p className="text-[9px] text-muted-foreground">{cat.metric(c)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ChildFamilyRankings />
       </motion.div>
 
-      {/* Active Tasks Preview */}
-      {pendingTasks.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <ListTodo className="h-3.5 w-3.5 text-primary" />
-                </div>
-                Próximas Tarefas
-              </CardTitle>
-              <button onClick={() => navigate('/child/wallet')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-                Ver todas <ChevronRight className="h-3 w-3" />
-              </button>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {pendingTasks.slice(0, 2).map((task) => (
-                <motion.div
-                  key={task.id}
-                  whileHover={{ x: 4 }}
-                  className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-sm">
-                      {task.category === 'cleaning' ? '🧹' : task.category === 'studying' ? '📚' : '🤝'}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{task.title}</p>
-                      <p className="text-[11px] text-muted-foreground">{task.description?.slice(0, 35)}...</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-display font-bold text-secondary">+{task.reward} 🪙</span>
-                </motion.div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Savings Progress */}
-      {vaults.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
-                  <TrendingUp className="h-3.5 w-3.5 text-secondary" />
-                </div>
-                Poupanças
-              </CardTitle>
-              <button onClick={() => navigate('/child/vaults')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-                Ver cofres <ChevronRight className="h-3 w-3" />
-              </button>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {vaults.map((vault) => {
-                const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
-                const monthlyInterest = Math.round(vault.currentAmount * (vault.interestRate / 100));
-                return (
-                  <div key={vault.id} className="space-y-1.5">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-semibold flex items-center gap-1.5">
-                        <span className="text-base">{vault.icon}</span> {vault.name}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <motion.span
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="text-[10px] text-secondary font-display font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md"
-                        >
-                          +{monthlyInterest}/mês
-                        </motion.span>
-                        <span className="text-xs text-muted-foreground font-display font-bold">
-                          {vault.currentAmount}/{vault.targetAmount} 🪙
-                        </span>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <Progress value={pct} className="h-3 rounded-full" />
-                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
-                        {pct}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-
-      {/* Recent Transactions */}
+      {/* Pending Tasks */}
       <motion.div variants={itemVariants}>
-        <Card className="border border-border/50">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-display flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
-                <Sparkles className="h-3.5 w-3.5 text-accent" />
-              </div>
-              Actividade Recente
-            </CardTitle>
-            <button onClick={() => navigate('/child/wallet')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-              Ver tudo <ChevronRight className="h-3 w-3" />
-            </button>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {recentTransactions.map((tx) => (
-              <div key={tx.id} className="flex items-center justify-between py-2.5 border-b border-border/30 last:border-0">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    {txIcon(tx.type)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">{tx.description}</p>
-                    <p className="text-[11px] text-muted-foreground">{tx.date}</p>
-                  </div>
-                </div>
-                <span className={`text-sm font-display font-bold ${tx.type === 'earned' || tx.type === 'allowance' ? 'text-secondary' : 'text-destructive'}`}>
-                  {tx.type === 'earned' || tx.type === 'allowance' ? '+' : '-'}{tx.amount}
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <ChildPendingTasks tasks={pendingTasks} />
       </motion.div>
 
+      {/* Savings */}
+      <motion.div variants={itemVariants}>
+        <ChildSavingsProgress vaults={vaults} />
+      </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div variants={itemVariants}>
+        <ChildRecentActivity transactions={recentTransactions} />
+      </motion.div>
+
+      {/* Streak */}
       <motion.div variants={itemVariants}>
         <StreakWidget onClick={() => navigate('/child/streaks')} />
       </motion.div>
 
-      {/* Achievements Strip */}
-      {unlockedAchievements.length > 0 && (
-        <motion.div variants={itemVariants}>
-          <Card className="border border-border/50 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-kivara-light-gold/30 to-kivara-light-blue/30 opacity-50" />
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-display font-bold flex items-center gap-1.5">🏆 Conquistas</p>
-                <button onClick={() => navigate('/child/achievements')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-                  Ver todas <ChevronRight className="h-3 w-3" />
-                </button>
-              </div>
-              <div className="flex gap-3 overflow-x-auto pb-1">
-                {unlockedAchievements.map((ach) => (
-                  <motion.div key={ach.id} whileHover={{ scale: 1.05 }} className="flex-shrink-0 w-20 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-card shadow-sm flex items-center justify-center mx-auto mb-1 text-2xl">
-                      {ach.icon}
-                    </div>
-                    <p className="text-[10px] font-semibold text-muted-foreground leading-tight">{ach.title}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+      {/* Achievements */}
+      <motion.div variants={itemVariants}>
+        <ChildAchievementsStrip achievements={unlockedAchievements} />
+      </motion.div>
 
       <Kivo page="dashboard" />
     </motion.div>
