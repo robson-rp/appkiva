@@ -5,7 +5,7 @@ import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2 } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
@@ -17,10 +17,11 @@ const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: 
   teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
   child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
   teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
+  partner: { label: 'Parceiro', description: 'Gestão do programa de parceria institucional', icon: Building2, colorClass: 'text-chart-4', bgClass: 'bg-chart-4/10 group-hover:bg-chart-4/20 hover:border-chart-4' },
   admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
 };
 
-const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'admin'];
+const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'partner', 'admin'];
 
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
@@ -56,7 +57,7 @@ export default function Login() {
         }
       }
 
-      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : '/child';
+      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : selectedRole === 'admin' ? '/admin' : selectedRole === 'partner' ? '/partner' : '/child';
       navigate(dest);
     } catch {
       toast({ title: 'Erro inesperado', variant: 'destructive' });
@@ -174,6 +175,7 @@ export default function Login() {
                             child: 'crianca@kivara.com',
                             teen: 'adolescente@kivara.com',
                             teacher: 'professor@kivara.com',
+                            partner: 'parceiro@kivara.com',
                             admin: 'admin@kivara.com',
                           };
                           setSelectedRole(role);

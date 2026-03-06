@@ -10,6 +10,7 @@ import { ChildLayout } from "@/components/layouts/ChildLayout";
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { TeenLayout } from "@/components/layouts/TeenLayout";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
+import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,10 @@ import AdminCurrencies from "./pages/admin/AdminCurrencies";
 import AdminAudit from "./pages/admin/AdminAudit";
 import AdminRisk from "./pages/admin/AdminRisk";
 import AdminCompliance from "./pages/admin/AdminCompliance";
+import PartnerDashboard from "./pages/partner/PartnerDashboard";
+import PartnerPrograms from "./pages/partner/PartnerPrograms";
+import PartnerChallenges from "./pages/partner/PartnerChallenges";
+import PartnerReports from "./pages/partner/PartnerReports";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +88,18 @@ function AppRoutes() {
         <Route path="/admin/risk" element={<AdminLayout><AdminRisk /></AdminLayout>} />
         <Route path="/admin/compliance" element={<AdminLayout><AdminCompliance /></AdminLayout>} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
+      </Routes>
+    );
+  }
+
+  if (user.role === 'partner') {
+    return (
+      <Routes>
+        <Route path="/partner" element={<PartnerLayout><PartnerDashboard /></PartnerLayout>} />
+        <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
+        <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
+        <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
+        <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
     );
   }
