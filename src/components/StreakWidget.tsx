@@ -10,18 +10,18 @@ interface StreakWidgetProps {
 
 const flameVariants = {
   idle: {
-    scale: [1, 1.15, 1],
-    rotate: [0, -5, 5, 0],
-    transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' as const },
+    scale: [1, 1.06, 1],
+    rotate: [0, -2, 2, 0],
+    transition: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' as const },
   },
 };
 
 const pulseRing = {
-  initial: { scale: 0.8, opacity: 0.6 },
+  initial: { scale: 0.9, opacity: 0.4 },
   animate: {
-    scale: [0.8, 1.4],
-    opacity: [0.5, 0],
-    transition: { duration: 1.6, repeat: Infinity, ease: 'easeOut' as const },
+    scale: [0.9, 1.2],
+    opacity: [0.4, 0],
+    transition: { duration: 2.2, repeat: Infinity, ease: 'easeOut' as const },
   },
 };
 
@@ -41,7 +41,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
   const isHot = sd.currentStreak >= 7;
 
   return (
-    <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
+    <motion.div whileHover={{ scale: 1.005 }} whileTap={{ scale: 0.995 }} transition={{ duration: 0.3 }}>
       <Card
         className="border border-border/50 cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden relative"
         onClick={onClick}
