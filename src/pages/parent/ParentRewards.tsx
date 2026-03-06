@@ -64,6 +64,10 @@ export default function ParentRewards() {
   };
 
   return (
+    <FeatureGateWrapper
+      allowed={rewardsAllowed || gateLoading}
+      featureName="Recompensas Personalizadas"
+    >
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
       <motion.div variants={item}>
