@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
+import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 
 export default function ChildVaults() {
   const { user } = useAuth();
@@ -196,6 +197,13 @@ export default function ChildVaults() {
       {!isLoading && vaults.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <VaultGrowthChart vaults={vaults} />
+        </motion.div>
+      )}
+
+      {/* Interest History */}
+      {!isLoading && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <VaultInterestHistory profileId={user?.profileId} />
         </motion.div>
       )}
 
