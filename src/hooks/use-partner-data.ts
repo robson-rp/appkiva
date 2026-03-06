@@ -68,7 +68,7 @@ export function useCreateSponsoredChallenge() {
     mutationFn: async (challenge: {
       partner_tenant_id: string;
       title: string;
-      description?: string;
+      description?: string | null;
       start_date: string;
       end_date: string;
       status?: string;
@@ -80,6 +80,50 @@ export function useCreateSponsoredChallenge() {
         .single();
       if (error) throw error;
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sponsored-challenges'] });
+    },
+  });
+}
+
+export function useUpdateSponsoredChallenge() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: {
+      id: string;
+      title?: string;
+      description?: string | null;
+      start_date?: string;
+      end_date?: string;
+      status?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('sponsored_challenges')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sponsored-challenges'] });
+    },
+  });
+}
+
+export function useDeleteSponsoredChallenge() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('sponsored_challenges')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sponsored-challenges'] });

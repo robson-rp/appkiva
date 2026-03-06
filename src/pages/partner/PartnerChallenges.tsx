@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trophy, Plus, Users, Calendar, Loader2 } from 'lucide-react';
-import { useSponsoredChallenges } from '@/hooks/use-partner-data';
+import { Trophy, Plus, Users, Calendar, Loader2, Pencil, Trash2 } from 'lucide-react';
+import { useSponsoredChallenges, useDeleteSponsoredChallenge, type SponsoredChallenge } from '@/hooks/use-partner-data';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import CreateChallengeDialog from '@/components/partner/CreateChallengeDialog';
+import ChallengeFormDialog from '@/components/partner/ChallengeFormDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
   active: { label: 'Activo', variant: 'default' },
@@ -16,7 +18,31 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 
 export default function PartnerChallenges() {
   const { data: challenges, isLoading } = useSponsoredChallenges();
+  const deleteChallenge = useDeleteSponsoredChallenge();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingChallenge, setEditingChallenge] = useState<SponsoredChallenge | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  function handleEdit(ch: SponsoredChallenge) {
+    setEditingChallenge(ch);
+    setDialogOpen(true);
+  }
+
+  function handleCreate() {
+    setEditingChallenge(null);
+    setDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+      await deleteChallenge.mutateAsync(deleteId);
+      toast.success('Desafio eliminado');
+    } catch {
+      toast.error('Erro ao eliminar desafio');
+    }
+    setDeleteId(null);
+  }
 
   if (isLoading) {
     return (
@@ -33,13 +59,28 @@ export default function PartnerChallenges() {
           <h1 className="font-display text-2xl font-bold text-foreground">Desafios Patrocinados 🏆</h1>
           <p className="text-muted-foreground font-body">Crie e gira desafios para as escolas e famílias do programa</p>
         </div>
-        <Button className="rounded-xl gap-2" onClick={() => setDialogOpen(true)}>
+        <Button className="rounded-xl gap-2" onClick={handleCreate}>
           <Plus className="h-4 w-4" />
           Novo Desafio
         </Button>
       </div>
 
-      <CreateChallengeDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <ChallengeFormDialog open={dialogOpen} onOpenChange={setDialogOpen} challenge={editingChallenge} />
+
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar desafio?</AlertDialogTitle>
+            <AlertDialogDescription>Esta acção é irreversível. O desafio será permanentemente removido.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="space-y-4">
         {(challenges ?? []).map(ch => {
@@ -72,12 +113,20 @@ export default function PartnerChallenges() {
                       </div>
                     </div>
                   </div>
-                  {ch.status !== 'draft' && (
-                    <div className="text-right shrink-0">
-                      <p className="font-display text-2xl font-bold text-foreground">{Number(ch.completion_rate)}%</p>
-                      <p className="text-[10px] text-muted-foreground">conclusão</p>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {ch.status !== 'draft' && (
+                      <div className="text-right mr-2">
+                        <p className="font-display text-2xl font-bold text-foreground">{Number(ch.completion_rate)}%</p>
+                        <p className="text-[10px] text-muted-foreground">conclusão</p>
+                      </div>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(ch)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setDeleteId(ch.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
