@@ -111,7 +111,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 const d = new Date();
                 d.setDate(d.getDate() - (6 - i));
                 const dateStr = d.toISOString().split('T')[0];
-                const isActiveDay = mockStreakData.activeDates.includes(dateStr);
+                const isActiveDay = sd.activeDates.includes(dateStr);
                 return (
                   <motion.div
                     key={i}
