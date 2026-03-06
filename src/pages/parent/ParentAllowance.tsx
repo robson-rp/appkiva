@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { motion } from 'framer-motion';
-import { Wallet, Send, TrendingUp, Calendar, Zap, Target, ListTodo, Settings, Loader2 } from 'lucide-react';
+import { Wallet, Send, TrendingUp, Calendar, Zap, Target, ListTodo, Settings, Loader2, PiggyBank, Percent } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -15,6 +15,7 @@ import { useHouseholdTasks } from '@/hooks/use-household-tasks';
 import { useAllowanceConfigs, useUpsertAllowanceConfig, useUpdateLastSent, type AllowanceConfig } from '@/hooks/use-allowance-configs';
 import { createTransaction } from '@/lib/ledger-api';
 import { useQueryClient } from '@tanstack/react-query';
+import { useHouseholdVaults, useUpdateVaultInterestRate } from '@/hooks/use-savings-vaults';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -32,6 +33,8 @@ export default function ParentAllowance() {
   const { data: children = [], isLoading: loadingChildren } = useChildren();
   const { data: configs = [], isLoading: loadingConfigs } = useAllowanceConfigs();
   const { data: tasks = [] } = useHouseholdTasks();
+  const { data: householdVaults = [], isLoading: loadingVaults } = useHouseholdVaults();
+  const updateVaultRate = useUpdateVaultInterestRate();
   const upsertConfig = useUpsertAllowanceConfig();
   const updateLastSent = useUpdateLastSent();
   const queryClient = useQueryClient();
@@ -241,6 +244,65 @@ export default function ParentAllowance() {
               </motion.div>
             );
           })}
+        </motion.div>
+      )}
+
+      {/* Vault Interest Rate Management */}
+      {householdVaults.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
+          <div className="flex items-center gap-2">
+            <PiggyBank className="h-5 w-5 text-secondary" />
+            <h2 className="font-display font-bold text-lg">Taxas de Juro dos Cofres</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {householdVaults.map((vault) => {
+              const child = children.find(c => c.profileId === vault.profileId);
+              return (
+                <Card key={vault.id} className="border-border/50">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{vault.icon}</div>
+                      <div className="flex-1">
+                        <h3 className="font-display font-bold text-sm">{vault.name}</h3>
+                        <p className="text-[10px] text-muted-foreground">{child?.displayName ?? 'Criança'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-display font-bold text-sm">{vault.currentAmount} 🪙</p>
+                        <p className="text-[10px] text-muted-foreground">de {vault.targetAmount}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Percent className="h-3 w-3" /> Taxa de juro mensal
+                        </span>
+                        <span className="font-display font-bold text-sm text-secondary">{vault.interestRate}%</span>
+                      </div>
+                      <Slider
+                        value={[vault.interestRate]}
+                        onValueChange={([v]) => {
+                          updateVaultRate.mutate(
+                            { vaultId: vault.id, interestRate: v },
+                            {
+                              onSuccess: () => toast({ title: 'Taxa atualizada! 📈', description: `${vault.name}: ${v}% por mês` }),
+                              onError: () => toast({ title: 'Erro', description: 'Não foi possível atualizar a taxa.', variant: 'destructive' }),
+                            }
+                          );
+                        }}
+                        max={10}
+                        min={0}
+                        step={0.5}
+                      />
+                      <div className="flex justify-between text-[10px] text-muted-foreground">
+                        <span>0%</span>
+                        <span>10%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </motion.div>
       )}
 
