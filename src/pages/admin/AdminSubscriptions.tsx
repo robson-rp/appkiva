@@ -130,12 +130,23 @@ export default function AdminSubscriptions() {
       return;
     }
     setErrors({});
+    const validData = parsed.data;
     try {
       if (editId) {
-        await updateTier.mutateAsync({ id: editId, ...parsed.data });
+        await updateTier.mutateAsync({ id: editId, ...validData });
         toast.success('Plano atualizado');
       } else {
-        await createTier.mutateAsync(parsed.data);
+        await createTier.mutateAsync({
+          name: validData.name,
+          tier_type: validData.tier_type,
+          price_monthly: validData.price_monthly,
+          price_yearly: validData.price_yearly,
+          max_children: validData.max_children,
+          max_classrooms: validData.max_classrooms,
+          currency: validData.currency,
+          is_active: validData.is_active,
+          features: validData.features,
+        });
         toast.success('Plano criado');
       }
       setDialogOpen(false);
