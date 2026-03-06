@@ -212,5 +212,6 @@ export default function ChildDreams() {
 
       <Kivo page="dreams" />
     </div>
+    </FeatureGateWrapper>
   );
 }

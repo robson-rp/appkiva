@@ -334,5 +334,6 @@ export default function TeenAnalytics() {
         </Card>
       </motion.div>
     </div>
+    </FeatureGateWrapper>
   );
 }

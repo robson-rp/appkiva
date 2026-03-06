@@ -374,5 +374,6 @@ export default function ParentReports() {
         </Card>
       </motion.div>
     </div>
+    </FeatureGateWrapper>
   );
 }
