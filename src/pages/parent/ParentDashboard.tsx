@@ -54,7 +54,7 @@ export default function ParentDashboard() {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero Welcome */}
-      <motion.div variants={item}>
+      <motion.div variants={item} data-onboarding="dashboard">
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
