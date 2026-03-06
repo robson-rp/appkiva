@@ -131,7 +131,7 @@ export default function ChildDashboard() {
       {/* Quick Stats */}
       <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
         {stats.map((stat) => (
-          <motion.div key={stat.label} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <motion.div key={stat.label} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
             <Card className="cursor-pointer border border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden" onClick={() => navigate(stat.to)}>
               <CardContent className="p-4 text-center relative">
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-40`} />
