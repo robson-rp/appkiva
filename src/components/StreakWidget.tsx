@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
+import { useStreakData } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
 
 interface StreakWidgetProps {
