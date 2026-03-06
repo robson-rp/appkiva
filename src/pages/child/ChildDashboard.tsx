@@ -15,6 +15,8 @@ import kivoImg from '@/assets/kivo.svg';
 import { Button } from '@/components/ui/button';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTeenBudget } from '@/hooks/use-teen-budget';
+import { useMonthlySpending } from '@/hooks/use-monthly-spending';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,8 +32,12 @@ export default function ChildDashboard() {
   const { user } = useAuth();
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
+  const { data: monthlyBudget = 0 } = useTeenBudget();
+  const { data: monthlySpent = 0 } = useMonthlySpending();
   const balance = walletBalance?.balance ?? child.balance;
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
+  const budgetRemaining = monthlyBudget > 0 ? Math.max(monthlyBudget - monthlySpent, 0) : 0;
   const pendingTasks = mockTasks.filter((t) => t.childId === child.id && t.status === 'pending');
   const activeMissions = mockMissions.filter((m) => m.status === 'available' || (m.status === 'in_progress' && m.childId === child.id));
   const vaults = mockVaults.filter((v) => v.childId === child.id);
@@ -157,6 +163,39 @@ export default function ChildDashboard() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Monthly Budget Indicator */}
+      {monthlyBudget > 0 && (
+        <motion.div variants={itemVariants}>
+          <Card className="border border-border/50 overflow-hidden">
+            <div className={`h-1 bg-gradient-to-r ${budgetPct >= 100 ? 'from-destructive to-destructive/60' : budgetPct >= 80 ? 'from-chart-1 to-accent' : 'from-secondary to-primary'}`} />
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <span className="text-sm">💰</span>
+                  </div>
+                  <span className="text-sm font-display font-bold">Limite Mensal</span>
+                </div>
+                <span className={`text-xs font-display font-bold ${budgetPct >= 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  🪙 {monthlySpent} / {monthlyBudget}
+                </span>
+              </div>
+              <div className="relative">
+                <Progress value={budgetPct} className="h-3 rounded-full" />
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
+                  {Math.round(budgetPct)}%
+                </span>
+              </div>
+              <p className={`text-[11px] font-display ${budgetPct >= 100 ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+                {budgetPct >= 100
+                  ? '⚠️ Atingiste o teu limite de gastos este mês!'
+                  : `Ainda podes gastar ${budgetRemaining} 🪙 este mês`}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Family Rankings */}
       <motion.div variants={itemVariants}>
