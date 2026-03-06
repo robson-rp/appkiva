@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
@@ -18,7 +19,8 @@ const CHART_COLORS = [
 ];
 
 export default function TeenAnalytics() {
-  const { data: monthlySummary } = useMonthlySummary(6);
+  const [summaryMonths, setSummaryMonths] = useState<3 | 6 | 12>(6);
+  const { data: monthlySummary } = useMonthlySummary(summaryMonths);
   const teen = mockTeens[0];
   const totalSpent = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
   const totalSaved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
@@ -210,10 +212,27 @@ export default function TeenAnalytics() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
           <Card className="border-border/50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-primary" />
-                Resumo Mensal — Receitas vs Despesas
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-display flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-primary" />
+                  Resumo Mensal — Receitas vs Despesas
+                </CardTitle>
+                <div className="flex gap-1">
+                  {([3, 6, 12] as const).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setSummaryMonths(m)}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-display font-bold transition-all duration-200 ${
+                        summaryMonths === m
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      {m}M
+                    </button>
+                  ))}
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="h-[260px]">
