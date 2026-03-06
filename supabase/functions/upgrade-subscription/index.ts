@@ -21,14 +21,16 @@ Deno.serve(async (req) => {
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     // User client to get current user
+    const token = authHeader.replace("Bearer ", "");
     const supabaseUser = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { authorization: authHeader } },
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+    const { data: { user }, error: authError } = await supabaseUser.auth.getUser(token);
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
+      console.error("Auth error:", authError?.message);
+      return new Response(JSON.stringify({ error: "Invalid token", details: authError?.message }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
