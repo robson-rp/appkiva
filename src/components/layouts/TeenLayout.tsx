@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
+import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
 
 const bottomNavItems = [
   { title: 'Início', url: '/teen', icon: Home },
