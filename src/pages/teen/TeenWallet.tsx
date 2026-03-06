@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { ArrowUpRight, ArrowDownRight, PiggyBank, Filter } from 'lucide-react';
 import { useState } from 'react';
+import CurrencyDisplay from '@/components/CurrencyDisplay';
 
 export default function TeenWallet() {
   const teen = mockTeens[0];
@@ -30,11 +30,11 @@ export default function TeenWallet() {
         <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
           <CardContent className="p-6 text-center">
             <p className="text-sm text-muted-foreground">Saldo disponível</p>
-            <p className="text-4xl font-display font-bold text-foreground mt-1">{teen.balance} 🪙</p>
+            <CurrencyDisplay amount={teen.balance} size="xl" className="mt-1" />
             <div className="flex justify-center gap-6 mt-4 text-sm">
-              <div><span className="text-chart-3 font-bold">+{income}</span> <span className="text-muted-foreground">recebido</span></div>
-              <div><span className="text-destructive font-bold">-{expenses}</span> <span className="text-muted-foreground">gasto</span></div>
-              <div><span className="text-primary font-bold">{saved}</span> <span className="text-muted-foreground">poupado</span></div>
+              <div><CurrencyDisplay amount={income} size="sm" className="text-chart-3 font-bold" /> <span className="text-muted-foreground">recebido</span></div>
+              <div><CurrencyDisplay amount={expenses} size="sm" className="text-destructive font-bold" /> <span className="text-muted-foreground">gasto</span></div>
+              <div><CurrencyDisplay amount={saved} size="sm" className="text-primary font-bold" /> <span className="text-muted-foreground">poupado</span></div>
             </div>
           </CardContent>
         </Card>
@@ -101,11 +101,13 @@ export default function TeenWallet() {
                       </p>
                     </div>
                   </div>
-                  <span className={`font-display font-bold text-sm ${
-                    tx.type === 'earned' || tx.type === 'allowance' ? 'text-chart-3' : tx.type === 'saved' ? 'text-primary' : 'text-destructive'
-                  }`}>
-                    {tx.type === 'spent' || tx.type === 'donated' ? '-' : '+'}{tx.amount}
-                  </span>
+                  <CurrencyDisplay
+                    amount={tx.amount}
+                    size="sm"
+                    className={`font-display font-bold ${
+                      tx.type === 'earned' || tx.type === 'allowance' ? 'text-chart-3' : tx.type === 'saved' ? 'text-primary' : 'text-destructive'
+                    }`}
+                  />
                 </motion.div>
               ))
             )}

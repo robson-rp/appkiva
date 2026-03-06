@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
+import CurrencyDisplay from '@/components/CurrencyDisplay';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -20,7 +21,6 @@ export default function ChildWallet() {
   const { data: ledgerTx } = useWalletTransactions();
   const balance = walletBalance?.balance ?? child.balance;
   
-  // Map entry_type to display type
   const mapTxType = (tx: { entry_type: string; direction: string }): string => {
     switch (tx.entry_type) {
       case 'vault_deposit': return 'saved';
@@ -33,10 +33,9 @@ export default function ChildWallet() {
     }
   };
 
-  // Use ledger transactions if available, fallback to mock
   const transactions = ledgerTx && ledgerTx.length > 0
     ? ledgerTx
-        .filter(tx => tx.entry_type !== 'vault_interest') // interest only affects vault, not wallet
+        .filter(tx => tx.entry_type !== 'vault_interest')
         .map(tx => ({
           id: tx.id,
           childId: child.id,
@@ -125,7 +124,9 @@ export default function ChildWallet() {
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
                   <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
-                  <p className="font-display font-bold text-white text-lg">🪙 {s.value}</p>
+                  <p className="font-display font-bold text-white text-lg">
+                    <CurrencyDisplay amount={s.value} size="lg" className="text-white" />
+                  </p>
                 </div>
               ))}
             </div>
@@ -200,7 +201,7 @@ export default function ChildWallet() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/40 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total doado</p>
-                <p className="font-display font-bold text-lg">🪙 {totalDonated}</p>
+                <CurrencyDisplay amount={totalDonated} size="lg" className="font-display font-bold text-lg" />
               </div>
               <div className="bg-muted/40 rounded-xl p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Causas apoiadas</p>
@@ -240,9 +241,11 @@ export default function ChildWallet() {
                         </div>
                         <p className="text-[11px] text-muted-foreground mt-0.5">{tx.date}</p>
                       </div>
-                      <span className={`font-display font-bold text-sm shrink-0 ${tx.type === 'earned' || tx.type === 'allowance' ? 'text-secondary' : 'text-destructive'}`}>
-                        {cfg.sign}{tx.amount} 🪙
-                      </span>
+                      <CurrencyDisplay
+                        amount={tx.amount}
+                        size="sm"
+                        className={`font-display font-bold shrink-0 ${tx.type === 'earned' || tx.type === 'allowance' ? 'text-secondary' : 'text-destructive'}`}
+                      />
                     </div>
                   </CardContent>
                 </Card>
