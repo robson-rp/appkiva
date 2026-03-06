@@ -63,20 +63,13 @@ export default function ChildDreams() {
     setExpandedId(dreams[0].id);
   }
 
-  if (!dreamVaultsAllowed && !gateLoading) {
-    return (
-      <div className="max-w-2xl mx-auto py-12">
-        <UpgradePrompt
-          featureName="Cofres de Sonhos"
-          description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
-          currentTier={tierName}
-          variant="inline"
-        />
-      </div>
-    );
-  }
-
   return (
+    <FeatureGateWrapper
+      allowed={dreamVaultsAllowed || gateLoading}
+      featureName="Cofres de Sonhos"
+      description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Hero */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
