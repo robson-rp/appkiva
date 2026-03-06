@@ -9,7 +9,7 @@ import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } fr
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
-import UpgradePrompt from '@/components/UpgradePrompt';
+import UpgradePrompt, { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
