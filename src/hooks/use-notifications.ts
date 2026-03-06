@@ -8,7 +8,7 @@ export interface AppNotification {
   profileId: string;
   title: string;
   message: string;
-  type: 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward';
+  type: 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward' | 'vault';
   read: boolean;
   urgent: boolean;
   metadata: Record<string, any>;

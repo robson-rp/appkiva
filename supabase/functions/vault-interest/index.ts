@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
         profile_id: vault.profile_id,
         title: "Juros recebidos! 📈",
         message: `O teu cofre "${vault.name}" rendeu +${interest} KVC de juros este mês!`,
-        type: "vault",
+        type: "savings",
         metadata: { vault_id: vault.id, interest },
       });
 
