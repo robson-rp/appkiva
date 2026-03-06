@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
     const errors: string[] = [];
 
     for (const vault of vaults) {
-      // Monthly interest = current_amount * (interest_rate / 100)
-      const interest = Math.round(vault.current_amount * (vault.interest_rate / 100));
+      // Monthly interest = current_amount * (interest_rate / 100), minimum 1 KVC
+      const interest = Math.max(1, Math.round(vault.current_amount * (vault.interest_rate / 100)));
 
       if (interest <= 0) continue;
 
