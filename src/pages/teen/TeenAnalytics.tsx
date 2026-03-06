@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { useMonthlySummary } from '@/hooks/use-monthly-summary';
 
 const CHART_COLORS = [
   'hsl(var(--chart-1))',
@@ -17,6 +18,7 @@ const CHART_COLORS = [
 ];
 
 export default function TeenAnalytics() {
+  const { data: monthlySummary } = useMonthlySummary(6);
   const teen = mockTeens[0];
   const totalSpent = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
   const totalSaved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
@@ -203,7 +205,71 @@ export default function TeenAnalytics() {
         </Card>
       </motion.div>
 
-      {/* Savings Rate */}
+      {/* Monthly Income vs Expenses */}
+      {monthlySummary && monthlySummary.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                Resumo Mensal — Receitas vs Despesas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlySummary} barCategoryGap="20%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={35}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--card))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value: number, name: string) => [`${value} 🪙`, name === 'income' ? 'Receitas' : name === 'expenses' ? 'Despesas' : 'Líquido']}
+                      labelFormatter={(label) => `Mês: ${label}`}
+                      cursor={{ fill: 'hsl(var(--muted) / 0.3)' }}
+                    />
+                    <Legend
+                      formatter={(value) => value === 'income' ? 'Receitas' : value === 'expenses' ? 'Despesas' : 'Líquido'}
+                      wrapperStyle={{ fontSize: '11px' }}
+                    />
+                    <Bar dataKey="income" fill="hsl(var(--chart-3))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="expenses" fill="hsl(var(--chart-1))" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Net summary row */}
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {monthlySummary.slice(-3).map((m) => (
+                  <div key={m.month} className="bg-muted/50 rounded-lg p-2 text-center">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{m.label}</p>
+                    <p className={`font-display font-bold text-sm ${m.net >= 0 ? 'text-chart-3' : 'text-destructive'}`}>
+                      {m.net >= 0 ? '+' : ''}{m.net} 🪙
+                    </p>
+                    <p className="text-[9px] text-muted-foreground">líquido</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Card className="border-border/50">
           <CardHeader className="pb-2">
