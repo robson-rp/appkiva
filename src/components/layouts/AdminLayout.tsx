@@ -11,6 +11,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
 
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
