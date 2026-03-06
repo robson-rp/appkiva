@@ -22,6 +22,7 @@ import UpgradePrompt from '@/components/UpgradePrompt';
 
 export default function ChildVaults() {
   const { user } = useAuth();
+  const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: dbVaults, isLoading } = useSavingsVaults(user?.profileId);
   const { data: walletBalance } = useWalletBalance();
   const createVault = useCreateSavingsVault();

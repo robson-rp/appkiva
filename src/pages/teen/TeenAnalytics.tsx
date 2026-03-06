@@ -22,6 +22,7 @@ const CHART_COLORS = [
 ];
 
 export default function TeenAnalytics() {
+  const { allowed: analyticsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const [summaryMonths, setSummaryMonths] = useState<3 | 6 | 12>(6);
   const { data: monthlySummary } = useMonthlySummary(summaryMonths);
   const { data: realBudget } = useTeenBudget();

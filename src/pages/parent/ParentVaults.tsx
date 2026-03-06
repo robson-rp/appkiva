@@ -22,6 +22,7 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } 
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ParentVaults() {
+  const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: children = [], isLoading: childrenLoading } = useChildren();
   const { data: allVaults = [], isLoading: vaultsLoading } = useHouseholdVaults();
   const updateRate = useUpdateVaultInterestRate();

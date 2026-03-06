@@ -33,6 +33,7 @@ const periodComparison = [
 ];
 
 export default function ParentReports() {
+  const { allowed: reportsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const taskData = mockChildren.map((child) => ({
     name: child.name,
     completas: mockTasks.filter((t) => t.childId === child.id && (t.status === 'completed' || t.status === 'approved')).length,
