@@ -226,6 +226,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
           )}
         </div>
       </div>
+      <OnboardingWalkthrough />
     </SidebarProvider>
   );
 }

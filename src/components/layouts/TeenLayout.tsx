@@ -118,6 +118,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+      <OnboardingWalkthrough />
     </div>
   );
 }

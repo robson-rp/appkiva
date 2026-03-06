@@ -123,6 +123,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
           </AnimatePresence>
         </div>
       </div>
+      <OnboardingWalkthrough />
     </SidebarProvider>
   );
 }

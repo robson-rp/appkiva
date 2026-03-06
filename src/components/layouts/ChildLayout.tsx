@@ -117,6 +117,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
           })}
         </div>
       </nav>
+      <OnboardingWalkthrough />
     </div>
   );
 }

@@ -126,6 +126,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </AnimatePresence>
         </div>
       </div>
+      <OnboardingWalkthrough />
     </SidebarProvider>
   );
 }
