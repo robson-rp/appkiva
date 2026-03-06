@@ -15,18 +15,55 @@ export function useTenants() {
   });
 }
 
-export function useSubscriptionTiers() {
+export function useSubscriptionTiers(showInactive = false) {
   return useQuery({
-    queryKey: ['subscription_tiers'],
+    queryKey: ['subscription_tiers', showInactive],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('subscription_tiers')
         .select('*')
-        .eq('is_active', true)
         .order('price_monthly', { ascending: true });
+      if (!showInactive) {
+        query = query.eq('is_active', true);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+  });
+}
+
+export function useCreateSubscriptionTier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (tier: {
+      name: string;
+      tier_type: string;
+      price_monthly: number;
+      price_yearly: number;
+      max_children: number;
+      max_classrooms: number;
+      currency: string;
+      is_active: boolean;
+      features: string[];
+    }) => {
+      const { data, error } = await supabase.from('subscription_tiers').insert(tier as any).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription_tiers'] }),
+  });
+}
+
+export function useUpdateSubscriptionTier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+      const { data, error } = await supabase.from('subscription_tiers').update(updates as any).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription_tiers'] }),
   });
 }
 
