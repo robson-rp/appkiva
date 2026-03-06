@@ -4,10 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { useSavingsVaults, useCreateSavingsVault } from '@/hooks/use-savings-vaults';
+import { useSavingsVaults, useCreateSavingsVault, useDepositToVault } from '@/hooks/use-savings-vaults';
+import { useWalletBalance } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVaults, mockChildren } from '@/data/mock-data';
-import { Plus, PiggyBank, Target, TrendingUp, Sparkles } from 'lucide-react';
+import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,10 +17,19 @@ import { toast } from 'sonner';
 export default function ChildVaults() {
   const { user } = useAuth();
   const { data: dbVaults, isLoading } = useSavingsVaults(user?.profileId);
+  const { data: walletBalance } = useWalletBalance();
   const createVault = useCreateSavingsVault();
+  const depositToVault = useDepositToVault();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
+
+  // Deposit dialog state
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [depositVault, setDepositVault] = useState<{ id: string; name: string; icon: string; currentAmount: number; targetAmount: number } | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
+
+  const balance = walletBalance?.balance ?? 0;
 
   // Fallback to mock data if no DB vaults
   const child = mockChildren[0];
@@ -48,6 +58,31 @@ export default function ChildVaults() {
     } catch { toast.error('Erro ao criar cofre'); }
   };
 
+  const openDepositDialog = (vault: typeof depositVault) => {
+    setDepositVault(vault);
+    setDepositAmount('');
+    setDepositDialogOpen(true);
+  };
+
+  const handleDeposit = () => {
+    if (!depositVault || !depositAmount) return;
+    const amount = Number(depositAmount);
+    if (amount <= 0) return;
+    depositToVault.mutate(
+      { vaultId: depositVault.id, amount },
+      {
+        onSuccess: () => {
+          setDepositDialogOpen(false);
+          setDepositVault(null);
+          setDepositAmount('');
+        },
+      }
+    );
+  };
+
+  const remaining = depositVault ? Math.max(0, depositVault.targetAmount - depositVault.currentAmount) : 0;
+  const maxDeposit = Math.min(balance, remaining > 0 ? remaining : balance);
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Hero Card */}
@@ -65,9 +100,12 @@ export default function ChildVaults() {
                 <h2 className="text-3xl font-display font-bold">🪙 {totalSaved}</h2>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-sm opacity-80">
-              <Target className="h-4 w-4" />
-              <span>Meta total: {totalTarget} KivaCoins</span>
+            <div className="flex items-center justify-between text-sm opacity-80">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                <span>Meta total: {totalTarget} KivaCoins</span>
+              </div>
+              <span>Carteira: {balance} KVC</span>
             </div>
             {totalTarget > 0 && <Progress value={Math.round((totalSaved / totalTarget) * 100)} className="h-2 mt-3 bg-white/20" />}
           </CardContent>
@@ -141,8 +179,19 @@ export default function ChildVaults() {
                     <Progress value={pct} className="h-3 mb-3" />
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm text-muted-foreground font-medium">🪙 {vault.currentAmount} / {vault.targetAmount}</span>
-                      <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-primary hover:text-primary-foreground transition-colors">
-                        <Plus className="h-3 w-3" /> Adicionar
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-primary hover:text-primary-foreground transition-colors"
+                        onClick={() => openDepositDialog({
+                          id: vault.id,
+                          name: vault.name,
+                          icon: vault.icon,
+                          currentAmount: vault.currentAmount,
+                          targetAmount: vault.targetAmount,
+                        })}
+                      >
+                        <ArrowDownToLine className="h-3 w-3" /> Depositar
                       </Button>
                     </div>
 
@@ -170,6 +219,92 @@ export default function ChildVaults() {
           })}
         </div>
       )}
+
+      {/* Deposit Dialog */}
+      <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <span className="text-2xl">{depositVault?.icon}</span>
+              Depositar em {depositVault?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-muted/50 rounded-xl p-3 text-sm space-y-1">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Saldo da carteira</span>
+                <span className="font-display font-bold">🪙 {balance}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">No cofre</span>
+                <span className="font-display font-bold">🪙 {depositVault?.currentAmount ?? 0}</span>
+              </div>
+              {remaining > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Falta para a meta</span>
+                  <span className="font-display font-bold text-primary">🪙 {remaining}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Montante a depositar</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 10"
+                value={depositAmount}
+                onChange={e => setDepositAmount(e.target.value)}
+                max={maxDeposit}
+                min={1}
+              />
+              {maxDeposit > 0 && (
+                <div className="flex gap-2">
+                  {[5, 10, 25].filter(v => v <= maxDeposit).map(v => (
+                    <Button
+                      key={v}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg text-xs font-display h-7"
+                      onClick={() => setDepositAmount(String(v))}
+                    >
+                      {v} KVC
+                    </Button>
+                  ))}
+                  {maxDeposit > 25 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-lg text-xs font-display h-7"
+                      onClick={() => setDepositAmount(String(maxDeposit))}
+                    >
+                      Máx ({maxDeposit})
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Button
+              className="w-full rounded-xl font-display gap-2"
+              disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending}
+              onClick={handleDeposit}
+            >
+              {depositToVault.isPending ? (
+                'A depositar...'
+              ) : (
+                <>
+                  <ArrowDownToLine className="h-4 w-4" />
+                  Depositar {depositAmount ? `${depositAmount} KVC` : ''}
+                </>
+              )}
+            </Button>
+
+            {Number(depositAmount) > balance && (
+              <p className="text-xs text-destructive text-center">Saldo insuficiente!</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Kivo page="vaults" />
     </div>
