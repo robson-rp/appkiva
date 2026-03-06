@@ -102,6 +102,7 @@ export default function PartnerChallenges() {
       <div className="space-y-4">
         {(challenges ?? []).map(ch => {
           const cfg = statusConfig[ch.status] ?? statusConfig.draft;
+          const nextStatuses = statusFlow[ch.status] ?? [];
           return (
             <Card key={ch.id} className="rounded-2xl border-border/50">
               <CardContent className="p-5">
