@@ -8,7 +8,7 @@ import { Kivo } from '@/components/Kivo';
 import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements, mockDonations } from '@/data/mock-data';
 import { mockStreakData } from '@/data/streaks-data';
 import { Progress } from '@/components/ui/progress';
-import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon, Flame } from 'lucide-react';
+import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon, Flame, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LEVEL_CONFIG, Level } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
@@ -17,6 +17,8 @@ import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { useMonthlySpending } from '@/hooks/use-monthly-spending';
+import { useMonthlySummary } from '@/hooks/use-monthly-summary';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +36,7 @@ export default function ChildDashboard() {
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
   const { data: monthlyBudget = 0 } = useTeenBudget();
   const { data: monthlySpent = 0 } = useMonthlySpending();
+  const { data: monthlySummary = [] } = useMonthlySummary(6);
   const balance = walletBalance?.balance ?? child.balance;
   const [showLevelUp, setShowLevelUp] = useState(false);
   const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
@@ -192,6 +195,51 @@ export default function ChildDashboard() {
                   ? '⚠️ Atingiste o teu limite de gastos este mês!'
                   : `Ainda podes gastar ${budgetRemaining} 🪙 este mês`}
               </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Monthly Spending Chart */}
+      {monthlySummary.length > 0 && (
+        <motion.div variants={itemVariants}>
+          <Card className="border border-border/50 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary to-secondary" />
+            <CardHeader className="pb-1">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                </div>
+                Evolução Mensal
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlySummary} barGap={4}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} width={32} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', fontSize: 12, fontFamily: 'var(--font-display)' }}
+                      formatter={(value: number, name: string) => [`🪙 ${value}`, name === 'income' ? 'Ganho' : 'Gasto']}
+                      labelFormatter={(label) => `Mês: ${label}`}
+                    />
+                    <Bar dataKey="income" name="income" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                    <Bar dataKey="expenses" name="expenses" fill="hsl(var(--destructive))" radius={[6, 6, 0, 0]} maxBarSize={28} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-secondary" />
+                  <span className="text-[10px] text-muted-foreground font-medium">Ganho</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-sm bg-destructive" />
+                  <span className="text-[10px] text-muted-foreground font-medium">Gasto</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
