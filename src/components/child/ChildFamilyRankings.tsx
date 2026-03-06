@@ -38,7 +38,7 @@ export function ChildFamilyRankings() {
           {categories.map((cat) => (
             <motion.div
               key={cat.title}
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: 1.01 }}
               className="bg-muted/40 rounded-xl p-3 text-center border border-border/30"
             >
               <p className="text-[10px] font-display font-bold mb-2">{cat.title}</p>

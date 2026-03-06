@@ -30,7 +30,7 @@ export function ChildAchievementsStrip({ achievements }: ChildAchievementsStripP
         </div>
         <div className="flex gap-3 overflow-x-auto pb-1">
           {achievements.map((ach) => (
-            <motion.div key={ach.id} whileHover={{ scale: 1.05 }} className="flex-shrink-0 w-20 text-center">
+            <motion.div key={ach.id} whileHover={{ scale: 1.02 }} className="flex-shrink-0 w-20 text-center">
               <div className="w-14 h-14 rounded-2xl bg-card shadow-sm flex items-center justify-center mx-auto mb-1 text-2xl">
                 {ach.icon}
               </div>
