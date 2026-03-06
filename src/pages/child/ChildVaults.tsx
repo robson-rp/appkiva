@@ -214,13 +214,25 @@ export default function ChildVaults() {
         <div className="space-y-4">
           {vaults.map((vault, i) => {
             const pct = vault.targetAmount > 0 ? Math.round((vault.currentAmount / vault.targetAmount) * 100) : 0;
+            const goalReached = vault.targetAmount > 0 && vault.currentAmount >= vault.targetAmount;
             const monthlyInterest = calcMonthlyInterest(vault.currentAmount, vault.interestRate);
             const projection3m = calcProjection(vault.currentAmount, vault.interestRate, 3);
             const projection6m = calcProjection(vault.currentAmount, vault.interestRate, 6);
             return (
               <motion.div key={vault.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1, type: 'spring', stiffness: 300, damping: 30 }}>
-                <Card className="hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm hover:-translate-y-0.5">
+                <Card className={`hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm hover:-translate-y-0.5 ${goalReached ? 'ring-2 ring-secondary/50 border-secondary/30' : ''}`}>
                   <CardContent className="p-5">
+                    {goalReached && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mb-3 flex items-center gap-2 bg-secondary/15 text-secondary rounded-xl px-3 py-1.5 border border-secondary/25 w-fit"
+                      >
+                        <span className="text-base">✅</span>
+                        <span className="text-xs font-display font-bold">Meta atingida!</span>
+                        <span className="text-base">🏆</span>
+                      </motion.div>
+                    )}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <motion.div className="w-14 h-14 rounded-2xl bg-accent/20 flex items-center justify-center text-3xl" whileHover={{ scale: 1.1, rotate: 5 }} transition={{ type: 'spring', stiffness: 400 }}>
