@@ -158,7 +158,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                          </motion.div>
                         </div>
                         <span className={`text-[9px] capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
-                          {shortDay}
+                          {isToday ? 'Hoje' : shortDay}
                         </span>
                       </div>
                     </TooltipTrigger>
