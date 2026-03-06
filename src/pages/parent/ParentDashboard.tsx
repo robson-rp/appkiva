@@ -153,7 +153,7 @@ export default function ParentDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="vaults">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 gradient-kivara" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
