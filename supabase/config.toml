@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.vault-withdraw]
 verify_jwt = false
+
+[functions.vault-interest]
+verify_jwt = false
