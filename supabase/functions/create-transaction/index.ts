@@ -303,6 +303,44 @@ Deno.serve(async (req) => {
       }
     }
 
+    // 7b. Monthly budget check (for children/teens on purchases)
+    if (body.entry_type === "purchase" && !isParent && !isAdmin) {
+      const { data: childRecord } = await supabaseAdmin
+        .from("children")
+        .select("monthly_budget")
+        .eq("profile_id", callerProfile.id)
+        .maybeSingle();
+
+      const monthlyBudget = Number(childRecord?.monthly_budget) || 0;
+      if (monthlyBudget > 0) {
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+        const { data: monthPurchases } = await supabaseAdmin
+          .from("ledger_entries")
+          .select("amount")
+          .eq("debit_wallet_id", debitWalletId)
+          .eq("entry_type", "purchase")
+          .gte("created_at", monthStart);
+
+        const totalSpent = (monthPurchases ?? []).reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+        const remaining = monthlyBudget - totalSpent;
+
+        if (remaining < body.amount) {
+          return new Response(
+            JSON.stringify({
+              error: "Limite mensal de gastos excedido",
+              monthly_budget: monthlyBudget,
+              spent_this_month: totalSpent,
+              remaining,
+              requested: body.amount,
+            }),
+            { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+    }
+
     // 8. Create the ledger entry
     const { data: entry, error: insertError } = await supabaseAdmin
       .from("ledger_entries")
