@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
+import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 
 export default function ChildVaults() {
   const { user } = useAuth();
@@ -35,6 +36,10 @@ export default function ChildVaults() {
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawVault, setWithdrawVault] = useState<{ id: string; name: string; icon: string; currentAmount: number } | null>(null);
   const [withdrawAmount, setWithdrawAmount] = useState('');
+
+  // Confetti state
+  const [confettiActive, setConfettiActive] = useState(false);
+  const [confettiVault, setConfettiVault] = useState<{ name: string; icon: string } | null>(null);
 
   const balance = walletBalance?.balance ?? 0;
 
@@ -75,13 +80,24 @@ export default function ChildVaults() {
     if (!depositVault || !depositAmount) return;
     const amount = Number(depositAmount);
     if (amount <= 0) return;
+
+    const willReachTarget = depositVault.targetAmount > 0 &&
+      depositVault.currentAmount < depositVault.targetAmount &&
+      (depositVault.currentAmount + amount) >= depositVault.targetAmount;
+
     depositToVault.mutate(
       { vaultId: depositVault.id, amount },
       {
         onSuccess: () => {
           setDepositDialogOpen(false);
-          setDepositVault(null);
           setDepositAmount('');
+
+          if (willReachTarget) {
+            setConfettiVault({ name: depositVault.name, icon: depositVault.icon });
+            setConfettiActive(true);
+          }
+
+          setDepositVault(null);
         },
       }
     );
@@ -445,6 +461,13 @@ export default function ChildVaults() {
       </Dialog>
 
       <Kivo page="vaults" />
+
+      <ConfettiCelebration
+        active={confettiActive}
+        onComplete={() => setConfettiActive(false)}
+        vaultName={confettiVault?.name}
+        vaultIcon={confettiVault?.icon}
+      />
     </div>
   );
 }
