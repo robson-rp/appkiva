@@ -6,9 +6,9 @@ import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { Kivo } from '@/components/Kivo';
 import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements, mockDonations } from '@/data/mock-data';
-import { mockStreakData } from '@/data/streaks-data';
+import { StreakWidget } from '@/components/StreakWidget';
 import { Progress } from '@/components/ui/progress';
-import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon, Flame } from 'lucide-react';
+import { ListTodo, Target, PiggyBank, TrendingUp, ArrowUpRight, ArrowDownLeft, Sparkles, ChevronRight, Crown, Medal, Trophy as TrophyIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LEVEL_CONFIG, Level } from '@/types/kivara';
 import kivoImg from '@/assets/kivo.svg';
@@ -385,51 +385,8 @@ export default function ChildDashboard() {
         </Card>
       </motion.div>
 
-      {/* Streak Widget */}
       <motion.div variants={itemVariants}>
-        <Card
-          className="border border-border/50 cursor-pointer hover:shadow-md transition-all duration-200 overflow-hidden"
-          onClick={() => navigate('/child/streaks')}
-        >
-          <div className="h-1 bg-gradient-to-r from-destructive via-chart-1 to-accent" />
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                  <Flame className="h-6 w-6 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-sm font-display font-bold">Sequência Diária</p>
-                  <p className="text-xs text-muted-foreground">{mockStreakData.totalActiveDays} dias activos no total</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <motion.p
-                  initial={{ scale: 1.2 }}
-                  animate={{ scale: 1 }}
-                  className="text-2xl font-display font-bold text-destructive"
-                >
-                  {mockStreakData.currentStreak} 🔥
-                </motion.p>
-                <p className="text-[10px] text-muted-foreground">Recorde: {mockStreakData.longestStreak}</p>
-              </div>
-            </div>
-            <div className="flex gap-1 mt-3">
-              {Array.from({ length: 7 }).map((_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (6 - i));
-                const dateStr = d.toISOString().split('T')[0];
-                const isActive = mockStreakData.activeDates.includes(dateStr);
-                return (
-                  <div
-                    key={i}
-                    className={`flex-1 h-2 rounded-full ${isActive ? 'bg-destructive' : 'bg-muted/60'}`}
-                  />
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+        <StreakWidget onClick={() => navigate('/child/streaks')} />
       </motion.div>
 
       {/* Achievements Strip */}
