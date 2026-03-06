@@ -128,10 +128,10 @@ export function useApproveTask() {
       // Credit the child's wallet via edge function
       const { error: txError } = await supabase.functions.invoke('create-transaction', {
         body: {
-          childProfileId: task.child_profile_id,
+          target_profile_id: task.child_profile_id,
           amount: Number(task.reward),
-          description: `Tarefa aprovada`,
-          entryType: 'task_reward',
+          description: `Tarefa aprovada: ${task.title}`,
+          entry_type: 'task_reward',
         },
       });
 
