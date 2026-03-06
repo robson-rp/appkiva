@@ -568,6 +568,73 @@ export type Database = {
           },
         ]
       }
+      partner_programs: {
+        Row: {
+          children_count: number
+          created_at: string
+          id: string
+          investment_amount: number
+          partner_tenant_id: string
+          program_name: string
+          program_type: string
+          started_at: string
+          status: string
+          target_household_id: string | null
+          target_tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          children_count?: number
+          created_at?: string
+          id?: string
+          investment_amount?: number
+          partner_tenant_id: string
+          program_name: string
+          program_type?: string
+          started_at?: string
+          status?: string
+          target_household_id?: string | null
+          target_tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          children_count?: number
+          created_at?: string
+          id?: string
+          investment_amount?: number
+          partner_tenant_id?: string
+          program_name?: string
+          program_type?: string
+          started_at?: string
+          status?: string
+          target_household_id?: string | null
+          target_tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_programs_partner_tenant_id_fkey"
+            columns: ["partner_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_programs_target_household_id_fkey"
+            columns: ["target_household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_programs_target_tenant_id_fkey"
+            columns: ["target_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar: string | null
@@ -793,6 +860,56 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsored_challenges: {
+        Row: {
+          completion_rate: number
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          participants_count: number
+          partner_tenant_id: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completion_rate?: number
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          participants_count?: number
+          partner_tenant_id: string
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completion_rate?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          participants_count?: number
+          partner_tenant_id?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_challenges_partner_tenant_id_fkey"
+            columns: ["partner_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]

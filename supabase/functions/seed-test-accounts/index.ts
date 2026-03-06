@@ -341,13 +341,89 @@ Deno.serve(async (req) => {
     }
   }
 
+  // ─── 7. Partner tenant & seed data ─────────────────────────
+  let partnerTenantId: string | undefined;
+  const partnerUserId = results.partner;
+
+  if (partnerUserId && !partnerUserId.startsWith("skipped")) {
+    // Check if partner already has a tenant
+    const { data: partnerProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("id, tenant_id")
+      .eq("user_id", partnerUserId)
+      .single();
+
+    if (partnerProfile?.tenant_id) {
+      partnerTenantId = partnerProfile.tenant_id;
+    } else {
+      // Create partner tenant
+      const { data: pTenant } = await supabaseAdmin
+        .from("tenants")
+        .insert({
+          name: "Banco Parceiro Teste",
+          tenant_type: "institutional_partner",
+          currency: "EUR",
+          subscription_tier_id: tierIds["partner_program"],
+          real_money_enabled: false,
+        })
+        .select("id")
+        .single();
+
+      partnerTenantId = pTenant?.id;
+
+      if (partnerTenantId) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ tenant_id: partnerTenantId })
+          .eq("user_id", partnerUserId);
+      }
+    }
+
+    // Seed partner programs
+    if (partnerTenantId) {
+      const { data: existingPrograms } = await supabaseAdmin
+        .from("partner_programs")
+        .select("id")
+        .eq("partner_tenant_id", partnerTenantId)
+        .limit(1);
+
+      if (!existingPrograms || existingPrograms.length === 0) {
+        await supabaseAdmin.from("partner_programs").insert([
+          { partner_tenant_id: partnerTenantId, program_name: "Escola Primária Sol", program_type: "school", status: "active", children_count: 85, investment_amount: 3200, started_at: "2026-01-15T00:00:00Z" },
+          { partner_tenant_id: partnerTenantId, program_name: "Família Ferreira", program_type: "family", status: "active", children_count: 3, investment_amount: 150, started_at: "2026-02-01T00:00:00Z" },
+          { partner_tenant_id: partnerTenantId, program_name: "Colégio Esperança", program_type: "school", status: "active", children_count: 120, investment_amount: 4500, started_at: "2025-11-01T00:00:00Z" },
+          { partner_tenant_id: partnerTenantId, program_name: "Família Santos", program_type: "family", status: "active", children_count: 2, investment_amount: 100, started_at: "2026-03-01T00:00:00Z" },
+          { partner_tenant_id: partnerTenantId, program_name: "Escola Básica Norte", program_type: "school", status: "pending", children_count: 65, investment_amount: 2500, started_at: "2026-03-01T00:00:00Z" },
+          { partner_tenant_id: partnerTenantId, program_name: "Família Costa", program_type: "family", status: "active", children_count: 4, investment_amount: 200, started_at: "2025-12-01T00:00:00Z" },
+        ]);
+      }
+
+      // Seed sponsored challenges
+      const { data: existingChallenges } = await supabaseAdmin
+        .from("sponsored_challenges")
+        .select("id")
+        .eq("partner_tenant_id", partnerTenantId)
+        .limit(1);
+
+      if (!existingChallenges || existingChallenges.length === 0) {
+        await supabaseAdmin.from("sponsored_challenges").insert([
+          { partner_tenant_id: partnerTenantId, title: "Poupar para o Futuro", description: "Desafio de poupança mensal para crianças dos 8-12 anos", status: "active", participants_count: 145, completion_rate: 78, start_date: "2026-02-01", end_date: "2026-02-28" },
+          { partner_tenant_id: partnerTenantId, title: "Mercado Escolar", description: "Simulação de compras inteligentes no ambiente escolar", status: "active", participants_count: 89, completion_rate: 62, start_date: "2026-02-15", end_date: "2026-03-15" },
+          { partner_tenant_id: partnerTenantId, title: "Desafio Familiar", description: "Poupança em família com metas semanais partilhadas", status: "draft", participants_count: 0, completion_rate: 0, start_date: "2026-04-01", end_date: "2026-04-30" },
+          { partner_tenant_id: partnerTenantId, title: "Educação Financeira Básica", description: "Completar 10 lições de literacia financeira", status: "completed", participants_count: 210, completion_rate: 91, start_date: "2026-01-01", end_date: "2026-01-31" },
+        ]);
+      }
+    }
+  }
+
   return new Response(
     JSON.stringify({
       success: true,
-      message: "Test accounts seeded with subscription tiers and tenant",
+      message: "Test accounts seeded with subscription tiers, tenant and partner data",
       accounts: accounts.map((a) => ({ email: a.email, role: a.role, password })),
       household_id: householdId,
       tenant_id: tenantId,
+      partner_tenant_id: partnerTenantId,
       subscription_tiers: tierIds,
       currencies: currencies.map((c) => c.code),
     }),
