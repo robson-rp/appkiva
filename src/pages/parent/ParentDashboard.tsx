@@ -88,7 +88,7 @@ export default function ParentDashboard() {
 
       {/* Quick Action: Send Allowance */}
       {children.length > 0 && (
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="allowance">
           <Card className="border-border/50 overflow-hidden border-dashed border-2 border-secondary/40 bg-secondary/5">
             <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-3">
