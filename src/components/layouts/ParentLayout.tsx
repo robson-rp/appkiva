@@ -12,7 +12,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { OnboardingWalkthrough, RestartOnboardingButton } from '@/components/OnboardingWalkthrough';
+import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 
 const navItems = [
   { title: 'Painel', url: '/parent', icon: LayoutDashboard },
@@ -111,7 +111,6 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-5 opacity-70" />
               </div>
               <div className="flex items-center gap-1">
-                <RestartOnboardingButton />
                 <ThemeToggle />
                 <NotificationDropdown />
               </div>
