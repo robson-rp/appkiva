@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
+import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } from 'lucide-react';
@@ -21,13 +22,15 @@ const CHART_COLORS = [
 export default function TeenAnalytics() {
   const [summaryMonths, setSummaryMonths] = useState<3 | 6 | 12>(6);
   const { data: monthlySummary } = useMonthlySummary(summaryMonths);
+  const { data: realBudget } = useTeenBudget();
   const teen = mockTeens[0];
+  const monthlyBudget = realBudget && realBudget > 0 ? realBudget : teen.monthlyBudget;
   const totalSpent = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
   const totalSaved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
   const totalIncome = mockTeenTransactions.filter(t => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
   const totalDonated = mockTeenTransactions.filter(t => t.type === 'donated').reduce((s, t) => s + t.amount, 0);
   const savingsRate = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
-  const budgetUsed = Math.round((totalSpent / teen.monthlyBudget) * 100);
+  const budgetUsed = monthlyBudget > 0 ? Math.round((totalSpent / monthlyBudget) * 100) : 0;
 
   const categorySpend = mockTeenTransactions
     .filter(t => t.type === 'spent' && t.category)
