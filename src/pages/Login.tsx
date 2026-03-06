@@ -17,6 +17,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: 
   teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
   child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
   teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
+  admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
 };
 
 const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher'];
@@ -173,6 +174,7 @@ export default function Login() {
                             child: 'crianca@kivara.com',
                             teen: 'adolescente@kivara.com',
                             teacher: 'professor@kivara.com',
+                            admin: 'admin@kivara.com',
                           };
                           setSelectedRole(role);
                           setEmail(testEmails[role]);

@@ -9,6 +9,7 @@ import { ParentLayout } from "@/components/layouts/ParentLayout";
 import { ChildLayout } from "@/components/layouts/ChildLayout";
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
 import { TeenLayout } from "@/components/layouts/TeenLayout";
+import { AdminLayout } from "@/components/layouts/AdminLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -40,6 +41,13 @@ import TeenAnalytics from "./pages/teen/TeenAnalytics";
 import LearnPage from "./pages/shared/LearnPage";
 import BadgesPage from "./pages/shared/BadgesPage";
 import StreaksPage from "./pages/shared/StreaksPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminTenants from "./pages/admin/AdminTenants";
+import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
+import AdminCurrencies from "./pages/admin/AdminCurrencies";
+import AdminAudit from "./pages/admin/AdminAudit";
+import AdminRisk from "./pages/admin/AdminRisk";
+import AdminCompliance from "./pages/admin/AdminCompliance";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +67,21 @@ function AppRoutes() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  if (user.role === 'admin') {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+        <Route path="/admin/tenants" element={<AdminLayout><AdminTenants /></AdminLayout>} />
+        <Route path="/admin/subscriptions" element={<AdminLayout><AdminSubscriptions /></AdminLayout>} />
+        <Route path="/admin/currencies" element={<AdminLayout><AdminCurrencies /></AdminLayout>} />
+        <Route path="/admin/audit" element={<AdminLayout><AdminAudit /></AdminLayout>} />
+        <Route path="/admin/risk" element={<AdminLayout><AdminRisk /></AdminLayout>} />
+        <Route path="/admin/compliance" element={<AdminLayout><AdminCompliance /></AdminLayout>} />
+        <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
   }

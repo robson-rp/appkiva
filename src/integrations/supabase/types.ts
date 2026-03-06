@@ -68,6 +68,56 @@ export type Database = {
           },
         ]
       }
+      audit_log: {
+        Row: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+          profile_id: string | null
+          resource_id: string | null
+          resource_type: string
+          tenant_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          profile_id?: string | null
+          resource_id?: string | null
+          resource_type: string
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["audit_action"]
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+          profile_id?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          tenant_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_exception_requests: {
         Row: {
           amount: number
@@ -191,7 +241,9 @@ export type Database = {
           consent_type: string
           granted_at: string
           id: string
+          ip_metadata: Json | null
           metadata: Json | null
+          revocation_reason: string | null
           revoked_at: string | null
         }
         Insert: {
@@ -200,7 +252,9 @@ export type Database = {
           consent_type: string
           granted_at?: string
           id?: string
+          ip_metadata?: Json | null
           metadata?: Json | null
+          revocation_reason?: string | null
           revoked_at?: string | null
         }
         Update: {
@@ -209,7 +263,9 @@ export type Database = {
           consent_type?: string
           granted_at?: string
           id?: string
+          ip_metadata?: Json | null
           metadata?: Json | null
+          revocation_reason?: string | null
           revoked_at?: string | null
         }
         Relationships: [
@@ -333,21 +389,32 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          tenant_id: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
+          tenant_id?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
+          tenant_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "households_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ledger_entries: {
         Row: {
@@ -509,6 +576,7 @@ export type Database = {
           display_name: string
           household_id: string | null
           id: string
+          tenant_id: string | null
           updated_at: string
           user_id: string
         }
@@ -519,6 +587,7 @@ export type Database = {
           display_name: string
           household_id?: string | null
           id?: string
+          tenant_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -529,6 +598,7 @@ export type Database = {
           display_name?: string
           household_id?: string | null
           id?: string
+          tenant_id?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -538,6 +608,13 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -602,6 +679,70 @@ export type Database = {
           },
         ]
       }
+      risk_flags: {
+        Row: {
+          created_at: string
+          description: string
+          flag_type: Database["public"]["Enums"]["risk_flag_type"]
+          id: string
+          metadata: Json | null
+          profile_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["risk_severity"]
+          tenant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          flag_type: Database["public"]["Enums"]["risk_flag_type"]
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["risk_severity"]
+          tenant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          flag_type?: Database["public"]["Enums"]["risk_flag_type"]
+          id?: string
+          metadata?: Json | null
+          profile_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["risk_severity"]
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_flags_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_flags_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "risk_flags_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       savings_vaults: {
         Row: {
           created_at: string
@@ -655,6 +796,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_tiers: {
+        Row: {
+          created_at: string
+          currency: string
+          features: Json
+          id: string
+          is_active: boolean
+          max_children: number
+          max_classrooms: number
+          name: string
+          price_monthly: number
+          price_yearly: number
+          tier_type: Database["public"]["Enums"]["subscription_tier_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_children?: number
+          max_classrooms?: number
+          name: string
+          price_monthly?: number
+          price_yearly?: number
+          tier_type?: Database["public"]["Enums"]["subscription_tier_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_children?: number
+          max_classrooms?: number
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          tier_type?: Database["public"]["Enums"]["subscription_tier_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      supported_currencies: {
+        Row: {
+          code: string
+          created_at: string
+          decimal_places: number
+          is_active: boolean
+          name: string
+          symbol: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          decimal_places?: number
+          is_active?: boolean
+          name: string
+          symbol: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          decimal_places?: number
+          is_active?: boolean
+          name?: string
+          symbol?: string
+        }
+        Relationships: []
       }
       tasks: {
         Row: {
@@ -712,6 +925,53 @@ export type Database = {
             columns: ["parent_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          name: string
+          real_money_enabled: boolean
+          settings: Json
+          subscription_tier_id: string | null
+          tenant_type: Database["public"]["Enums"]["tenant_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          real_money_enabled?: boolean
+          settings?: Json
+          subscription_tier_id?: string | null
+          tenant_type?: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          real_money_enabled?: boolean
+          settings?: Json
+          subscription_tier_id?: string | null
+          tenant_type?: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_subscription_tier_id_fkey"
+            columns: ["subscription_tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
             referencedColumns: ["id"]
           },
         ]
@@ -862,6 +1122,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_anomalies: { Args: never; Returns: number }
       get_profile_balance: { Args: { _profile_id: string }; Returns: number }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
@@ -874,6 +1135,17 @@ export type Database = {
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin"
+      audit_action:
+        | "insert"
+        | "update"
+        | "delete"
+        | "login"
+        | "logout"
+        | "consent_granted"
+        | "consent_revoked"
+        | "role_changed"
+        | "wallet_transfer"
+        | "admin_action"
       budget_exception_status: "pending" | "approved" | "rejected"
       ledger_entry_type:
         | "allowance"
@@ -888,8 +1160,20 @@ export type Database = {
         | "adjustment"
         | "refund"
       reward_category: "experience" | "privilege" | "physical" | "digital"
+      risk_flag_type:
+        | "excessive_rewards"
+        | "unusual_transactions"
+        | "rate_limit_hit"
+        | "task_exploitation"
+      risk_severity: "low" | "medium" | "high" | "critical"
+      subscription_tier_type:
+        | "free"
+        | "family_premium"
+        | "school_institutional"
+        | "partner_program"
       task_category: "cleaning" | "studying" | "helping" | "other"
       task_status: "pending" | "in_progress" | "completed" | "approved"
+      tenant_type: "family" | "school" | "institutional_partner"
       wallet_type: "virtual" | "real"
     }
     CompositeTypes: {
@@ -1019,6 +1303,18 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["parent", "child", "teen", "teacher", "admin"],
+      audit_action: [
+        "insert",
+        "update",
+        "delete",
+        "login",
+        "logout",
+        "consent_granted",
+        "consent_revoked",
+        "role_changed",
+        "wallet_transfer",
+        "admin_action",
+      ],
       budget_exception_status: ["pending", "approved", "rejected"],
       ledger_entry_type: [
         "allowance",
@@ -1034,8 +1330,22 @@ export const Constants = {
         "refund",
       ],
       reward_category: ["experience", "privilege", "physical", "digital"],
+      risk_flag_type: [
+        "excessive_rewards",
+        "unusual_transactions",
+        "rate_limit_hit",
+        "task_exploitation",
+      ],
+      risk_severity: ["low", "medium", "high", "critical"],
+      subscription_tier_type: [
+        "free",
+        "family_premium",
+        "school_institutional",
+        "partner_program",
+      ],
       task_category: ["cleaning", "studying", "helping", "other"],
       task_status: ["pending", "in_progress", "completed", "approved"],
+      tenant_type: ["family", "school", "institutional_partner"],
       wallet_type: ["virtual", "real"],
     },
   },
