@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import { FeatureGateWrapper } from '@/components/UpgradePrompt';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +34,7 @@ const categoryColors: Record<string, string> = {
 const iconOptions = ['🎬', '🌙', '🍕', '🎢', '📖', '📱', '🎮', '⚽', '🎨', '🎁', '🏖️', '🍦'];
 
 export default function ParentRewards() {
+  const { allowed: rewardsAllowed, loading: gateLoading } = useFeatureGate(FEATURES.CUSTOM_REWARDS);
   const { data: rewards = [], isLoading } = useRewards();
   const createReward = useCreateReward();
   const deleteReward = useDeleteReward();
@@ -61,6 +64,10 @@ export default function ParentRewards() {
   };
 
   return (
+    <FeatureGateWrapper
+      allowed={rewardsAllowed || gateLoading}
+      featureName="Recompensas Personalizadas"
+    >
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
       <motion.div variants={item}>
@@ -231,5 +238,6 @@ export default function ParentRewards() {
         </motion.div>
       )}
     </motion.div>
+    </FeatureGateWrapper>
   );
 }
