@@ -95,7 +95,7 @@ export default function TeenDashboard() {
       )}
 
       {/* Budget */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} data-onboarding="missions">
         <TeenBudgetBar totalSpent={totalSpent} monthlyBudget={monthlyBudget} budgetUsed={budgetUsed} />
       </motion.div>
 
