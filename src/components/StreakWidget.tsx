@@ -131,7 +131,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                           variants={dayDotVariants}
                           initial="hidden"
                           animate="visible"
-                          className={`w-full h-2.5 rounded-full relative overflow-hidden ${
+                          className={`w-full h-3.5 rounded-full relative overflow-hidden ${
                             isActiveDay
                               ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
                               : 'bg-muted/50'
