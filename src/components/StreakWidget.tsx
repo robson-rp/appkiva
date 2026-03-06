@@ -10,9 +10,9 @@ interface StreakWidgetProps {
 
 const flameVariants = {
   idle: {
-    scale: [1, 1.15, 1],
-    rotate: [0, -5, 5, 0],
-    transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' as const },
+    scale: [1, 1.06, 1],
+    rotate: [0, -2, 2, 0],
+    transition: { duration: 2.5, repeat: Infinity, ease: 'easeInOut' as const },
   },
 };
 
