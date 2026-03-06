@@ -105,3 +105,35 @@ export function useDepositToVault() {
     },
   });
 }
+
+export function useWithdrawFromVault() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ vaultId, amount }: { vaultId: string; amount: number }) => {
+      const { data, error } = await supabase.functions.invoke('vault-withdraw', {
+        body: { vault_id: vaultId, amount },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      return data as { withdrawn: number; vault_balance: number; wallet_balance: number };
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['savings-vaults'] });
+      qc.invalidateQueries({ queryKey: ['wallet-balance'] });
+      qc.invalidateQueries({ queryKey: ['wallet-transactions'] });
+      toast({
+        title: 'Levantamento realizado! 💰',
+        description: `Levantaste ${data.withdrawn} KivaCoins do cofre.`,
+      });
+    },
+    onError: (err: Error) => {
+      const msg = err.message.includes('vazio')
+        ? 'O cofre está vazio.'
+        : 'Não foi possível realizar o levantamento.';
+      toast({ title: 'Erro', description: msg, variant: 'destructive' });
+    },
+  });
+}
