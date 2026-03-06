@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award, Trash2 } from 'lucide-react';
+import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award, Trash2, Pencil } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useHouseholdTasks, useCreateTask, useApproveTask, useDeleteTask, type TaskCategory } from '@/hooks/use-household-tasks';
+import { useHouseholdTasks, useCreateTask, useApproveTask, useDeleteTask, useUpdateTask, type TaskCategory } from '@/hooks/use-household-tasks';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useChildren } from '@/hooks/use-children';
 
@@ -32,6 +32,7 @@ export default function ParentTasks() {
   const createTask = useCreateTask();
   const approveTask = useApproveTask();
   const deleteTask = useDeleteTask();
+  const updateTask = useUpdateTask();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -39,6 +40,29 @@ export default function ParentTasks() {
   const [reward, setReward] = useState('20');
   const [category, setCategory] = useState<TaskCategory>('other');
   const [selectedChild, setSelectedChild] = useState('');
+
+  // Edit state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editTaskId, setEditTaskId] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editReward, setEditReward] = useState('');
+  const [editCategory, setEditCategory] = useState<TaskCategory>('other');
+
+  const openEditDialog = (task: { id: string; title: string; reward: number; category: TaskCategory }) => {
+    setEditTaskId(task.id);
+    setEditTitle(task.title);
+    setEditReward(String(task.reward));
+    setEditCategory(task.category);
+    setEditDialogOpen(true);
+  };
+
+  const handleEdit = () => {
+    if (!editTitle || !editReward) return;
+    updateTask.mutate(
+      { taskId: editTaskId, title: editTitle, reward: Number(editReward), category: editCategory },
+      { onSuccess: () => setEditDialogOpen(false) }
+    );
+  };
 
   const handleCreate = () => {
     if (!title || !selectedChild || !reward) return;
@@ -229,6 +253,21 @@ export default function ParentTasks() {
                           </Button>
                         )}
                         {task.status !== 'approved' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-xl h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            onClick={() => openEditDialog({
+                              id: task.id,
+                              title: task.title,
+                              reward: task.reward,
+                              category: task.category,
+                            })}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
+                        {task.status !== 'approved' && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
@@ -267,6 +306,46 @@ export default function ParentTasks() {
           })}
         </motion.div>
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-display">Editar Tarefa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Título</Label>
+              <Input value={editTitle} onChange={e => setEditTitle(e.target.value)} maxLength={100} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Recompensa (KVC)</Label>
+                <Input type="number" value={editReward} onChange={e => setEditReward(e.target.value)} min={0} max={9999} />
+              </div>
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Select value={editCategory} onValueChange={v => setEditCategory(v as TaskCategory)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cleaning">🧹 Limpeza</SelectItem>
+                    <SelectItem value="studying">📚 Estudo</SelectItem>
+                    <SelectItem value="helping">🤝 Ajuda</SelectItem>
+                    <SelectItem value="other">📌 Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button
+              className="w-full rounded-xl font-display"
+              disabled={!editTitle || !editReward || updateTask.isPending}
+              onClick={handleEdit}
+            >
+              {updateTask.isPending ? 'A guardar...' : '✏️ Guardar Alterações'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
