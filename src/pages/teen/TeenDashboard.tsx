@@ -111,7 +111,7 @@ export default function TeenDashboard() {
 
       {/* Monthly Chart */}
       {monthlySummary.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} data-onboarding="analytics">
           <MonthlyEvolutionChart data={monthlySummary} />
         </motion.div>
       )}

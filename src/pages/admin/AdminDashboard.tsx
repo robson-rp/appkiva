@@ -40,7 +40,7 @@ export default function AdminDashboard() {
       </motion.div>
 
       {stats && (
-        <motion.div variants={item} initial="hidden" animate="show">
+        <motion.div variants={item} initial="hidden" animate="show" data-onboarding="subscriptions">
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="text-base font-display">Distribuição por Tipo</CardTitle>

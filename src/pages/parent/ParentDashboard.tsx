@@ -208,7 +208,7 @@ export default function ParentDashboard() {
         </motion.div>
 
         {/* Recent Activity */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="reports">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">

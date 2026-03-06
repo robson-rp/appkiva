@@ -183,7 +183,7 @@ export default function ChildDashboard() {
       </motion.div>
 
       {/* Achievements */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} data-onboarding="achievements">
         <ChildAchievementsStrip achievements={unlockedAchievements} />
       </motion.div>
 

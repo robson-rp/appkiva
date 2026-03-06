@@ -167,7 +167,7 @@ export default function TeacherDashboard() {
 
       <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
         {/* Active Challenges */}
-        <motion.div variants={item}>
+        <motion.div variants={item} data-onboarding="challenges">
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-gradient-to-r from-accent to-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
