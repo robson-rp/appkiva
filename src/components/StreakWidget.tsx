@@ -120,27 +120,34 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 d.setDate(d.getDate() - (6 - i));
                 const dateStr = d.toISOString().split('T')[0];
                 const isActiveDay = sd.activeDates.includes(dateStr);
+                const dayLabel = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric' });
                 return (
-                  <motion.div
-                    key={i}
-                    custom={i}
-                    variants={dayDotVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className={`flex-1 h-2.5 rounded-full relative overflow-hidden ${
-                      isActiveDay
-                        ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
-                        : 'bg-muted/50'
-                    }`}
-                  >
-                    {isActiveDay && (
+                  <Tooltip key={i}>
+                    <TooltipTrigger asChild>
                       <motion.div
-                        className="absolute inset-0 bg-white/20 rounded-full"
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
-                      />
-                    )}
-                  </motion.div>
+                        custom={i}
+                        variants={dayDotVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className={`flex-1 h-2.5 rounded-full relative overflow-hidden cursor-default ${
+                          isActiveDay
+                            ? 'bg-gradient-to-r from-destructive to-chart-1 shadow-[0_0_4px_hsl(var(--destructive)/0.3)]'
+                            : 'bg-muted/50'
+                        }`}
+                      >
+                        {isActiveDay && (
+                          <motion.div
+                            className="absolute inset-0 bg-white/20 rounded-full"
+                            animate={{ x: ['-100%', '200%'] }}
+                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+                          />
+                        )}
+                      </motion.div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs capitalize">
+                      <p>{dayLabel} {isActiveDay ? '✅' : '—'}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 );
               })}
             </AnimatePresence>
