@@ -137,3 +137,37 @@ export function useWithdrawFromVault() {
     },
   });
 }
+
+export function useUpdateVaultInterestRate() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ vaultId, interestRate }: { vaultId: string; interestRate: number }) => {
+      const { error } = await supabase
+        .from('savings_vaults')
+        .update({ interest_rate: interestRate })
+        .eq('id', vaultId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['savings-vaults'] });
+    },
+  });
+}
+
+export function useHouseholdVaults() {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['savings-vaults', 'household'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('savings_vaults')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(mapRow);
+    },
+    enabled: !!user,
+  });
+}
