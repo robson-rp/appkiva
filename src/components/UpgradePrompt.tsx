@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Sparkles, Crown, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import PaymentSimulator from '@/components/PaymentSimulator';
+import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
 
 interface UpgradePromptProps {
   /** The name of the blocked feature (e.g. "Cofres de Sonhos") */
@@ -193,7 +196,6 @@ export function FeatureGateWrapper({
   tierName,
   children,
   variant = 'overlay',
-  onUpgrade,
   className,
 }: {
   allowed: boolean;
@@ -202,20 +204,32 @@ export function FeatureGateWrapper({
   tierName?: string | null;
   children: React.ReactNode;
   variant?: 'inline' | 'overlay';
-  onUpgrade?: () => void;
   className?: string;
 }) {
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const { data: tiers = [] } = useSubscriptionTiers();
+  const { upgrade } = useUpgradeSubscription();
+
   return (
     <div className={cn('relative', className)}>
       {children}
       {!allowed && (
-        <UpgradePrompt
-          featureName={featureName}
-          description={description}
-          currentTier={tierName}
-          variant={variant}
-          onUpgrade={onUpgrade}
-        />
+        <>
+          <UpgradePrompt
+            featureName={featureName}
+            description={description}
+            currentTier={tierName}
+            variant={variant}
+            onUpgrade={() => setPaymentOpen(true)}
+          />
+          <PaymentSimulator
+            open={paymentOpen}
+            onOpenChange={setPaymentOpen}
+            currentTierName={tierName}
+            tiers={tiers}
+            onConfirmUpgrade={upgrade}
+          />
+        </>
       )}
     </div>
   );
