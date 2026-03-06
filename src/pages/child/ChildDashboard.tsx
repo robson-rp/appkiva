@@ -116,6 +116,11 @@ export default function ChildDashboard() {
         </Card>
       </motion.div>
 
+      {/* Streak */}
+      <motion.div variants={itemVariants}>
+        <StreakWidget onClick={() => navigate('/child/streaks')} />
+      </motion.div>
+
       {/* Weekly Sparkline */}
       {weeklyData && weeklyData.points.length > 0 && (
         <motion.div variants={itemVariants}>
@@ -175,11 +180,6 @@ export default function ChildDashboard() {
       {/* Recent Activity */}
       <motion.div variants={itemVariants}>
         <ChildRecentActivity transactions={recentTransactions} />
-      </motion.div>
-
-      {/* Streak */}
-      <motion.div variants={itemVariants}>
-        <StreakWidget onClick={() => navigate('/child/streaks')} />
       </motion.div>
 
       {/* Achievements */}
