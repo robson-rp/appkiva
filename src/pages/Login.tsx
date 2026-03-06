@@ -175,6 +175,7 @@ export default function Login() {
                             child: 'crianca@kivara.com',
                             teen: 'adolescente@kivara.com',
                             teacher: 'professor@kivara.com',
+                            partner: 'parceiro@kivara.com',
                             admin: 'admin@kivara.com',
                           };
                           setSelectedRole(role);
