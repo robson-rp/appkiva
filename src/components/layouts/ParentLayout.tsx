@@ -22,6 +22,7 @@ const navItems = [
   { title: 'Recompensas', url: '/parent/rewards', icon: Gift },
   { title: 'Relatórios', url: '/parent/reports', icon: BarChart3 },
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
+  { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
 ];
 
 function ParentSidebar() {

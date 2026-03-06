@@ -98,6 +98,7 @@ function AppRoutes() {
         <Route path="/parent/vaults" element={<ParentLayout><ParentVaults /></ParentLayout>} />
         <Route path="/parent/rewards" element={<ParentLayout><ParentRewards /></ParentLayout>} />
         <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
+        <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
     );
