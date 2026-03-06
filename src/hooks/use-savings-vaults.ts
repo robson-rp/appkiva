@@ -155,6 +155,27 @@ export function useUpdateVaultInterestRate() {
   });
 }
 
+export function useDeleteSavingsVault() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vaultId: string) => {
+      const { error } = await supabase
+        .from('savings_vaults')
+        .delete()
+        .eq('id', vaultId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['savings-vaults'] });
+      toast({ title: 'Cofre eliminado 🗑️', description: 'O cofre foi removido com sucesso.' });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível eliminar o cofre.', variant: 'destructive' });
+    },
+  });
+}
+
 export function useHouseholdVaults() {
   const { user } = useAuth();
 

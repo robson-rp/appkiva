@@ -4,11 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { useSavingsVaults, useCreateSavingsVault, useDepositToVault, useWithdrawFromVault } from '@/hooks/use-savings-vaults';
+import { useSavingsVaults, useCreateSavingsVault, useDepositToVault, useWithdrawFromVault, useDeleteSavingsVault } from '@/hooks/use-savings-vaults';
 import { useWalletBalance } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockVaults, mockChildren } from '@/data/mock-data';
-import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
+import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine, ArrowUpFromLine, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,7 @@ export default function ChildVaults() {
   const createVault = useCreateSavingsVault();
   const depositToVault = useDepositToVault();
   const withdrawFromVault = useWithdrawFromVault();
+  const deleteVault = useDeleteSavingsVault();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
@@ -255,6 +257,36 @@ export default function ChildVaults() {
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-sm text-muted-foreground font-medium">🪙 {vault.currentAmount} / {vault.targetAmount}</span>
                       <div className="flex gap-2">
+                        {vault.currentAmount === 0 && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-xl text-xs font-display h-8 gap-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+                              >
+                                <Trash2 className="h-3 w-3" /> Eliminar
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="font-display">Eliminar cofre?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tens a certeza que queres eliminar o cofre "{vault.name}"? Esta acção não pode ser revertida.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl font-display">Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() => deleteVault.mutate(vault.id)}
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                         {vault.currentAmount > 0 && (
                           <Button
                             variant="outline"
