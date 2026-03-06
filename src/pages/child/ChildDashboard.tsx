@@ -81,7 +81,7 @@ export default function ChildDashboard() {
       )}
 
       {/* Hero Balance Card */}
-      <motion.div variants={itemVariants}>
+      <motion.div variants={itemVariants} data-onboarding="wallet">
         <Card className="border-0 overflow-hidden relative shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
           <div className="absolute top-[-30%] right-[-15%] w-[55%] h-[80%] rounded-full bg-white/5 blur-3xl" />
