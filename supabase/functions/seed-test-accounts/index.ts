@@ -28,42 +28,7 @@ Deno.serve(async (req) => {
 
   // Create users
   for (const acc of accounts) {
-    // Check if user already exists by email
-    const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-    const existing = listData?.users?.find((u) => u.email === acc.email);
-
-    if (existing) {
-      results[acc.role] = existing.id;
-
-      // Ensure role exists for this user
-      const { data: existingRoles } = await supabaseAdmin
-        .from("user_roles")
-        .select("id")
-        .eq("user_id", existing.id)
-        .eq("role", acc.role);
-
-      if (!existingRoles || existingRoles.length === 0) {
-        await supabaseAdmin.from("user_roles").insert({ user_id: existing.id, role: acc.role });
-      }
-
-      // Ensure profile exists
-      const { data: existingProfile } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("user_id", existing.id)
-        .single();
-
-      if (!existingProfile) {
-        await supabaseAdmin.from("profiles").insert({
-          user_id: existing.id,
-          display_name: acc.name,
-          avatar: acc.avatar,
-        });
-      }
-
-      continue;
-    }
-
+    // Try to create; if already exists, find by email
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: acc.email,
       password,
@@ -76,6 +41,39 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
+      if (error.message.includes("already been registered")) {
+        // Find existing user
+        const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+        const existing = listData?.users?.find((u) => u.email === acc.email);
+        if (!existing) {
+          return new Response(JSON.stringify({ error: `User ${acc.email} exists but could not be found` }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        results[acc.role] = existing.id;
+
+        // Ensure role exists
+        await supabaseAdmin.from("user_roles").upsert(
+          { user_id: existing.id, role: acc.role },
+          { onConflict: "user_id,role" }
+        );
+
+        // Ensure profile exists
+        const { data: prof } = await supabaseAdmin
+          .from("profiles")
+          .select("id")
+          .eq("user_id", existing.id)
+          .single();
+        if (!prof) {
+          await supabaseAdmin.from("profiles").insert({
+            user_id: existing.id,
+            display_name: acc.name,
+            avatar: acc.avatar,
+          });
+        }
+        continue;
+      }
       return new Response(JSON.stringify({ error: `Failed to create ${acc.role}: ${error.message}` }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
