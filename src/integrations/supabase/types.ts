@@ -1014,6 +1014,45 @@ export type Database = {
           },
         ]
       }
+      onboarding_steps: {
+        Row: {
+          created_at: string
+          cta: string | null
+          description: string
+          id: string
+          illustration_key: string
+          is_active: boolean
+          role: string
+          step_index: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta?: string | null
+          description?: string
+          id?: string
+          illustration_key?: string
+          is_active?: boolean
+          role: string
+          step_index?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta?: string | null
+          description?: string
+          id?: string
+          illustration_key?: string
+          is_active?: boolean
+          role?: string
+          step_index?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partner_programs: {
         Row: {
           budget_spent: number
