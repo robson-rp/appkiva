@@ -62,7 +62,7 @@ function generateChallengeAlerts(): Notification[] {
     }));
 }
 
-type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward' | 'vault' | 'budget';
+type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward' | 'vault' | 'budget' | 'emission_80' | 'emission_100';
 
 const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
   task: { icon: ListTodo, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
@@ -74,6 +74,8 @@ const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
   reward: { icon: Gift, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
   vault: { icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-green))]' },
   budget: { icon: Bell, bg: 'bg-destructive/15' },
+  emission_80: { icon: Bell, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
+  emission_100: { icon: Bell, bg: 'bg-destructive/15' },
 };
 
 // Unified notification shape for display
