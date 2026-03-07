@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SplashIllustration } from '@/components/SplashIllustration';
-import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
