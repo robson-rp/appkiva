@@ -354,7 +354,7 @@ export default function ParentChildren() {
                     >
                       <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
-                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9">
+                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9" onClick={() => setDeleteChild({ childId: child.childId, displayName: child.displayName })}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
