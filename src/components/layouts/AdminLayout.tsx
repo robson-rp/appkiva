@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
@@ -25,6 +25,7 @@ const navItems = [
   { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
   { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
   { title: 'Compliance', url: '/admin/compliance', icon: Shield },
+  { title: 'Lições', url: '/admin/lessons', icon: BookOpen },
 ];
 
 function AdminSidebar() {

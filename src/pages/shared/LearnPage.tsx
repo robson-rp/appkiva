@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockLessons } from '@/data/lessons-data';
 import { LESSON_CATEGORIES, DIFFICULTY_CONFIG, LessonCategory, MicroLesson } from '@/types/kivara';
 import { LessonViewer } from '@/components/LessonViewer';
-import { BookOpen, Clock, Star, CheckCircle, Sparkles } from 'lucide-react';
+import { BookOpen, Clock, Star, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { useLessons } from '@/hooks/use-lessons';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LearnPage() {
+  const { data: lessons = [], isLoading } = useLessons();
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [earnedPoints, setEarnedPoints] = useState(0);
@@ -35,9 +36,17 @@ export default function LearnPage() {
     return <LessonViewer lesson={activeLesson} onComplete={handleComplete} onBack={() => setActiveLesson(null)} />;
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const categories = Object.entries(LESSON_CATEGORIES);
   const completedCount = completedIds.size;
-  const totalPoints = mockLessons.filter(l => completedIds.has(l.id)).reduce((s, l) => s + l.kivaPointsReward, 0);
+  const totalPoints = lessons.filter(l => completedIds.has(l.id)).reduce((s, l) => s + l.kivaPointsReward, 0);
 
   return (
     <div className="space-y-6">
@@ -54,7 +63,7 @@ export default function LearnPage() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Progresso</p>
-              <p className="text-lg font-display font-bold text-foreground">{completedCount}/{mockLessons.length} lições</p>
+              <p className="text-lg font-display font-bold text-foreground">{completedCount}/{lessons.length} lições</p>
             </div>
             <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -77,14 +86,14 @@ export default function LearnPage() {
         </TabsList>
 
         <TabsContent value="all" className="mt-4 space-y-3">
-          {mockLessons.map((lesson, i) => (
+          {lessons.map((lesson, i) => (
             <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
           ))}
         </TabsContent>
 
         {categories.map(([key]) => (
           <TabsContent key={key} value={key} className="mt-4 space-y-3">
-            {mockLessons.filter(l => l.category === key).map((lesson, i) => (
+            {lessons.filter(l => l.category === key).map((lesson, i) => (
               <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
             ))}
           </TabsContent>

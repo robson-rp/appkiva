@@ -56,6 +56,7 @@ import AdminCompliance from "./pages/admin/AdminCompliance";
 import AdminSchools from "./pages/admin/AdminSchools";
 import AdminFinance from "./pages/admin/AdminFinance";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminLessons from "./pages/admin/AdminLessons";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
@@ -82,6 +83,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/schools" element={<AdminLayout><AdminSchools /></AdminLayout>} />
         <Route path="/admin/finance" element={<AdminLayout><AdminFinance /></AdminLayout>} />
         <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
+        <Route path="/admin/lessons" element={<AdminLayout><AdminLessons /></AdminLayout>} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
