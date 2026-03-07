@@ -11,6 +11,7 @@ import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
+import { XPProgressBar } from '@/components/XPProgressBar';
 
 const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Início', url: '/teen', icon: Home },
