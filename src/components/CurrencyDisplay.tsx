@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { getCurrencyByCountry } from '@/data/countries-currencies';
 
 interface CurrencyInfo {
   code: string;
@@ -18,8 +19,8 @@ const DEFAULT_CURRENCY: CurrencyInfo = {
 };
 
 /**
- * Hook to get the tenant's real-money currency configuration.
- * Falls back to KivaCoins (virtual) if no tenant or currency is set.
+ * Hook to get the user's real-money currency configuration.
+ * Priority: tenant currency → profile country → AOA fallback.
  */
 export function useTenantCurrency() {
   const { user } = useAuth();
@@ -31,24 +32,34 @@ export function useTenantCurrency() {
     queryFn: async () => {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('tenant_id')
+        .select('tenant_id, country')
         .eq('user_id', user!.id)
         .single();
 
-      if (!profile?.tenant_id) return null;
+      if (!profile) return null;
 
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('currency')
-        .eq('id', profile.tenant_id)
-        .single();
+      // Determine currency code: tenant overrides country
+      let currencyCode: string | null = null;
 
-      if (!tenant?.currency) return null;
+      if (profile.tenant_id) {
+        const { data: tenant } = await supabase
+          .from('tenants')
+          .select('currency')
+          .eq('id', profile.tenant_id)
+          .single();
+        currencyCode = tenant?.currency ?? null;
+      }
+
+      if (!currencyCode && profile.country) {
+        currencyCode = getCurrencyByCountry(profile.country);
+      }
+
+      if (!currencyCode) currencyCode = 'AOA';
 
       const { data: currency } = await supabase
         .from('supported_currencies')
         .select('code, symbol, name, decimal_places')
-        .eq('code', tenant.currency)
+        .eq('code', currencyCode)
         .eq('is_active', true)
         .single();
 
