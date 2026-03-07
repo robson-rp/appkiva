@@ -326,7 +326,7 @@ export default function Login() {
             <img 
               src={kivaraLogoWhite} 
               alt="KIVARA" 
-              className="h-20 sm:h-24 lg:h-56 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
+              className="h-24 sm:h-28 lg:h-64 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
             />
           </motion.div>
 
@@ -335,7 +335,7 @@ export default function Login() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="text-white/60 text-[10px] lg:text-sm tracking-[0.25em] uppercase font-light"
+            className="-mt-2 lg:-mt-4 text-white/60 text-[10px] lg:text-sm tracking-[0.25em] uppercase font-light"
           >
             Educação financeira para famílias
           </motion.p>
