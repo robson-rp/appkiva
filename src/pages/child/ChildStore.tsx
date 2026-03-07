@@ -82,7 +82,7 @@ export default function ChildStore() {
             profileId: exceptionReward.parentProfileId,
             title: '📩 Pedido de exceção ao limite',
             message: `${user.name || 'O teu filho(a)'} pediu autorização para resgatar "${exceptionReward.name}" (${exceptionReward.price} KVC), que excede o limite mensal.`,
-            type: 'budget',
+            type: 'task',
             urgent: true,
             metadata: { reward_id: exceptionReward.id, child_profile_id: user.profileId },
           });

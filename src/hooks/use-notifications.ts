@@ -125,22 +125,5 @@ export function useDeleteNotification() {
   });
 }
 
-/** Helper to create a notification (call from parent-side mutations) */
-export async function createNotification(input: {
-  profileId: string;
-  title: string;
-  message: string;
-  type: string;
-  urgent?: boolean;
-  metadata?: Record<string, any>;
-}) {
-  const { error } = await supabase.from('notifications').insert({
-    profile_id: input.profileId,
-    title: input.title,
-    message: input.message,
-    type: input.type,
-    urgent: input.urgent ?? false,
-    metadata: input.metadata ?? {},
-  });
-  if (error) console.error('Failed to create notification:', error);
-}
+// createNotification moved to src/lib/notify.ts — re-export for backward compat
+export { createNotification } from '@/lib/notify';

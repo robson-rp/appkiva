@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { notifyRewardClaimed } from '@/lib/notify';
 import type { RewardCategory } from '@/hooks/use-rewards';
 
 export interface ChildReward {
@@ -53,9 +54,10 @@ export function useChildRewards() {
 
 export function useClaimReward() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (reward: { id: string; name: string; price: number }) => {
+    mutationFn: async (reward: { id: string; name: string; price: number; parentProfileId?: string }) => {
       const { data, error } = await supabase.functions.invoke('claim-reward', {
         body: { reward_id: reward.id },
       });
@@ -65,12 +67,16 @@ export function useClaimReward() {
 
       return data as { success: boolean; new_balance: number; reward_name: string };
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['child-rewards'] });
       queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
       queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['children'] });
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
+      // Notify parent about the claim
+      if (variables.parentProfileId) {
+        notifyRewardClaimed(variables.parentProfileId, user?.name ?? 'O teu filho', data.reward_name, variables.price);
+      }
       toast({
         title: 'Recompensa resgatada! 🎉',
         description: `Parabéns! Resgataste "${data.reward_name}". Novo saldo: ${data.new_balance} KVC.`,
