@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
