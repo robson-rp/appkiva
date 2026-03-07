@@ -292,34 +292,45 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Hero Panel — compact on mobile, full on desktop */}
-      <div className="relative flex flex-col items-center justify-center px-6 py-8 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-3xl" />
-        <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-white/5 blur-3xl" />
+      <div className="relative flex flex-col items-center justify-center px-6 py-6 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
+        {/* Subtle background accents */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <div className="absolute top-[-20%] right-[-15%] w-[45%] h-[45%] rounded-full bg-white/[0.04] blur-3xl" />
+          <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/[0.03] blur-3xl" />
+        </div>
         
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="relative z-10 flex flex-row lg:flex-col items-center lg:text-center gap-4 lg:gap-0"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 flex flex-row lg:flex-col items-center lg:items-center gap-3 lg:gap-0"
         >
-          <div className="flex flex-col items-center lg:items-center">
-            <img src={kivaraLogoWhite} alt="KIVARA" className="h-12 sm:h-14 lg:h-28 mb-2 lg:mb-6 drop-shadow-lg" />
+          {/* Logo */}
+          <img 
+            src={kivaraLogoWhite} 
+            alt="KIVARA" 
+            className="h-10 sm:h-12 lg:h-24 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
+          />
 
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-white/85 font-body text-sm sm:text-base lg:text-xl font-medium tracking-wide italic"
-            >
-              Pequenos hábitos. Grandes futuros.
-            </motion.p>
-          </div>
+          {/* Separator line */}
+          <div className="hidden lg:block w-12 h-[1px] bg-white/20 my-5" />
 
+          {/* Slogan */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="text-white/70 font-body text-xs sm:text-sm lg:text-base tracking-[0.2em] uppercase font-light"
+          >
+            Pequenos hábitos. Grandes futuros.
+          </motion.p>
+
+          {/* Feature list — desktop only */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="mt-10 hidden lg:flex flex-col gap-3 text-white/70 text-sm"
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="mt-12 hidden lg:flex flex-col gap-3 text-white/50 text-sm"
           >
             {[
               'Carteira virtual para crianças',
@@ -330,12 +341,12 @@ export default function Login() {
             ].map((feat, i) => (
               <motion.div
                 key={feat}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -15 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8 + i * 0.1 }}
-                className="flex items-center gap-2"
+                transition={{ delay: 1 + i * 0.08 }}
+                className="flex items-center gap-2.5"
               >
-                <Sparkles className="h-3.5 w-3.5 text-accent" />
+                <div className="h-1 w-1 rounded-full bg-white/30" />
                 <span>{feat}</span>
               </motion.div>
             ))}
