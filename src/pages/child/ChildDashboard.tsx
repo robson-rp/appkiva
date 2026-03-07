@@ -95,7 +95,7 @@ export default function ChildDashboard() {
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
   const stats = [
-    { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/wallet' },
+    { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/missions' },
     { label: 'Missões', value: activeMissions.length, icon: Target, gradient: 'from-kivara-green/10 to-kivara-light-green', iconColor: 'text-secondary', to: '/child/missions' },
     { label: 'Cofres', value: vaults.length, icon: PiggyBank, gradient: 'from-kivara-gold/10 to-kivara-light-gold', iconColor: 'text-accent', to: '/child/vaults' },
   ];
