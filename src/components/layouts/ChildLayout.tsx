@@ -61,6 +61,9 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      {/* XP Progress Bar */}
+      <XPProgressBar />
+
       {/* Content */}
       <AnimatePresence mode="wait">
         <motion.main
