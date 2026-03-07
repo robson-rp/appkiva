@@ -538,6 +538,29 @@ export default function ParentChildren() {
 
       {/* Edit Child Dialog */}
       <EditChildDialog open={editOpen} onOpenChange={setEditOpen} child={editChild} />
+
+      {/* Delete Child Confirmation */}
+      <AlertDialog open={!!deleteChild} onOpenChange={(open) => !open && setDeleteChild(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Remover {deleteChild?.displayName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove o perfil da criança da tua lista. Esta operação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-display">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteChildMutation.isPending}
+              onClick={() => deleteChild && deleteChildMutation.mutate(deleteChild.childId)}
+            >
+              {deleteChildMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
