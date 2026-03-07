@@ -136,101 +136,31 @@ export default function ParentTasks() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-5 sm:p-6 text-primary-foreground">
         <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute top-0 left-1/3 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
-            <h1 className="font-display text-2xl font-bold mt-1">Tarefas</h1>
-            <p className="text-sm text-primary-foreground/60 mt-1">Cria e aprova tarefas para as crianças</p>
+            <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">Tarefas</h1>
+            <p className="text-small text-primary-foreground/60 mt-1">Cria e aprova tarefas para as crianças</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
               onClick={handleAiSuggest}
               disabled={aiLoading}
+              size="sm"
               className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm"
             >
               {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              Sugerir IA
+              <span className="hidden xs:inline">Sugerir</span> IA
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
+                <Button size="sm" className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
                   <Plus className="h-4 w-4" /> Nova Tarefa
                 </Button>
               </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="font-display">Criar Tarefa</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Título</Label>
-                    <Input placeholder="Ex: Arrumar o quarto" value={title} onChange={e => setTitle(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Descrição</Label>
-                    <Textarea placeholder="Descreve a tarefa..." value={description} onChange={e => setDescription(e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label>Recompensa (KVC)</Label>
-                      <Input type="number" placeholder="20" value={reward} onChange={e => setReward(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Categoria</Label>
-                      <Select value={category} onValueChange={v => setCategory(v as TaskCategory)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="cleaning">🧹 Limpeza</SelectItem>
-                          <SelectItem value="studying">📚 Estudo</SelectItem>
-                          <SelectItem value="helping">🤝 Ajuda</SelectItem>
-                          <SelectItem value="other">📌 Outro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label>Criança</Label>
-                      <Select value={selectedChild} onValueChange={setSelectedChild}>
-                        <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
-                        <SelectContent>
-                          {children.map(c => (
-                            <SelectItem key={c.profileId} value={c.profileId}>
-                              {c.avatar} {c.displayName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Recorrência</Label>
-                      <Select value={recurrence} onValueChange={setRecurrence}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Única vez</SelectItem>
-                          <SelectItem value="daily">🔄 Diária</SelectItem>
-                          <SelectItem value="weekly">📅 Semanal</SelectItem>
-                          <SelectItem value="monthly">🗓️ Mensal</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <Button
-                    className="w-full rounded-xl font-display"
-                    disabled={!title || !selectedChild || !reward || createTask.isPending}
-                    onClick={handleCreate}
-                  >
-                    {createTask.isPending ? 'A criar...' : '✅ Criar Tarefa'}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </motion.div>
 
       {/* Stats */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-3">
