@@ -128,8 +128,39 @@ export default function OnboardingStepManager() {
     onSuccess: () => invalidate(),
     onError: (e: any) => toast.error(e.message),
   });
+  const duplicateMutation = useMutation({
+    mutationFn: async ({ step, targetRoles }: { step: StepRow; targetRoles: string[] }) => {
+      for (const role of targetRoles) {
+        // Get current max step_index for target role
+        const { data: existing } = await supabase
+          .from('onboarding_steps')
+          .select('step_index')
+          .eq('role', role)
+          .order('step_index', { ascending: false })
+          .limit(1);
+        const nextIndex = (existing && existing.length > 0 ? existing[0].step_index + 1 : 0);
+        const { error } = await supabase.from('onboarding_steps').insert([{
+          role,
+          step_index: nextIndex,
+          title: step.title,
+          description: step.description,
+          illustration_key: step.illustration_key,
+          cta: step.cta,
+          is_active: step.is_active,
+        }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, { targetRoles }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-onboarding-steps'] });
+      toast.success(`Passo duplicado para ${targetRoles.length} papel(éis)`);
+      setDuplicatingStep(null);
+      setDupTargetRoles([]);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
-  const openEdit = (step: StepRow) => {
+
     setEditingStep(step);
     setForm({
       title: step.title,
