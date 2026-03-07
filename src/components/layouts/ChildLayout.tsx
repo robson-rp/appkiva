@@ -25,6 +25,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const child = mockChildren[0];
+  const { hasFeature } = useAllFeatures();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
