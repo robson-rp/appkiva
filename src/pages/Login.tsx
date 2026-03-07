@@ -65,9 +65,9 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch schools for teacher signup
+  // Fetch schools for teacher/parent/child/teen signup
   useEffect(() => {
-    if ((selectedRole === 'teacher' || selectedRole === 'parent') && authMode === 'signup') {
+    if (['teacher', 'parent', 'child', 'teen'].includes(selectedRole ?? '') && authMode === 'signup') {
       supabase
         .from('tenants')
         .select('id, name')
@@ -434,27 +434,46 @@ export default function Login() {
                     <>
                       {/* Child/Teen: Invite code first */}
                       {isChildOrTeen && (
-                        <div className="space-y-2">
-                          <Label className="font-semibold">Código de Convite Familiar</Label>
-                          <p className="text-xs text-muted-foreground">Pede ao teu encarregado o código de 6 caracteres.</p>
-                          <div className="relative">
-                            <Input
-                              placeholder="EX: A3B7K9"
-                              value={inviteCode}
-                              onChange={e => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
-                              className="h-12 rounded-xl text-base tracking-widest font-mono text-center uppercase"
-                              maxLength={6}
-                              required
-                            />
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label className="font-semibold">Código de Convite Familiar</Label>
+                            <p className="text-xs text-muted-foreground">Pede ao teu encarregado o código de 6 caracteres.</p>
+                            <div className="relative">
+                              <Input
+                                placeholder="EX: A3B7K9"
+                                value={inviteCode}
+                                onChange={e => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+                                className="h-12 rounded-xl text-base tracking-widest font-mono text-center uppercase"
+                                maxLength={6}
+                                required
+                              />
+                              {inviteValid === true && (
+                                <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary" />
+                              )}
+                            </div>
+                            {inviteValid === false && (
+                              <p className="text-xs text-destructive">Código inválido ou expirado. Pede um novo ao teu encarregado.</p>
+                            )}
                             {inviteValid === true && (
-                              <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary" />
+                              <p className="text-xs text-secondary">✓ Código válido! Preenche os teus dados abaixo.</p>
                             )}
                           </div>
-                          {inviteValid === false && (
-                            <p className="text-xs text-destructive">Código inválido ou expirado. Pede um novo ao teu encarregado.</p>
-                          )}
-                          {inviteValid === true && (
-                            <p className="text-xs text-secondary">✓ Código válido! Preenche os teus dados abaixo.</p>
+
+                          {/* School - For child/teen after invite validated */}
+                          {inviteValid && schools.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Escola <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                              <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                                <SelectTrigger className="h-12 rounded-xl text-base">
+                                  <SelectValue placeholder="Selecionar escola (opcional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schools.map(s => (
+                                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           )}
                         </div>
                       )}

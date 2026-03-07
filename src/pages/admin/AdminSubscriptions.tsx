@@ -41,6 +41,7 @@ const tierSchema = z.object({
   price_yearly: z.number().min(0, 'Deve ser ≥ 0'),
   max_children: z.number().int().min(0),
   max_classrooms: z.number().int().min(0),
+  extra_child_price: z.number().min(0, 'Deve ser ≥ 0'),
   currency: z.string().trim().min(1).max(10),
   is_active: z.boolean(),
   features: z.array(z.string()),
@@ -55,6 +56,7 @@ const emptyForm: TierForm = {
   price_yearly: 0,
   max_children: 5,
   max_classrooms: 0,
+  extra_child_price: 0,
   currency: 'AOA',
   is_active: true,
   features: [],
@@ -117,6 +119,7 @@ export default function AdminSubscriptions() {
       price_yearly: Number(tier.price_yearly),
       max_children: tier.max_children,
       max_classrooms: tier.max_classrooms,
+      extra_child_price: Number(tier.extra_child_price ?? 0),
       currency: tier.currency,
       is_active: tier.is_active,
       features,
@@ -151,6 +154,7 @@ export default function AdminSubscriptions() {
           price_yearly: validData.price_yearly,
           max_children: validData.max_children,
           max_classrooms: validData.max_classrooms,
+          extra_child_price: validData.extra_child_price,
           currency: validData.currency,
           is_active: validData.is_active,
           features: validData.features,
@@ -374,7 +378,7 @@ export default function AdminSubscriptions() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Máx. Crianças</Label>
                 <Input type="number" min={0} value={form.max_children} onChange={e => setForm(f => ({ ...f, max_children: parseInt(e.target.value) || 0 }))} />
@@ -382,6 +386,11 @@ export default function AdminSubscriptions() {
               <div>
                 <Label>Máx. Turmas</Label>
                 <Input type="number" min={0} value={form.max_classrooms} onChange={e => setForm(f => ({ ...f, max_classrooms: parseInt(e.target.value) || 0 }))} />
+              </div>
+              <div>
+                <Label>Preço Extra/Criança</Label>
+                <Input type="number" min={0} step={0.01} value={form.extra_child_price} onChange={e => setForm(f => ({ ...f, extra_child_price: parseFloat(e.target.value) || 0 }))} />
+                {errors.extra_child_price && <p className="text-xs text-destructive mt-1">{errors.extra_child_price}</p>}
               </div>
             </div>
 
