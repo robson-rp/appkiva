@@ -446,7 +446,7 @@ function MissionsTab({
                           <span className="text-xs text-muted-foreground">Meta: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
                         </div>
                       )}
-                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast({ title: '🚀 Em breve!', description: 'O sistema de missões interactivas estará disponível em breve.' })}>
+                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast('🚀 O sistema de missões interactivas estará disponível em breve!')}>
                         <Target className="h-3.5 w-3.5" /> Começar Missão
                       </Button>
                     </CardContent>

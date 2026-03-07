@@ -51,7 +51,7 @@ export default function ChildDashboard() {
   const { data: weeklyData } = useWeeklySparkline();
   const { data: tasks = [] } = useChildTasks();
   const { data: dbVaults } = useDreamVaults(user?.profileId);
-  const { data: streakData } = useStrDateakData
+  const { data: streakData } = useStreakData();
 
   const childName = user?.name ?? 'Explorador';
   const childAvatar = user?.avatar ?? '🦊';
