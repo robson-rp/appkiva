@@ -21,14 +21,18 @@ export function useSubscriptionTiers(showInactive = false) {
     queryFn: async () => {
       let query = supabase
         .from('subscription_tiers')
-        .select('*')
+        .select('*, tenants(id)')
         .order('price_monthly', { ascending: true });
       if (!showInactive) {
         query = query.eq('is_active', true);
       }
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return (data ?? []).map((t: any) => ({
+        ...t,
+        tenant_count: Array.isArray(t.tenants) ? t.tenants.length : 0,
+        tenants: undefined,
+      }));
     },
   });
 }

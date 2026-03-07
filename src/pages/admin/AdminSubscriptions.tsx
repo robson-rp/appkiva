@@ -15,7 +15,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle } from 'lucide-react';
+import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
 import {
   useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier,
 } from '@/hooks/use-tenants';
