@@ -54,9 +54,10 @@ export function useChildRewards() {
 
 export function useClaimReward() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (reward: { id: string; name: string; price: number }) => {
+    mutationFn: async (reward: { id: string; name: string; price: number; parentProfileId?: string }) => {
       const { data, error } = await supabase.functions.invoke('claim-reward', {
         body: { reward_id: reward.id },
       });
