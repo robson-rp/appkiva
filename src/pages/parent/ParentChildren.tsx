@@ -181,11 +181,12 @@ export default function ParentChildren() {
             }}>
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Convidar
             </Button>
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
               if (!canAddChild) {
                 setPaymentOpen(true);
                 return;
               }
+              await generateAndPersistCode();
               setInviteOpen(true);
             }}>
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
