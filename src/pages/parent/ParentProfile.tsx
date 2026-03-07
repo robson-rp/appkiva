@@ -52,7 +52,7 @@ export default function ParentProfile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ country } as any)
+      .update({ country, gender } as any)
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep household in sync

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
@@ -8,13 +8,16 @@ import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2 } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
+import { PARTNER_SECTORS } from '@/data/partner-sectors';
+import { supabase } from '@/integrations/supabase/client';
 
 type AuthMode = 'login' | 'signup';
+type ContactMethod = 'email' | 'phone';
 
 const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string }> = {
   parent: { label: 'Encarregado', description: 'Gerir tarefas, mesadas e acompanhar o progresso', icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary' },
@@ -27,17 +30,83 @@ const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: 
 
 const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'partner', 'admin'];
 
+const GENDER_OPTIONS = [
+  { value: 'male', label: 'Masculino' },
+  { value: 'female', label: 'Feminino' },
+  { value: 'other', label: 'Outro' },
+];
+
+const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
+  AO: '+244', PT: '+351', BR: '+55', MZ: '+258', CV: '+238',
+  GW: '+245', ST: '+239', TL: '+670', US: '+1', GB: '+44',
+  FR: '+33', DE: '+49', ES: '+34', ZA: '+27', NG: '+234',
+};
+
 export default function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [country, setCountry] = useState('AO');
+  const [gender, setGender] = useState('');
+  const [sector, setSector] = useState('');
+  const [schoolTenantId, setSchoolTenantId] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [inviteValid, setInviteValid] = useState<boolean | null>(null);
+  const [inviteData, setInviteData] = useState<{ household_id: string; parent_profile_id: string; code_id: string } | null>(null);
+  const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Fetch schools for teacher signup
+  useEffect(() => {
+    if (selectedRole === 'teacher' && authMode === 'signup') {
+      supabase
+        .from('tenants')
+        .select('id, name')
+        .eq('tenant_type', 'school')
+        .eq('is_active', true)
+        .then(({ data }) => {
+          if (data) setSchools(data);
+        });
+    }
+  }, [selectedRole, authMode]);
+
+  // Validate invite code for child/teen
+  useEffect(() => {
+    if ((selectedRole === 'child' || selectedRole === 'teen') && inviteCode.length === 6) {
+      supabase.rpc('validate_invite_code', { _code: inviteCode }).then(({ data, error }) => {
+        if (error || !data) {
+          setInviteValid(false);
+          setInviteData(null);
+        } else {
+          const result = data as any;
+          setInviteValid(result.valid);
+          if (result.valid) {
+            setInviteData({
+              household_id: result.household_id,
+              parent_profile_id: result.parent_profile_id,
+              code_id: result.code_id,
+            });
+          } else {
+            setInviteData(null);
+          }
+        }
+      });
+    } else {
+      setInviteValid(null);
+      setInviteData(null);
+    }
+  }, [inviteCode, selectedRole]);
+
+  const phoneWithPrefix = `${COUNTRY_PHONE_PREFIXES[country] || '+244'}${phone.replace(/\s/g, '')}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,19 +115,146 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
-        const { error } = await signup(email, password, selectedRole, displayName || email, country);
-        if (error) {
-          toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
+        // Validate child/teen must have valid invite
+        if ((selectedRole === 'child' || selectedRole === 'teen') && !inviteValid) {
+          toast({ title: 'Código inválido', description: 'Precisas de um código de convite válido do teu encarregado.', variant: 'destructive' });
           setSubmitting(false);
           return;
         }
-        toast({ title: 'Conta criada!', description: 'Verifica o teu email para confirmar a conta.' });
-      } else {
-        const { error } = await login(email, password);
-        if (error) {
-          toast({ title: 'Erro ao entrar', description: error, variant: 'destructive' });
+
+        // Validate teacher must select school
+        if (selectedRole === 'teacher' && !schoolTenantId) {
+          toast({ title: 'Escola obrigatória', description: 'Seleciona a tua escola para continuar.', variant: 'destructive' });
           setSubmitting(false);
           return;
+        }
+
+        // Validate partner must have sector
+        if (selectedRole === 'partner' && !sector) {
+          toast({ title: 'Sector obrigatório', description: 'Seleciona o sector de actividade.', variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
+
+        // Validate parent must have gender
+        if (selectedRole === 'parent' && !gender) {
+          toast({ title: 'Género obrigatório', description: 'Seleciona o teu género.', variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
+
+        if (contactMethod === 'phone') {
+          // Phone signup with OTP
+          if (!otpSent) {
+            const { error } = await supabase.auth.signInWithOtp({
+              phone: phoneWithPrefix,
+              options: {
+                data: {
+                  display_name: displayName || phoneWithPrefix,
+                  role: selectedRole,
+                  country,
+                  gender: gender || undefined,
+                  phone: phoneWithPrefix,
+                  institution_name: selectedRole === 'partner' ? displayName : undefined,
+                  sector: sector || undefined,
+                  school_tenant_id: schoolTenantId || undefined,
+                  avatar: selectedRole === 'parent' ? '👩' : selectedRole === 'teacher' ? '👨‍🏫' : selectedRole === 'teen' ? '🧑‍💻' : selectedRole === 'admin' ? '🛡️' : selectedRole === 'partner' ? '🏢' : '🦊',
+                },
+              },
+            });
+            if (error) {
+              toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              setSubmitting(false);
+              return;
+            }
+            setOtpSent(true);
+            toast({ title: 'OTP enviado! 📱', description: `Código enviado para ${phoneWithPrefix}` });
+            setSubmitting(false);
+            return;
+          } else {
+            // Verify OTP
+            const { error } = await supabase.auth.verifyOtp({
+              phone: phoneWithPrefix,
+              token: otpCode,
+              type: 'sms',
+            });
+            if (error) {
+              toast({ title: 'Código inválido', description: error.message, variant: 'destructive' });
+              setSubmitting(false);
+              return;
+            }
+            // If child/teen, claim the invite code
+            if (inviteData && (selectedRole === 'child' || selectedRole === 'teen')) {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('id')
+                  .eq('user_id', user.id)
+                  .single();
+                if (profile) {
+                  await supabase.rpc('claim_invite_code', { _code: inviteCode, _profile_id: profile.id });
+                }
+              }
+            }
+          }
+        } else {
+          // Email signup
+          const { error } = await signup(
+            email,
+            password,
+            selectedRole,
+            displayName || email,
+            country,
+            {
+              gender: gender || undefined,
+              phone: phone ? phoneWithPrefix : undefined,
+              institution_name: selectedRole === 'partner' ? displayName : undefined,
+              sector: sector || undefined,
+              school_tenant_id: schoolTenantId || undefined,
+              invite_code: inviteCode || undefined,
+            }
+          );
+          if (error) {
+            toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
+            setSubmitting(false);
+            return;
+          }
+          toast({ title: 'Conta criada!', description: 'Verifica o teu email para confirmar a conta.' });
+        }
+      } else {
+        // Login
+        if (contactMethod === 'phone') {
+          if (!otpSent) {
+            const { error } = await supabase.auth.signInWithOtp({ phone: phoneWithPrefix });
+            if (error) {
+              toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              setSubmitting(false);
+              return;
+            }
+            setOtpSent(true);
+            toast({ title: 'OTP enviado! 📱', description: `Código enviado para ${phoneWithPrefix}` });
+            setSubmitting(false);
+            return;
+          } else {
+            const { error } = await supabase.auth.verifyOtp({
+              phone: phoneWithPrefix,
+              token: otpCode,
+              type: 'sms',
+            });
+            if (error) {
+              toast({ title: 'Código inválido', description: error.message, variant: 'destructive' });
+              setSubmitting(false);
+              return;
+            }
+          }
+        } else {
+          const { error } = await login(email, password);
+          if (error) {
+            toast({ title: 'Erro ao entrar', description: error, variant: 'destructive' });
+            setSubmitting(false);
+            return;
+          }
         }
       }
 
@@ -74,11 +270,24 @@ export default function Login() {
   const resetForm = () => {
     setSelectedRole(null);
     setEmail('');
+    setPhone('');
     setPassword('');
     setDisplayName('');
     setCountry('AO');
+    setGender('');
+    setSector('');
+    setSchoolTenantId('');
+    setInviteCode('');
+    setInviteValid(null);
+    setInviteData(null);
     setAuthMode('login');
+    setContactMethod('email');
+    setOtpSent(false);
+    setOtpCode('');
   };
+
+  const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
+  const needsInviteFirst = isChildOrTeen && authMode === 'signup' && !inviteValid;
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -176,17 +385,7 @@ export default function Login() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => {
-                          const testEmails: Record<UserRole, string> = {
-                            parent: 'encarregado@kivara.com',
-                            child: 'crianca@kivara.com',
-                            teen: 'adolescente@kivara.com',
-                            teacher: 'professor@kivara.com',
-                            partner: 'parceiro@kivara.com',
-                            admin: 'admin@kivara.com',
-                          };
                           setSelectedRole(role);
-                          setEmail(testEmails[role]);
-                          setPassword('Test1234!');
                           setAuthMode('login');
                         }}
                         className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
@@ -229,89 +428,274 @@ export default function Login() {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* ===== SIGNUP-ONLY FIELDS ===== */}
                   {authMode === 'signup' && (
                     <>
-                      <div className="space-y-2">
-                        <Label htmlFor="displayName" className="font-semibold">Nome</Label>
-                        <Input
-                          id="displayName"
-                          placeholder="O teu nome"
-                          value={displayName}
-                          onChange={e => setDisplayName(e.target.value)}
-                          className="h-12 rounded-xl text-base"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-semibold">País</Label>
-                        <Select value={country} onValueChange={setCountry}>
-                          <SelectTrigger className="h-12 rounded-xl text-base">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {COUNTRY_CURRENCIES.map(c => (
-                              <SelectItem key={c.code} value={c.code}>
-                                {c.name} ({c.currencySymbol})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {/* Child/Teen: Invite code first */}
+                      {isChildOrTeen && (
+                        <div className="space-y-2">
+                          <Label className="font-semibold">Código de Convite Familiar</Label>
+                          <p className="text-xs text-muted-foreground">Pede ao teu encarregado o código de 6 caracteres.</p>
+                          <div className="relative">
+                            <Input
+                              placeholder="EX: A3B7K9"
+                              value={inviteCode}
+                              onChange={e => setInviteCode(e.target.value.toUpperCase().slice(0, 6))}
+                              className="h-12 rounded-xl text-base tracking-widest font-mono text-center uppercase"
+                              maxLength={6}
+                              required
+                            />
+                            {inviteValid === true && (
+                              <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary" />
+                            )}
+                          </div>
+                          {inviteValid === false && (
+                            <p className="text-xs text-destructive">Código inválido ou expirado. Pede um novo ao teu encarregado.</p>
+                          )}
+                          {inviteValid === true && (
+                            <p className="text-xs text-secondary">✓ Código válido! Preenche os teus dados abaixo.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Show remaining fields only if not child/teen or if invite is valid */}
+                      {!needsInviteFirst && (
+                        <>
+                          {/* Name / Institution Name */}
+                          <div className="space-y-2">
+                            <Label htmlFor="displayName" className="font-semibold">
+                              {selectedRole === 'partner' ? 'Nome da Instituição' : 'Nome'}
+                            </Label>
+                            <Input
+                              id="displayName"
+                              placeholder={selectedRole === 'partner' ? 'Nome da instituição' : 'O teu nome'}
+                              value={displayName}
+                              onChange={e => setDisplayName(e.target.value)}
+                              className="h-12 rounded-xl text-base"
+                              required
+                            />
+                          </div>
+
+                          {/* Gender - Only for parents */}
+                          {selectedRole === 'parent' && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Género</Label>
+                              <Select value={gender} onValueChange={setGender}>
+                                <SelectTrigger className="h-12 rounded-xl text-base">
+                                  <SelectValue placeholder="Selecionar género" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {GENDER_OPTIONS.map(g => (
+                                    <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+
+                          {/* Sector - Only for partners */}
+                          {selectedRole === 'partner' && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Sector de Actividade</Label>
+                              <Select value={sector} onValueChange={setSector}>
+                                <SelectTrigger className="h-12 rounded-xl text-base">
+                                  <SelectValue placeholder="Selecionar sector" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {PARTNER_SECTORS.map(s => (
+                                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+
+                          {/* School - Only for teachers */}
+                          {selectedRole === 'teacher' && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Escola</Label>
+                              {schools.length === 0 ? (
+                                <p className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-xl">
+                                  Nenhuma escola registada. Contacta o administrador da plataforma.
+                                </p>
+                              ) : (
+                                <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                                  <SelectTrigger className="h-12 rounded-xl text-base">
+                                    <SelectValue placeholder="Selecionar escola" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {schools.map(s => (
+                                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Country - Not for child/teen (inherited from parent) */}
+                          {!isChildOrTeen && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">País</Label>
+                              <Select value={country} onValueChange={setCountry}>
+                                <SelectTrigger className="h-12 rounded-xl text-base">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {COUNTRY_CURRENCIES.map(c => (
+                                    <SelectItem key={c.code} value={c.code}>
+                                      {c.name} ({c.currencySymbol})
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="font-semibold">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="exemplo@email.com"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      className="h-12 rounded-xl text-base"
-                      required
-                    />
-                  </div>
+                  {/* ===== CONTACT METHOD TOGGLE ===== */}
+                  {!needsInviteFirst && (
+                    <>
+                      {/* Toggle Email/Phone - not for child/teen in signup (they just use password) */}
+                      {!(isChildOrTeen && authMode === 'signup') && (
+                        <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => { setContactMethod('email'); setOtpSent(false); setOtpCode(''); }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
+                              contactMethod === 'email'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                          >
+                            <Mail className="h-4 w-4" /> Email
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => { setContactMethod('phone'); setOtpSent(false); setOtpCode(''); }}
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
+                              contactMethod === 'phone'
+                                ? 'bg-background text-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                          >
+                            <Phone className="h-4 w-4" /> Telefone
+                          </button>
+                        </div>
+                      )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className="h-12 rounded-xl text-base"
-                      minLength={6}
-                      required
-                    />
-                  </div>
+                      {/* Email or Phone field */}
+                      {contactMethod === 'email' || (isChildOrTeen && authMode === 'signup') ? (
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="font-semibold">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="exemplo@email.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            className="h-12 rounded-xl text-base"
+                            required
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <Label htmlFor="phone" className="font-semibold">Telefone</Label>
+                          <div className="flex gap-2">
+                            <div className="w-24 shrink-0">
+                              <Input
+                                value={COUNTRY_PHONE_PREFIXES[country] || '+244'}
+                                readOnly
+                                className="h-12 rounded-xl text-base text-center bg-muted/30 font-mono"
+                              />
+                            </div>
+                            <Input
+                              id="phone"
+                              type="tel"
+                              placeholder="912 345 678"
+                              value={phone}
+                              onChange={e => setPhone(e.target.value)}
+                              className="h-12 rounded-xl text-base"
+                              required
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                  <Button
-                    type="submit"
-                    className="w-full font-display font-bold h-13 rounded-xl text-base"
-                    size="lg"
-                    disabled={submitting}
-                  >
-                    {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : authMode === 'signup' ? 'Criar Conta' : 'Entrar'}
-                  </Button>
+                      {/* Password - Only for email auth */}
+                      {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && !otpSent && (
+                        <div className="space-y-2">
+                          <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            className="h-12 rounded-xl text-base"
+                            minLength={6}
+                            required
+                          />
+                        </div>
+                      )}
 
-                  <p className="text-center text-sm text-muted-foreground">
-                    {authMode === 'login' ? (
-                      <>Não tens conta?{' '}
-                        <button type="button" onClick={() => setAuthMode('signup')} className="text-primary font-semibold hover:underline">
-                          Criar conta
-                        </button>
-                      </>
-                    ) : (
-                      <>Já tens conta?{' '}
-                        <button type="button" onClick={() => setAuthMode('login')} className="text-primary font-semibold hover:underline">
-                          Entrar
-                        </button>
-                      </>
-                    )}
-                  </p>
+                      {/* OTP Code Input */}
+                      {otpSent && contactMethod === 'phone' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="otp" className="font-semibold">Código OTP</Label>
+                          <p className="text-xs text-muted-foreground">Insere o código de 6 dígitos enviado para o teu telefone.</p>
+                          <Input
+                            id="otp"
+                            placeholder="000000"
+                            value={otpCode}
+                            onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
+                            maxLength={6}
+                            required
+                          />
+                        </div>
+                      )}
+
+                      <Button
+                        type="submit"
+                        className="w-full font-display font-bold h-13 rounded-xl text-base"
+                        size="lg"
+                        disabled={submitting}
+                      >
+                        {submitting ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : otpSent ? (
+                          'Verificar Código'
+                        ) : contactMethod === 'phone' ? (
+                          'Enviar Código'
+                        ) : authMode === 'signup' ? (
+                          'Criar Conta'
+                        ) : (
+                          'Entrar'
+                        )}
+                      </Button>
+
+                      <p className="text-center text-sm text-muted-foreground">
+                        {authMode === 'login' ? (
+                          <>Não tens conta?{' '}
+                            <button type="button" onClick={() => { setAuthMode('signup'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
+                              Criar conta
+                            </button>
+                          </>
+                        ) : (
+                          <>Já tens conta?{' '}
+                            <button type="button" onClick={() => { setAuthMode('login'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
+                              Entrar
+                            </button>
+                          </>
+                        )}
+                      </p>
+                    </>
+                  )}
                 </form>
               </motion.div>
             )}

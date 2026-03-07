@@ -23,7 +23,7 @@ interface AuthContextType {
   loading: boolean;
   currentChildId: string | null;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
-  signup: (email: string, password: string, role: UserRole, displayName: string, country?: string) => Promise<{ error: string | null }>;
+  signup: (email: string, password: string, role: UserRole, displayName: string, country?: string, extra?: { gender?: string; phone?: string; institution_name?: string; sector?: string; school_tenant_id?: string; invite_code?: string }) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   setCurrentChildId: (id: string | null) => void;
 }
