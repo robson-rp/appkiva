@@ -293,7 +293,7 @@ export default function ParentChildren() {
                       variant="outline"
                       size="sm"
                       className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs sm:text-sm"
-                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
                       <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
