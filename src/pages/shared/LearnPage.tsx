@@ -18,7 +18,7 @@ import donatingImg from '@/assets/lessons/donating.png';
 
 export default function LearnPage() {
   const { data: lessons = [], isLoading } = useLessons();
-  const { completedIds, totalPoints, isLoading: progressLoading } = useLessonProgress();
+  const { completedIds, totalPoints, scoreMap, isLoading: progressLoading } = useLessonProgress();
   const completeLesson = useCompleteLessonMutation();
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
   const { toast } = useToast();
