@@ -343,7 +343,7 @@ export default function ParentConsent() {
 
       {/* Revoke Consent Dialog */}
       <Dialog open={revokeDialog.open} onOpenChange={(o) => !o && setRevokeDialog({ open: false, id: '', childName: '', type: '' })}>
-        <DialogContent className="sm:max-w-sm rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Revogar Consentimento
