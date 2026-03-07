@@ -22,8 +22,9 @@ export function useLessonProgress() {
 
   const completedIds = new Set((query.data ?? []).map(r => r.lesson_id));
   const totalPoints = (query.data ?? []).reduce((s, r) => s + r.kiva_points_earned, 0);
+  const scoreMap = new Map((query.data ?? []).map(r => [r.lesson_id, r.score]));
 
-  return { ...query, completedIds, totalPoints };
+  return { ...query, completedIds, totalPoints, scoreMap };
 }
 
 export function useCompleteLessonMutation() {
