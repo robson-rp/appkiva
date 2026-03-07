@@ -210,6 +210,18 @@ export function NotificationDropdown() {
                 <p className="text-xs font-display font-bold">{urgentNotif.title}</p>
                 <p className="text-[11px] opacity-90 line-clamp-2">{urgentNotif.message}</p>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 h-7 text-[10px] font-bold text-destructive-foreground bg-destructive-foreground/15 hover:bg-destructive-foreground/25 rounded-lg gap-1 px-2"
+                onClick={() => {
+                  handleMarkRead(urgentNotif.id, urgentNotif.isReal);
+                  setDismissedBannerId(urgentNotif.id);
+                  setShowBanner(false);
+                }}
+              >
+                <CheckCheck className="h-3 w-3" /> Lida
+              </Button>
               <button onClick={() => { setDismissedBannerId(urgentNotif.id); setShowBanner(false); }} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
                 <X className="h-4 w-4" />
               </button>
