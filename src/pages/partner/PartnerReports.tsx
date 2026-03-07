@@ -3,6 +3,8 @@ import { BarChart3, TrendingUp, BookOpen, Trophy, Download, Loader2 } from 'luci
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 
 export default function PartnerReports() {
   const { data: programs, isLoading: loadingP } = usePartnerPrograms();
