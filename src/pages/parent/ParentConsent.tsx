@@ -377,7 +377,7 @@ export default function ParentConsent() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialog.open} onOpenChange={(o) => !o && setDetailDialog({ open: false, record: null })}>
-        <max-w-[calc(100vw-2rem)] sm:max-w-md DialogContent className="rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">Detalhe do Consentimento</DialogTitle>
           </DialogHeader>
