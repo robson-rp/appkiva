@@ -18,12 +18,12 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
+      includeAssets: ["favicon.svg", "pwa-192x192.png", "pwa-512x512.png"],
       manifest: {
         name: "Kivara – Educação Financeira",
         short_name: "Kivara",
         description: "Infraestrutura nacional de educação financeira para crianças e famílias",
-        theme_color: "#6366f1",
+        theme_color: "#2f9e7a",
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait-primary",
