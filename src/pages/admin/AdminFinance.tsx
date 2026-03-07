@@ -5,12 +5,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, TrendingUp, Calculator, BarChart3, Globe } from 'lucide-react';
+import { DollarSign, TrendingUp, Calculator, BarChart3, Globe, Vault, ArrowUpFromLine, ArrowDownToLine, Coins, Wallet, PiggyBank } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
+import { useMoneySupply } from '@/hooks/use-money-supply';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -36,6 +37,7 @@ function useTenantsByTier() {
 
 export default function AdminFinance() {
   const { data, isLoading } = useTenantsByTier();
+  const { data: moneySupply, isLoading: moneyLoading } = useMoneySupply();
   const tenants = data?.tenants ?? [];
   const tiers = data?.tiers ?? [];
 
@@ -110,6 +112,66 @@ export default function AdminFinance() {
         <h1 className="text-2xl font-display font-bold text-foreground">Módulo Financeiro</h1>
         <p className="text-sm text-muted-foreground">Receitas por moeda, simulações e projecções de subscrições</p>
       </div>
+
+      {/* Money Supply Audit */}
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-display flex items-center gap-2">
+            <Vault className="h-4 w-4 text-primary" /> Auditoria da Massa Monetária (KVC)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {moneyLoading ? (
+            <p className="text-sm text-muted-foreground">A carregar...</p>
+          ) : moneySupply?.error ? (
+            <p className="text-sm text-destructive">{moneySupply.error}</p>
+          ) : moneySupply ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ArrowUpFromLine className="h-3.5 w-3.5 text-emerald-500" /> Emitidos
+                </div>
+                <p className="text-lg font-display font-bold text-emerald-600">{Number(moneySupply.total_emitted).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ArrowDownToLine className="h-3.5 w-3.5 text-red-500" /> Queimados
+                </div>
+                <p className="text-lg font-display font-bold text-red-600">{Number(moneySupply.total_burned).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Coins className="h-3.5 w-3.5 text-primary" /> Em Circulação
+                </div>
+                <p className="text-lg font-display font-bold text-primary">{Number(moneySupply.total_in_circulation).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Wallet className="h-3.5 w-3.5 text-chart-3" /> Em Carteiras
+                </div>
+                <p className="text-lg font-display font-bold">{Number(moneySupply.total_in_wallets).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <PiggyBank className="h-3.5 w-3.5 text-chart-4" /> Em Cofres
+                </div>
+                <p className="text-lg font-display font-bold">{Number(moneySupply.total_in_vaults).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <BarChart3 className="h-3.5 w-3.5" /> Carteiras Activas
+                </div>
+                <p className="text-lg font-display font-bold">{moneySupply.wallet_count}</p>
+              </div>
+            </div>
+          ) : null}
+          {moneySupply && !moneySupply.error && (
+            <p className="text-[10px] text-muted-foreground mt-3">
+              Última auditoria: {new Date(moneySupply.audit_timestamp).toLocaleString('pt-PT')}
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Stats — per currency */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
