@@ -62,7 +62,7 @@ function generateChallengeAlerts(): Notification[] {
     }));
 }
 
-type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward';
+type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward' | 'vault' | 'budget';
 
 const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
   task: { icon: ListTodo, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
@@ -72,6 +72,8 @@ const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
   streak: { icon: Flame, bg: 'bg-destructive/15' },
   class: { icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]' },
   reward: { icon: Gift, bg: 'bg-[hsl(var(--kivara-light-gold))]' },
+  vault: { icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-green))]' },
+  budget: { icon: Bell, bg: 'bg-destructive/15' },
 };
 
 // Unified notification shape for display
@@ -137,6 +139,7 @@ export function NotificationDropdown() {
   const urgentNotif = allNotifications.find(n => n.urgent && !n.read);
 
   const [showBanner, setShowBanner] = useState(false);
+  const [dismissedBannerId, setDismissedBannerId] = useState<string | null>(null);
   const [muted, setMuted] = useState(() => localStorage.getItem('kivara-notif-muted') === 'true');
 
   const toggleMute = () => {
@@ -148,7 +151,7 @@ export function NotificationDropdown() {
   };
 
   useEffect(() => {
-    if (urgentNotif) {
+    if (urgentNotif && urgentNotif.id !== dismissedBannerId) {
       const timer = setTimeout(() => {
         setShowBanner(true);
         if (!muted) {
@@ -157,8 +160,10 @@ export function NotificationDropdown() {
         }
       }, 2000);
       return () => clearTimeout(timer);
+    } else {
+      setShowBanner(false);
     }
-  }, [urgentNotif, muted]);
+  }, [urgentNotif?.id, dismissedBannerId, muted]);
 
   const handleMarkRead = (id: string, isReal?: boolean) => {
     if (isReal) {
@@ -205,7 +210,7 @@ export function NotificationDropdown() {
                 <p className="text-xs font-display font-bold">{urgentNotif.title}</p>
                 <p className="text-[11px] opacity-90 line-clamp-2">{urgentNotif.message}</p>
               </div>
-              <button onClick={() => setShowBanner(false)} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
+              <button onClick={() => { setDismissedBannerId(urgentNotif.id); setShowBanner(false); }} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
