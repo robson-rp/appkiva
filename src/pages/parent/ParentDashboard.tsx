@@ -25,6 +25,7 @@ export default function ParentDashboard() {
   const { data: children = [], isLoading: childrenLoading } = useChildren();
   const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
+  const { data: emissionStats } = useEmissionStats();
 
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
 
