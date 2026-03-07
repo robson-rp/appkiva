@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Crown, Check, Sparkles, Shield, Zap, Building2 } from 'lucide-react';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
 import { usePartnerLimits } from '@/hooks/use-partner-limits';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +33,16 @@ export default function PartnerSubscription() {
   const { data: allTiers = [], isLoading } = useSubscriptionTiers();
   const { upgrade, loading: upgradeLoading } = useUpgradeSubscription();
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+
+  const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
+  const currencyCode = tenantCurrency?.code ?? 'AOA';
+
+  const localPrice = (eurAmount: number) => {
+    const converted = convertPrice(eurAmount, 'EUR', currencyCode, rates);
+    return formatPrice(converted, currencySymbol, tenantCurrency?.decimalPlaces ?? 0);
+  };
 
   const partnerTiers = allTiers.filter(t => t.tierType === 'partner_program');
   const currentTierIndex = partnerTiers.findIndex(t => t.name === limits.tierName);
@@ -58,9 +70,9 @@ export default function PartnerSubscription() {
                 <div>
                   <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
                   <h1 className="font-display text-2xl font-bold">{limits.tierName}</h1>
-                  <p className="text-sm opacity-80 mt-0.5">
-                    {limits.priceMonthly > 0 ? `€${limits.priceMonthly}/mês` : 'Gratuito'}
-                  </p>
+                    <p className="text-sm opacity-80 mt-0.5">
+                      {limits.priceMonthly > 0 ? `${localPrice(limits.priceMonthly)}/mês` : 'Gratuito'}
+                    </p>
                 </div>
               </div>
               <Badge className="bg-white/20 text-white border-0 font-display">
@@ -123,7 +135,7 @@ export default function PartnerSubscription() {
                     <span className="text-3xl">{TIER_ICONS[tier.name] ?? '📋'}</span>
                     <h3 className="font-display font-bold mt-2">{tier.name}</h3>
                     <p className="text-2xl font-bold text-foreground mt-1">
-                      {tier.priceMonthly > 0 ? `€${tier.priceMonthly}` : 'Grátis'}
+                      {tier.priceMonthly > 0 ? localPrice(tier.priceMonthly) : 'Grátis'}
                       {tier.priceMonthly > 0 && <span className="text-xs text-muted-foreground font-normal">/mês</span>}
                     </p>
                     {isCurrent && (
