@@ -783,6 +783,7 @@ export type Database = {
       }
       partner_programs: {
         Row: {
+          budget_spent: number
           children_count: number
           created_at: string
           id: string
@@ -797,6 +798,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          budget_spent?: number
           children_count?: number
           created_at?: string
           id?: string
@@ -811,6 +813,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          budget_spent?: number
           children_count?: number
           created_at?: string
           id?: string
@@ -1175,6 +1178,8 @@ export type Database = {
           id: string
           participants_count: number
           partner_tenant_id: string
+          program_id: string | null
+          reward_amount: number
           start_date: string
           status: string
           title: string
@@ -1188,6 +1193,8 @@ export type Database = {
           id?: string
           participants_count?: number
           partner_tenant_id: string
+          program_id?: string | null
+          reward_amount?: number
           start_date: string
           status?: string
           title: string
@@ -1201,6 +1208,8 @@ export type Database = {
           id?: string
           participants_count?: number
           partner_tenant_id?: string
+          program_id?: string | null
+          reward_amount?: number
           start_date?: string
           status?: string
           title?: string
@@ -1212,6 +1221,13 @@ export type Database = {
             columns: ["partner_tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsored_challenges_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "partner_programs"
             referencedColumns: ["id"]
           },
         ]
