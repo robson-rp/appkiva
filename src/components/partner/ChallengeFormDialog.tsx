@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 const schema = z.object({
   title: z.string().trim().min(3, 'Mínimo 3 caracteres').max(100),
   description: z.string().trim().max(500).optional(),
+  reward_amount: z.coerce.number().min(0, 'Mínimo 0 KVC'),
   start_date: z.date({ required_error: 'Data de início obrigatória' }),
   end_date: z.date({ required_error: 'Data de fim obrigatória' }),
 }).refine(d => d.end_date > d.start_date, {
