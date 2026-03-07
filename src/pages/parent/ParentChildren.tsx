@@ -381,21 +381,22 @@ export default function ParentChildren() {
         </DialogContent>
       </Dialog>
 
-      {/* Budget Dialog */}
+      {/* Budget & Daily Limit Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
         <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              Limite de Gasto Mensal
+              Limites de Gasto
             </DialogTitle>
             <DialogDescription>
-              Define quanto {budgetChild?.displayName} pode gastar por mês.
+              Define os limites de gasto de {budgetChild?.displayName}.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* Monthly limit */}
             <div className="space-y-2">
-              <Label>Limite mensal (KivaCoins)</Label>
+              <Label className="text-xs font-display font-bold">Limite mensal (KivaCoins)</Label>
               <Input
                 type="number"
                 placeholder="Ex: 500"
@@ -404,35 +405,68 @@ export default function ParentChildren() {
                 min={0}
                 className="rounded-xl text-lg font-display text-center"
               />
+              <div className="flex gap-2 flex-wrap justify-center">
+                {[100, 250, 500, 1000].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setBudgetValue(String(v))}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
+                      budgetValue === String(v)
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {v} 🪙
+                  </button>
+                ))}
+              </div>
               <p className="text-[10px] text-muted-foreground text-center">
-                Define 0 para remover o limite
+                Define 0 para remover o limite mensal
               </p>
             </div>
 
-            <div className="flex gap-2 flex-wrap justify-center">
-              {[100, 250, 500, 1000].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setBudgetValue(String(v))}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
-                    budgetValue === String(v)
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  {v} 🪙
-                </button>
-              ))}
+            <div className="h-px bg-border/50" />
+
+            {/* Daily limit */}
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">Limite diário (KivaCoins)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 50"
+                value={dailyLimitValue}
+                onChange={e => setDailyLimitValue(e.target.value)}
+                min={0}
+                className="rounded-xl text-lg font-display text-center"
+              />
+              <div className="flex gap-2 flex-wrap justify-center">
+                {[20, 50, 100, 200].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setDailyLimitValue(String(v))}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
+                      dailyLimitValue === String(v)
+                        ? 'bg-secondary text-secondary-foreground shadow-sm'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {v} 🪙
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                Máximo que pode gastar por dia em compras
+              </p>
             </div>
 
             <Button
               className="w-full rounded-xl font-display gap-2"
               onClick={handleSaveBudget}
-              disabled={updateBudget.isPending}
+              disabled={updateBudget.isPending || updateDailyLimit.isPending}
             >
               <Wallet className="h-4 w-4" />
-              {updateBudget.isPending ? 'A guardar...' : 'Guardar Limite'}
+              {(updateBudget.isPending || updateDailyLimit.isPending) ? 'A guardar...' : 'Guardar Limites'}
             </Button>
           </div>
         </DialogContent>
