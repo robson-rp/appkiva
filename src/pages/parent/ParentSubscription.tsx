@@ -55,9 +55,10 @@ export default function ParentSubscription() {
   const fmtP = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
     formatPrice(getRegionalPrice(tierId, field, usdAmount, code, regionalPrices, rates), sym, dec);
 
-  const currentTier = tiers.find((t) => t.name === tierName);
-  const currentIndex = tiers.findIndex((t) => t.name === tierName);
-  const lowerTiers = tiers.filter((_, i) => i < currentIndex);
+  const familyTiers = tiers.filter(t => t.tierType === 'free' || t.tierType === 'family_premium');
+  const currentTier = familyTiers.find((t) => t.name === tierName);
+  const currentIndex = familyTiers.findIndex((t) => t.name === tierName);
+  const lowerTiers = familyTiers.filter((_, i) => i < currentIndex);
   const isFreeTier = !tierName || tierName === 'Free' || tierName === 'Gratuito' || currentIndex <= 0;
 
   const handleDowngrade = async () => {
@@ -197,7 +198,7 @@ export default function ParentSubscription() {
         open={paymentOpen}
         onOpenChange={setPaymentOpen}
         currentTierName={tierName}
-        tiers={tiers}
+        tiers={familyTiers}
         onConfirmUpgrade={upgrade}
       />
 
