@@ -17,6 +17,17 @@ export default function PartnerPrograms() {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const { data: programs, isLoading } = usePartnerPrograms();
+  const deleteProgram = useDeletePartnerProgram();
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Eliminar o programa "${name}"?`)) return;
+    try {
+      await deleteProgram.mutateAsync(id);
+      toast.success('Programa eliminado');
+    } catch {
+      toast.error('Erro ao eliminar programa');
+    }
+  };
 
   const filtered = (programs ?? []).filter(p =>
     p.program_name.toLowerCase().includes(search.toLowerCase())
