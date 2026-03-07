@@ -274,7 +274,7 @@ export default function ParentChildren() {
                     </div>
                     <div
                       className="bg-muted/50 rounded-2xl p-3.5 text-center cursor-pointer hover:bg-muted/80 transition-colors group/budget"
-                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
                         <Wallet className="h-3 w-3" /> Limite Mensal
