@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Building2, Mail, Globe } from 'lucide-react';
-import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
+import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
