@@ -110,14 +110,50 @@ export function useAdminStats() {
   return useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const [tenantsRes, profilesRes, walletsRes] = await Promise.all([
+      const today = new Date().toISOString().slice(0, 10);
+      const todayStart = `${today}T00:00:00.000Z`;
+      const todayEnd = `${today}T23:59:59.999Z`;
+
+      const [tenantsRes, profilesRes, walletsRes, dauRes, tasksAllRes, tasksCompletedRes, txTodayRes, txWeekRes] = await Promise.all([
         supabase.from('tenants').select('id, tenant_type, is_active'),
         supabase.from('profiles').select('id, created_at'),
         supabase.from('wallets').select('id'),
+        // DAU: unique profiles active today
+        supabase.from('streak_activities').select('profile_id', { count: 'exact', head: false }).eq('active_date', today),
+        // All tasks
+        supabase.from('tasks').select('id', { count: 'exact', head: true }),
+        // Completed/approved tasks
+        supabase.from('tasks').select('id', { count: 'exact', head: true }).in('status', ['completed', 'approved']),
+        // Today's transactions
+        supabase.from('ledger_entries').select('id, amount', { count: 'exact', head: false }).gte('created_at', todayStart).lte('created_at', todayEnd),
+        // Last 7 days transactions for sparkline
+        supabase.from('ledger_entries').select('created_at, amount').gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('created_at', { ascending: true }),
       ]);
       
       const tenants = tenantsRes.data ?? [];
       const profiles = profilesRes.data ?? [];
+      const dauProfiles = dauRes.data ?? [];
+      const uniqueDau = new Set(dauProfiles.map((d: any) => d.profile_id)).size;
+      const totalTasks = tasksAllRes.count ?? 0;
+      const completedTasks = tasksCompletedRes.count ?? 0;
+      const missionCompletionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      const txToday = txTodayRes.data ?? [];
+      const dailyTxVolume = txToday.reduce((sum: number, t: any) => sum + Number(t.amount || 0), 0);
+      const dailyTxCount = txToday.length;
+
+      // Build 7-day sparkline data
+      const weekData = txWeekRes.data ?? [];
+      const sparkline: { day: string; volume: number; count: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const dateStr = d.toISOString().slice(0, 10);
+        const dayTx = weekData.filter((t: any) => t.created_at?.startsWith(dateStr));
+        sparkline.push({
+          day: d.toLocaleDateString('pt', { weekday: 'short' }),
+          volume: dayTx.reduce((s: number, t: any) => s + Number(t.amount || 0), 0),
+          count: dayTx.length,
+        });
+      }
       
       return {
         totalTenants: tenants.length,
@@ -129,6 +165,13 @@ export function useAdminStats() {
         },
         totalUsers: profiles.length,
         totalWallets: walletsRes.data?.length ?? 0,
+        dau: uniqueDau,
+        missionCompletionRate,
+        totalTasks,
+        completedTasks,
+        dailyTxVolume,
+        dailyTxCount,
+        weeklySparkline: sparkline,
       };
     },
   });
