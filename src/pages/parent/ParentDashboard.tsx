@@ -12,6 +12,7 @@ import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
+import { useEmissionStats } from '@/hooks/use-emission-stats';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
