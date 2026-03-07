@@ -12,6 +12,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 
 const FEATURE_LABELS: Record<string, string> = {
   savings_vaults: 'Cofres de Poupança',
