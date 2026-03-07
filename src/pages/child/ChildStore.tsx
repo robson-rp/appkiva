@@ -13,6 +13,7 @@ import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { useMonthlySpending } from '@/hooks/use-monthly-spending';
 import { useRequestBudgetException } from '@/hooks/use-budget-exceptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
 import { createNotification } from '@/hooks/use-notifications';
 import {
   AlertDialog,
