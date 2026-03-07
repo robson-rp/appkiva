@@ -176,7 +176,7 @@ export default function ChildDreams() {
                     </div>
 
                     <div className="flex gap-2 mt-3">
-                      <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 flex-1 hover:bg-primary hover:text-primary-foreground transition-colors">
+                      <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 flex-1 hover:bg-primary hover:text-primary-foreground transition-colors" onClick={() => { setDepositDreamId(dream.id); setDepositAmount(''); setDepositDialogOpen(true); }}>
                         <Plus className="h-3 w-3" /> Poupar
                       </Button>
                       <Button variant="ghost" size="sm" className="rounded-xl text-xs font-display h-8 gap-1" onClick={() => setExpandedId(isExpanded ? null : dream.id)}>
