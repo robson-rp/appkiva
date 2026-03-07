@@ -417,6 +417,135 @@ const illustrations: Record<string, React.FC> = {
     </div>
   ),
 
+
+  /* ── Teen-specific illustrations ── */
+
+  'teen-welcome': () => (
+    <div className="relative flex items-center justify-center h-full overflow-hidden">
+      <BgGradient from="var(--kivara-blue)" to="var(--kivara-green)" />
+      <div className="relative flex flex-col items-center">
+        <GlowRings color="var(--kivara-blue)" count={3} />
+        <Particles count={6} color="var(--kivara-green)" />
+        <Kivo size={100} />
+        <OrbitIcon icon={Wallet} radius={82} duration={10} size={20} colorClass="text-primary" />
+        <OrbitIcon icon={TrendingUp} radius={82} duration={10} delay={2.5} size={18} colorClass="text-secondary" />
+        <OrbitIcon icon={Rocket} radius={82} duration={10} delay={5} size={18} colorClass="text-accent" />
+        <OrbitIcon icon={Star} radius={82} duration={10} delay={7.5} size={16} colorClass="text-accent" />
+        <motion.div
+          className="mt-3 text-3xl"
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          💪
+        </motion.div>
+      </div>
+    </div>
+  ),
+
+  'teen-budget': () => (
+    <div className="relative flex items-center justify-center h-full overflow-hidden">
+      <BgGradient from="var(--kivara-green)" to="var(--kivara-blue)" />
+      <div className="relative flex flex-col items-center">
+        <GlowRings color="var(--kivara-green)" count={2} />
+        {/* Budget pie chart representation */}
+        <motion.div
+          className="relative z-10 w-20 h-20 rounded-full border-4 border-primary mb-3"
+          style={{
+            background: `conic-gradient(
+              hsl(var(--kivara-blue)) 0% 35%,
+              hsl(var(--kivara-green)) 35% 60%,
+              hsl(var(--kivara-gold)) 60% 80%,
+              hsl(var(--kivara-blue) / 0.3) 80% 100%
+            )`,
+          }}
+          initial={{ scale: 0, rotate: -90 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 180, damping: 15, delay: 0.2 }}
+        />
+        <div className="flex gap-5 mt-3">
+          <PopIcon icon={ChartPie} delay={0.5} className="w-11 h-11 text-primary" glow="hsl(var(--kivara-blue) / 0.3)" />
+          <PopIcon icon={Wallet} delay={0.7} className="w-10 h-10 text-secondary" glow="hsl(var(--kivara-green) / 0.3)" />
+          <PopIcon icon={ArrowUpRight} delay={0.9} className="w-10 h-10 text-accent" />
+        </div>
+        <Particles count={4} color="var(--kivara-green)" />
+      </div>
+    </div>
+  ),
+
+  'teen-invest': () => (
+    <div className="relative flex items-center justify-center h-full overflow-hidden">
+      <BgGradient from="var(--kivara-gold)" to="var(--kivara-green)" />
+      <div className="relative flex flex-col items-center">
+        <PulseRing color="var(--kivara-gold)" size={110} />
+        <GlowRings color="var(--kivara-gold)" count={2} />
+        {/* Growing compound interest bars */}
+        <div className="flex items-end gap-2 mb-3 relative z-10">
+          {[20, 30, 45, 65, 90].map((h, i) => (
+            <motion.div
+              key={i}
+              className="w-5 rounded-t-md"
+              style={{
+                background: `hsl(var(--kivara-green) / ${0.5 + i * 0.1})`,
+                boxShadow: i === 4 ? '0 0 12px hsl(var(--kivara-green) / 0.4)' : undefined,
+              }}
+              initial={{ height: 0 }}
+              animate={{ height: h }}
+              transition={{ delay: 0.3 + i * 0.15, duration: 0.6, ease: 'easeOut' }}
+            />
+          ))}
+        </div>
+        <div className="flex gap-5 mt-3">
+          <PopIcon icon={TrendingUp} delay={0.8} className="w-11 h-11 text-secondary" glow="hsl(var(--kivara-green) / 0.4)" />
+          <PopIcon icon={Coins} delay={1} className="w-10 h-10 text-accent" glow="hsl(var(--kivara-gold) / 0.4)" />
+          <PopIcon icon={PiggyBank} delay={1.2} className="w-10 h-10 text-primary" />
+        </div>
+        <Particles count={5} color="var(--kivara-gold)" />
+      </div>
+    </div>
+  ),
+
+  'teen-level-up': () => (
+    <div className="relative flex items-center justify-center h-full overflow-hidden">
+      <BgGradient from="var(--kivara-blue)" to="var(--kivara-gold)" />
+      <div className="relative flex flex-col items-center">
+        {/* Radiating rays */}
+        {Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              width: 2,
+              height: 36,
+              background: `hsl(var(--kivara-gold) / 0.18)`,
+              transformOrigin: 'bottom center',
+              rotate: `${i * 45}deg`,
+              top: -16,
+            }}
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: [0, 1, 0.7, 1], opacity: [0, 0.5, 0.2, 0.5] }}
+            transition={{ delay: 0.5 + i * 0.08, duration: 3, repeat: Infinity }}
+          />
+        ))}
+        <PulseRing color="var(--kivara-gold)" size={100} />
+        <motion.div
+          className="text-5xl relative z-10"
+          style={{ filter: 'drop-shadow(0 0 14px hsl(var(--kivara-gold) / 0.5))' }}
+          initial={{ scale: 0, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 14, delay: 0.15 }}
+        >
+          ⚡
+        </motion.div>
+        <div className="flex gap-4 mt-5">
+          <PopIcon icon={Flame} delay={0.4} className="w-10 h-10 text-destructive" glow="hsl(0 72% 55% / 0.3)" />
+          <PopIcon icon={Award} delay={0.6} className="w-12 h-12 text-accent" glow="hsl(var(--kivara-gold) / 0.4)" />
+          <PopIcon icon={Trophy} delay={0.8} className="w-10 h-10 text-primary" glow="hsl(var(--kivara-blue) / 0.3)" />
+        </div>
+        <Particles count={6} color="var(--kivara-gold)" />
+      </div>
+    </div>
+  ),
+
   'teacher-classroom': () => (
     <div className="relative flex items-center justify-center h-full overflow-hidden">
       <BgGradient from="var(--kivara-blue)" to="var(--kivara-green)" />
