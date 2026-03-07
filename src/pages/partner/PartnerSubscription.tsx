@@ -39,8 +39,8 @@ export default function PartnerSubscription() {
   const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
   const currencyCode = tenantCurrency?.code ?? 'AOA';
 
-  const localPrice = (eurAmount: number) => {
-    const converted = convertPrice(eurAmount, 'EUR', currencyCode, rates);
+  const localPrice = (usdAmount: number) => {
+    const converted = convertPrice(usdAmount, 'USD', currencyCode, rates);
     return formatPrice(converted, currencySymbol, tenantCurrency?.decimalPlaces ?? 0);
   };
 

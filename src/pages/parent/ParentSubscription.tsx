@@ -50,7 +50,7 @@ export default function ParentSubscription() {
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const code = tenantCurrency?.code ?? 'AOA';
   const dec = tenantCurrency?.decimalPlaces ?? 0;
-  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', code, rates), sym, dec);
+  const fmtP = (usdAmount: number) => formatPrice(convertPrice(usdAmount, 'USD', code, rates), sym, dec);
 
   const currentTier = tiers.find((t) => t.name === tierName);
   const currentIndex = tiers.findIndex((t) => t.name === tierName);

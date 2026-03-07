@@ -38,9 +38,9 @@ export function convertPrice(
 
   if (!fromRate || !toRate) return amount;
 
-  // amount in FROM → EUR → TO
-  const eurAmount = amount / fromRate.rate;
-  return eurAmount * toRate.rate;
+  // amount in FROM → USD → TO
+  const usdAmount = amount / fromRate.rate;
+  return usdAmount * toRate.rate;
 }
 
 /**
