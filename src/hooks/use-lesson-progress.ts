@@ -12,7 +12,7 @@ export function useLessonProgress() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lesson_progress')
-        .select('lesson_id, kiva_points_earned')
+        .select('lesson_id, kiva_points_earned, score')
         .eq('profile_id', profileId!);
 
       if (error) throw error;
