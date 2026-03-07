@@ -7,25 +7,31 @@ import { LESSON_CATEGORIES, DIFFICULTY_CONFIG, LessonCategory, MicroLesson } fro
 import { LessonViewer } from '@/components/LessonViewer';
 import { BookOpen, Clock, Star, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
 import { useLessons } from '@/hooks/use-lessons';
+import { useLessonProgress, useCompleteLessonMutation } from '@/hooks/use-lesson-progress';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LearnPage() {
   const { data: lessons = [], isLoading } = useLessons();
+  const { completedIds, totalPoints, isLoading: progressLoading } = useLessonProgress();
+  const completeLesson = useCompleteLessonMutation();
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
-  const [earnedPoints, setEarnedPoints] = useState(0);
   const { toast } = useToast();
 
   const handleComplete = (score: number) => {
     if (!activeLesson) return;
     if (score >= 60) {
-      setCompletedIds(prev => new Set(prev).add(activeLesson.id));
-      setEarnedPoints(prev => prev + activeLesson.kivaPointsReward);
-      toast({
-        title: '🎉 Lição concluída!',
-        description: `Ganhaste ${activeLesson.kivaPointsReward} KivaPoints!`,
-      });
-      setActiveLesson(null);
+      completeLesson.mutate(
+        { lessonId: activeLesson.id, score, kivaPoints: activeLesson.kivaPointsReward },
+        {
+          onSuccess: () => {
+            toast({
+              title: '🎉 Lição concluída!',
+              description: `Ganhaste ${activeLesson.kivaPointsReward} KivaPoints!`,
+            });
+            setActiveLesson(null);
+          },
+        }
+      );
     } else {
       // retry — reset lesson
       setActiveLesson({ ...activeLesson });
@@ -36,7 +42,7 @@ export default function LearnPage() {
     return <LessonViewer lesson={activeLesson} onComplete={handleComplete} onBack={() => setActiveLesson(null)} />;
   }
 
-  if (isLoading) {
+  if (isLoading || progressLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -46,7 +52,6 @@ export default function LearnPage() {
 
   const categories = Object.entries(LESSON_CATEGORIES);
   const completedCount = completedIds.size;
-  const totalPoints = lessons.filter(l => completedIds.has(l.id)).reduce((s, l) => s + l.kivaPointsReward, 0);
 
   return (
     <div className="space-y-6">
