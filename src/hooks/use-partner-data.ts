@@ -155,3 +155,47 @@ export function useCreatePartnerProgram() {
     },
   });
 }
+
+export function useUpdatePartnerProgram() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: {
+      id: string;
+      program_name?: string;
+      program_type?: string;
+      children_count?: number;
+      investment_amount?: number;
+      status?: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('partner_programs')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partner-programs'] });
+    },
+  });
+}
+
+export function useDeletePartnerProgram() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('partner_programs')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partner-programs'] });
+    },
+  });
+}

@@ -1,19 +1,33 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Users, School, Search, Loader2 } from 'lucide-react';
+import { Users, School, Search, Loader2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { usePartnerPrograms } from '@/hooks/use-partner-data';
+import { usePartnerPrograms, useDeletePartnerProgram } from '@/hooks/use-partner-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
 import { CreateProgramDialog } from '@/components/partner/CreateProgramDialog';
+import { EditProgramDialog } from '@/components/partner/EditProgramDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 export default function PartnerPrograms() {
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const { data: programs, isLoading } = usePartnerPrograms();
+  const deleteProgram = useDeletePartnerProgram();
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Eliminar o programa "${name}"?`)) return;
+    try {
+      await deleteProgram.mutateAsync(id);
+      toast.success('Programa eliminado');
+    } catch {
+      toast.error('Erro ao eliminar programa');
+    }
+  };
 
   const filtered = (programs ?? []).filter(p =>
     p.program_name.toLowerCase().includes(search.toLowerCase())
@@ -74,12 +88,24 @@ export default function PartnerPrograms() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 Investimento: €{Number(prog.investment_amount).toLocaleString()}
               </p>
-              <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
                 <ProgramInviteDialog
                   programId={prog.id}
                   programName={prog.program_name}
                   partnerTenantId={prog.partner_tenant_id}
                 />
+                <div className="flex gap-1">
+                  <EditProgramDialog program={prog} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-destructive hover:text-destructive"
+                    onClick={() => handleDelete(prog.id, prog.program_name)}
+                    disabled={deleteProgram.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
