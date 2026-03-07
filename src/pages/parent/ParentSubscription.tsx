@@ -16,24 +16,20 @@ import { useTenantCurrency } from '@/components/CurrencyDisplay';
 import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
 import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 
+// Only family-relevant features for parent subscription page
 const FEATURE_LABELS: Record<string, string> = {
+  basic_wallet: 'Carteira Básica',
+  basic_tasks: 'Tarefas Básicas',
+  basic_rewards: 'Recompensas Básicas',
   savings_vaults: 'Cofres de Poupança',
   dream_vaults: 'Cofres de Sonhos',
   custom_rewards: 'Recompensas Personalizadas',
   budget_exceptions: 'Exceções de Orçamento',
   multi_child: 'Multi-Criança',
   advanced_analytics: 'Relatórios Avançados',
-  analytics: 'Relatórios Avançados',
   export_reports: 'Exportar Relatórios',
   real_money_wallet: 'Carteira Dinheiro Real',
-  classroom_mode: 'Modo Sala de Aula',
   priority_support: 'Suporte Prioritário',
-  basic_wallet: 'Carteira Básica',
-  basic_tasks: 'Tarefas Básicas',
-  basic_rewards: 'Recompensas Básicas',
-  teacher_dashboard: 'Painel do Professor',
-  api_access: 'Acesso API',
-  custom_branding: 'Marca Personalizada',
 };
 
 const ALL_FEATURES = Object.keys(FEATURE_LABELS);
