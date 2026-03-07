@@ -135,7 +135,7 @@ export default function PartnerSubscription() {
                     <span className="text-3xl">{TIER_ICONS[tier.name] ?? '📋'}</span>
                     <h3 className="font-display font-bold mt-2">{tier.name}</h3>
                     <p className="text-2xl font-bold text-foreground mt-1">
-                      {tier.priceMonthly > 0 ? `€${tier.priceMonthly}` : 'Grátis'}
+                      {tier.priceMonthly > 0 ? localPrice(tier.priceMonthly) : 'Grátis'}
                       {tier.priceMonthly > 0 && <span className="text-xs text-muted-foreground font-normal">/mês</span>}
                     </p>
                     {isCurrent && (
