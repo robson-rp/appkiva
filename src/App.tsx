@@ -278,27 +278,39 @@ function AppRoutes() {
   );
 }
 
-const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <RewardAnimationProvider>
-              {/* Skip-to-content link for keyboard users */}
-              <a href="#main-content" className="skip-to-content">
-                Saltar para o conteúdo
-              </a>
-              <OfflineBanner />
-              <AppRoutes />
-            </RewardAnimationProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
-);
+const App = () => {
+  const [splashDone, setSplashDone] = useState(() => sessionStorage.getItem('kivara-splash') === '1');
+
+  const handleSplashComplete = useCallback(() => {
+    sessionStorage.setItem('kivara-splash', '1');
+    setSplashDone(true);
+  }, []);
+
+  if (!splashDone) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
+
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <RewardAnimationProvider>
+                <a href="#main-content" className="skip-to-content">
+                  Saltar para o conteúdo
+                </a>
+                <OfflineBanner />
+                <AppRoutes />
+              </RewardAnimationProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
+};
 
 export default App;
