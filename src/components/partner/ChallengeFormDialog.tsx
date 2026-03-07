@@ -73,6 +73,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           id: challenge!.id,
           title: values.title,
           description: values.description || null,
+          reward_amount: values.reward_amount,
           start_date: format(values.start_date, 'yyyy-MM-dd'),
           end_date: format(values.end_date, 'yyyy-MM-dd'),
         });
