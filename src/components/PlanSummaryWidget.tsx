@@ -92,7 +92,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
         {isFree && (
           <div className="mt-3 flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
             <p className="text-[11px] text-accent-foreground font-display font-bold">
-              Pede ao teu encarregado para fazer upgrade! 🚀
+              {upgradeLabel || 'Pede ao teu encarregado para fazer upgrade! 🚀'}
             </p>
             <ChevronRight className="h-4 w-4 text-accent-foreground" />
           </div>
