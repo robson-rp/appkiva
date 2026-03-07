@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, Pencil, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Plus, Pencil, Trash2, Sparkles, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,13 @@ export default function AdminLessons() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<LessonForm>(emptyForm);
 
+  // AI Generate state
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiCategory, setAiCategory] = useState('saving');
+  const [aiDifficulty, setAiDifficulty] = useState('beginner');
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+
   const openCreate = () => {
     setEditingId(null);
     setForm({ ...emptyForm, sort_order: (lessons?.length || 0) + 1 });
@@ -75,6 +82,42 @@ export default function AdminLessons() {
       quiz: JSON.stringify(lesson.quiz, null, 2),
     });
     setDialogOpen(true);
+  };
+
+  const handleAiGenerate = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-lesson', {
+        body: { category: aiCategory, difficulty: aiDifficulty, topic: aiTopic || undefined },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const lesson = data.lesson;
+      setEditingId(null);
+      setForm({
+        title: lesson.title,
+        description: lesson.description,
+        icon: lesson.icon,
+        category: aiCategory,
+        difficulty: aiDifficulty,
+        estimated_minutes: lesson.estimated_minutes || 3,
+        kiva_points_reward: lesson.kiva_points_reward || 15,
+        sort_order: (lessons?.length || 0) + 1,
+        is_active: true,
+        blocks: JSON.stringify(lesson.blocks, null, 2),
+        quiz: JSON.stringify(lesson.quiz, null, 2),
+      });
+
+      setAiDialogOpen(false);
+      setDialogOpen(true);
+      toast({ title: '✨ Lição gerada com IA', description: 'Revê o conteúdo e guarda quando estiveres satisfeito.' });
+    } catch (e: any) {
+      toast({ title: '❌ Erro na geração', description: e.message, variant: 'destructive' });
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -140,9 +183,14 @@ export default function AdminLessons() {
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Micro-lições de educação financeira</p>
         </div>
-        <Button onClick={openCreate} className="gap-2 rounded-xl">
-          <Plus className="h-4 w-4" /> Nova Lição
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setAiDialogOpen(true)} variant="outline" className="gap-2 rounded-xl border-primary/30 text-primary hover:bg-primary/10">
+            <Sparkles className="h-4 w-4" /> Gerar com IA
+          </Button>
+          <Button onClick={openCreate} className="gap-2 rounded-xl">
+            <Plus className="h-4 w-4" /> Nova Lição
+          </Button>
+        </div>
       </motion.div>
 
       <Card className="border-border/50">
@@ -207,6 +255,53 @@ export default function AdminLessons() {
         </CardContent>
       </Card>
 
+      {/* AI Generate Dialog */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> Gerar Lição com IA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div>
+              <Label>Categoria</Label>
+              <Select value={aiCategory} onValueChange={setAiCategory}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {catEntries.map(([k, v]) => <SelectItem key={k} value={k}>{v.icon} {v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Dificuldade</Label>
+              <Select value={aiDifficulty} onValueChange={setAiDifficulty}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {diffEntries.map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Tópico (opcional)</Label>
+              <Input
+                placeholder="Ex: inflação, câmbio, impostos..."
+                value={aiTopic}
+                onChange={e => setAiTopic(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAiGenerate} disabled={aiLoading} className="gap-2">
+              {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              {aiLoading ? 'A gerar...' : 'Gerar Lição'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit/Create Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

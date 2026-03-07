@@ -3,14 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren, mockTransactions, mockDonationCauses, mockDonations } from '@/data/mock-data';
-import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart } from 'lucide-react';
+import { mockChildren } from '@/data/mock-data';
+import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
+import { useDonationCauses, useMyDonations, useDonate } from '@/hooks/use-donations';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -20,7 +21,18 @@ export default function ChildWallet() {
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTx } = useWalletTransactions();
   const balance = walletBalance?.balance ?? child.balance;
-  
+
+  // Real donations data
+  const { data: causes = [] } = useDonationCauses();
+  const { data: myDonations = [] } = useMyDonations();
+  const donateMutation = useDonate();
+
+  const totalDonated = myDonations.reduce((s, d) => s + d.amount, 0);
+  const uniqueCauses = new Set(myDonations.map(d => d.causeId)).size;
+  const [selectedCause, setSelectedCause] = useState<string | null>(null);
+  const [donateAmount, setDonateAmount] = useState('');
+  const [donateDialogOpen, setDonateDialogOpen] = useState(false);
+
   const mapTxType = (tx: { entry_type: string; direction: string }): string => {
     switch (tx.entry_type) {
       case 'vault_deposit': return 'saved';
@@ -48,13 +60,7 @@ export default function ChildWallet() {
           type: mapTxType(tx) as 'earned' | 'spent' | 'saved' | 'allowance' | 'donated',
           date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
         }))
-    : mockTransactions.filter((t) => t.childId === child.id);
-  
-  const childDonations = mockDonations.filter((d) => d.childId === child.id);
-  const totalDonated = childDonations.reduce((s, d) => s + d.amount, 0);
-  const uniqueCauses = new Set(childDonations.map((d) => d.causeId)).size;
-  const [selectedCause, setSelectedCause] = useState<string | null>(null);
-  const [donateAmount, setDonateAmount] = useState('');
+    : [];
 
   const earned = transactions.filter((t) => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
   const spent = transactions.filter((t) => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
@@ -71,10 +77,16 @@ export default function ChildWallet() {
   const handleDonate = () => {
     const amount = parseInt(donateAmount);
     if (!selectedCause || !amount || amount <= 0) return;
-    const cause = mockDonationCauses.find((c) => c.id === selectedCause);
-    toast({ title: 'Doação realizada! 💜', description: `Doaste ${amount} KivaCoins para "${cause?.name}". Obrigado!` });
-    setSelectedCause(null);
-    setDonateAmount('');
+    donateMutation.mutate(
+      { causeId: selectedCause, amount },
+      {
+        onSuccess: () => {
+          setSelectedCause(null);
+          setDonateAmount('');
+          setDonateDialogOpen(false);
+        },
+      }
+    );
   };
 
   return (
@@ -146,7 +158,7 @@ export default function ChildWallet() {
                 </div>
                 <h2 className="font-display font-bold text-sm">Impacto Solidário</h2>
               </div>
-              <Dialog>
+              <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="rounded-xl font-display gap-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white border-0">
                     <Heart className="h-3.5 w-3.5" /> Doar
@@ -159,24 +171,28 @@ export default function ChildWallet() {
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-2">
-                      {mockDonationCauses.map((cause) => (
-                        <motion.button
-                          key={cause.id}
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => setSelectedCause(cause.id)}
-                          className={`p-3 rounded-xl border-2 text-left transition-all ${
-                            selectedCause === cause.id
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border/50 hover:border-primary/30'
-                          }`}
-                        >
-                          <span className="text-2xl block mb-1">{cause.icon}</span>
-                          <p className="font-display font-bold text-xs">{cause.name}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{cause.description}</p>
-                        </motion.button>
-                      ))}
-                    </div>
+                    {causes.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">Sem causas disponíveis de momento.</p>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-2">
+                        {causes.map((cause) => (
+                          <motion.button
+                            key={cause.id}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => setSelectedCause(cause.id)}
+                            className={`p-3 rounded-xl border-2 text-left transition-all ${
+                              selectedCause === cause.id
+                                ? 'border-primary bg-primary/10'
+                                : 'border-border/50 hover:border-primary/30'
+                            }`}
+                          >
+                            <span className="text-2xl block mb-1">{cause.icon}</span>
+                            <p className="font-display font-bold text-xs">{cause.name}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{cause.description}</p>
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
                     <div className="space-y-2">
                       <p className="text-xs font-medium">Quanto queres doar? (KivaCoins)</p>
                       <Input
@@ -190,9 +206,10 @@ export default function ChildWallet() {
                     <Button
                       className="w-full rounded-xl font-display gap-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white border-0"
                       onClick={handleDonate}
-                      disabled={!selectedCause || !donateAmount}
+                      disabled={!selectedCause || !donateAmount || donateMutation.isPending}
                     >
-                      <Heart className="h-4 w-4" /> Confirmar Doação
+                      {donateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
+                      {donateMutation.isPending ? 'A processar...' : 'Confirmar Doação'}
                     </Button>
                   </div>
                 </DialogContent>
@@ -219,7 +236,13 @@ export default function ChildWallet() {
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} movimentos</span>
         </div>
         <div className="space-y-2">
-          {transactions.map((tx) => {
+          {transactions.length === 0 ? (
+            <Card className="border-border/50">
+              <CardContent className="py-8 text-center">
+                <p className="text-sm text-muted-foreground">Sem movimentos ainda</p>
+              </CardContent>
+            </Card>
+          ) : transactions.map((tx) => {
             const cfg = typeConfig[tx.type] || typeConfig.earned;
             return (
               <motion.div

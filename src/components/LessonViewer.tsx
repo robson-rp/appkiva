@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MicroLesson, DIFFICULTY_CONFIG } from '@/types/kivara';
-import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Sparkles, BookOpen, Lightbulb, Star, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Sparkles, BookOpen, Lightbulb, Star, Zap, Image, Play } from 'lucide-react';
 
 interface LessonViewerProps {
   lesson: MicroLesson;
@@ -62,6 +62,8 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     tip: Lightbulb,
     example: Star,
     highlight: Zap,
+    image: Image,
+    video: Play,
   };
 
   const blockColors: Record<string, string> = {
@@ -69,6 +71,80 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     tip: 'bg-chart-2/10 border-chart-2/30',
     example: 'bg-chart-4/10 border-chart-4/30',
     highlight: 'bg-primary/10 border-primary/30',
+    image: 'bg-muted/30 border-border/50',
+    video: 'bg-primary/5 border-primary/20',
+  };
+
+  const blockLabels: Record<string, string> = {
+    text: 'Conteúdo',
+    tip: 'Dica',
+    example: 'Exemplo',
+    highlight: 'Destaque',
+    image: 'Imagem',
+    video: 'Vídeo',
+  };
+
+  const renderBlockContent = (block: any) => {
+    const Icon = blockIcons[block.type] || BookOpen;
+
+    if (block.type === 'image') {
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-primary shrink-0" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Imagem</span>
+          </div>
+          <img
+            src={block.content}
+            alt={block.caption || 'Ilustração da lição'}
+            className="w-full rounded-xl object-cover max-h-64"
+            loading="lazy"
+          />
+          {block.caption && <p className="text-xs text-muted-foreground italic text-center">{block.caption}</p>}
+        </div>
+      );
+    }
+
+    if (block.type === 'video') {
+      const videoId = extractYouTubeId(block.content);
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-primary shrink-0" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Vídeo</span>
+          </div>
+          {videoId ? (
+            <div className="aspect-video rounded-xl overflow-hidden">
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}`}
+                title={block.caption || 'Vídeo educativo'}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <a href={block.content} target="_blank" rel="noopener noreferrer"
+               className="block p-4 rounded-xl bg-primary/10 text-primary text-sm font-medium text-center hover:bg-primary/20 transition-colors">
+              ▶️ Abrir vídeo
+            </a>
+          )}
+          {block.caption && <p className="text-xs text-muted-foreground italic text-center">{block.caption}</p>}
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-primary shrink-0" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            {blockLabels[block.type] || 'Conteúdo'}
+          </span>
+        </div>
+        <p className="text-sm text-foreground leading-relaxed">{block.content}</p>
+      </div>
+    );
   };
 
   return (
@@ -104,7 +180,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
       />
 
       <AnimatePresence mode="wait">
-        {/* ─── READING PHASE ─── */}
+        {/* READING PHASE */}
         {phase === 'reading' && (
           <motion.div
             key={`block-${blockIndex}`}
@@ -113,23 +189,9 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.25 }}
           >
-            <Card className={`border ${blockColors[lesson.blocks[blockIndex].type]}`}>
+            <Card className={`border ${blockColors[lesson.blocks[blockIndex].type] || blockColors.text}`}>
               <CardContent className="p-5">
-                {(() => {
-                  const block = lesson.blocks[blockIndex];
-                  const Icon = blockIcons[block.type] || BookOpen;
-                  return (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-5 w-5 text-primary shrink-0" />
-                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                          {block.type === 'text' ? 'Conteúdo' : block.type === 'tip' ? 'Dica' : block.type === 'example' ? 'Exemplo' : 'Destaque'}
-                        </span>
-                      </div>
-                      <p className="text-sm text-foreground leading-relaxed">{block.content}</p>
-                    </div>
-                  );
-                })()}
+                {renderBlockContent(lesson.blocks[blockIndex])}
               </CardContent>
             </Card>
 
@@ -139,7 +201,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
           </motion.div>
         )}
 
-        {/* ─── QUIZ PHASE ─── */}
+        {/* QUIZ PHASE */}
         {phase === 'quiz' && question && (
           <motion.div
             key={`q-${currentQuestion}`}
@@ -208,7 +270,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
           </motion.div>
         )}
 
-        {/* ─── RESULTS PHASE ─── */}
+        {/* RESULTS PHASE */}
         {phase === 'results' && (
           <motion.div
             key="results"
@@ -259,4 +321,9 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
       </AnimatePresence>
     </div>
   );
+}
+
+function extractYouTubeId(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match?.[1] || null;
 }
