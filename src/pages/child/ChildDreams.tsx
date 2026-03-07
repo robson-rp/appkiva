@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { useDreamVaults, useCreateDreamVault } from '@/hooks/use-dream-vaults';
+import { useDreamVaults, useCreateDreamVault, useDepositToDream } from '@/hooks/use-dream-vaults';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockDreamVaults, mockChildren } from '@/data/mock-data';
 import { Plus, MessageCircle, Sparkles, Heart, ChevronDown, ChevronUp } from 'lucide-react';
