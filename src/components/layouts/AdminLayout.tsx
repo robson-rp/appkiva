@@ -16,6 +16,7 @@ import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
   { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
+  { title: 'Escolas', url: '/admin/schools', icon: School },
   { title: 'Subscrições', url: '/admin/subscriptions', icon: CreditCard },
   { title: 'Moedas', url: '/admin/currencies', icon: Globe },
   { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
