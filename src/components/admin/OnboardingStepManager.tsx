@@ -9,11 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SplashIllustration } from '@/components/SplashIllustration';
-import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
@@ -61,6 +62,8 @@ export default function OnboardingStepManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true });
   const [previewKey, setPreviewKey] = useState<string | null>(null);
+  const [duplicatingStep, setDuplicatingStep] = useState<StepRow | null>(null);
+  const [dupTargetRoles, setDupTargetRoles] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   const { data: steps = [], isLoading } = useQuery({
@@ -125,7 +128,37 @@ export default function OnboardingStepManager() {
     onSuccess: () => invalidate(),
     onError: (e: any) => toast.error(e.message),
   });
-
+  const duplicateMutation = useMutation({
+    mutationFn: async ({ step, targetRoles }: { step: StepRow; targetRoles: string[] }) => {
+      for (const role of targetRoles) {
+        // Get current max step_index for target role
+        const { data: existing } = await supabase
+          .from('onboarding_steps')
+          .select('step_index')
+          .eq('role', role)
+          .order('step_index', { ascending: false })
+          .limit(1);
+        const nextIndex = (existing && existing.length > 0 ? existing[0].step_index + 1 : 0);
+        const { error } = await supabase.from('onboarding_steps').insert([{
+          role,
+          step_index: nextIndex,
+          title: step.title,
+          description: step.description,
+          illustration_key: step.illustration_key,
+          cta: step.cta,
+          is_active: step.is_active,
+        }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: (_, { targetRoles }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-onboarding-steps'] });
+      toast.success(`Passo duplicado para ${targetRoles.length} papel(éis)`);
+      setDuplicatingStep(null);
+      setDupTargetRoles([]);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
   const openEdit = (step: StepRow) => {
     setEditingStep(step);
     setForm({
@@ -227,6 +260,9 @@ export default function OnboardingStepManager() {
                   </Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreviewKey(step.illustration_key)}>
                     <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setDuplicatingStep(step); setDupTargetRoles([]); }}>
+                    <Copy className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </CardContent>
@@ -334,6 +370,42 @@ export default function OnboardingStepManager() {
               </p>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Dialog */}
+      <Dialog open={!!duplicatingStep} onOpenChange={(open) => { if (!open) { setDuplicatingStep(null); setDupTargetRoles([]); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Duplicar Passo</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Selecione os papéis para onde duplicar "<span className="font-medium text-foreground">{duplicatingStep?.title}</span>"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {ROLES.filter(r => r !== duplicatingStep?.role).map(r => (
+              <label key={r} className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={dupTargetRoles.includes(r)}
+                  onCheckedChange={(checked) => {
+                    setDupTargetRoles(prev =>
+                      checked ? [...prev, r] : prev.filter(x => x !== r)
+                    );
+                  }}
+                />
+                <span className="text-sm">{ROLE_LABELS[r]}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setDuplicatingStep(null); setDupTargetRoles([]); }}>Cancelar</Button>
+            <Button
+              disabled={dupTargetRoles.length === 0 || duplicateMutation.isPending}
+              onClick={() => duplicatingStep && duplicateMutation.mutate({ step: duplicatingStep, targetRoles: dupTargetRoles })}
+            >
+              {duplicateMutation.isPending ? 'A duplicar...' : `Duplicar (${dupTargetRoles.length})`}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
