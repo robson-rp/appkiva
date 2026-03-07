@@ -70,6 +70,7 @@ import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 const queryClient = new QueryClient();
 
 const INVITE_ROUTE = <Route path="/invite/program/:code" element={<AcceptProgramInvite />} />;
+const INSTALL_ROUTE = <Route path="/install" element={<Install />} />;
 
 function renderRoutes(user: { role: string }) {
   if (user.role === 'admin') {
@@ -86,6 +87,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/finance" element={<AdminLayout><AdminFinance /></AdminLayout>} />
         <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
         <Route path="/admin/lessons" element={<AdminLayout><AdminLessons /></AdminLayout>} />
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
@@ -100,6 +102,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
         <Route path="/partner/subscription" element={<PartnerLayout><PartnerSubscriptionPage /></PartnerLayout>} />
         <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
     );
@@ -119,6 +122,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
         <Route path="/parent/consent" element={<ParentLayout><ParentConsent /></ParentLayout>} />
         {INVITE_ROUTE}
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
     );
@@ -133,6 +137,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />
         <Route path="/teacher/school" element={<TeacherLayout><TeacherSchoolProfile /></TeacherLayout>} />
         {INVITE_ROUTE}
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>
     );
@@ -149,6 +154,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teen/learn" element={<TeenLayout><LearnPage /></TeenLayout>} />
         <Route path="/teen/badges" element={<TeenLayout><BadgesPage /></TeenLayout>} />
         <Route path="/teen/streaks" element={<TeenLayout><StreaksPage /></TeenLayout>} />
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>
     );
@@ -167,6 +173,7 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
       <Route path="/child/learn" element={<ChildLayout><LearnPage /></ChildLayout>} />
+      {INSTALL_ROUTE}
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
