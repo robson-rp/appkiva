@@ -106,7 +106,6 @@ export function useUpdateChild() {
   return useMutation({
     mutationFn: async ({
       childId,
-      profileId,
       nickname,
       avatar,
       dateOfBirth,
@@ -117,19 +116,13 @@ export function useUpdateChild() {
       avatar: string;
       dateOfBirth: string | null;
     }) => {
-      // Update children table (nickname + date_of_birth)
-      const { error: childError } = await supabase
-        .from('children')
-        .update({ nickname, date_of_birth: dateOfBirth } as any)
-        .eq('id', childId);
-      if (childError) throw childError;
-
-      // Update profile avatar
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ avatar })
-        .eq('id', profileId);
-      if (profileError) throw profileError;
+      const { error } = await supabase.rpc('update_child_profile', {
+        _child_id: childId,
+        _nickname: nickname,
+        _avatar: avatar,
+        _date_of_birth: dateOfBirth,
+      });
+      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
