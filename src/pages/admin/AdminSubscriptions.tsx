@@ -67,6 +67,7 @@ export default function AdminSubscriptions() {
   const deleteTier = useDeleteSubscriptionTier();
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -387,7 +388,19 @@ export default function AdminSubscriptions() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={v => {
+                  if (!v && editId) {
+                    const currentTier = tiers?.find((t: any) => t.id === editId);
+                    if (currentTier && (currentTier.tenant_count ?? 0) > 0 && currentTier.is_active) {
+                      setDeactivateConfirmOpen(true);
+                      return;
+                    }
+                  }
+                  setForm(f => ({ ...f, is_active: v }));
+                }}
+              />
               <Label>Plano activo</Label>
             </div>
 
@@ -419,6 +432,25 @@ export default function AdminSubscriptions() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Deactivate confirmation for tiers with tenants */}
+      <AlertDialog open={deactivateConfirmOpen} onOpenChange={setDeactivateConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Desactivar plano com tenants associados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este plano tem {editId ? (tiers?.find((t: any) => t.id === editId)?.tenant_count ?? 0) : 0} tenant(s) associado(s).
+              Ao desactivá-lo, esses tenants permanecerão vinculados mas o plano deixará de estar visível para novos utilizadores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setForm(f => ({ ...f, is_active: false })); setDeactivateConfirmOpen(false); }}>
+              Desactivar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
