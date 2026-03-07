@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { useDreamVaults, useCreateDreamVault } from '@/hooks/use-dream-vaults';
+import { useDreamVaults, useCreateDreamVault, useDepositToDream } from '@/hooks/use-dream-vaults';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockDreamVaults, mockChildren } from '@/data/mock-data';
 import { Plus, MessageCircle, Sparkles, Heart, ChevronDown, ChevronUp } from 'lucide-react';
@@ -30,8 +30,12 @@ export default function ChildDreams() {
   const { allowed: dreamVaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.DREAM_VAULTS);
   const { data: dbDreams, isLoading } = useDreamVaults(user?.profileId);
   const createDream = useCreateDreamVault();
+  const depositToDream = useDepositToDream();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [depositDreamId, setDepositDreamId] = useState<string | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newTarget, setNewTarget] = useState('');
@@ -56,6 +60,19 @@ export default function ChildDreams() {
       toast.success('Sonho criado! ✨');
       setNewTitle(''); setNewDesc(''); setNewTarget(''); setDialogOpen(false);
     } catch { toast.error('Erro ao criar sonho'); }
+  };
+
+  const handleDeposit = async () => {
+    if (!depositDreamId || !depositAmount) return;
+    const amount = Number(depositAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    try {
+      await depositToDream.mutateAsync({ dreamId: depositDreamId, amount });
+      toast.success(`+${amount} 🪙 depositados no sonho!`);
+      setDepositAmount('');
+      setDepositDialogOpen(false);
+      setDepositDreamId(null);
+    } catch { toast.error('Erro ao depositar'); }
   };
 
   // Set first expanded if not set
@@ -159,7 +176,7 @@ export default function ChildDreams() {
                     </div>
 
                     <div className="flex gap-2 mt-3">
-                      <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 flex-1 hover:bg-primary hover:text-primary-foreground transition-colors">
+                      <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 flex-1 hover:bg-primary hover:text-primary-foreground transition-colors" onClick={() => { setDepositDreamId(dream.id); setDepositAmount(''); setDepositDialogOpen(true); }}>
                         <Plus className="h-3 w-3" /> Poupar
                       </Button>
                       <Button variant="ghost" size="sm" className="rounded-xl text-xs font-display h-8 gap-1" onClick={() => setExpandedId(isExpanded ? null : dream.id)}>
@@ -211,6 +228,29 @@ export default function ChildDreams() {
       </motion.div>
 
       <Kivo page="dreams" />
+
+      {/* Deposit Dialog */}
+      <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="font-display">Poupar para o Sonho</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Quanto queres poupar? (KivaCoins)</Label>
+              <Input type="number" placeholder="10" min={1} value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center">
+              {[5, 10, 25, 50].map(v => (
+                <button key={v} type="button" onClick={() => setDepositAmount(String(v))} className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${depositAmount === String(v) ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}>
+                  {v} 🪙
+                </button>
+              ))}
+            </div>
+            <Button className="w-full rounded-xl font-display" onClick={handleDeposit} disabled={depositToDream.isPending}>
+              {depositToDream.isPending ? 'A poupar...' : '🪙 Depositar'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </FeatureGateWrapper>
   );

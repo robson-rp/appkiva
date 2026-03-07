@@ -6,6 +6,7 @@ import { CoinDisplay } from '@/components/CoinDisplay';
 import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +19,9 @@ import { useSubscriptionTiers } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
 import EditChildDialog from '@/components/EditChildDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -31,17 +35,35 @@ function generateCode() {
 
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
+  const { user } = useAuth();
+  const qc = useQueryClient();
   const updateBudget = useUpdateChildBudget();
   const updateDailyLimit = useUpdateChildDailyLimit();
   const { data: pendingExceptions = [] } = usePendingBudgetExceptions();
   const resolveException = useResolveBudgetException();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteCode, setInviteCode] = useState(() => generateCode());
+  const [inviteCode, setInviteCode] = useState('');
+  const [inviteSaving, setInviteSaving] = useState(false);
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
+  const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
+  const deleteChildMutation = useMutation({
+    mutationFn: async (childId: string) => {
+      const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['children'] });
+      toast({ title: 'Criança removida', description: 'O perfil foi removido com sucesso.' });
+      setDeleteChild(null);
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível remover a criança.', variant: 'destructive' });
+    },
+  });
   // Feature gate: check max_children limit
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
@@ -100,9 +122,30 @@ export default function ParentChildren() {
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const generateAndPersistCode = async () => {
+    const newCode = generateCode();
+    if (!user?.profileId || !user?.householdId) {
+      setInviteCode(newCode);
+      return;
+    }
+    setInviteSaving(true);
+    try {
+      const { error } = await supabase.from('family_invite_codes').insert({
+        code: newCode,
+        parent_profile_id: user.profileId,
+        household_id: user.householdId,
+      });
+      if (error) throw error;
+      setInviteCode(newCode);
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível gerar o código.', variant: 'destructive' });
+    } finally {
+      setInviteSaving(false);
+    }
+  };
+
   const handleRegenerate = () => {
-    setInviteCode(generateCode());
-    toast({ title: 'Novo código gerado! 🔄' });
+    generateAndPersistCode();
   };
 
   const handleShare = async () => {
@@ -128,20 +171,22 @@ export default function ParentChildren() {
             <p className="text-sm text-primary-foreground/60 mt-1">Gere os perfis das tuas crianças</p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
               if (!canAddChild) {
                 setPaymentOpen(true);
                 return;
               }
+              await generateAndPersistCode();
               setInviteOpen(true);
             }}>
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Convidar
             </Button>
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
               if (!canAddChild) {
                 setPaymentOpen(true);
                 return;
               }
+              await generateAndPersistCode();
               setInviteOpen(true);
             }}>
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
@@ -249,7 +294,7 @@ export default function ParentChildren() {
             <div className="text-5xl mb-4">👶</div>
             <h3 className="font-display font-bold text-lg mb-2">Ainda sem crianças</h3>
             <p className="text-sm text-muted-foreground mb-4">Adiciona ou convida uma criança para começar.</p>
-            <Button className="rounded-xl font-display gap-1.5" onClick={() => setInviteOpen(true)}>
+            <Button className="rounded-xl font-display gap-1.5" onClick={async () => { await generateAndPersistCode(); setInviteOpen(true); }}>
               <Link2 className="h-4 w-4" /> Convidar Criança
             </Button>
           </CardContent>
@@ -309,7 +354,7 @@ export default function ParentChildren() {
                     >
                       <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
-                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9">
+                    <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9" onClick={() => setDeleteChild({ childId: child.childId, displayName: child.displayName })}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -493,6 +538,29 @@ export default function ParentChildren() {
 
       {/* Edit Child Dialog */}
       <EditChildDialog open={editOpen} onOpenChange={setEditOpen} child={editChild} />
+
+      {/* Delete Child Confirmation */}
+      <AlertDialog open={!!deleteChild} onOpenChange={(open) => !open && setDeleteChild(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display">Remover {deleteChild?.displayName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação remove o perfil da criança da tua lista. Esta operação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-display">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteChildMutation.isPending}
+              onClick={() => deleteChild && deleteChildMutation.mutate(deleteChild.childId)}
+            >
+              {deleteChildMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              Remover
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
