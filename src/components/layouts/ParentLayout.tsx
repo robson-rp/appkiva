@@ -34,6 +34,7 @@ function ParentSidebar() {
   const collapsed = state === 'collapsed';
   const { logout, user } = useAuth();
   const location = useLocation();
+  const { hasFeature } = useAllFeatures();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
