@@ -76,6 +76,7 @@ export default function PartnerPrograms() {
                   programName={prog.program_name}
                   partnerTenantId={prog.partner_tenant_id}
                 />
+              </div>
             </CardContent>
           </Card>
         ))}
