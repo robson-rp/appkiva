@@ -70,6 +70,7 @@ import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 const queryClient = new QueryClient();
 
 const INVITE_ROUTE = <Route path="/invite/program/:code" element={<AcceptProgramInvite />} />;
+const INSTALL_ROUTE = <Route path="/install" element={<Install />} />;
 
 function renderRoutes(user: { role: string }) {
   if (user.role === 'admin') {
