@@ -15,7 +15,7 @@ import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks
 import { useEmissionStats } from '@/hooks/use-emission-stats';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
-import { format } from 'date-fns';
+import { format, differenceInYears } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
