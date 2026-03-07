@@ -23,7 +23,7 @@ interface AuthContextType {
   loading: boolean;
   currentChildId: string | null;
   login: (email: string, password: string) => Promise<{ error: string | null }>;
-  signup: (email: string, password: string, role: UserRole, displayName: string) => Promise<{ error: string | null }>;
+  signup: (email: string, password: string, role: UserRole, displayName: string, country?: string) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   setCurrentChildId: (id: string | null) => void;
 }
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
-  const signup = async (email: string, password: string, role: UserRole, displayName: string) => {
+  const signup = async (email: string, password: string, role: UserRole, displayName: string, country: string = 'AO') => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -126,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           display_name: displayName,
           role,
+          country,
           avatar: role === 'parent' ? '👩' : role === 'teacher' ? '👨‍🏫' : role === 'teen' ? '🧑‍💻' : role === 'admin' ? '🛡️' : role === 'partner' ? '🏢' : '🦊',
         },
         emailRedirectTo: window.location.origin,

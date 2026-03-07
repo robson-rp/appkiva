@@ -55,7 +55,7 @@ const emptyForm: TierForm = {
   price_yearly: 0,
   max_children: 5,
   max_classrooms: 0,
-  currency: 'USD',
+  currency: 'AOA',
   is_active: true,
   features: [],
 };

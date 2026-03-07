@@ -5,10 +5,14 @@ import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
+import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 
 type AuthMode = 'login' | 'signup';
 
@@ -29,6 +33,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [country, setCountry] = useState('AO');
   const [submitting, setSubmitting] = useState(false);
   const { login, signup } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +46,7 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
-        const { error } = await signup(email, password, selectedRole, displayName || email);
+        const { error } = await signup(email, password, selectedRole, displayName || email, country);
         if (error) {
           toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
           setSubmitting(false);
@@ -71,6 +76,7 @@ export default function Login() {
     setEmail('');
     setPassword('');
     setDisplayName('');
+    setCountry('AO');
     setAuthMode('login');
   };
 
@@ -225,17 +231,34 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {authMode === 'signup' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="displayName" className="font-semibold">Nome</Label>
-                      <Input
-                        id="displayName"
-                        placeholder="O teu nome"
-                        value={displayName}
-                        onChange={e => setDisplayName(e.target.value)}
-                        className="h-12 rounded-xl text-base"
-                        required
-                      />
-                    </div>
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="displayName" className="font-semibold">Nome</Label>
+                        <Input
+                          id="displayName"
+                          placeholder="O teu nome"
+                          value={displayName}
+                          onChange={e => setDisplayName(e.target.value)}
+                          className="h-12 rounded-xl text-base"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-semibold">País</Label>
+                        <Select value={country} onValueChange={setCountry}>
+                          <SelectTrigger className="h-12 rounded-xl text-base">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COUNTRY_CURRENCIES.map(c => (
+                              <SelectItem key={c.code} value={c.code}>
+                                {c.name} ({c.currencySymbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
                   )}
 
                   <div className="space-y-2">
