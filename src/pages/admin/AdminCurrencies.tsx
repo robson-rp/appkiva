@@ -1,34 +1,301 @@
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import { Globe, ArrowRightLeft, Pencil, Plus, Loader2, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+
+// ─── Currencies Tab ──────────────────────────────────────
+
+function CurrenciesTab() {
+  const { data: currencies = [], isLoading } = useQuery({
+    queryKey: ['admin-currencies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('supported_currencies')
+        .select('*')
+        .order('code');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isLoading) {
+    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {currencies.map((c) => (
+        <Card key={c.code} className="border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">{c.code}</CardTitle>
+            <Badge variant={c.is_active ? 'default' : 'outline'} className="text-[10px]">
+              {c.is_active ? 'Activa' : 'Inactiva'}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-display font-bold">{c.symbol}</p>
+            <p className="text-xs text-muted-foreground mt-1">{c.name}</p>
+            <p className="text-[10px] text-muted-foreground">{c.decimal_places} casas decimais</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── Exchange Rates Tab ──────────────────────────────────
+
+interface RateRow {
+  id: string;
+  base_currency: string;
+  target_currency: string;
+  rate: number;
+  updated_at: string;
+}
+
+function ExchangeRatesTab() {
+  const queryClient = useQueryClient();
+  const [editRate, setEditRate] = useState<RateRow | null>(null);
+  const [newRate, setNewRate] = useState('');
+  const [addOpen, setAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState({ base: 'EUR', target: '', rate: '' });
+
+  const { data: rates = [], isLoading } = useQuery({
+    queryKey: ['admin-exchange-rates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('currency_exchange_rates')
+        .select('*')
+        .order('target_currency');
+      if (error) throw error;
+      return data as RateRow[];
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, rate }: { id: string; rate: number }) => {
+      const { error } = await supabase
+        .from('currency_exchange_rates')
+        .update({ rate, updated_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-exchange-rates'] });
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      toast.success('Taxa atualizada');
+      setEditRate(null);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (vals: { base_currency: string; target_currency: string; rate: number }) => {
+      const { error } = await supabase
+        .from('currency_exchange_rates')
+        .insert(vals);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-exchange-rates'] });
+      queryClient.invalidateQueries({ queryKey: ['exchange-rates'] });
+      toast.success('Taxa adicionada');
+      setAddOpen(false);
+      setAddForm({ base: 'EUR', target: '', rate: '' });
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const handleUpdate = () => {
+    if (!editRate) return;
+    const val = parseFloat(newRate);
+    if (isNaN(val) || val <= 0) { toast.error('Taxa inválida'); return; }
+    updateMutation.mutate({ id: editRate.id, rate: val });
+  };
+
+  const handleAdd = () => {
+    const val = parseFloat(addForm.rate);
+    if (!addForm.target.trim() || isNaN(val) || val <= 0) { toast.error('Preenche todos os campos'); return; }
+    addMutation.mutate({ base_currency: addForm.base, target_currency: addForm.target.toUpperCase(), rate: val });
+  };
+
+  if (isLoading) {
+    return <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+  }
+
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setAddOpen(true)} className="gap-1.5" size="sm">
+          <Plus className="h-4 w-4" /> Nova Taxa
+        </Button>
+      </div>
+
+      <Card className="border-border/50">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Base</TableHead>
+                <TableHead>Destino</TableHead>
+                <TableHead className="text-right">Taxa</TableHead>
+                <TableHead>Última Actualização</TableHead>
+                <TableHead className="text-right">Acções</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rates.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    Nenhuma taxa configurada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rates.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono font-medium">{r.base_currency}</TableCell>
+                    <TableCell className="font-mono font-medium">{r.target_currency}</TableCell>
+                    <TableCell className="text-right font-mono">{Number(r.rate).toFixed(4)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {new Date(r.updated_at).toLocaleDateString('pt', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => { setEditRate(r); setNewRate(String(r.rate)); }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editRate} onOpenChange={(o) => !o && setEditRate(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-primary" />
+              Editar Taxa
+            </DialogTitle>
+          </DialogHeader>
+          {editRate && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 justify-center text-lg font-mono font-bold">
+                <span>{editRate.base_currency}</span>
+                <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+                <span>{editRate.target_currency}</span>
+              </div>
+              <div>
+                <Label>Nova taxa</Label>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  min="0"
+                  value={newRate}
+                  onChange={(e) => setNewRate(e.target.value)}
+                  className="font-mono mt-1"
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  1 {editRate.base_currency} = {newRate || '?'} {editRate.target_currency}
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditRate(null)}>Cancelar</Button>
+            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? 'A guardar...' : 'Guardar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Plus className="h-4 w-4 text-primary" />
+              Nova Taxa de Câmbio
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Moeda base</Label>
+              <Input value={addForm.base} onChange={(e) => setAddForm(f => ({ ...f, base: e.target.value.toUpperCase() }))} className="font-mono mt-1" maxLength={5} />
+            </div>
+            <div>
+              <Label>Moeda destino</Label>
+              <Input value={addForm.target} onChange={(e) => setAddForm(f => ({ ...f, target: e.target.value.toUpperCase() }))} className="font-mono mt-1" maxLength={5} placeholder="Ex: BRL" />
+            </div>
+            <div>
+              <Label>Taxa</Label>
+              <Input type="number" step="0.0001" min="0" value={addForm.rate} onChange={(e) => setAddForm(f => ({ ...f, rate: e.target.value }))} className="font-mono mt-1" placeholder="Ex: 6.10" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Cancelar</Button>
+            <Button onClick={handleAdd} disabled={addMutation.isPending}>
+              {addMutation.isPending ? 'A guardar...' : 'Adicionar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────
 
 export default function AdminCurrencies() {
-  const currencies = [
-    { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
-    { code: 'AOA', name: 'Kwanza Angolano', symbol: 'Kz', flag: '🇦🇴' },
-    { code: 'NGN', name: 'Naira Nigeriana', symbol: '₦', flag: '🇳🇬' },
-    { code: 'KES', name: 'Xelim Queniano', symbol: 'KSh', flag: '🇰🇪' },
-  ];
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Moedas Suportadas</h1>
-        <p className="text-sm text-muted-foreground">Configuração de moedas da plataforma</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">Moedas e Câmbio</h1>
+        <p className="text-sm text-muted-foreground">Moedas suportadas e taxas de conversão da plataforma</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {currencies.map((c) => (
-          <Card key={c.code} className="border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{c.flag} {c.code}</CardTitle>
-              <Globe className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-display font-bold">{c.symbol}</p>
-              <p className="text-xs text-muted-foreground">{c.name}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <Tabs defaultValue="currencies">
+          <TabsList>
+            <TabsTrigger value="currencies" className="gap-1.5">
+              <Globe className="h-3.5 w-3.5" /> Moedas
+            </TabsTrigger>
+            <TabsTrigger value="rates" className="gap-1.5">
+              <ArrowRightLeft className="h-3.5 w-3.5" /> Taxas de Câmbio
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="currencies" className="mt-4">
+            <CurrenciesTab />
+          </TabsContent>
+
+          <TabsContent value="rates" className="mt-4">
+            <ExchangeRatesTab />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
     </div>
   );
 }
