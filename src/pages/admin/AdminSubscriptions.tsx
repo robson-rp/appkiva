@@ -296,7 +296,10 @@ export default function AdminSubscriptions() {
                         <TableCell className="text-center">{tier.max_classrooms}</TableCell>
                         <TableCell>{tier.currency}</TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="outline" className="text-xs font-mono">
+                          <Badge
+                            variant={tier.is_active && (tier.tenant_count ?? 0) >= 3 ? 'destructive' : (tier.tenant_count ?? 0) > 0 ? 'default' : 'outline'}
+                            className="text-xs font-mono"
+                          >
                             {tier.tenant_count ?? 0}
                           </Badge>
                         </TableCell>
