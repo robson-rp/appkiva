@@ -67,12 +67,16 @@ export function useClaimReward() {
 
       return data as { success: boolean; new_balance: number; reward_name: string };
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['child-rewards'] });
       queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
       queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
       queryClient.invalidateQueries({ queryKey: ['children'] });
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
+      // Notify parent about the claim
+      if (variables.parentProfileId) {
+        notifyRewardClaimed(variables.parentProfileId, user?.displayName ?? 'O teu filho', data.reward_name, variables.price);
+      }
       toast({
         title: 'Recompensa resgatada! 🎉',
         description: `Parabéns! Resgataste "${data.reward_name}". Novo saldo: ${data.new_balance} KVC.`,

@@ -94,8 +94,10 @@ export function useCreateTask() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      // Notify the child about the new task
+      notifyNewTask(variables.childProfileId, variables.title, variables.reward);
       toast({ title: 'Tarefa criada! ✅', description: 'A tarefa foi adicionada com sucesso.' });
     },
     onError: () => {

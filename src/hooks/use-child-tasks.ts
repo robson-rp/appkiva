@@ -52,8 +52,19 @@ export function useChildTasks() {
 export function useCompleteTask() {
   const queryClient = useQueryClient();
 
+  const { user } = useAuth();
+
   return useMutation({
     mutationFn: async (taskId: string) => {
+      // Get task details to notify the parent
+      const { data: task, error: fetchErr } = await supabase
+        .from('tasks')
+        .select('title, parent_profile_id')
+        .eq('id', taskId)
+        .single();
+
+      if (fetchErr || !task) throw fetchErr || new Error('Tarefa não encontrada');
+
       const { error } = await supabase
         .from('tasks')
         .update({
@@ -63,9 +74,14 @@ export function useCompleteTask() {
         .eq('id', taskId);
 
       if (error) throw error;
+
+      // Notify parent about task completion
+      const childName = user?.displayName ?? 'O teu filho';
+      await notifyTaskCompleted(task.parent_profile_id, childName, task.title, taskId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['child-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
       toast({ title: 'Tarefa concluída! 🎉', description: 'Agora aguarda aprovação do encarregado.' });
     },
     onError: () => {
