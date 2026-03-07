@@ -70,9 +70,9 @@ export default function PartnerSubscription() {
                 <div>
                   <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
                   <h1 className="font-display text-2xl font-bold">{limits.tierName}</h1>
-                  <p className="text-sm opacity-80 mt-0.5">
-                    {limits.priceMonthly > 0 ? `€${limits.priceMonthly}/mês` : 'Gratuito'}
-                  </p>
+                    <p className="text-sm opacity-80 mt-0.5">
+                      {limits.priceMonthly > 0 ? `${localPrice(limits.priceMonthly)}/mês` : 'Gratuito'}
+                    </p>
                 </div>
               </div>
               <Badge className="bg-white/20 text-white border-0 font-display">
