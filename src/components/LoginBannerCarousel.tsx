@@ -116,24 +116,14 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="flex gap-0.5 mt-2 px-8">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => handleSegmentClick(i)}
-              className="relative h-[1.5px] flex-1 rounded-full bg-muted-foreground/8 overflow-hidden"
-              aria-label={`Banner ${i + 1}`}
-            >
-              <div
-                className={cn(
-                  "absolute inset-y-0 left-0 rounded-full bg-primary/40",
-                  i < selectedIndex && "w-full",
-                  i > selectedIndex && "w-0"
-                )}
-                style={i === selectedIndex ? { width: `${progress * 100}%` } : undefined}
-              />
-            </button>
-          ))}
+        <div className="relative h-[1.5px] mt-2 mx-12 rounded-full bg-muted-foreground/8">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
+            style={{
+              width: `${100 / banners.length}%`,
+              left: `${(selectedIndex / banners.length) * 100}%`,
+            }}
+          />
         </div>
       )}
     </div>
