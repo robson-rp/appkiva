@@ -14,9 +14,11 @@ const FEATURE_LIST = [
 
 interface PlanSummaryWidgetProps {
   compact?: boolean;
+  onClick?: () => void;
+  upgradeLabel?: string;
 }
 
-export function PlanSummaryWidget({ compact = false }: PlanSummaryWidgetProps) {
+export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: PlanSummaryWidgetProps) {
   const { enabledFeatures, tierName, loading } = useAllFeatures();
 
   if (loading) return null;
@@ -49,7 +51,7 @@ export function PlanSummaryWidget({ compact = false }: PlanSummaryWidgetProps) {
   }
 
   return (
-    <Card className="border-border/50 overflow-hidden">
+    <Card className={`border-border/50 overflow-hidden${onClick ? ' cursor-pointer hover:shadow-kivara transition-all duration-300' : ''}`} onClick={onClick}>
       <div className="h-0.5 bg-gradient-to-r from-accent via-primary to-secondary" />
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
@@ -90,7 +92,7 @@ export function PlanSummaryWidget({ compact = false }: PlanSummaryWidgetProps) {
         {isFree && (
           <div className="mt-3 flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
             <p className="text-[11px] text-accent-foreground font-display font-bold">
-              Pede ao teu encarregado para fazer upgrade! 🚀
+              {upgradeLabel || 'Pede ao teu encarregado para fazer upgrade! 🚀'}
             </p>
             <ChevronRight className="h-4 w-4 text-accent-foreground" />
           </div>
