@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Building2, Mail, Globe } from 'lucide-react';
-import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
+import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
@@ -46,6 +46,23 @@ export default function PartnerProfile() {
       .from('profiles')
       .update({ country } as any)
       .eq('id', user.profileId);
+
+    // Also update the tenant's currency to keep it in sync
+    if (!error) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', user.profileId)
+        .single();
+      if (profile?.tenant_id) {
+        const newCurrency = getCurrencyByCountry(country);
+        await supabase
+          .from('tenants')
+          .update({ currency: newCurrency } as any)
+          .eq('id', profile.tenant_id);
+      }
+    }
+
     setSaving(false);
     if (error) {
       toast({ title: 'Erro ao guardar', description: error.message, variant: 'destructive' });

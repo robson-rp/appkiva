@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { getCurrencyByCountry } from '@/data/countries-currencies';
 import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
@@ -51,6 +52,23 @@ export default function ParentProfile() {
       .from('profiles')
       .update({ country } as any)
       .eq('id', user.profileId);
+
+    // Also update the tenant's currency to keep household in sync
+    if (!error) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', user.profileId)
+        .single();
+      if (profile?.tenant_id) {
+        const newCurrency = getCurrencyByCountry(country);
+        await supabase
+          .from('tenants')
+          .update({ currency: newCurrency } as any)
+          .eq('id', profile.tenant_id);
+      }
+    }
+
     setSaving(false);
     if (error) {
       toast({ title: 'Erro ao guardar', description: error.message, variant: 'destructive' });
