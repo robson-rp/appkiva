@@ -80,7 +80,7 @@ function useUpdateTemplate() {
   return useMutation({
     mutationFn: async (payload: { id: string; title_template: string; message_template: string; icon: string; is_urgent: boolean; cooldown_minutes: number }) => {
       const { id, ...rest } = payload;
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notification_templates')
         .update(rest as any)
         .eq('id', id);

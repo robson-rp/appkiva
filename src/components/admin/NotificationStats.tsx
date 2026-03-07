@@ -15,7 +15,7 @@ export function useNotificationStats() {
         supabase.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', today),
         supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('read', false),
         supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('urgent', true).eq('read', false),
-        supabase.from('notification_templates').select('id', { count: 'exact', head: true }).eq('is_active', true),
+        (supabase as any).from('notification_templates').select('id', { count: 'exact', head: true }).eq('is_active', true),
       ]);
 
       return {
