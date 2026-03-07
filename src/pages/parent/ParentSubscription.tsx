@@ -44,6 +44,13 @@ export default function ParentSubscription() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [downgradeOpen, setDowngradeOpen] = useState(false);
   const [downgradeTarget, setDowngradeTarget] = useState<typeof tiers[0] | null>(null);
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+
+  const sym = tenantCurrency?.symbol ?? 'Kz';
+  const code = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
+  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', code, rates), sym, dec);
 
   const currentTier = tiers.find((t) => t.name === tierName);
   const currentIndex = tiers.findIndex((t) => t.name === tierName);
