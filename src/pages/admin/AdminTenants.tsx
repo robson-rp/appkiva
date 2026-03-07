@@ -10,6 +10,7 @@ import { Plus, Building2 } from 'lucide-react';
 import { useTenants, useSubscriptionTiers, useCreateTenant, useUpdateTenant } from '@/hooks/use-tenants';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 
 export default function AdminTenants() {
   const { data: tenants, isLoading } = useTenants();
@@ -21,8 +22,14 @@ export default function AdminTenants() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [tenantType, setTenantType] = useState('family');
-  const [currency, setCurrency] = useState('USD');
+  const [country, setCountry] = useState('AO');
+  const [currency, setCurrency] = useState('AOA');
   const [tierId, setTierId] = useState('');
+
+  const handleCountryChange = (code: string) => {
+    setCountry(code);
+    setCurrency(getCurrencyByCountry(code));
+  };
 
   const handleCreate = async () => {
     if (!name.trim()) return;
@@ -56,6 +63,11 @@ export default function AdminTenants() {
     institutional_partner: 'Parceiro',
   };
 
+  // Unique currencies for manual override
+  const uniqueCurrencies = Array.from(
+    new Map(COUNTRY_CURRENCIES.map(c => [c.currency, c])).values()
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -81,15 +93,32 @@ export default function AdminTenants() {
                   <SelectItem value="institutional_partner">Parceiro Institucional</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="AOA">AOA (Kwanza)</SelectItem>
-                  <SelectItem value="NGN">NGN (Naira)</SelectItem>
-                  <SelectItem value="KES">KES (Shilling)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">País</label>
+                <Select value={country} onValueChange={handleCountryChange}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_CURRENCIES.map(c => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.name} ({c.currencySymbol} {c.currency})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Moeda</label>
+                <Select value={currency} onValueChange={setCurrency}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {uniqueCurrencies.map(c => (
+                      <SelectItem key={c.currency} value={c.currency}>
+                        {c.currencySymbol} — {c.currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               {tiers && (
                 <Select value={tierId} onValueChange={setTierId}>
                   <SelectTrigger><SelectValue placeholder="Subscrição" /></SelectTrigger>
