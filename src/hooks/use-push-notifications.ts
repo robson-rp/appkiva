@@ -40,7 +40,7 @@ export function usePushNotifications() {
 
       const subJson = subscription.toJSON();
 
-      const { error } = await supabase.from('push_subscriptions').upsert(
+      const { error } = await supabase.from('push_subscriptions' as any).upsert(
         {
           profile_id: user.profileId,
           endpoint: subJson.endpoint!,
