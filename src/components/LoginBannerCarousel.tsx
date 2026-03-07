@@ -124,9 +124,9 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="relative h-[1.5px] mt-2 mx-12 rounded-full bg-muted-foreground/8">
+        <div className="relative h-[1.5px] mt-2 mx-12 rounded-full bg-white/10">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
+            className="absolute inset-y-0 left-0 rounded-full bg-white/50 transition-[left,width] duration-500 ease-out"
             style={{
               width: `${100 / banners.length}%`,
               left: `${(selectedIndex / banners.length) * 100}%`,
