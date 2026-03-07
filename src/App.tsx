@@ -112,6 +112,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
         <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
         <Route path="/parent/consent" element={<ParentLayout><ParentConsent /></ParentLayout>} />
+        {INVITE_ROUTE}
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
     );
