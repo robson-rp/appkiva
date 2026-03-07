@@ -51,7 +51,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
   }
 
   return (
-    <Card className="border-border/50 overflow-hidden">
+    <Card className={`border-border/50 overflow-hidden${onClick ? ' cursor-pointer hover:shadow-kivara transition-all duration-300' : ''}`} onClick={onClick}>
       <div className="h-0.5 bg-gradient-to-r from-accent via-primary to-secondary" />
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
