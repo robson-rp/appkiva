@@ -35,19 +35,32 @@ export default function ParentProfile() {
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Load current country and gender from profile
+  // Load current country, gender and school from profile
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country, gender')
+      .select('country, gender, school_tenant_id')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.country) setCountry(data.country);
-        if ((data as any)?.gender) setGender((data as any).gender);
+        if (data?.gender) setGender(data.gender);
+        if (data?.school_tenant_id) setSchoolTenantId(data.school_tenant_id);
       });
   }, [user?.id]);
+
+  // Load available schools
+  useEffect(() => {
+    supabase
+      .from('tenants')
+      .select('id, name')
+      .eq('tenant_type', 'school')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (data) setSchools(data);
+      });
+  }, []);
 
   const handleSave = async () => {
     if (!user?.profileId) return;
