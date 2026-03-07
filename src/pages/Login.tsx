@@ -515,7 +515,7 @@ export default function Login() {
                                 </Select>
                               )}
                             </div>
-                          )
+                          )}
 
                           {/* Sector - Only for partners */}
                           {selectedRole === 'partner' && (
