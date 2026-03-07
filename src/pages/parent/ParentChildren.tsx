@@ -36,6 +36,19 @@ export default function ParentChildren() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState(() => generateCode());
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+
+  // Feature gate: check max_children limit
+  const { hasFeature, tierName } = useAllFeatures();
+  const { data: tiers = [] } = useSubscriptionTiers();
+  const { upgrade } = useUpgradeSubscription();
+  const hasMultiChild = hasFeature(FEATURES.MULTI_CHILD);
+
+  // Find current tier's max children
+  const currentTier = tiers.find(t => t.name === tierName);
+  const maxChildren = currentTier?.maxChildren ?? 2; // Free tier default: 2
+  const childrenCount = children.length;
+  const canAddChild = childrenCount < maxChildren || hasMultiChild;
 
   // Budget edit dialog
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
