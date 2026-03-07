@@ -19,13 +19,13 @@ import { supabase } from '@/integrations/supabase/client';
 type AuthMode = 'login' | 'signup';
 type ContactMethod = 'email' | 'phone';
 
-const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string; testEmail: string }> = {
-  parent: { label: 'Encarregado', description: 'Gerir tarefas, mesadas e acompanhar o progresso', icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary', testEmail: 'encarregado@kivara.com' },
-  teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3', testEmail: 'adolescente@kivara.com' },
-  child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary', testEmail: 'crianca@kivara.com' },
-  teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent', testEmail: 'professor@kivara.com' },
-  partner: { label: 'Parceiro', description: 'Gestão do programa de parceria institucional', icon: Building2, colorClass: 'text-chart-4', bgClass: 'bg-chart-4/10 group-hover:bg-chart-4/20 hover:border-chart-4', testEmail: 'parceiro@kivara.com' },
-  admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive', testEmail: 'admin@kivara.com' },
+const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string }> = {
+  parent: { label: 'Encarregado', description: 'Gerir tarefas, mesadas e acompanhar o progresso', icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary' },
+  teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
+  child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
+  teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
+  partner: { label: 'Parceiro', description: 'Gestão do programa de parceria institucional', icon: Building2, colorClass: 'text-chart-4', bgClass: 'bg-chart-4/10 group-hover:bg-chart-4/20 hover:border-chart-4' },
+  admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
 };
 
 const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'partner', 'admin'];
@@ -386,11 +386,11 @@ export default function Login() {
                         key={role}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => {
+                      onClick={() => {
                           setSelectedRole(role);
                           setAuthMode('login');
-                          setEmail(cfg.testEmail);
-                          setPassword('Test1234!');
+                          setEmail('');
+                          setPassword('');
                           setContactMethod('email');
                         }}
                         className={`w-full p-3 sm:p-4 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 group ${cfg.bgClass.split(' ').pop()}`}
@@ -401,7 +401,7 @@ export default function Login() {
                         <div className="flex-1 min-w-0 text-center sm:text-left">
                           <span className="font-display font-bold text-sm sm:text-base text-foreground block truncate">{cfg.label}</span>
                           <span className="text-xs text-muted-foreground hidden sm:block">{cfg.description}</span>
-                          <span className="text-xs font-mono text-muted-foreground/70 mt-0.5 hidden sm:block">{cfg.testEmail} · Test1234!</span>
+                          
                         </div>
                       </motion.button>
                     );
