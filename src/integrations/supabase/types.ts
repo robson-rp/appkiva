@@ -190,6 +190,7 @@ export type Database = {
         Row: {
           created_at: string
           daily_spend_limit: number
+          date_of_birth: string | null
           id: string
           monthly_budget: number
           nickname: string | null
@@ -201,6 +202,7 @@ export type Database = {
         Insert: {
           created_at?: string
           daily_spend_limit?: number
+          date_of_birth?: string | null
           id?: string
           monthly_budget?: number
           nickname?: string | null
@@ -212,6 +214,7 @@ export type Database = {
         Update: {
           created_at?: string
           daily_spend_limit?: number
+          date_of_birth?: string | null
           id?: string
           monthly_budget?: number
           nickname?: string | null
@@ -887,6 +890,51 @@ export type Database = {
           quiz?: Json
           sort_order?: number
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_templates: {
+        Row: {
+          cooldown_minutes: number
+          created_at: string
+          event: Database["public"]["Enums"]["notification_event"]
+          icon: string
+          id: string
+          is_active: boolean
+          is_urgent: boolean
+          message_template: string
+          recipient_role: string
+          title_template: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cooldown_minutes?: number
+          created_at?: string
+          event: Database["public"]["Enums"]["notification_event"]
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_urgent?: boolean
+          message_template: string
+          recipient_role?: string
+          title_template: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          cooldown_minutes?: number
+          created_at?: string
+          event?: Database["public"]["Enums"]["notification_event"]
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_urgent?: boolean
+          message_template?: string
+          recipient_role?: string
+          title_template?: string
+          type?: string
           updated_at?: string
         }
         Relationships: []
@@ -2120,6 +2168,22 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      notification_event:
+        | "task_created"
+        | "task_completed"
+        | "task_approved"
+        | "lesson_completed"
+        | "donation_made"
+        | "reward_claimed"
+        | "allowance_sent"
+        | "vault_deposit"
+        | "vault_withdraw"
+        | "vault_milestone"
+        | "streak_milestone"
+        | "badge_unlocked"
+        | "level_up"
+        | "budget_warning"
+        | "system_broadcast"
       reward_category: "experience" | "privilege" | "physical" | "digital"
       risk_flag_type:
         | "excessive_rewards"
@@ -2289,6 +2353,23 @@ export const Constants = {
         "transfer",
         "adjustment",
         "refund",
+      ],
+      notification_event: [
+        "task_created",
+        "task_completed",
+        "task_approved",
+        "lesson_completed",
+        "donation_made",
+        "reward_claimed",
+        "allowance_sent",
+        "vault_deposit",
+        "vault_withdraw",
+        "vault_milestone",
+        "streak_milestone",
+        "badge_unlocked",
+        "level_up",
+        "budget_warning",
+        "system_broadcast",
       ],
       reward_category: ["experience", "privilege", "physical", "digital"],
       risk_flag_type: [

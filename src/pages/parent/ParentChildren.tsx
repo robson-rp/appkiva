@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown } from 'lucide-react';
@@ -16,6 +17,7 @@ import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
 import { useSubscriptionTiers } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
+import EditChildDialog from '@/components/EditChildDialog';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -38,7 +40,8 @@ export default function ParentChildren() {
   const [inviteCode, setInviteCode] = useState(() => generateCode());
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
-
+  const [editOpen, setEditOpen] = useState(false);
+  const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   // Feature gate: check max_children limit
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
@@ -266,6 +269,9 @@ export default function ParentChildren() {
                       {child.nickname && (
                         <p className="text-xs text-muted-foreground">Alcunha: {child.nickname}</p>
                       )}
+                      {child.dateOfBirth && (
+                        <p className="text-xs text-muted-foreground">{differenceInYears(new Date(), new Date(child.dateOfBirth))} anos</p>
+                      )}
                     </div>
                   </div>
 
@@ -288,7 +294,10 @@ export default function ParentChildren() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm">
+                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm" onClick={() => {
+                      setEditChild({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, nickname: child.nickname, avatar: child.avatar, dateOfBirth: child.dateOfBirth });
+                      setEditOpen(true);
+                    }}>
                       <Edit className="h-3.5 w-3.5" /> Editar
                     </Button>
                     <Button
@@ -480,6 +489,9 @@ export default function ParentChildren() {
         tiers={tiers.filter(t => t.tierType === 'free' || t.tierType === 'family_premium')}
         onConfirmUpgrade={upgrade}
       />
+
+      {/* Edit Child Dialog */}
+      <EditChildDialog open={editOpen} onOpenChange={setEditOpen} child={editChild} />
     </div>
   );
 }

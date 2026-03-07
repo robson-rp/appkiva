@@ -11,6 +11,7 @@ export interface ChildWithBalance {
   balance: number;
   monthlyBudget: number;
   dailySpendLimit: number;
+  dateOfBirth: string | null;
 }
 
 export function useChildren() {
@@ -29,6 +30,7 @@ export function useChildren() {
           profile_id,
           monthly_budget,
           daily_spend_limit,
+          date_of_birth,
           profiles!children_profile_id_fkey (
             id,
             display_name,
@@ -61,6 +63,7 @@ export function useChildren() {
         balance: balanceMap.get(c.profile_id) ?? 0,
         monthlyBudget: Number(c.monthly_budget) || 0,
         dailySpendLimit: Number(c.daily_spend_limit) || 50,
+        dateOfBirth: c.date_of_birth ?? null,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
@@ -92,6 +95,41 @@ export function useUpdateChildDailyLimit() {
         .update({ daily_spend_limit: dailySpendLimit } as any)
         .eq('id', childId);
       if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
+  });
+}
+
+export function useUpdateChild() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      childId,
+      profileId,
+      nickname,
+      avatar,
+      dateOfBirth,
+    }: {
+      childId: string;
+      profileId: string;
+      nickname: string | null;
+      avatar: string;
+      dateOfBirth: string | null;
+    }) => {
+      // Update children table (nickname + date_of_birth)
+      const { error: childError } = await supabase
+        .from('children')
+        .update({ nickname, date_of_birth: dateOfBirth } as any)
+        .eq('id', childId);
+      if (childError) throw childError;
+
+      // Update profile avatar
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ avatar })
+        .eq('id', profileId);
+      if (profileError) throw profileError;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
