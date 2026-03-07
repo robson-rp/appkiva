@@ -239,16 +239,15 @@ Deno.serve(async (req) => {
         creditWalletId = targetWallet?.id ?? callerWallet.id;
     }
 
-    // 9. Balance check for debiting operations (skip for system wallet emissions)
-    const debitTypes = ["purchase", "donation", "vault_deposit", "transfer"];
-    if (debitTypes.includes(body.entry_type)) {
+    // 9. Universal balance check — ANY non-system wallet debit must have sufficient funds
+    if (debitWalletId !== systemWalletId) {
       const { data: balanceData } = await supabaseAdmin
         .from("wallet_balances")
         .select("balance")
         .eq("wallet_id", debitWalletId)
         .single();
 
-      const currentBalance = balanceData?.balance ?? 0;
+      const currentBalance = Number(balanceData?.balance ?? 0);
       if (currentBalance < body.amount) {
         return errorResponse("Saldo insuficiente", 422, {
           current_balance: currentBalance,
