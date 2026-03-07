@@ -15,6 +15,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const calcMonthlyInterest = (amount: number, rate: number) =>
   Math.round(amount * (rate / 100));
