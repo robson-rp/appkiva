@@ -167,68 +167,7 @@ export default function ParentDashboard() {
       {/* Subscription Plan Summary */}
       {!featuresLoading && (
         <motion.div variants={item}>
-          <Card className="border-border/50 overflow-hidden cursor-pointer hover:shadow-kivara transition-all duration-300" onClick={() => navigate('/parent/subscription')}>
-            <div className="h-0.5 bg-gradient-to-r from-accent via-primary to-secondary" />
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center">
-                    <Crown className="h-4 w-4 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-display font-bold text-sm">Plano Actual</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {tierName === 'Free' || !tierName ? 'Plano Gratuito' : tierName}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant={tierName === 'Free' || !tierName ? 'secondary' : 'default'} className="font-display text-xs gap-1">
-                  <Crown className="h-3 w-3" />
-                  {tierName || 'Free'}
-                </Badge>
-              </div>
-
-              {/* Feature list */}
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { key: FEATURES.SAVINGS_VAULTS, label: 'Cofres de Poupança', icon: '🐷' },
-                  { key: FEATURES.ADVANCED_ANALYTICS, label: 'Relatórios Avançados', icon: '📊' },
-                  { key: FEATURES.CUSTOM_REWARDS, label: 'Recompensas Custom', icon: '🎁' },
-                  { key: FEATURES.BUDGET_EXCEPTIONS, label: 'Excepções Orçamento', icon: '📩' },
-                  { key: FEATURES.DREAM_VAULTS, label: 'Cofres de Sonhos', icon: '✨' },
-                  { key: FEATURES.EXPORT_REPORTS, label: 'Exportar Dados', icon: '📥' },
-                ].map((f) => {
-                  const active = enabledFeatures.includes(f.key);
-                  return (
-                    <div
-                      key={f.key}
-                      className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs transition-colors ${
-                        active
-                          ? 'bg-secondary/10 text-foreground'
-                          : 'bg-muted/30 text-muted-foreground'
-                      }`}
-                    >
-                      {active ? (
-                        <Check className="h-3 w-3 text-secondary shrink-0" />
-                      ) : (
-                        <Lock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-                      )}
-                      <span className="truncate">{f.icon} {f.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {(tierName === 'Free' || !tierName) && (
-                <div className="mt-3 flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
-                  <p className="text-[11px] text-accent-foreground font-display font-bold">
-                    Faz upgrade para desbloquear tudo! 🚀
-                  </p>
-                  <ChevronRight className="h-4 w-4 text-accent-foreground" />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <PlanSummaryWidget onClick={() => navigate('/parent/subscription')} upgradeLabel="Faz upgrade para desbloquear tudo! 🚀" />
         </motion.div>
       )}
 
