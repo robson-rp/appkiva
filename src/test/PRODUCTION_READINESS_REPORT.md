@@ -39,14 +39,13 @@ The KIVARA platform is **production-ready**. All critical and high-priority issu
 **Status**: RESOLVED  
 **Fix Applied**: Added admin-only auth guard via `getClaims()` + `user_roles` admin role check.
 
-### 🔴 C4: Negative Wallet Balances — PENDING
-**Severity**: CRITICAL  
-**Issue**: 2 non-system wallets have negative KVC balances:
-- **Teste Parent** (ae9bcd8a): **-75 KVC**
-- **Aniceto** (2b31a44e): **-945 KVC**
-
-This indicates the `create-transaction` edge function is not properly enforcing balance checks in all paths, or seeded data introduced inconsistencies.  
-**Fix**: (a) Add a database constraint or trigger to prevent negative balances on non-system wallets. (b) Investigate and correct the balances of affected accounts.
+### ✅ C4: Negative Wallet Balances — FIXED
+**Status**: RESOLVED  
+**Root Cause**: `seed-test-accounts` debited parent wallets instead of the system wallet for allowance entries, running multiple times and accumulating -945 KVC and -75 KVC.  
+**Fix Applied**:
+1. Inserted 2 corrective adjustment entries (system → parent wallets) to zero out negative balances.
+2. Hardened `create-transaction` edge function: balance check now applies to **ALL non-system wallet debits** (previously only checked purchase/donation/vault_deposit/transfer).
+3. Verified: 0 non-system wallets with negative balances post-fix.
 
 ---
 
