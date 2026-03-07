@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePartnerPrograms } from '@/hooks/use-partner-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
+import { CreateProgramDialog } from '@/components/partner/CreateProgramDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -32,9 +33,12 @@ export default function PartnerPrograms() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-foreground">Programas 📋</h1>
-        <p className="text-muted-foreground font-body">Famílias e escolas associadas ao programa de parceria</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Programas 📋</h1>
+          <p className="text-muted-foreground font-body">Famílias e escolas associadas ao programa de parceria</p>
+        </div>
+        <CreateProgramDialog />
       </div>
 
       <div className="relative max-w-sm">
