@@ -1026,6 +1026,8 @@ export type Database = {
           step_index: number
           title: string
           updated_at: string
+          visible_from: string | null
+          visible_until: string | null
         }
         Insert: {
           created_at?: string
@@ -1038,6 +1040,8 @@ export type Database = {
           step_index?: number
           title: string
           updated_at?: string
+          visible_from?: string | null
+          visible_until?: string | null
         }
         Update: {
           created_at?: string
@@ -1050,6 +1054,8 @@ export type Database = {
           step_index?: number
           title?: string
           updated_at?: string
+          visible_from?: string | null
+          visible_until?: string | null
         }
         Relationships: []
       }
