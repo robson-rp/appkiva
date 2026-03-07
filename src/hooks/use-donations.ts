@@ -100,12 +100,18 @@ export function useDonate() {
       // We use a raw update - admin RLS allows this via service role in edge function
       // For client-side, we just record the donation; a trigger or function could update totals
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['donation-causes'] });
       qc.invalidateQueries({ queryKey: ['my-donations'] });
       qc.invalidateQueries({ queryKey: ['wallet-balance'] });
       qc.invalidateQueries({ queryKey: ['wallet-transactions'] });
       toast({ title: 'Doação realizada! 💜', description: 'Obrigado pela tua generosidade!' });
+      // Fire notification
+      import('@/lib/notify').then(({ notifyDonationMade }) => {
+        if (user?.profileId) {
+          notifyDonationMade(user.profileId, 'causa solidária', variables.amount);
+        }
+      });
     },
     onError: (e: any) => {
       toast({ title: 'Erro na doação', description: e?.message || 'Tenta novamente.', variant: 'destructive' });

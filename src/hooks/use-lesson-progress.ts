@@ -46,8 +46,14 @@ export function useCompleteLessonMutation() {
         );
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['lesson-progress'] });
+      // Fire-and-forget notification
+      import('@/lib/notify').then(({ notifyLessonCompleted }) => {
+        if (user?.profileId) {
+          notifyLessonCompleted(user.profileId, variables.lessonId, variables.kivaPoints);
+        }
+      });
     },
   });
 }

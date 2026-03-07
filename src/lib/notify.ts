@@ -156,3 +156,79 @@ export function notifyStreakMilestone(profileId: string, days: number, reward: n
     metadata: { days, reward },
   });
 }
+
+// ─── Lesson Notifications ──────────────────────────────────────
+
+/** Notify on lesson completion */
+export function notifyLessonCompleted(profileId: string, lessonTitle: string, points: number) {
+  return send({
+    profileId,
+    title: '📚 Lição concluída!',
+    message: `Kivo diz: Parabéns! Completaste a lição "${lessonTitle}" e ganhaste +${points} KivaPoints!`,
+    type: 'mission',
+    metadata: { lesson_title: lessonTitle, points },
+  });
+}
+
+// ─── Donation Notifications ────────────────────────────────────
+
+/** Notify on donation */
+export function notifyDonationMade(profileId: string, causeName: string, amount: number) {
+  return send({
+    profileId,
+    title: '💜 Doação realizada!',
+    message: `Kivo diz: Que generosidade! Doaste ${amount} KivaCoins para "${causeName}". O mundo agradece!`,
+    type: 'achievement',
+    metadata: { cause_name: causeName, amount },
+  });
+}
+
+/** Notify parent about child donation */
+export function notifyChildDonation(parentProfileId: string, childName: string, causeName: string, amount: number) {
+  return send({
+    profileId: parentProfileId,
+    title: '💜 Doação do ' + childName,
+    message: `${childName} doou ${amount} KivaCoins para "${causeName}".`,
+    type: 'achievement',
+    metadata: { cause_name: causeName, amount },
+  });
+}
+
+// ─── Allowance Notifications ───────────────────────────────────
+
+/** Notify child about allowance received */
+export function notifyAllowanceReceived(childProfileId: string, amount: number) {
+  return send({
+    profileId: childProfileId,
+    title: '💰 Mesada recebida!',
+    message: `Kivo diz: Recebeste ${amount} KivaCoins de mesada! Poupa, gasta ou investe com sabedoria.`,
+    type: 'reward',
+    metadata: { amount },
+  });
+}
+
+// ─── System / Admin Notifications ──────────────────────────────
+
+/** Notify on level up */
+export function notifyLevelUp(profileId: string, newLevel: string) {
+  return send({
+    profileId,
+    title: '🎮 Subiste de nível!',
+    message: `Kivo diz: Parabéns! Atingiste o nível "${newLevel}". Novas missões e recompensas te esperam!`,
+    type: 'achievement',
+    urgent: false,
+    metadata: { level: newLevel },
+  });
+}
+
+/** Notify on budget limit approaching */
+export function notifyBudgetWarning(parentProfileId: string, percentUsed: number) {
+  return send({
+    profileId: parentProfileId,
+    title: '⚠️ Limite de orçamento',
+    message: `Atenção: ${percentUsed}% do orçamento mensal já foi utilizado.`,
+    type: 'savings',
+    urgent: percentUsed >= 90,
+    metadata: { percent_used: percentUsed },
+  });
+}
