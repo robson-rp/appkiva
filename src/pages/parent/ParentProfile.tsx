@@ -68,7 +68,14 @@ export default function ParentProfile() {
     const updatedSchool = schoolTenantId && schoolTenantId !== 'none' ? schoolTenantId : null;
     const { error } = await supabase
       .from('profiles')
-      .update({ country, gender, school_tenant_id: updatedSchool })
+      .update({
+        display_name: name.trim() || user.name,
+        avatar: selectedAvatar,
+        phone: phone.trim() || null,
+        country,
+        gender: gender || null,
+        school_tenant_id: updatedSchool,
+      })
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep household in sync
