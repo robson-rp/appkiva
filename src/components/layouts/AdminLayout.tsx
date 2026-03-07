@@ -13,18 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 
-import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import kivaraLogo from '@/assets/logo-kivara.svg';
-import { NavLink } from '@/components/NavLink';
-import { useAuth } from '@/contexts/AuthContext';
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
