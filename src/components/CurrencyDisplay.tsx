@@ -116,6 +116,8 @@ interface CurrencyDisplayProps {
   className?: string;
   /** Text size variant */
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  /** Show a pill/badge style with background */
+  badge?: boolean;
 }
 
 const sizeClasses = {
@@ -129,10 +131,13 @@ const sizeClasses = {
  * Displays a formatted currency value, automatically using the tenant's
  * real-money currency or the virtual KivaCoin format.
  *
+ * Virtual (KivaCoins): golden coin styling 🪙
+ * Real money: uses the tenant's currency symbol with distinct styling
+ *
  * ```tsx
  * <CurrencyDisplay amount={42.5} type="virtual" />        // 🪙 43
- * <CurrencyDisplay amount={1500} type="real" />            // $ 1 500.00
- * <CurrencyDisplay amount={1500} type="real" compact />    // $ 1.5k
+ * <CurrencyDisplay amount={1500} type="real" />            // Kz 1 500.00
+ * <CurrencyDisplay amount={1500} type="real" badge />      // [Kz 1 500.00] with bg
  * ```
  */
 export default function CurrencyDisplay({
@@ -142,6 +147,7 @@ export default function CurrencyDisplay({
   showCode = false,
   className,
   size = 'md',
+  badge = false,
 }: CurrencyDisplayProps) {
   const { data: tenantCurrency } = useTenantCurrency();
 
@@ -150,12 +156,36 @@ export default function CurrencyDisplay({
 
   const display = formatValue(amount, currency, compact);
 
+  const isVirtual = type === 'virtual';
+
+  if (badge) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-display tabular-nums whitespace-nowrap',
+          isVirtual
+            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+            : 'bg-primary/10 text-primary dark:bg-primary/20',
+          sizeClasses[size],
+          className
+        )}
+      >
+        {display}
+        {showCode && (
+          <span className="text-[0.75em] opacity-60">{currency.code}</span>
+        )}
+      </span>
+    );
+  }
+
   return (
     <span
       className={cn(
         sizeClasses[size],
-        type === 'virtual' ? 'text-secondary' : 'text-primary',
-        'tabular-nums whitespace-nowrap',
+        isVirtual
+          ? 'text-amber-600 dark:text-amber-400'
+          : 'text-primary',
+        'tabular-nums whitespace-nowrap font-display',
         className
       )}
     >
