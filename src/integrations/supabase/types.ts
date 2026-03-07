@@ -118,6 +118,38 @@ export type Database = {
           },
         ]
       }
+      banner_clicks: {
+        Row: {
+          banner_id: string
+          clicked_at: string
+          id: string
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          banner_id: string
+          clicked_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          banner_id?: string
+          clicked_at?: string
+          id?: string
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banner_clicks_banner_id_fkey"
+            columns: ["banner_id"]
+            isOneToOne: false
+            referencedRelation: "login_banners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budget_exception_requests: {
         Row: {
           amount: number
