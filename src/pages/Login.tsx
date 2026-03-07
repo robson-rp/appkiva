@@ -75,6 +75,7 @@ export default function Login() {
     setEmail('');
     setPassword('');
     setDisplayName('');
+    setCountry('AO');
     setAuthMode('login');
   };
 
