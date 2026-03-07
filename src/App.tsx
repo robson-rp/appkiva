@@ -87,6 +87,7 @@ const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminLessons = lazy(() => import("./pages/admin/AdminLessons"));
 const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminBanners = lazy(() => import("./pages/admin/AdminBanners"));
 
 // Partner
 const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard"));
