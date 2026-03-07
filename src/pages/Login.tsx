@@ -418,9 +418,8 @@ export default function Login() {
                 transition={{ duration: 0.3 }}
                 className="space-y-4 sm:space-y-6"
               >
+                <LoginBannerCarousel />
                 <div>
-                  <LoginBannerCarousel />
-                </div>
                   <button
                     onClick={resetForm}
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 font-body"
