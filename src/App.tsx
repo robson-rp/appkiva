@@ -60,6 +60,7 @@ const TeenWallet = lazy(() => import("./pages/teen/TeenWallet"));
 const TeenMissions = lazy(() => import("./pages/teen/TeenMissions"));
 const TeenVaults = lazy(() => import("./pages/teen/TeenVaults"));
 const TeenAnalytics = lazy(() => import("./pages/teen/TeenAnalytics"));
+const TeenProfile = lazy(() => import("./pages/teen/TeenProfile"));
 
 // Shared
 const LearnPage = lazy(() => import("./pages/shared/LearnPage"));
