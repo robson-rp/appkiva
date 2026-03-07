@@ -129,6 +129,12 @@ export default function TeenVaults() {
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
 
   return (
+    <FeatureGateWrapper
+      allowed={vaultsAllowed || gateLoading}
+      featureName="Cofres de Poupança"
+      description="Cria cofres para poupar para os teus objectivos com juros mensais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>

@@ -203,16 +203,29 @@ export default function ParentConsent() {
                       >
                         <Plus className="h-3.5 w-3.5" /> Conceder
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl text-xs gap-1.5"
-                        disabled={exportingChild === profileId}
-                        onClick={() => handleExportData(profileId)}
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                        {exportingChild === profileId ? 'A exportar...' : 'Exportar Dados'}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-xl text-xs gap-1.5"
+                                disabled={!canExport || exportingChild === profileId}
+                                onClick={() => handleExportData(profileId)}
+                              >
+                                {canExport ? <FileDown className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                                {exportingChild === profileId ? 'A exportar...' : 'Exportar Dados'}
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {!canExport && (
+                            <TooltipContent>
+                              <p className="text-xs">Requer upgrade para exportar dados</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </CardHeader>

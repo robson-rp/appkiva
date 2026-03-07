@@ -180,7 +180,7 @@ export default function ChildStore() {
             const canAfford = balance >= reward.price;
             const withinBudget = budgetRemaining >= reward.price;
             const canBuy = canAfford && withinBudget;
-            const canRequestException = canAfford && !withinBudget && monthlyBudget > 0;
+            const canRequestException = canAfford && !withinBudget && monthlyBudget > 0 && hasBudgetExceptions;
             return (
               <motion.div
                 key={reward.id}
