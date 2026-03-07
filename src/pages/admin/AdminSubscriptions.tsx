@@ -64,6 +64,9 @@ export default function AdminSubscriptions() {
   const { data: tiers, isLoading } = useSubscriptionTiers(true);
   const createTier = useCreateSubscriptionTier();
   const updateTier = useUpdateSubscriptionTier();
+  const deleteTier = useDeleteSubscriptionTier();
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
