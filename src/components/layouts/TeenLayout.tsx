@@ -15,9 +15,9 @@ import { XPProgressBar } from '@/components/XPProgressBar';
 const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Início', url: '/teen', icon: Home },
   { title: 'Carteira', url: '/teen/wallet', icon: Wallet },
+  { title: 'Missões', url: '/teen/missions', icon: Target },
   { title: 'Aprender', url: '/teen/learn', icon: BookOpen },
   { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
-  { title: 'Análise', url: '/teen/analytics', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
 ];
 
 export function TeenLayout({ children }: { children: ReactNode }) {
