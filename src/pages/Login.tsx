@@ -352,7 +352,7 @@ export default function Login() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-16 bg-background">
+      <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-16 bg-background overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
