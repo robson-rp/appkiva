@@ -1,128 +1,76 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+## Estado Atual da Plataforma KIVARA -- Auditoria de Completude
 
-## Current State Assessment
+### O que ESTA FUNCIONAL
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+| Area | Estado | Detalhes |
+|------|--------|---------|
+| Autenticacao e RBAC | OK | 6 roles, `has_role()` server-side, sem checks client-side |
+| Routing por role | OK | Lazy-loading em todas as paginas, redirect correcto |
+| Splash screen + Onboarding | OK | Por sessao, role-based, com skip |
+| RLS em todas as tabelas | OK | 0 tabelas publicas sem RLS |
+| Audit triggers | OK | 6 triggers activos (ledger_entries, wallets, profiles, consent_records, user_roles, tasks) |
+| Edge functions protegidas | OK | seed-test-accounts e risk-scan com admin guard |
+| Program invitations RLS | OK | Corrigido com scoping por target_type |
+| Ledger double-entry | OK | Todas as entradas tem debit + credit wallet |
+| Emission limits | OK | `get_parent_emission_stats` funcional (45/1000 KVC emitidos) |
+| Streaks | OK | `record_daily_activity` funcional |
+| Notificacoes | OK | Templates, throttling, motor agendado |
+| Multi-tenant isolation | OK | tenant_id em profiles/households, RLS scoped |
+| Currency localization | OK | AOA configurado, `supported_currencies` activa |
+| PWA + Offline banner | OK | Service worker, install prompt |
+| React warnings | OK | Corrigidos (ref forwarding, aria-describedby) |
+| Console errors | OK | Zero erros na consola |
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+### PROBLEMAS PENDENTES (C4 + H1-H2 do relatorio)
 
-## What Lovable Can and Cannot Build
+**1. Saldos negativos em wallets nao-sistema (CRITICO)**
+- Teste Parent: **-75 KVC**
+- Aniceto (Encarregado): **-945 KVC**
+- Causa: seed-test-accounts criou allowances debitando da wallet do pai em vez da wallet sistema, ou transferencias iniciais sem validacao de saldo
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+**2. Money supply conservation error**
+- Total emitido: 45 KVC
+- Total em wallets: -5 KVC
+- Total em vaults: 51 KVC
+- Wallets + vaults = 46 KVC != 45 KVC (1 KVC de discrepancia)
+- Causa provavel: deposito em vault feito por update directo sem ledger entry
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+**3. Wallet balance discrepancy (H1)**
+- A view `wallet_balances` mostra saldos calculados pelo ledger, mas o seed pode ter inserido dados inconsistentes
 
-## Implementation Plan (4 Phases)
+### PLANO DE CORRECAO
 
-### Phase 1 — Multi-Tenant Foundation
+#### 1. Prevenir saldos negativos futuros
+Criar um trigger de validacao na tabela `wallets` (ou na logica do `create-transaction`) que rejeita actualizacoes quando o saldo resultante e negativo para wallets nao-sistema.
 
-**Database migrations:**
+```sql
+CREATE OR REPLACE FUNCTION prevent_negative_balance()
+RETURNS trigger AS $$
+BEGIN
+  IF NOT NEW.is_system AND NEW.balance < 0 THEN
+    RAISE EXCEPTION 'Saldo insuficiente';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+```
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+Nota: wallets NAO tem coluna `balance` directa -- os saldos sao calculados via view `wallet_balances`. A validacao deve ser feita no `create-transaction` edge function antes de inserir no ledger.
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+#### 2. Corrigir saldos existentes
+Executar ledger entries correctivas para zerar as discrepancias dos 2 wallets afectados e reconciliar o money supply.
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+#### 3. Adicionar balance check no create-transaction
+Verificar que o edge function `create-transaction` ja valida saldo antes de debitar. Se nao, adicionar essa verificacao.
 
-4. Expand `app_role` enum to include `admin`
+### RESUMO
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+A plataforma esta **~95% funcional**. Todos os fluxos de UI, autenticacao, routing, notificacoes, gamificacao e multi-tenancy funcionam correctamente. Os unicos problemas pendentes sao:
+- 2 wallets com saldos negativos (dados de teste inconsistentes)
+- 1 KVC de discrepancia na massa monetaria
+- Ambos sao problemas de **dados**, nao de **codigo** -- provavelmente introduzidos pelo seeding inicial
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
-
-### Phase 2 — Currency Localization & Real Money Domain Separation
-
-**Database:**
-
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+Recomendacao: corrigir os dados e adicionar validacao de saldo no edge function para prevenir recorrencia.
 
