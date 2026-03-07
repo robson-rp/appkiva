@@ -269,6 +269,9 @@ export default function ParentChildren() {
                       {child.nickname && (
                         <p className="text-xs text-muted-foreground">Alcunha: {child.nickname}</p>
                       )}
+                      {child.dateOfBirth && (
+                        <p className="text-xs text-muted-foreground">{differenceInYears(new Date(), new Date(child.dateOfBirth))} anos</p>
+                      )}
                     </div>
                   </div>
 
