@@ -12,13 +12,18 @@ const slideVariants = {
 };
 
 export function OnboardingWalkthrough() {
-  const { showOnboarding, currentStep, totalSteps, steps, nextStep, skipWalkthrough } = useOnboarding();
+  const { showOnboarding, currentStep, totalSteps, steps, nextStep, prevStep, skipWalkthrough } = useOnboarding();
   const [direction, setDirection] = useState(1);
 
   const handleNext = useCallback(() => {
     setDirection(1);
     nextStep();
   }, [nextStep]);
+
+  const handlePrev = useCallback(() => {
+    setDirection(-1);
+    prevStep();
+  }, [prevStep]);
 
   const step = steps[currentStep];
   if (!showOnboarding || steps.length === 0 || !step) return null;
