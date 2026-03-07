@@ -261,6 +261,9 @@ export default function OnboardingStepManager() {
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreviewKey(step.illustration_key)}>
                     <Eye className="h-3.5 w-3.5" />
                   </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setDuplicatingStep(step); setDupTargetRoles([]); }}>
+                    <Copy className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
