@@ -18,7 +18,9 @@ import { useNavigate } from 'react-router-dom';
 
 export default function PartnerPrograms() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const limits = usePartnerLimits();
   const { data: programs, isLoading } = usePartnerPrograms();
   const deleteProgram = useDeletePartnerProgram();
 
