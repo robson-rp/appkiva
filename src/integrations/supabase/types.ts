@@ -234,6 +234,99 @@ export type Database = {
           },
         ]
       }
+      classroom_students: {
+        Row: {
+          added_at: string
+          classroom_id: string
+          id: string
+          student_profile_id: string
+        }
+        Insert: {
+          added_at?: string
+          classroom_id: string
+          id?: string
+          student_profile_id: string
+        }
+        Update: {
+          added_at?: string
+          classroom_id?: string
+          id?: string
+          student_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_students_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classroom_students_student_profile_id_fkey"
+            columns: ["student_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classrooms: {
+        Row: {
+          created_at: string
+          description: string | null
+          grade: string
+          icon: string
+          id: string
+          name: string
+          schedule: string | null
+          school_tenant_id: string | null
+          subject: string | null
+          teacher_profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          grade?: string
+          icon?: string
+          id?: string
+          name: string
+          schedule?: string | null
+          school_tenant_id?: string | null
+          subject?: string | null
+          teacher_profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          grade?: string
+          icon?: string
+          id?: string
+          name?: string
+          schedule?: string | null
+          school_tenant_id?: string | null
+          subject?: string | null
+          teacher_profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classrooms_school_tenant_id_fkey"
+            columns: ["school_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "classrooms_teacher_profile_id_fkey"
+            columns: ["teacher_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent_records: {
         Row: {
           adult_profile_id: string

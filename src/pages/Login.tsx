@@ -67,7 +67,7 @@ export default function Login() {
 
   // Fetch schools for teacher signup
   useEffect(() => {
-    if (selectedRole === 'teacher' && authMode === 'signup') {
+    if ((selectedRole === 'teacher' || selectedRole === 'parent') && authMode === 'signup') {
       supabase
         .from('tenants')
         .select('id, name')
@@ -491,6 +491,29 @@ export default function Login() {
                                   ))}
                                 </SelectContent>
                               </Select>
+                            </div>
+                          )}
+
+                          {/* School - For parents (optional, to link children) */}
+                          {selectedRole === 'parent' && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Escola dos filhos <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                              {schools.length === 0 ? (
+                                <p className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-xl">
+                                  Nenhuma escola registada de momento.
+                                </p>
+                              ) : (
+                                <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                                  <SelectTrigger className="h-12 rounded-xl text-base">
+                                    <SelectValue placeholder="Selecionar escola (opcional)" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {schools.map(s => (
+                                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
                             </div>
                           )}
 
