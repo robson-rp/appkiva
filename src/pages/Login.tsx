@@ -340,11 +340,21 @@ export default function Login() {
             Pequenos hábitos. Grandes futuros
           </motion.p>
 
+          {/* Banner Carousel */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full max-w-xs lg:max-w-md mt-2 lg:mt-4"
+          >
+            <LoginBannerCarousel />
+          </motion.div>
+
           {/* Version badge */}
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
             className="hidden lg:inline-flex mt-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.05] text-white/30 text-[10px] tracking-widest uppercase"
           >
             beta v1.0
