@@ -1,85 +1,128 @@
 
 
-## Plan: Role-Based Splash Screens for KIVARA
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Overview
+## Current State Assessment
 
-Create a full-screen, role-based splash screen system that replaces the current `OnboardingWalkthrough` spotlight-style walkthrough with a visually rich, illustration-driven splash experience. The system reuses the existing `onboarding_progress` table for persistence.
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### Architecture
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-The existing onboarding system (`OnboardingWalkthrough` + `use-onboarding` hook + `onboarding_progress` table) already handles:
-- First-login detection
-- Step tracking and persistence
-- Skip/complete logic
-- Role-based step definitions
+## What Lovable Can and Cannot Build
 
-We will **replace** the walkthrough component and step data while keeping the hook and database table intact.
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-### Files to Change
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-| File | Action |
-|---|---|
-| `src/data/onboarding-steps.ts` | Replace all step data with the new splash screen content per role (parent, child, teen, teacher, admin, partner). Teen reuses child screens with slight tone adjustment. Partner keeps existing content adapted. |
-| `src/components/OnboardingWalkthrough.tsx` | Complete rewrite as a full-screen splash carousel. Remove spotlight/clip-path logic. New design: full-screen overlay with large SVG illustration area, title, description text, progress dots, Skip/Next/Start buttons, Kivo mascot, smooth slide animations. |
-| `src/components/SplashIllustration.tsx` | **New file.** Inline SVG illustrations for each splash screen, rendered based on a key (e.g., `family-welcome`, `child-kivo`, `teacher-classroom`, `admin-dashboard`). Uses brand colors (deep blue #1F4E8C, green #2F9E7A, gold #F2B134) with soft gradients. |
+## Implementation Plan (4 Phases)
 
-### Splash Screen Content Mapping
+### Phase 1 — Multi-Tenant Foundation
 
-**Parent (6 screens → 4 screens):**
-1. Welcome to KIVARA (family + Kivo illustration)
-2. Turn daily tasks into financial lessons
-3. Follow your child's financial journey
-4. Help children save for their dreams
+**Database migrations:**
 
-**Child (5 screens → 4 screens):**
-1. Hi! I'm Kivo (Kivo waving)
-2. Earn coins by completing missions
-3. Save coins for things you really want
-4. Unlock badges and achievements
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-**Teen:** Same as child with slightly adjusted tone.
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-**Teacher (3 screens):**
-1. Bring financial education to your classroom
-2. Manage students and learning progress
-3. Engage students with financial challenges
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-**Admin (3 screens):**
-1. Welcome to the KIVARA Admin Console
-2. Manage organizations and users
-3. Track platform growth and activity
+4. Expand `app_role` enum to include `admin`
 
-**Partner (3 screens):** Adapted from existing content.
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-### Visual Design
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-- Full-screen modal overlay with `bg-gradient-to-b` using brand colors
-- Large illustration area (top 50% of screen) with inline SVG compositions
-- Kivo mascot appears on screen 1 for all roles
-- Rounded card at bottom with title, text, dots, and buttons
-- Responsive: on mobile the illustration scales down, text stays readable
-- Animations: `framer-motion` slide transitions between screens (horizontal swipe feel)
-- Navigation dots at bottom showing progress
-- Buttons: "Skip" (text link), "Next" / "Start using platform" (primary button)
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-### Illustration Approach
+**Database:**
 
-Since we cannot load external images, all illustrations will be composed using:
-- Emoji-based decorative elements at large scale
-- CSS gradient backgrounds creating scene contexts
-- The existing Kivo SVG mascot (`src/assets/kivo.svg`)
-- Lucide icons combined creatively (e.g., PiggyBank, Target, Trophy, BarChart3, Users, BookOpen)
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-Each illustration will be a styled div composition rather than a complex SVG, keeping it maintainable and performant.
+2. Add `real_money_enabled` flag to tenants
 
-### Data Model
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-No database changes needed. The existing `onboarding_progress` table with `current_step`, `completed`, `skipped`, `completed_at` fields handles everything. The `use-onboarding` hook remains unchanged.
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-### What Won't Change
+### Phase 3 — Audit Logging & Compliance
 
-- `src/hooks/use-onboarding.ts` — unchanged
-- `onboarding_progress` table — unchanged
-- Layout files that render `OnboardingWalkthrough` — unchanged (component name stays the same)
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
