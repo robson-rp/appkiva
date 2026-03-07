@@ -207,6 +207,7 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child" element={<ChildLayout><S><ChildDashboard /></S></ChildLayout>} />
       <Route path="/child/wallet" element={<ChildLayout><S><ChildWallet /></S></ChildLayout>} />
       <Route path="/child/missions" element={<ChildLayout><S><ChildMissions /></S></ChildLayout>} />
+      <Route path="/child/tasks" element={<ChildLayout><S><ChildTasks /></S></ChildLayout>} />
       <Route path="/child/vaults" element={<ChildLayout><S><ChildVaults /></S></ChildLayout>} />
       <Route path="/child/achievements" element={<ChildLayout><S><ChildAchievements /></S></ChildLayout>} />
       <Route path="/child/badges" element={<ChildLayout><S><BadgesPage /></S></ChildLayout>} />
