@@ -14,7 +14,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SplashIllustration } from '@/components/SplashIllustration';
-import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight, Copy } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight, Copy, CalendarIcon, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
@@ -46,6 +50,8 @@ interface StepRow {
   illustration_key: string;
   cta: string | null;
   is_active: boolean;
+  visible_from: string | null;
+  visible_until: string | null;
 }
 
 type FormData = {
@@ -54,13 +60,56 @@ type FormData = {
   illustration_key: string;
   cta: string;
   is_active: boolean;
+  visible_from: Date | null;
+  visible_until: Date | null;
 };
+
+function getVisibilityStatus(step: StepRow): 'active' | 'scheduled' | 'expired' | 'inactive' {
+  if (!step.is_active) return 'inactive';
+  const now = new Date();
+  if (step.visible_from && new Date(step.visible_from) > now) return 'scheduled';
+  if (step.visible_until && new Date(step.visible_until) < now) return 'expired';
+  return 'active';
+}
+
+const STATUS_BADGES: Record<string, { label: string; className: string }> = {
+  active: { label: 'Ativo agora', className: 'bg-green-500/10 text-green-600' },
+  scheduled: { label: 'Agendado', className: 'bg-chart-4/10 text-chart-4' },
+  expired: { label: 'Expirado', className: 'bg-destructive/10 text-destructive' },
+  inactive: { label: 'Inativo', className: 'bg-muted text-muted-foreground' },
+};
+
+function DatePickerField({ label, value, onChange }: { label: string; value: Date | null; onChange: (d: Date | null) => void }) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !value && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value ? format(value, "dd/MM/yyyy HH:mm") : "Sem limite"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={value ?? undefined} onSelect={(d) => onChange(d ?? null)} className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        {value && (
+          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => onChange(null)}>
+            ✕
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function OnboardingStepManager() {
   const [selectedRole, setSelectedRole] = useState<string>('parent');
   const [editingStep, setEditingStep] = useState<StepRow | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true });
+  const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true, visible_from: null, visible_until: null });
   const [previewKey, setPreviewKey] = useState<string | null>(null);
   const [duplicatingStep, setDuplicatingStep] = useState<StepRow | null>(null);
   const [dupTargetRoles, setDupTargetRoles] = useState<string[]>([]);
@@ -167,13 +216,15 @@ export default function OnboardingStepManager() {
       illustration_key: step.illustration_key,
       cta: step.cta ?? '',
       is_active: step.is_active,
+      visible_from: step.visible_from ? new Date(step.visible_from) : null,
+      visible_until: step.visible_until ? new Date(step.visible_until) : null,
     });
   };
 
   const openCreate = () => {
     setIsCreating(true);
     setEditingStep(null);
-    setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true });
+    setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true, visible_from: null, visible_until: null });
   };
 
   const handleSave = () => {
@@ -183,6 +234,8 @@ export default function OnboardingStepManager() {
       illustration_key: form.illustration_key,
       cta: form.cta || null,
       is_active: form.is_active,
+      visible_from: form.visible_from?.toISOString() ?? null,
+      visible_until: form.visible_until?.toISOString() ?? null,
     };
     saveMutation.mutate(
       { id: editingStep?.id, values },
@@ -235,10 +288,21 @@ export default function OnboardingStepManager() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Badge variant="outline" className="text-[10px]">Passo {step.step_index + 1}</Badge>
-                    {!step.is_active && <Badge variant="secondary" className="text-[10px]"><EyeOff className="h-3 w-3 mr-1" />Inativo</Badge>}
+                    {(() => {
+                      const status = getVisibilityStatus(step);
+                      const badge = STATUS_BADGES[status];
+                      return <Badge className={cn("text-[10px]", badge.className)}>{status === 'scheduled' && <Clock className="h-3 w-3 mr-1" />}{badge.label}</Badge>;
+                    })()}
                     {step.cta && <Badge className="text-[10px] bg-primary/10 text-primary">CTA: {step.cta}</Badge>}
+                    {(step.visible_from || step.visible_until) && (
+                      <span className="text-[9px] text-muted-foreground">
+                        {step.visible_from ? format(new Date(step.visible_from), 'dd/MM/yy') : '∞'}
+                        {' → '}
+                        {step.visible_until ? format(new Date(step.visible_until), 'dd/MM/yy') : '∞'}
+                      </span>
+                    )}
                   </div>
                   <h4 className="text-sm font-display font-bold text-foreground truncate">{step.title}</h4>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{step.description}</p>
@@ -307,6 +371,8 @@ export default function OnboardingStepManager() {
                 <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
                 <Label>Ativo</Label>
               </div>
+              <DatePickerField label="Visível a partir de (opcional)" value={form.visible_from} onChange={d => setForm(f => ({ ...f, visible_from: d }))} />
+              <DatePickerField label="Visível até (opcional)" value={form.visible_until} onChange={d => setForm(f => ({ ...f, visible_until: d }))} />
               <DialogFooter className="pt-2">
                 <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>Cancelar</Button>
                 <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>
