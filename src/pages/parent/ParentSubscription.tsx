@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 
 const FEATURE_LABELS: Record<string, string> = {
   savings_vaults: 'Cofres de Poupança',
