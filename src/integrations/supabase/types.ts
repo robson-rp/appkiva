@@ -189,6 +189,7 @@ export type Database = {
       children: {
         Row: {
           created_at: string
+          daily_spend_limit: number
           id: string
           monthly_budget: number
           nickname: string | null
@@ -199,6 +200,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          daily_spend_limit?: number
           id?: string
           monthly_budget?: number
           nickname?: string | null
@@ -209,6 +211,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          daily_spend_limit?: number
           id?: string
           monthly_budget?: number
           nickname?: string | null
