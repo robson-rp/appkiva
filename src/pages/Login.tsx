@@ -457,6 +457,23 @@ export default function Login() {
                             <p className="text-xs text-secondary">✓ Código válido! Preenche os teus dados abaixo.</p>
                           )}
                         </div>
+
+                        {/* School - For child/teen after invite validated */}
+                        {inviteValid && schools.length > 0 && (
+                          <div className="space-y-2">
+                            <Label className="font-semibold">Escola <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                            <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                              <SelectTrigger className="h-12 rounded-xl text-base">
+                                <SelectValue placeholder="Selecionar escola (opcional)" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {schools.map(s => (
+                                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                       )}
 
                       {/* Show remaining fields only if not child/teen or if invite is valid */}

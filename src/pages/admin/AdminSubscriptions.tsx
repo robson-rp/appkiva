@@ -378,7 +378,7 @@ export default function AdminSubscriptions() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <Label>Máx. Crianças</Label>
                 <Input type="number" min={0} value={form.max_children} onChange={e => setForm(f => ({ ...f, max_children: parseInt(e.target.value) || 0 }))} />
@@ -386,6 +386,11 @@ export default function AdminSubscriptions() {
               <div>
                 <Label>Máx. Turmas</Label>
                 <Input type="number" min={0} value={form.max_classrooms} onChange={e => setForm(f => ({ ...f, max_classrooms: parseInt(e.target.value) || 0 }))} />
+              </div>
+              <div>
+                <Label>Preço Extra/Criança</Label>
+                <Input type="number" min={0} step={0.01} value={form.extra_child_price} onChange={e => setForm(f => ({ ...f, extra_child_price: parseFloat(e.target.value) || 0 }))} />
+                {errors.extra_child_price && <p className="text-xs text-destructive mt-1">{errors.extra_child_price}</p>}
               </div>
             </div>
 
