@@ -62,10 +62,10 @@ export default function ParentProfile() {
         .single();
       if (profile?.tenant_id) {
         const newCurrency = getCurrencyByCountry(country);
-        await supabase
-          .from('tenants')
-          .update({ currency: newCurrency } as any)
-          .eq('id', profile.tenant_id);
+        await supabase.rpc('update_tenant_currency', {
+          _tenant_id: profile.tenant_id,
+          _currency: newCurrency,
+        } as any);
       }
     }
 
