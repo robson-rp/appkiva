@@ -46,6 +46,7 @@ const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
   { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
+  { title: 'Suporte', url: '/parent/support', icon: Headphones, requiredFeature: FEATURES.PRIORITY_SUPPORT },
 ];
 
 function ParentSidebar() {
