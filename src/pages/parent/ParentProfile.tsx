@@ -162,6 +162,21 @@ export default function ParentProfile() {
             </div>
 
             <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" /> Género
+              </Label>
+              <Select value={gender} onValueChange={setGender}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar género" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Masculino</SelectItem>
+                  <SelectItem value="female">Feminino</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+
+            <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground" /> Email
               </Label>
