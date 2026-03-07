@@ -224,7 +224,7 @@ export default function OnboardingStepManager() {
   const openCreate = () => {
     setIsCreating(true);
     setEditingStep(null);
-    setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true });
+    setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true, visible_from: null, visible_until: null });
   };
 
   const handleSave = () => {
