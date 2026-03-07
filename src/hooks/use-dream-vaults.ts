@@ -115,16 +115,32 @@ export function useDepositToDream() {
     mutationFn: async ({ dreamId, amount }: { dreamId: string; amount: number }) => {
       const { data: dream, error: fetchErr } = await supabase
         .from('dream_vaults')
-        .select('current_amount')
+        .select('current_amount, target_amount, title, profile_id')
         .eq('id', dreamId)
         .single();
       if (fetchErr) throw fetchErr;
 
+      const newAmount = Number(dream.current_amount) + amount;
       const { error } = await supabase
         .from('dream_vaults')
-        .update({ current_amount: Number(dream.current_amount) + amount })
+        .update({ current_amount: newAmount })
         .eq('id', dreamId);
       if (error) throw error;
+
+      // Check savings milestones
+      if (dream.target_amount > 0) {
+        const pct = Math.floor((newAmount / Number(dream.target_amount)) * 100);
+        const milestones = [25, 50, 75, 100];
+        for (const m of milestones) {
+          const prevPct = Math.floor((Number(dream.current_amount) / Number(dream.target_amount)) * 100);
+          if (pct >= m && prevPct < m) {
+            import('@/lib/notify').then(({ notifySavingsMilestone }) => {
+              notifySavingsMilestone(dream.profile_id, dream.title, m);
+            });
+            break;
+          }
+        }
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['dream-vaults'] }),
   });

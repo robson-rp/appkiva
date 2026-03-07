@@ -111,8 +111,18 @@ export function useClaimStreakReward() {
         });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['streak-data'] });
+      // Fire streak milestone notification
+      if (user?.id) {
+        getProfileId(user.id).then(profileId => {
+          if (profileId) {
+            import('@/lib/notify').then(({ notifyStreakMilestone }) => {
+              notifyStreakMilestone(profileId, variables.milestoneDays, variables.kivaPoints);
+            });
+          }
+        });
+      }
     },
   });
 }

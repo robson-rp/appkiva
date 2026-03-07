@@ -929,6 +929,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          notification_id: string | null
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          notification_id?: string | null
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          notification_id?: string | null
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_log_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_templates: {
         Row: {
           cooldown_minutes: number
@@ -2150,6 +2189,10 @@ export type Database = {
         Returns: Json
       }
       check_anomalies: { Args: never; Returns: number }
+      check_notification_throttle: {
+        Args: { _profile_id: string }
+        Returns: boolean
+      }
       claim_invite_code: {
         Args: { _code: string; _profile_id: string }
         Returns: undefined
