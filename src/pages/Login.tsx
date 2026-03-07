@@ -494,6 +494,29 @@ export default function Login() {
                             </div>
                           )}
 
+                          {/* School - For parents (optional, to link children) */}
+                          {selectedRole === 'parent' && (
+                            <div className="space-y-2">
+                              <Label className="font-semibold">Escola dos filhos <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                              {schools.length === 0 ? (
+                                <p className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-xl">
+                                  Nenhuma escola registada de momento.
+                                </p>
+                              ) : (
+                                <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                                  <SelectTrigger className="h-12 rounded-xl text-base">
+                                    <SelectValue placeholder="Selecionar escola (opcional)" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {schools.map(s => (
+                                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                            </div>
+                          )
+
                           {/* Sector - Only for partners */}
                           {selectedRole === 'partner' && (
                             <div className="space-y-2">
