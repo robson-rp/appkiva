@@ -133,6 +133,7 @@ function AppRoutes() {
         <Route path="/teacher/classes" element={<TeacherLayout><TeacherClasses /></TeacherLayout>} />
         <Route path="/teacher/challenges" element={<TeacherLayout><TeacherChallenges /></TeacherLayout>} />
         <Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />
+        <Route path="/teacher/school" element={<TeacherLayout><TeacherSchoolProfile /></TeacherLayout>} />
         <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>
     );

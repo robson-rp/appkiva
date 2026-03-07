@@ -10,7 +10,7 @@ import { School, Users, GraduationCap, BookOpen, MapPin, Calendar, Globe } from 
 import { format } from 'date-fns';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
+const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 function useTeacherSchool() {
   const { user } = useAuth();

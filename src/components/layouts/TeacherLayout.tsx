@@ -29,6 +29,7 @@ const navItems = [
   { title: 'Painel', url: '/teacher', icon: LayoutDashboard },
   { title: 'Turmas', url: '/teacher/classes', icon: Users },
   { title: 'Desafios', url: '/teacher/challenges', icon: Trophy, badge: urgentChallengesCount },
+  { title: 'Escola', url: '/teacher/school', icon: School },
 ];
 
 function TeacherSidebar() {
