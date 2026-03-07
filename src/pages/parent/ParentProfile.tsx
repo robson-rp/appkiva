@@ -30,18 +30,20 @@ export default function ParentProfile() {
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
+  const [gender, setGender] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Load current country from profile
+  // Load current country and gender from profile
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country')
+      .select('country, gender')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.country) setCountry(data.country);
+        if ((data as any)?.gender) setGender((data as any).gender);
       });
   }, [user?.id]);
 
@@ -50,7 +52,7 @@ export default function ParentProfile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ country } as any)
+      .update({ country, gender } as any)
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep household in sync
@@ -157,6 +159,22 @@ export default function ParentProfile() {
             <div className="space-y-2">
               <Label htmlFor="name">Nome completo</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" /> Género
+              </Label>
+              <Select value={gender} onValueChange={setGender}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar género" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Masculino</SelectItem>
+                  <SelectItem value="female">Feminino</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

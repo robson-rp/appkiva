@@ -408,6 +408,61 @@ export type Database = {
           },
         ]
       }
+      family_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          household_id: string
+          id: string
+          parent_profile_id: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          household_id: string
+          id?: string
+          parent_profile_id: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          household_id?: string
+          id?: string
+          parent_profile_id?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_invite_codes_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_invite_codes_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_invite_codes_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       households: {
         Row: {
           created_at: string
@@ -707,8 +762,13 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           display_name: string
+          gender: string | null
           household_id: string | null
           id: string
+          institution_name: string | null
+          phone: string | null
+          school_tenant_id: string | null
+          sector: string | null
           tenant_id: string | null
           updated_at: string
           user_id: string
@@ -719,8 +779,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           display_name: string
+          gender?: string | null
           household_id?: string | null
           id?: string
+          institution_name?: string | null
+          phone?: string | null
+          school_tenant_id?: string | null
+          sector?: string | null
           tenant_id?: string | null
           updated_at?: string
           user_id: string
@@ -731,8 +796,13 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           display_name?: string
+          gender?: string | null
           household_id?: string | null
           id?: string
+          institution_name?: string | null
+          phone?: string | null
+          school_tenant_id?: string | null
+          sector?: string | null
           tenant_id?: string | null
           updated_at?: string
           user_id?: string
@@ -743,6 +813,13 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_school_tenant_id_fkey"
+            columns: ["school_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
           {
@@ -1410,6 +1487,10 @@ export type Database = {
     }
     Functions: {
       check_anomalies: { Args: never; Returns: number }
+      claim_invite_code: {
+        Args: { _code: string; _profile_id: string }
+        Returns: undefined
+      }
       get_profile_balance: { Args: { _profile_id: string }; Returns: number }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
@@ -1424,6 +1505,7 @@ export type Database = {
         Args: { _currency: string; _tenant_id: string }
         Returns: undefined
       }
+      validate_invite_code: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin" | "partner"
