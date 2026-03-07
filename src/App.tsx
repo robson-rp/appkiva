@@ -173,6 +173,7 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
       <Route path="/child/learn" element={<ChildLayout><LearnPage /></ChildLayout>} />
+      {INSTALL_ROUTE}
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
