@@ -245,6 +245,7 @@ export default function AdminSubscriptions() {
                     <TableHead className="text-center">Crianças</TableHead>
                     <TableHead className="text-center">Turmas</TableHead>
                     <TableHead>Moeda</TableHead>
+                    <TableHead className="text-center">Tenants</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acções</TableHead>
                   </TableRow>
