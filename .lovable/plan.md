@@ -1,96 +1,128 @@
 
 
-## Validation Report: KIVARA Platform Specifications
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### 1. Multi-Tenant Architecture — **IMPLEMENTED**
+## Current State Assessment
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Tenants table with ID, type, settings | ✅ | `tenants` table with `id`, `tenant_type` (family/school/institutional_partner), `settings` (jsonb), `currency`, `is_active` |
-| Data isolation via tenant_id | ✅ | `profiles.tenant_id`, `households.tenant_id`, RLS policies scoped by tenant |
-| Role-based permissions | ✅ | `user_roles` table with `app_role` enum (parent, child, teen, teacher, admin, partner), `has_role()` security definer function |
-| Super-admin role | ✅ | `admin` role in enum, admin RLS policies on tenants, audit_log, risk_flags, currencies, subscription_tiers |
-| Admin capabilities: manage tenants | ✅ | `AdminTenants` page, `useCreateTenant`, `useUpdateTenant` hooks |
-| Admin: manage subscription plans | ✅ | `AdminSubscriptions` page with full CRUD on `subscription_tiers` |
-| Admin: manage currency rules | ✅ | `AdminCurrencies` page with create/toggle on `supported_currencies` |
-| Admin: manage risk/compliance | ✅ | `AdminRisk` + `AdminAudit` pages |
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### 2. Subscription & Pricing — **IMPLEMENTED**
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Subscription tiers (Free, Family Premium, School Institutional, Partner Program) | ✅ | `subscription_tiers` table with `tier_type` enum matching these 4 types |
-| Pricing per tier (monthly/yearly) | ✅ | `price_monthly`, `price_yearly` columns |
-| Feature limits | ✅ | `features` jsonb array, `max_children`, `max_classrooms` |
-| Feature gating | ✅ | `useFeatureGate` hook, `FEATURES` constant with 10 feature keys |
-| Upgrade/downgrade flow | ✅ | `upgrade-subscription` edge function, `PaymentSimulator` component |
+## What Lovable Can and Cannot Build
 
-### 3. Currency Localization — **IMPLEMENTED**
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Currency based on user location | ✅ | `profiles.country` maps to currency via `COUNTRY_CURRENCIES` data, synced to `tenants.currency` via `update_tenant_currency` RPC |
-| `supported_currencies` table | ✅ | With code, name, symbol, decimal_places, is_active |
-| `CurrencyDisplay` component | ✅ | Dynamic formatting based on tenant currency |
-| Exchange rates | ✅ | `currency_exchange_rates` table with admin management |
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### 4. Ledger-First Financial Architecture — **IMPLEMENTED**
+## Implementation Plan (4 Phases)
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Double-entry accounting | ✅ | `ledger_entries` with `debit_wallet_id` + `credit_wallet_id` |
-| Immutable entries | ✅ | RLS: no UPDATE/DELETE on `ledger_entries` |
-| All required fields (ID, wallet, debit, credit, amount, currency, timestamp, type, metadata) | ✅ | All present in schema |
-| Transaction types (mission_reward, task_reward, allowance, purchase, vault_deposit, etc.) | ✅ | `ledger_entry_type` enum with 11 types |
-| Balances derived from ledger | ✅ | `wallet_balances` is a VIEW, not a stored value |
-| Server-side validation | ✅ | `create-transaction` edge function validates auth, roles, budget limits |
+### Phase 1 — Multi-Tenant Foundation
 
-### 5. Virtual Coins vs Real Money Separation — **IMPLEMENTED**
+**Database migrations:**
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Two wallet types | ✅ | `wallet_type` enum with `virtual` and `real` |
-| Virtual = KVC (no financial value) | ✅ | Default wallet created as `virtual`/`KVC` |
-| Real money flag on tenant | ✅ | `tenants.real_money_enabled` boolean |
-| Separate ledgers/rules | ⚠️ Partial | Same `ledger_entries` table but filtered by wallet type; no separate "Financial Wallet Service" API — this is acceptable given the single-backend architecture |
-| No automatic conversion | ✅ | No conversion logic exists |
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-### 6. Compliance-by-Design — **PARTIALLY IMPLEMENTED**
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Children linked to parent | ✅ | `children` table with `parent_profile_id`, cannot self-register |
-| Consent management | ✅ | `consent_records` table with timestamps, `ip_metadata`, `revocation_reason` |
-| Audit logging | ✅ | `audit_log` table, `audit_trigger_fn()` security definer function |
-| Audit on sensitive tables | ⚠️ **ISSUE** | The `audit_trigger_fn` function exists but **no triggers are attached** to any tables (confirmed by empty `db-triggers` section). Audit logging is NOT actually firing. |
-| Source IP in logs | ⚠️ Partial | `ip_metadata` field exists on `consent_records` but not captured in `audit_log` (Deno limitation noted in plan) |
-| Data retention/deletion | ⚠️ Placeholder | `AdminCompliance` page shows "Fase 3" placeholder — no functional consent management UI |
-| Right to deletion/anonymization | ❌ Not implemented | No data export or deletion workflow |
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-### 7. Observability & Anti-Fraud — **IMPLEMENTED**
+4. Expand `app_role` enum to include `admin`
 
-| Requirement | Status | Evidence |
-|---|---|---|
-| Anomaly detection | ✅ | `check_anomalies()` SQL function detecting excessive rewards (>10/24h) and unusual transactions (>3x average) |
-| Risk flags | ✅ | `risk_flags` table with severity levels, resolution workflow |
-| Risk dashboard | ✅ | `AdminRisk` page with flag list, scan trigger, resolution |
-| Risk scan edge function | ✅ | `risk-scan` edge function calls `check_anomalies()` |
-| Error tracking / performance monitoring | ❌ Not implemented | No APM or error tracking integration |
-| Usage analytics (DAU, completion rate) | ⚠️ Basic | `useAdminStats` provides counts but no DAU or completion rate metrics |
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
----
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-### Critical Issues Found
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-1. **Audit triggers not attached** — The `audit_trigger_fn` function exists but zero triggers are bound to tables. This means `ledger_entries`, `wallets`, `profiles`, and `consent_records` mutations are NOT being logged. This requires a migration to `CREATE TRIGGER` on each critical table.
+**Database:**
 
-2. **Compliance UI is a placeholder** — The consent management panel, data export, and data deletion features are not built.
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-3. **No service architecture separation** — The spec calls for 9 independent services. The current implementation uses a monolithic frontend + edge functions pattern, which is the correct approach for Lovable Cloud but does not match the spec's microservice vision. This is an architectural constraint, not a bug.
+2. Add `real_money_enabled` flag to tenants
 
-### Recommendation
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-The most critical gap is **#1 — missing audit triggers**. Without them, the audit_log table remains empty and compliance claims are invalid. This should be fixed immediately with a migration attaching triggers to `ledger_entries`, `wallets`, `profiles`, `consent_records`, and `user_roles`.
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-The compliance UI (#2) should follow as the next priority.
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
