@@ -15,6 +15,7 @@ import kivoImg from '@/assets/kivo.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
+import LoginBannerCarousel from '@/components/LoginBannerCarousel';
 
 type AuthMode = 'login' | 'signup';
 type ContactMethod = 'email' | 'phone';
