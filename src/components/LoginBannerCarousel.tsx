@@ -116,17 +116,17 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="flex gap-1 mt-2 px-1">
+        <div className="flex gap-0.5 mt-2 px-8">
           {banners.map((_, i) => (
             <button
               key={i}
               onClick={() => handleSegmentClick(i)}
-              className="relative h-[2px] flex-1 rounded-full bg-muted-foreground/10 overflow-hidden"
+              className="relative h-[1.5px] flex-1 rounded-full bg-muted-foreground/8 overflow-hidden"
               aria-label={`Banner ${i + 1}`}
             >
               <div
                 className={cn(
-                  "absolute inset-y-0 left-0 rounded-full bg-primary/60",
+                  "absolute inset-y-0 left-0 rounded-full bg-primary/40",
                   i < selectedIndex && "w-full",
                   i > selectedIndex && "w-0"
                 )}
