@@ -48,6 +48,12 @@ export function useOnboarding() {
     }
   };
 
+  const prevStep = () => {
+    if (currentStep > 0) {
+      upsertProgress.mutate({ current_step: currentStep - 1 });
+    }
+  };
+
   const skipWalkthrough = () => {
     upsertProgress.mutate({ skipped: true, current_step: currentStep });
   };
@@ -63,6 +69,7 @@ export function useOnboarding() {
     steps,
     isLoading,
     nextStep,
+    prevStep,
     skipWalkthrough,
     resetWalkthrough,
   };

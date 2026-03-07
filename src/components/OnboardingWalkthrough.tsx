@@ -12,13 +12,18 @@ const slideVariants = {
 };
 
 export function OnboardingWalkthrough() {
-  const { showOnboarding, currentStep, totalSteps, steps, nextStep, skipWalkthrough } = useOnboarding();
+  const { showOnboarding, currentStep, totalSteps, steps, nextStep, prevStep, skipWalkthrough } = useOnboarding();
   const [direction, setDirection] = useState(1);
 
   const handleNext = useCallback(() => {
     setDirection(1);
     nextStep();
   }, [nextStep]);
+
+  const handlePrev = useCallback(() => {
+    setDirection(-1);
+    prevStep();
+  }, [prevStep]);
 
   const step = steps[currentStep];
   if (!showOnboarding || steps.length === 0 || !step) return null;
@@ -37,12 +42,22 @@ export function OnboardingWalkthrough() {
         initial={{ scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-lg mx-4 bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-lg mx-4 bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden touch-pan-y"
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.15}
+        onDragEnd={(_, info) => {
+          const swipe = info.offset.x;
+          const velocity = info.velocity.x;
+          if (swipe < -50 || velocity < -300) {
+            handleNext();
+          } else if ((swipe > 50 || velocity > 300) && currentStep > 0) {
+            handlePrev();
+          }
+        }}
       >
         {/* Top accent */}
         <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
-
-        {/* Illustration area */}
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
