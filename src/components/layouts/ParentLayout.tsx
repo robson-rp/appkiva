@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, Home, MoreHorizontal } from 'lucide-react';
+import { ReactNode, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const navItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Painel', url: '/parent', icon: LayoutDashboard },
@@ -30,12 +31,20 @@ const navItems: { title: string; url: string; icon: any; requiredFeature?: Featu
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
 ];
 
-const mobileNavItems = [
+const mobileFixedItems = [
   { title: 'Painel', url: '/parent', icon: LayoutDashboard },
   { title: 'Crianças', url: '/parent/children', icon: Users },
   { title: 'Tarefas', url: '/parent/tasks', icon: ListTodo },
   { title: 'Mesada', url: '/parent/allowance', icon: Wallet },
+];
+
+const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Recompensas', url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
+  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
+  { title: 'Consentimento', url: '/parent/consent', icon: Shield },
+  { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
 ];
 
 function ParentSidebar() {
@@ -131,8 +140,15 @@ function ParentSidebar() {
 
 export function ParentLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { logout } = useAuth();
+  const { hasFeature } = useAllFeatures();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const isMoreRouteActive = mobileMoreItems.some((item) =>
+    location.pathname === item.url || location.pathname.startsWith(item.url + '/')
+  );
 
   return (
     <SidebarProvider>
@@ -177,7 +193,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
               <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
               <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
-                {mobileNavItems.map((item) => {
+                {mobileFixedItems.map((item) => {
                   const isActive = item.url === '/parent'
                     ? location.pathname === '/parent'
                     : location.pathname.startsWith(item.url);
@@ -206,9 +222,76 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                     </NavLink>
                   );
                 })}
+
+                {/* More button */}
+                <button
+                  onClick={() => setMoreOpen(true)}
+                  className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
+                  aria-label="Mais opções"
+                >
+                  <div className={`relative p-2 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
+                    <MoreHorizontal className="h-6 w-6 relative z-10" />
+                  </div>
+                  <span className="text-caption mt-0.5 font-semibold">Mais</span>
+                  {isMoreRouteActive && (
+                    <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                  )}
+                </button>
               </div>
             </nav>
           )}
+
+          {/* More Menu Sheet */}
+          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+            <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
+              <SheetHeader className="pb-2">
+                <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+              </SheetHeader>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-3 gap-3 pt-2"
+              >
+                {mobileMoreItems.map((item) => {
+                  const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
+                  const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + '/');
+
+                  if (locked) {
+                    return (
+                      <div
+                        key={item.title}
+                        className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
+                        title="Requer upgrade"
+                      >
+                        <div className="relative w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center">
+                          <item.icon className="h-6 w-6" />
+                          <Lock className="h-3.5 w-3.5 absolute -top-1 -right-1 text-muted-foreground/60" />
+                        </div>
+                        <span className="text-xs font-semibold">{item.title}</span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={item.title}
+                      onClick={() => {
+                        setMoreOpen(false);
+                        navigate(item.url);
+                      }}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-200 active:scale-95 ${isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/60'}`}
+                    >
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isActive ? 'bg-primary/15' : 'bg-muted/80'}`}>
+                        <item.icon className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs font-semibold">{item.title}</span>
+                    </button>
+                  );
+                })}
+              </motion.div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
       <OnboardingWalkthrough />
