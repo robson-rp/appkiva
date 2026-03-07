@@ -33,7 +33,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [country, setCountry] = useState('AO');
   const { login, signup } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
