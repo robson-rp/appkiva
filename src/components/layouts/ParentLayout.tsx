@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -23,6 +23,7 @@ const navItems = [
   { title: 'Recompensas', url: '/parent/rewards', icon: Gift },
   { title: 'Relatórios', url: '/parent/reports', icon: BarChart3 },
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
+  { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
 ];
 
