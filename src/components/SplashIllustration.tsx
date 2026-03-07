@@ -3,6 +3,7 @@ import {
   PiggyBank, Target, Trophy, BarChart3, Users, BookOpen,
   Coins, Star, TrendingUp, Shield, Building2, Activity,
   Handshake, Award, GraduationCap, Sparkles, Heart, Rocket,
+  Wallet, ArrowUpRight, Flame, ChartPie,
 } from 'lucide-react';
 import kivoSvg from '@/assets/kivo.svg';
 
