@@ -162,6 +162,22 @@ export default function AdminSubscriptions() {
     }
   }
 
+  function canDelete(tier: any) {
+    return !tier.is_active && (tier.tenant_count ?? 0) === 0;
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await deleteTier.mutateAsync(deleteTarget.id);
+      toast.success(`Plano "${deleteTarget.name}" eliminado`);
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao eliminar');
+    } finally {
+      setDeleteTarget(null);
+    }
+  }
+
   const isSaving = createTier.isPending || updateTier.isPending;
 
   return (
