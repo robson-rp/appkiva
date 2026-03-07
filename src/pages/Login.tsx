@@ -401,7 +401,7 @@ export default function Login() {
                         <div className="flex-1 min-w-0 text-center sm:text-left">
                           <span className="font-display font-bold text-sm sm:text-base text-foreground block truncate">{cfg.label}</span>
                           <span className="text-xs text-muted-foreground hidden sm:block">{cfg.description}</span>
-                          <span className="text-xs font-mono text-muted-foreground/70 mt-0.5 hidden sm:block">{cfg.testEmail} · Test1234!</span>
+                          
                         </div>
                       </motion.button>
                     );
