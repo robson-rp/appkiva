@@ -104,8 +104,8 @@ The KIVARA platform is **production-ready**. All critical and high-priority issu
 | `generate-recurring-tasks` | Service role (cron) | ✅ Internal only |
 | `elevenlabs-tts` | `getClaims()` | ✅ Protected |
 | `send-push-notification` | Service role (cron) | ✅ Internal only |
-| `seed-test-accounts` | **NONE** | 🔴 CRITICAL |
-| `risk-scan` | **NONE** | 🔴 CRITICAL |
+| `seed-test-accounts` | `getClaims()` + admin | ✅ Protected |
+| `risk-scan` | `getClaims()` + admin | ✅ Protected |
 
 ### 3.4 Role Escalation
 | Check | Result |
