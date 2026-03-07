@@ -293,23 +293,63 @@ export default function Login() {
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Hero Panel — compact on mobile, full on desktop */}
       <div className="relative flex flex-col items-center justify-center px-6 py-5 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full">
+        {/* Soft glow orbs */}
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
           <div className="absolute top-[-20%] right-[-15%] w-[45%] h-[45%] rounded-full bg-white/[0.04] blur-3xl" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/[0.03] blur-3xl" />
         </div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10"
-        >
-          <img 
-            src={kivaraLogoWhite} 
-            alt="KIVARA" 
-            className="h-14 sm:h-16 lg:h-44 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
-          />
-        </motion.div>
+
+        {/* Geometric pattern overlay */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="geo-grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+              <path d="M60 0 L30 30 L60 60" fill="none" stroke="white" strokeWidth="0.5" />
+              <path d="M0 0 L30 30 L0 60" fill="none" stroke="white" strokeWidth="0.5" />
+              <circle cx="30" cy="30" r="1.5" fill="white" opacity="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#geo-grid)" />
+        </svg>
+
+        {/* Accent lines */}
+        <div className="absolute top-[15%] left-[8%] w-24 h-[1px] bg-white/10 rotate-45 hidden lg:block" />
+        <div className="absolute bottom-[20%] right-[10%] w-32 h-[1px] bg-white/10 -rotate-30 hidden lg:block" />
+        <div className="absolute top-[40%] right-[5%] w-16 h-[1px] bg-white/10 rotate-12 hidden lg:block" />
+
+        <div className="relative z-10 flex flex-col items-center gap-3 lg:gap-5">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <img 
+              src={kivaraLogoWhite} 
+              alt="KIVARA" 
+              className="h-14 sm:h-16 lg:h-44 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
+            />
+          </motion.div>
+
+          {/* Slogan */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="text-white/60 text-[10px] lg:text-sm tracking-[0.25em] uppercase font-light"
+          >
+            Educação financeira para famílias
+          </motion.p>
+
+          {/* Version badge */}
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="hidden lg:inline-flex mt-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.05] text-white/30 text-[10px] tracking-widest uppercase"
+          >
+            beta v1.0
+          </motion.span>
+        </div>
       </div>
 
       {/* Right Form Panel */}
