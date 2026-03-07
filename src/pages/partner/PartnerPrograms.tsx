@@ -4,10 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Users, School, Search, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { usePartnerPrograms } from '@/hooks/use-partner-data';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 export default function PartnerPrograms() {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const { data: programs, isLoading } = usePartnerPrograms();
 
@@ -67,6 +70,13 @@ export default function PartnerPrograms() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 Investimento: €{Number(prog.investment_amount).toLocaleString()}
               </p>
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <ProgramInviteDialog
+                  programId={prog.id}
+                  programName={prog.program_name}
+                  partnerTenantId={prog.partner_tenant_id}
+                />
+              </div>
             </CardContent>
           </Card>
         ))}

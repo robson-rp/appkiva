@@ -924,6 +924,70 @@ export type Database = {
           },
         ]
       }
+      program_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          partner_tenant_id: string
+          program_id: string
+          status: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          partner_tenant_id: string
+          program_id: string
+          status?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          partner_tenant_id?: string
+          program_id?: string
+          status?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_invitations_partner_tenant_id_fkey"
+            columns: ["partner_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_invitations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "partner_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards: {
         Row: {
           available: boolean
@@ -1582,6 +1646,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_program_invitation: {
+        Args: { _code: string; _profile_id: string }
+        Returns: Json
+      }
       check_anomalies: { Args: never; Returns: number }
       claim_invite_code: {
         Args: { _code: string; _profile_id: string }
@@ -1602,6 +1670,7 @@ export type Database = {
         Returns: undefined
       }
       validate_invite_code: { Args: { _code: string }; Returns: Json }
+      validate_program_invite: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin" | "partner"

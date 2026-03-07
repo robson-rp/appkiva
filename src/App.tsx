@@ -61,8 +61,11 @@ import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
 import PartnerReports from "./pages/partner/PartnerReports";
 import PartnerProfile from "./pages/partner/PartnerProfile";
+import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 
 const queryClient = new QueryClient();
+
+const INVITE_ROUTE = <Route path="/invite/program/:code" element={<AcceptProgramInvite />} />;
 
 function renderRoutes(user: { role: string }) {
   if (user.role === 'admin') {
@@ -109,6 +112,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
         <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
         <Route path="/parent/consent" element={<ParentLayout><ParentConsent /></ParentLayout>} />
+        {INVITE_ROUTE}
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
     );
@@ -122,6 +126,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teacher/challenges" element={<TeacherLayout><TeacherChallenges /></TeacherLayout>} />
         <Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />
         <Route path="/teacher/school" element={<TeacherLayout><TeacherSchoolProfile /></TeacherLayout>} />
+        {INVITE_ROUTE}
         <Route path="*" element={<Navigate to="/teacher" replace />} />
       </Routes>
     );
