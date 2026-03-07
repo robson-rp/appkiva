@@ -79,9 +79,17 @@ export default function LoginBannerCarousel() {
 
   if (!banners.length) return null;
 
-  const Wrapper = ({ href, children, className }: { href: string | null; children: React.ReactNode; className?: string }) =>
+  const trackClick = useCallback((bannerId: string) => {
+    supabase.from("banner_clicks").insert({
+      banner_id: bannerId,
+      user_agent: navigator.userAgent,
+      referrer: document.referrer || null,
+    }).then(() => {});
+  }, []);
+
+  const Wrapper = ({ href, bannerId, children, className }: { href: string | null; bannerId: string; children: React.ReactNode; className?: string }) =>
     href ? (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{children}</a>
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={() => trackClick(bannerId)}>{children}</a>
     ) : (
       <div className={className}>{children}</div>
     );
