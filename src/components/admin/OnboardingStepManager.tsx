@@ -14,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SplashIllustration } from '@/components/SplashIllustration';
-import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
