@@ -6,6 +6,11 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { lazy, Suspense } from "react";
+import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
+import { OfflineBanner } from "./components/OfflineBanner";
+
+// Layouts (kept eager – small and always needed)
 import { ParentLayout } from "@/components/layouts/ParentLayout";
 import { ChildLayout } from "@/components/layouts/ChildLayout";
 import { TeacherLayout } from "@/components/layouts/TeacherLayout";
@@ -13,83 +18,108 @@ import { TeenLayout } from "@/components/layouts/TeenLayout";
 import { AdminLayout } from "@/components/layouts/AdminLayout";
 import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
-import Install from "./pages/Install";
-import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
-import { OfflineBanner } from "./components/OfflineBanner";
-import ParentDashboard from "./pages/parent/ParentDashboard";
-import ParentChildren from "./pages/parent/ParentChildren";
-import ParentTasks from "./pages/parent/ParentTasks";
-import ParentAllowance from "./pages/parent/ParentAllowance";
-import ParentReports from "./pages/parent/ParentReports";
-import ParentProfile from "./pages/parent/ParentProfile";
-import ParentRewards from "./pages/parent/ParentRewards";
-import ParentVaults from "./pages/parent/ParentVaults";
-import ParentSubscription from "./pages/parent/ParentSubscription";
-import ParentConsent from "./pages/parent/ParentConsent";
-import ChildDashboard from "./pages/child/ChildDashboard";
-import ChildWallet from "./pages/child/ChildWallet";
-import ChildMissions from "./pages/child/ChildMissions";
-import ChildVaults from "./pages/child/ChildVaults";
-import ChildAchievements from "./pages/child/ChildAchievements";
-import ChildStore from "./pages/child/ChildStore";
-import ChildDiary from "./pages/child/ChildDiary";
-import ChildDreams from "./pages/child/ChildDreams";
-import TeacherDashboard from "./pages/teacher/TeacherDashboard";
-import TeacherClasses from "./pages/teacher/TeacherClasses";
-import TeacherChallenges from "./pages/teacher/TeacherChallenges";
-import TeacherStudentProfile from "./pages/teacher/TeacherStudentProfile";
-import TeacherSchoolProfile from "./pages/teacher/TeacherSchoolProfile";
-import TeenDashboard from "./pages/teen/TeenDashboard";
-import TeenWallet from "./pages/teen/TeenWallet";
-import TeenMissions from "./pages/teen/TeenMissions";
-import TeenVaults from "./pages/teen/TeenVaults";
-import TeenAnalytics from "./pages/teen/TeenAnalytics";
-import LearnPage from "./pages/shared/LearnPage";
-import BadgesPage from "./pages/shared/BadgesPage";
-import StreaksPage from "./pages/shared/StreaksPage";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminTenants from "./pages/admin/AdminTenants";
-import AdminSubscriptions from "./pages/admin/AdminSubscriptions";
-import AdminCurrencies from "./pages/admin/AdminCurrencies";
-import AdminAudit from "./pages/admin/AdminAudit";
-import AdminRisk from "./pages/admin/AdminRisk";
-import AdminCompliance from "./pages/admin/AdminCompliance";
-import AdminSchools from "./pages/admin/AdminSchools";
-import AdminFinance from "./pages/admin/AdminFinance";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminLessons from "./pages/admin/AdminLessons";
-import AdminOnboarding from "./pages/admin/AdminOnboarding";
-import PartnerDashboard from "./pages/partner/PartnerDashboard";
-import PartnerPrograms from "./pages/partner/PartnerPrograms";
-import PartnerChallenges from "./pages/partner/PartnerChallenges";
-import PartnerReports from "./pages/partner/PartnerReports";
-import PartnerProfile from "./pages/partner/PartnerProfile";
-import PartnerSubscriptionPage from "./pages/partner/PartnerSubscription";
-import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
+// Lazy-loaded pages
+const Login = lazy(() => import("./pages/Login"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Install = lazy(() => import("./pages/Install"));
+
+// Parent
+const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
+const ParentChildren = lazy(() => import("./pages/parent/ParentChildren"));
+const ParentTasks = lazy(() => import("./pages/parent/ParentTasks"));
+const ParentAllowance = lazy(() => import("./pages/parent/ParentAllowance"));
+const ParentReports = lazy(() => import("./pages/parent/ParentReports"));
+const ParentProfile = lazy(() => import("./pages/parent/ParentProfile"));
+const ParentRewards = lazy(() => import("./pages/parent/ParentRewards"));
+const ParentVaults = lazy(() => import("./pages/parent/ParentVaults"));
+const ParentSubscription = lazy(() => import("./pages/parent/ParentSubscription"));
+const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
+
+// Child
+const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
+const ChildWallet = lazy(() => import("./pages/child/ChildWallet"));
+const ChildMissions = lazy(() => import("./pages/child/ChildMissions"));
+const ChildVaults = lazy(() => import("./pages/child/ChildVaults"));
+const ChildAchievements = lazy(() => import("./pages/child/ChildAchievements"));
+const ChildStore = lazy(() => import("./pages/child/ChildStore"));
+const ChildDiary = lazy(() => import("./pages/child/ChildDiary"));
+const ChildDreams = lazy(() => import("./pages/child/ChildDreams"));
+
+// Teacher
+const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard"));
+const TeacherClasses = lazy(() => import("./pages/teacher/TeacherClasses"));
+const TeacherChallenges = lazy(() => import("./pages/teacher/TeacherChallenges"));
+const TeacherStudentProfile = lazy(() => import("./pages/teacher/TeacherStudentProfile"));
+const TeacherSchoolProfile = lazy(() => import("./pages/teacher/TeacherSchoolProfile"));
+
+// Teen
+const TeenDashboard = lazy(() => import("./pages/teen/TeenDashboard"));
+const TeenWallet = lazy(() => import("./pages/teen/TeenWallet"));
+const TeenMissions = lazy(() => import("./pages/teen/TeenMissions"));
+const TeenVaults = lazy(() => import("./pages/teen/TeenVaults"));
+const TeenAnalytics = lazy(() => import("./pages/teen/TeenAnalytics"));
+
+// Shared
+const LearnPage = lazy(() => import("./pages/shared/LearnPage"));
+const BadgesPage = lazy(() => import("./pages/shared/BadgesPage"));
+const StreaksPage = lazy(() => import("./pages/shared/StreaksPage"));
+const AcceptProgramInvite = lazy(() => import("./pages/shared/AcceptProgramInvite"));
+
+// Admin
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminTenants = lazy(() => import("./pages/admin/AdminTenants"));
+const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions"));
+const AdminCurrencies = lazy(() => import("./pages/admin/AdminCurrencies"));
+const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
+const AdminRisk = lazy(() => import("./pages/admin/AdminRisk"));
+const AdminCompliance = lazy(() => import("./pages/admin/AdminCompliance"));
+const AdminSchools = lazy(() => import("./pages/admin/AdminSchools"));
+const AdminFinance = lazy(() => import("./pages/admin/AdminFinance"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminLessons = lazy(() => import("./pages/admin/AdminLessons"));
+const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
+
+// Partner
+const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard"));
+const PartnerPrograms = lazy(() => import("./pages/partner/PartnerPrograms"));
+const PartnerChallenges = lazy(() => import("./pages/partner/PartnerChallenges"));
+const PartnerReports = lazy(() => import("./pages/partner/PartnerReports"));
+const PartnerProfile = lazy(() => import("./pages/partner/PartnerProfile"));
+const PartnerSubscriptionPage = lazy(() => import("./pages/partner/PartnerSubscription"));
 
 const queryClient = new QueryClient();
 
-const INVITE_ROUTE = <Route path="/invite/program/:code" element={<AcceptProgramInvite />} />;
-const INSTALL_ROUTE = <Route path="/install" element={<Install />} />;
+function LazyFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[200px]" role="status" aria-label="A carregar">
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+    </div>
+  );
+}
+
+const INVITE_ROUTE = <Route path="/invite/program/:code" element={<Suspense fallback={<LazyFallback />}><AcceptProgramInvite /></Suspense>} />;
+const INSTALL_ROUTE = <Route path="/install" element={<Suspense fallback={<LazyFallback />}><Install /></Suspense>} />;
 
 function renderRoutes(user: { role: string }) {
+  const S = ({ children }: { children: React.ReactNode }) => (
+    <Suspense fallback={<LazyFallback />}>{children}</Suspense>
+  );
+
   if (user.role === 'admin') {
     return (
       <Routes>
-        <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-        <Route path="/admin/tenants" element={<AdminLayout><AdminTenants /></AdminLayout>} />
-        <Route path="/admin/subscriptions" element={<AdminLayout><AdminSubscriptions /></AdminLayout>} />
-        <Route path="/admin/currencies" element={<AdminLayout><AdminCurrencies /></AdminLayout>} />
-        <Route path="/admin/audit" element={<AdminLayout><AdminAudit /></AdminLayout>} />
-        <Route path="/admin/risk" element={<AdminLayout><AdminRisk /></AdminLayout>} />
-        <Route path="/admin/compliance" element={<AdminLayout><AdminCompliance /></AdminLayout>} />
-        <Route path="/admin/schools" element={<AdminLayout><AdminSchools /></AdminLayout>} />
-        <Route path="/admin/finance" element={<AdminLayout><AdminFinance /></AdminLayout>} />
-        <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
-        <Route path="/admin/lessons" element={<AdminLayout><AdminLessons /></AdminLayout>} />
-        <Route path="/admin/onboarding" element={<AdminLayout><AdminOnboarding /></AdminLayout>} />
+        <Route path="/admin" element={<AdminLayout><S><AdminDashboard /></S></AdminLayout>} />
+        <Route path="/admin/tenants" element={<AdminLayout><S><AdminTenants /></S></AdminLayout>} />
+        <Route path="/admin/subscriptions" element={<AdminLayout><S><AdminSubscriptions /></S></AdminLayout>} />
+        <Route path="/admin/currencies" element={<AdminLayout><S><AdminCurrencies /></S></AdminLayout>} />
+        <Route path="/admin/audit" element={<AdminLayout><S><AdminAudit /></S></AdminLayout>} />
+        <Route path="/admin/risk" element={<AdminLayout><S><AdminRisk /></S></AdminLayout>} />
+        <Route path="/admin/compliance" element={<AdminLayout><S><AdminCompliance /></S></AdminLayout>} />
+        <Route path="/admin/schools" element={<AdminLayout><S><AdminSchools /></S></AdminLayout>} />
+        <Route path="/admin/finance" element={<AdminLayout><S><AdminFinance /></S></AdminLayout>} />
+        <Route path="/admin/users" element={<AdminLayout><S><AdminUsers /></S></AdminLayout>} />
+        <Route path="/admin/lessons" element={<AdminLayout><S><AdminLessons /></S></AdminLayout>} />
+        <Route path="/admin/onboarding" element={<AdminLayout><S><AdminOnboarding /></S></AdminLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
@@ -99,12 +129,12 @@ function renderRoutes(user: { role: string }) {
   if (user.role === 'partner') {
     return (
       <Routes>
-        <Route path="/partner" element={<PartnerLayout><PartnerDashboard /></PartnerLayout>} />
-        <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
-        <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
-        <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
-        <Route path="/partner/subscription" element={<PartnerLayout><PartnerSubscriptionPage /></PartnerLayout>} />
-        <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
+        <Route path="/partner" element={<PartnerLayout><S><PartnerDashboard /></S></PartnerLayout>} />
+        <Route path="/partner/programs" element={<PartnerLayout><S><PartnerPrograms /></S></PartnerLayout>} />
+        <Route path="/partner/challenges" element={<PartnerLayout><S><PartnerChallenges /></S></PartnerLayout>} />
+        <Route path="/partner/reports" element={<PartnerLayout><S><PartnerReports /></S></PartnerLayout>} />
+        <Route path="/partner/subscription" element={<PartnerLayout><S><PartnerSubscriptionPage /></S></PartnerLayout>} />
+        <Route path="/partner/profile" element={<PartnerLayout><S><PartnerProfile /></S></PartnerLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
@@ -114,16 +144,16 @@ function renderRoutes(user: { role: string }) {
   if (user.role === 'parent') {
     return (
       <Routes>
-        <Route path="/parent" element={<ParentLayout><ParentDashboard /></ParentLayout>} />
-        <Route path="/parent/children" element={<ParentLayout><ParentChildren /></ParentLayout>} />
-        <Route path="/parent/tasks" element={<ParentLayout><ParentTasks /></ParentLayout>} />
-        <Route path="/parent/allowance" element={<ParentLayout><ParentAllowance /></ParentLayout>} />
-        <Route path="/parent/reports" element={<ParentLayout><ParentReports /></ParentLayout>} />
-        <Route path="/parent/vaults" element={<ParentLayout><ParentVaults /></ParentLayout>} />
-        <Route path="/parent/rewards" element={<ParentLayout><ParentRewards /></ParentLayout>} />
-        <Route path="/parent/profile" element={<ParentLayout><ParentProfile /></ParentLayout>} />
-        <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
-        <Route path="/parent/consent" element={<ParentLayout><ParentConsent /></ParentLayout>} />
+        <Route path="/parent" element={<ParentLayout><S><ParentDashboard /></S></ParentLayout>} />
+        <Route path="/parent/children" element={<ParentLayout><S><ParentChildren /></S></ParentLayout>} />
+        <Route path="/parent/tasks" element={<ParentLayout><S><ParentTasks /></S></ParentLayout>} />
+        <Route path="/parent/allowance" element={<ParentLayout><S><ParentAllowance /></S></ParentLayout>} />
+        <Route path="/parent/reports" element={<ParentLayout><S><ParentReports /></S></ParentLayout>} />
+        <Route path="/parent/vaults" element={<ParentLayout><S><ParentVaults /></S></ParentLayout>} />
+        <Route path="/parent/rewards" element={<ParentLayout><S><ParentRewards /></S></ParentLayout>} />
+        <Route path="/parent/profile" element={<ParentLayout><S><ParentProfile /></S></ParentLayout>} />
+        <Route path="/parent/subscription" element={<ParentLayout><S><ParentSubscription /></S></ParentLayout>} />
+        <Route path="/parent/consent" element={<ParentLayout><S><ParentConsent /></S></ParentLayout>} />
         {INVITE_ROUTE}
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/parent" replace />} />
@@ -134,11 +164,11 @@ function renderRoutes(user: { role: string }) {
   if (user.role === 'teacher') {
     return (
       <Routes>
-        <Route path="/teacher" element={<TeacherLayout><TeacherDashboard /></TeacherLayout>} />
-        <Route path="/teacher/classes" element={<TeacherLayout><TeacherClasses /></TeacherLayout>} />
-        <Route path="/teacher/challenges" element={<TeacherLayout><TeacherChallenges /></TeacherLayout>} />
-        <Route path="/teacher/student/:studentId" element={<TeacherLayout><TeacherStudentProfile /></TeacherLayout>} />
-        <Route path="/teacher/school" element={<TeacherLayout><TeacherSchoolProfile /></TeacherLayout>} />
+        <Route path="/teacher" element={<TeacherLayout><S><TeacherDashboard /></S></TeacherLayout>} />
+        <Route path="/teacher/classes" element={<TeacherLayout><S><TeacherClasses /></S></TeacherLayout>} />
+        <Route path="/teacher/challenges" element={<TeacherLayout><S><TeacherChallenges /></S></TeacherLayout>} />
+        <Route path="/teacher/student/:studentId" element={<TeacherLayout><S><TeacherStudentProfile /></S></TeacherLayout>} />
+        <Route path="/teacher/school" element={<TeacherLayout><S><TeacherSchoolProfile /></S></TeacherLayout>} />
         {INVITE_ROUTE}
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teacher" replace />} />
@@ -149,14 +179,14 @@ function renderRoutes(user: { role: string }) {
   if (user.role === 'teen') {
     return (
       <Routes>
-        <Route path="/teen" element={<TeenLayout><TeenDashboard /></TeenLayout>} />
-        <Route path="/teen/wallet" element={<TeenLayout><TeenWallet /></TeenLayout>} />
-        <Route path="/teen/missions" element={<TeenLayout><TeenMissions /></TeenLayout>} />
-        <Route path="/teen/vaults" element={<TeenLayout><TeenVaults /></TeenLayout>} />
-        <Route path="/teen/analytics" element={<TeenLayout><TeenAnalytics /></TeenLayout>} />
-        <Route path="/teen/learn" element={<TeenLayout><LearnPage /></TeenLayout>} />
-        <Route path="/teen/badges" element={<TeenLayout><BadgesPage /></TeenLayout>} />
-        <Route path="/teen/streaks" element={<TeenLayout><StreaksPage /></TeenLayout>} />
+        <Route path="/teen" element={<TeenLayout><S><TeenDashboard /></S></TeenLayout>} />
+        <Route path="/teen/wallet" element={<TeenLayout><S><TeenWallet /></S></TeenLayout>} />
+        <Route path="/teen/missions" element={<TeenLayout><S><TeenMissions /></S></TeenLayout>} />
+        <Route path="/teen/vaults" element={<TeenLayout><S><TeenVaults /></S></TeenLayout>} />
+        <Route path="/teen/analytics" element={<TeenLayout><S><TeenAnalytics /></S></TeenLayout>} />
+        <Route path="/teen/learn" element={<TeenLayout><S><LearnPage /></S></TeenLayout>} />
+        <Route path="/teen/badges" element={<TeenLayout><S><BadgesPage /></S></TeenLayout>} />
+        <Route path="/teen/streaks" element={<TeenLayout><S><StreaksPage /></S></TeenLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>
@@ -165,17 +195,17 @@ function renderRoutes(user: { role: string }) {
 
   return (
     <Routes>
-      <Route path="/child" element={<ChildLayout><ChildDashboard /></ChildLayout>} />
-      <Route path="/child/wallet" element={<ChildLayout><ChildWallet /></ChildLayout>} />
-      <Route path="/child/missions" element={<ChildLayout><ChildMissions /></ChildLayout>} />
-      <Route path="/child/vaults" element={<ChildLayout><ChildVaults /></ChildLayout>} />
-      <Route path="/child/achievements" element={<ChildLayout><ChildAchievements /></ChildLayout>} />
-      <Route path="/child/badges" element={<ChildLayout><BadgesPage /></ChildLayout>} />
-      <Route path="/child/streaks" element={<ChildLayout><StreaksPage /></ChildLayout>} />
-      <Route path="/child/store" element={<ChildLayout><ChildStore /></ChildLayout>} />
-      <Route path="/child/diary" element={<ChildLayout><ChildDiary /></ChildLayout>} />
-      <Route path="/child/dreams" element={<ChildLayout><ChildDreams /></ChildLayout>} />
-      <Route path="/child/learn" element={<ChildLayout><LearnPage /></ChildLayout>} />
+      <Route path="/child" element={<ChildLayout><S><ChildDashboard /></S></ChildLayout>} />
+      <Route path="/child/wallet" element={<ChildLayout><S><ChildWallet /></S></ChildLayout>} />
+      <Route path="/child/missions" element={<ChildLayout><S><ChildMissions /></S></ChildLayout>} />
+      <Route path="/child/vaults" element={<ChildLayout><S><ChildVaults /></S></ChildLayout>} />
+      <Route path="/child/achievements" element={<ChildLayout><S><ChildAchievements /></S></ChildLayout>} />
+      <Route path="/child/badges" element={<ChildLayout><S><BadgesPage /></S></ChildLayout>} />
+      <Route path="/child/streaks" element={<ChildLayout><S><StreaksPage /></S></ChildLayout>} />
+      <Route path="/child/store" element={<ChildLayout><S><ChildStore /></S></ChildLayout>} />
+      <Route path="/child/diary" element={<ChildLayout><S><ChildDiary /></S></ChildLayout>} />
+      <Route path="/child/dreams" element={<ChildLayout><S><ChildDreams /></S></ChildLayout>} />
+      <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
       {INSTALL_ROUTE}
       <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
@@ -195,6 +225,8 @@ function AppRoutes() {
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.25 }}
           className="min-h-screen flex items-center justify-center"
+          role="status"
+          aria-label="A carregar aplicação"
         >
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </motion.div>
@@ -207,11 +239,13 @@ function AppRoutes() {
           transition={{ duration: 0.3 }}
         >
           <InstallPWAPrompt />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/install" element={<Install />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
+          <Suspense fallback={<LazyFallback />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/install" element={<Install />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
         </motion.div>
       ) : (
         <motion.div
@@ -236,6 +270,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            {/* Skip-to-content link for keyboard users */}
+            <a href="#main-content" className="skip-to-content">
+              Saltar para o conteúdo
+            </a>
             <OfflineBanner />
             <AppRoutes />
           </AuthProvider>
