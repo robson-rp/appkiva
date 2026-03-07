@@ -157,6 +157,8 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
           </header>
           <AnimatePresence mode="wait">
             <motion.main
+              id="main-content"
+              role="main"
               key={location.pathname}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
