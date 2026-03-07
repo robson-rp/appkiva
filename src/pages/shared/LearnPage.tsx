@@ -36,9 +36,17 @@ export default function LearnPage() {
     return <LessonViewer lesson={activeLesson} onComplete={handleComplete} onBack={() => setActiveLesson(null)} />;
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   const categories = Object.entries(LESSON_CATEGORIES);
   const completedCount = completedIds.size;
-  const totalPoints = mockLessons.filter(l => completedIds.has(l.id)).reduce((s, l) => s + l.kivaPointsReward, 0);
+  const totalPoints = lessons.filter(l => completedIds.has(l.id)).reduce((s, l) => s + l.kivaPointsReward, 0);
 
   return (
     <div className="space-y-6">
