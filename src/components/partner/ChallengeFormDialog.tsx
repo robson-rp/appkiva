@@ -46,7 +46,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: '', description: '' },
+    defaultValues: { title: '', description: '', reward_amount: 0 },
   });
 
   useEffect(() => {
