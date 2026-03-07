@@ -175,6 +175,7 @@ export default function ParentProfile() {
                   <SelectItem value="other">Outro</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-1.5">
