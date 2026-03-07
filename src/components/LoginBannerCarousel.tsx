@@ -12,12 +12,16 @@ interface Banner {
   display_order: number;
 }
 
+const AUTO_PLAY_MS = 4000;
+
 export default function LoginBannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isPaused = useRef(false);
+  const rafRef = useRef<number | null>(null);
+  const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     supabase
@@ -34,6 +38,8 @@ export default function LoginBannerCarousel() {
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
+    setProgress(0);
+    startTimeRef.current = Date.now();
   }, [emblaApi]);
 
   useEffect(() => {
@@ -43,17 +49,33 @@ export default function LoginBannerCarousel() {
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi, onSelect]);
 
-  // Auto-play
+  // Animated progress + auto-play
   useEffect(() => {
     if (!emblaApi || banners.length <= 1) return;
-    const play = () => {
-      intervalRef.current = setInterval(() => {
-        if (!isPaused.current) emblaApi.scrollNext();
-      }, 4000);
+
+    const tick = () => {
+      if (!isPaused.current) {
+        const elapsed = Date.now() - startTimeRef.current;
+        const pct = Math.min(elapsed / AUTO_PLAY_MS, 1);
+        setProgress(pct);
+        if (pct >= 1) {
+          emblaApi.scrollNext();
+          return;
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
     };
-    play();
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [emblaApi, banners.length]);
+
+  // Pause/resume resets timing
+  const handlePause = useCallback(() => { isPaused.current = true; }, []);
+  const handleResume = useCallback(() => {
+    isPaused.current = false;
+    startTimeRef.current = Date.now() - (progress * AUTO_PLAY_MS);
+  }, [progress]);
 
   if (!banners.length) return null;
 
@@ -64,11 +86,15 @@ export default function LoginBannerCarousel() {
       <div className={className}>{children}</div>
     );
 
+  const handleSegmentClick = (i: number) => {
+    emblaApi?.scrollTo(i);
+  };
+
   return (
     <div
       className="w-full"
-      onMouseEnter={() => { isPaused.current = true; }}
-      onMouseLeave={() => { isPaused.current = false; }}
+      onMouseEnter={handlePause}
+      onMouseLeave={handleResume}
     >
       <div ref={emblaRef} className="overflow-hidden rounded-2xl">
         <div className="flex">
@@ -90,19 +116,23 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="flex justify-center gap-1 mt-2">
+        <div className="flex gap-1 mt-2 px-1">
           {banners.map((_, i) => (
             <button
               key={i}
-              onClick={() => emblaApi?.scrollTo(i)}
-              className={cn(
-                "h-[2px] rounded-full transition-all duration-500 ease-out",
-                i === selectedIndex
-                  ? "w-5 bg-primary/70"
-                  : "w-2.5 bg-muted-foreground/15"
-              )}
+              onClick={() => handleSegmentClick(i)}
+              className="relative h-[2px] flex-1 rounded-full bg-muted-foreground/10 overflow-hidden"
               aria-label={`Banner ${i + 1}`}
-            />
+            >
+              <div
+                className={cn(
+                  "absolute inset-y-0 left-0 rounded-full bg-primary/60",
+                  i < selectedIndex && "w-full",
+                  i > selectedIndex && "w-0"
+                )}
+                style={i === selectedIndex ? { width: `${progress * 100}%` } : undefined}
+              />
+            </button>
           ))}
         </div>
       )}
