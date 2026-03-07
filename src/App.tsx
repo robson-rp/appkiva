@@ -196,6 +196,7 @@ function AppRoutes() {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3 }}
         >
+          <InstallPWAPrompt />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
