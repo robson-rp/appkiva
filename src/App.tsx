@@ -61,6 +61,7 @@ import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
 import PartnerReports from "./pages/partner/PartnerReports";
 import PartnerProfile from "./pages/partner/PartnerProfile";
+import PartnerSubscriptionPage from "./pages/partner/PartnerSubscription";
 import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 
 const queryClient = new QueryClient();
