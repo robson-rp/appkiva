@@ -137,7 +137,7 @@ export default function PartnerReports() {
               <p className="text-sm text-muted-foreground mt-1">Crianças impactadas</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
-              <p className="font-display text-3xl font-bold text-foreground">€{totalInvestment.toLocaleString()}</p>
+              <p className="font-display text-3xl font-bold text-foreground">{fmtP(totalInvestment)}</p>
               <p className="text-sm text-muted-foreground mt-1">Investimento total</p>
             </div>
           </div>

@@ -290,8 +290,8 @@ export default function AdminSubscriptions() {
                             {tierTypeLabels[tier.tier_type] ?? tier.tier_type}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right font-mono">${tier.price_monthly}</TableCell>
-                        <TableCell className="text-right font-mono">${tier.price_yearly}</TableCell>
+                        <TableCell className="text-right font-mono">{tier.currency} {tier.price_monthly}</TableCell>
+                        <TableCell className="text-right font-mono">{tier.currency} {tier.price_yearly}</TableCell>
                         <TableCell className="text-center">{tier.max_children}</TableCell>
                         <TableCell className="text-center">{tier.max_classrooms}</TableCell>
                         <TableCell>{tier.currency}</TableCell>

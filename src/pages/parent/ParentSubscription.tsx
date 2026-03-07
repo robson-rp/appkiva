@@ -87,7 +87,7 @@ export default function ParentSubscription() {
                   {currentTier && (
                     <p className="text-sm opacity-80 mt-0.5">
                       {currentTier.priceMonthly > 0
-                        ? `€${currentTier.priceMonthly}/mês`
+                        ? `${fmtP(currentTier.priceMonthly)}/mês`
                         : 'Gratuito'}
                     </p>
                   )}
