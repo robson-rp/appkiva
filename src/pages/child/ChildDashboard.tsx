@@ -53,11 +53,10 @@ export default function ChildDashboard() {
   const { data: dbVaults } = useDreamVaults(user?.profileId);
   const { data: streakData } = useStrDataaks();
 
-  // Use real data from auth + wallet, with sensible defaults for gamification
   const childName = user?.name ?? 'Explorador';
   const childAvatar = user?.avatar ?? '🦊';
   const balance = walletBalance?.balance ?? 0;
-  const childLevel: Level = 'saver'; // TODO: compute from XP when level system is backend-driven
+  const childLevel: Level = 'saver';
   const childKivaPoints = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
   const streakDays = streakData?.currentStreak ?? 0;
 
