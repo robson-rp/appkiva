@@ -15,6 +15,7 @@ import kivoImg from '@/assets/kivo.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
+import LoginBannerCarousel from '@/components/LoginBannerCarousel';
 
 type AuthMode = 'login' | 'signup';
 type ContactMethod = 'email' | 'phone';
@@ -375,6 +376,8 @@ export default function Login() {
                     Seleciona o teu perfil para continuar
                   </p>
                 </div>
+
+                <LoginBannerCarousel />
 
                 <div className="grid grid-cols-2 sm:grid-cols-1 gap-2.5 sm:gap-3">
                   {ROLE_ORDER.map(role => {

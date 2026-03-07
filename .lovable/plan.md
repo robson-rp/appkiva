@@ -1,56 +1,128 @@
 
 
-## Carousel de Banners Publicitários na Página de Login
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### O que será feito
+## Current State Assessment
 
-Adicionar um carousel horizontal de banners (até 5) abaixo do subtítulo "Seleciona o teu perfil para continuar", visível apenas na vista de seleção de perfil (antes do login/signup).
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### Implementação
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-**1. Tabela `login_banners` (migração)**
-```sql
-CREATE TABLE public.login_banners (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  title text NOT NULL,
-  image_url text NOT NULL,
-  link_url text,
-  display_order smallint NOT NULL DEFAULT 0,
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz DEFAULT now()
-);
+## What Lovable Can and Cannot Build
 
-ALTER TABLE public.login_banners ENABLE ROW LEVEL SECURITY;
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
--- Leitura pública (visitantes não autenticados precisam ver)
-CREATE POLICY "Anyone can view active banners"
-  ON public.login_banners FOR SELECT
-  USING (is_active = true);
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
--- Apenas admins podem gerir
-CREATE POLICY "Admins manage banners"
-  ON public.login_banners FOR ALL
-  TO authenticated
-  USING (public.has_role(auth.uid(), 'admin'))
-  WITH CHECK (public.has_role(auth.uid(), 'admin'));
-```
+## Implementation Plan (4 Phases)
 
-**2. Storage bucket `banners`**
-- Criar bucket público para imagens de banners
+### Phase 1 — Multi-Tenant Foundation
 
-**3. Componente `LoginBannerCarousel`**
-- Usa Embla Carousel (já instalado via `embla-carousel-react`)
-- Busca banners activos ordenados por `display_order`
-- Auto-play com intervalo de 4s, pausa ao hover
-- Indicadores de pontos (dots) abaixo do carousel
-- Fallback: não renderiza nada se 0 banners activos
-- Aspecto 16:9 ou 3:1, cantos arredondados, clicável se `link_url` existir
+**Database migrations:**
 
-**4. Integração no `Login.tsx`**
-- Inserir `<LoginBannerCarousel />` entre o subtítulo (linha ~377) e a grelha de roles (linha ~379)
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-**5. Ficheiros afectados**
-- `src/components/LoginBannerCarousel.tsx` — novo componente
-- `src/pages/Login.tsx` — importar e posicionar o carousel
-- 1 migração SQL — tabela + RLS + storage bucket
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+
+4. Expand `app_role` enum to include `admin`
+
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
+
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
