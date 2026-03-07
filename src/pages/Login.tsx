@@ -746,7 +746,6 @@ export default function Login() {
                 </form>
               </motion.div>
             )}
-          </AnimatePresence>
 
           <p className="text-center text-xs text-muted-foreground mt-6 sm:mt-10 pb-4">
             © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
