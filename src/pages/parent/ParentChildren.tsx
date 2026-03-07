@@ -142,6 +142,7 @@ export default function ParentChildren() {
                 setPaymentOpen(true);
                 return;
               }
+              setInviteOpen(true);
             }}>
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
             </Button>
