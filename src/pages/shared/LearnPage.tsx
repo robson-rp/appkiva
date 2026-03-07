@@ -15,9 +15,6 @@ import budgetingImg from '@/assets/lessons/budgeting.png';
 import investingImg from '@/assets/lessons/investing.png';
 import earningImg from '@/assets/lessons/earning.png';
 import donatingImg from '@/assets/lessons/donating.png';
-import { useLessons } from '@/hooks/use-lessons';
-import { useLessonProgress, useCompleteLessonMutation } from '@/hooks/use-lesson-progress';
-import { useToast } from '@/hooks/use-toast';
 
 export default function LearnPage() {
   const { data: lessons = [], isLoading } = useLessons();
