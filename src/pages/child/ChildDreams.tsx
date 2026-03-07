@@ -62,6 +62,19 @@ export default function ChildDreams() {
     } catch { toast.error('Erro ao criar sonho'); }
   };
 
+  const handleDeposit = async () => {
+    if (!depositDreamId || !depositAmount) return;
+    const amount = Number(depositAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    try {
+      await depositToDream.mutateAsync({ dreamId: depositDreamId, amount });
+      toast.success(`+${amount} 🪙 depositados no sonho!`);
+      setDepositAmount('');
+      setDepositDialogOpen(false);
+      setDepositDreamId(null);
+    } catch { toast.error('Erro ao depositar'); }
+  };
+
   // Set first expanded if not set
   if (!expandedId && dreams.length > 0 && dreams[0].parentComments.length > 0) {
     setExpandedId(dreams[0].id);
