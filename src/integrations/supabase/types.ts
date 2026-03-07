@@ -891,6 +891,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_templates: {
+        Row: {
+          cooldown_minutes: number
+          created_at: string
+          event: Database["public"]["Enums"]["notification_event"]
+          icon: string
+          id: string
+          is_active: boolean
+          is_urgent: boolean
+          message_template: string
+          recipient_role: string
+          title_template: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cooldown_minutes?: number
+          created_at?: string
+          event: Database["public"]["Enums"]["notification_event"]
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_urgent?: boolean
+          message_template: string
+          recipient_role?: string
+          title_template: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          cooldown_minutes?: number
+          created_at?: string
+          event?: Database["public"]["Enums"]["notification_event"]
+          icon?: string
+          id?: string
+          is_active?: boolean
+          is_urgent?: boolean
+          message_template?: string
+          recipient_role?: string
+          title_template?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -2120,6 +2165,22 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      notification_event:
+        | "task_created"
+        | "task_completed"
+        | "task_approved"
+        | "lesson_completed"
+        | "donation_made"
+        | "reward_claimed"
+        | "allowance_sent"
+        | "vault_deposit"
+        | "vault_withdraw"
+        | "vault_milestone"
+        | "streak_milestone"
+        | "badge_unlocked"
+        | "level_up"
+        | "budget_warning"
+        | "system_broadcast"
       reward_category: "experience" | "privilege" | "physical" | "digital"
       risk_flag_type:
         | "excessive_rewards"
@@ -2289,6 +2350,23 @@ export const Constants = {
         "transfer",
         "adjustment",
         "refund",
+      ],
+      notification_event: [
+        "task_created",
+        "task_completed",
+        "task_approved",
+        "lesson_completed",
+        "donation_made",
+        "reward_claimed",
+        "allowance_sent",
+        "vault_deposit",
+        "vault_withdraw",
+        "vault_milestone",
+        "streak_milestone",
+        "badge_unlocked",
+        "level_up",
+        "budget_warning",
+        "system_broadcast",
       ],
       reward_category: ["experience", "privilege", "physical", "digital"],
       risk_flag_type: [
