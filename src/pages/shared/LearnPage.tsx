@@ -90,14 +90,14 @@ export default function LearnPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="mt-4 space-y-3">
+        <TabsContent value="all" className="mt-4 grid grid-cols-2 gap-3">
           {lessons.map((lesson, i) => (
             <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
           ))}
         </TabsContent>
 
         {categories.map(([key]) => (
-          <TabsContent key={key} value={key} className="mt-4 space-y-3">
+          <TabsContent key={key} value={key} className="mt-4 grid grid-cols-2 gap-3">
             {lessons.filter(l => l.category === key).map((lesson, i) => (
               <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
             ))}
@@ -108,38 +108,55 @@ export default function LearnPage() {
   );
 }
 
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  saving: 'from-emerald-500/80 to-emerald-700/80',
+  budgeting: 'from-sky-500/80 to-blue-700/80',
+  investing: 'from-violet-500/80 to-purple-700/80',
+  earning: 'from-amber-400/80 to-yellow-600/80',
+  donating: 'from-rose-400/80 to-pink-600/80',
+};
+
 function LessonCard({ lesson, index, completed, onStart }: { lesson: MicroLesson; index: number; completed: boolean; onStart: () => void }) {
+  const gradient = CATEGORY_GRADIENTS[lesson.category] || 'from-primary/60 to-primary/80';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04 }}
+      transition={{ delay: index * 0.03 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
     >
       <Card
-        className={`border-border/50 cursor-pointer transition-all hover:shadow-md active:scale-[0.99] ${completed ? 'opacity-80' : ''}`}
+        className={`border-border/50 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg ${completed ? 'opacity-75' : ''}`}
         onClick={onStart}
       >
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${completed ? 'bg-chart-3/15' : 'bg-primary/10'}`}>
-            {completed ? <CheckCircle className="h-6 w-6 text-chart-3" /> : <span>{lesson.icon}</span>}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display font-bold text-foreground text-sm truncate">{lesson.title}</h3>
-            <p className="text-[11px] text-muted-foreground line-clamp-1">{lesson.description}</p>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              <Badge className={`text-[9px] border-0 ${DIFFICULTY_CONFIG[lesson.difficulty].color}`}>
-                {DIFFICULTY_CONFIG[lesson.difficulty].label}
-              </Badge>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                <Clock className="h-3 w-3" /> {lesson.estimatedMinutes}min
-              </span>
-              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                <Star className="h-3 w-3" /> {lesson.kivaPointsReward}pts
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {lesson.quiz.length} perguntas
-              </span>
+        {/* Illustration area */}
+        <div className={`relative h-28 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+          <span className="text-5xl drop-shadow-md">{lesson.icon}</span>
+          {completed && (
+            <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1">
+              <CheckCircle className="h-5 w-5 text-chart-3" />
             </div>
+          )}
+          <Badge className={`absolute bottom-2 left-2 text-[9px] border-0 backdrop-blur-sm ${DIFFICULTY_CONFIG[lesson.difficulty].color}`}>
+            {DIFFICULTY_CONFIG[lesson.difficulty].label}
+          </Badge>
+        </div>
+
+        {/* Content */}
+        <CardContent className="p-3">
+          <h3 className="font-display font-bold text-foreground text-xs leading-tight line-clamp-2 min-h-[2rem]">
+            {lesson.title}
+          </h3>
+          <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{lesson.description}</p>
+          <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-3 w-3" /> {lesson.estimatedMinutes}min
+            </span>
+            <span className="flex items-center gap-0.5">
+              <Star className="h-3 w-3 text-chart-2" /> {lesson.kivaPointsReward}
+            </span>
           </div>
         </CardContent>
       </Card>
