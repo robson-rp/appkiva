@@ -371,6 +371,8 @@ export default function OnboardingStepManager() {
                 <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
                 <Label>Ativo</Label>
               </div>
+              <DatePickerField label="Visível a partir de (opcional)" value={form.visible_from} onChange={d => setForm(f => ({ ...f, visible_from: d }))} />
+              <DatePickerField label="Visível até (opcional)" value={form.visible_until} onChange={d => setForm(f => ({ ...f, visible_until: d }))} />
               <DialogFooter className="pt-2">
                 <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>Cancelar</Button>
                 <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>
