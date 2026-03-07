@@ -50,8 +50,57 @@ export default function PartnerPrograms() {
     );
   }
 
+  const programPct = limits.maxPrograms >= 99999 ? 5 : (limits.usedPrograms / limits.maxPrograms) * 100;
+  const childPct = limits.maxChildren >= 99999 ? 5 : (limits.usedChildren / limits.maxChildren) * 100;
+  const nearLimit = programPct >= 80 || childPct >= 80;
+
   return (
     <div className="space-y-6">
+      {/* Consumption Bar */}
+      {!limits.loading && (
+        <Card className="rounded-2xl border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-[10px] font-display gap-1">
+                  <Zap className="h-3 w-3" /> {limits.tierName}
+                </Badge>
+              </div>
+              {nearLimit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl text-xs gap-1 border-primary/30 text-primary"
+                  onClick={() => navigate('/partner/subscription')}
+                >
+                  <Crown className="h-3 w-3" /> Upgrade
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Programas</span>
+                  <span className="font-semibold text-foreground">
+                    {limits.usedPrograms}/{limits.maxPrograms >= 99999 ? '∞' : limits.maxPrograms}
+                  </span>
+                </div>
+                <Progress value={programPct} className="h-1.5" />
+              </div>
+              <div>
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Crianças</span>
+                  <span className="font-semibold text-foreground">
+                    {limits.usedChildren}/{limits.maxChildren >= 99999 ? '∞' : limits.maxChildren}
+                  </span>
+                </div>
+                <Progress value={childPct} className="h-1.5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Programas 📋</h1>

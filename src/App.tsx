@@ -94,6 +94,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
         <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
         <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
+        <Route path="/partner/subscription" element={<PartnerLayout><PartnerSubscriptionPage /></PartnerLayout>} />
         <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
