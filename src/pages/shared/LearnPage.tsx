@@ -98,14 +98,14 @@ export default function LearnPage() {
 
         <TabsContent value="all" className="mt-4 grid grid-cols-2 gap-3">
           {lessons.map((lesson, i) => (
-            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
+            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
           ))}
         </TabsContent>
 
         {categories.map(([key]) => (
           <TabsContent key={key} value={key} className="mt-4 grid grid-cols-2 gap-3">
             {lessons.filter(l => l.category === key).map((lesson, i) => (
-              <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
+              <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
             ))}
           </TabsContent>
         ))}
