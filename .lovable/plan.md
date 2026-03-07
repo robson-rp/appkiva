@@ -1,141 +1,128 @@
 
 
-# UI/UX Redesign -- Plataforma KIVARA (Mobile First)
+# Plan: KIVARA Core Platform Architecture Evolution
 
-This is a large-scale redesign touching every layout, dashboard, and component across 6 user roles. To avoid breaking things and to keep iterations manageable, the work is split into 4 phases. Each phase can be implemented and tested before moving to the next.
+## Current State Assessment
 
----
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-## Phase 1: Design System Foundation
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-Update the global design tokens, typography, spacing, and base components so all subsequent changes inherit the improvements automatically.
+## What Lovable Can and Cannot Build
 
-### 1A. Typography & Spacing (`src/index.css`, `tailwind.config.ts`)
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-- Add **Poppins** as a third font option (headings get `Space Grotesk` or `Poppins`, body stays `Nunito`)
-- Define a mobile-first typography scale in CSS custom properties:
-  - `--text-heading`: 28px (mobile) / 32px (desktop)
-  - `--text-section`: 20px (mobile) / 24px (desktop)
-  - `--text-body`: 16px minimum
-  - `--text-small`: 14px minimum (replace all `text-[10px]`, `text-[11px]`, `text-[9px]` across the codebase)
-- Set global minimum touch target: `min-h-[44px] min-w-[44px]` for all interactive elements
-- Increase base gap/padding from `p-4` to `p-4 md:p-6` consistently
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### 1B. Button & Card Components (`src/components/ui/button.tsx`, `src/components/ui/card.tsx`)
+## Implementation Plan (4 Phases)
 
-- Button: increase default height to `h-11` (44px), add `rounded-xl` as default radius
-- Card: increase default border-radius to `rounded-2xl`, add subtle `shadow-sm` default
+### Phase 1 — Multi-Tenant Foundation
 
-### 1C. Color Contrast Audit (`src/index.css`)
+**Database migrations:**
 
-- Increase contrast for `--muted-foreground` in both light and dark themes
-- Ensure all text/background combinations meet WCAG AA (4.5:1 for body text)
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
----
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-## Phase 2: Layout & Navigation Overhaul
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-### 2A. Child & Teen Layouts (bottom nav -- mobile first)
+4. Expand `app_role` enum to include `admin`
 
-**Files**: `src/components/layouts/ChildLayout.tsx`, `src/components/layouts/TeenLayout.tsx`
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-- Increase bottom nav item touch targets: icons from `h-5 w-5` to `h-6 w-6`, label text from `text-[10px]` to `text-xs` (12px)
-- Increase bottom nav padding/height for better finger reach
-- Header: increase avatar size, make coin balance more prominent, increase text sizes
-- Content area: ensure `pb-28` to avoid bottom nav overlap
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-### 2B. Parent, Teacher, Partner, Admin Layouts (sidebar + mobile bottom nav)
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-**Files**: All 4 layout files in `src/components/layouts/`
+**Database:**
 
-- **Mobile**: Hide sidebar, show bottom navigation bar (like Teacher already does) for Parent, Partner, and Admin layouts
-- Show max 5 items in bottom nav; group remaining under "More" menu
-- **Desktop**: Keep sidebar but increase font sizes, touch targets, spacing
-- Sidebar nav items: increase to `min-h-[44px]`, text from small to `text-sm`
-- Header: increase height from `h-14` to `h-16`, larger logo and actions
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-### 2C. Bottom Navigation Component (new shared component)
+2. Add `real_money_enabled` flag to tenants
 
-**File**: `src/components/BottomNav.tsx` (new)
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-- Extract a reusable `BottomNav` component used by all mobile layouts
-- Consistent styling: glassmorphism backdrop, 44px touch targets, spring animations
-- Support locked items, badges, active indicators
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
----
+### Phase 3 — Audit Logging & Compliance
 
-## Phase 3: Dashboard Redesigns (per role)
+**Database:**
 
-### 3A. Child Dashboard (`src/pages/child/ChildDashboard.tsx`)
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
 
-- Hero card: increase balance text to `text-5xl`, Kivo mascot larger
-- Quick stats: increase card padding, icon sizes (`h-6 w-6`), text sizes
-- Replace all `text-[10px]` labels with `text-xs` or `text-sm`
-- Cards: `rounded-2xl`, increased padding `p-5`
-- Ensure single-column vertical scroll on mobile
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
 
-### 3B. Teen Dashboard (`src/pages/teen/TeenDashboard.tsx`)
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
 
-- Adopt a cleaner fintech card style: minimal gradients, sharper typography
-- Stats grid: increase card sizes, use `text-xl` for values
-- Progress bar: increase height from `h-2` to `h-3`
-- Remove cartoon elements, use more muted professional tones
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
 
-### 3C. Parent Dashboard (`src/pages/parent/ParentDashboard.tsx`)
+### Phase 4 — Risk Monitoring & Anti-Fraud
 
-- Hero card: larger text, clearer CTA button
-- Stats grid: `grid-cols-2` on mobile (already done), increase padding
-- Children list and activity: larger avatars, bigger text, more spacing
-- Quick action (Send Allowance): make it more prominent with larger button
+**Database:**
 
-### 3D. Teacher Dashboard (`src/pages/teacher/TeacherDashboard.tsx`)
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
 
-- Stats: increase all text sizes
-- Charts: increase height from `h-64` to `h-72`, larger axis labels
-- Leaderboard: larger student rows, bigger avatars
-- Pedagogical tips: increase text from `text-xs` to `text-sm`
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
 
-### 3E. Partner Dashboard (`src/pages/partner/PartnerDashboard.tsx`)
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
 
-- Add gradient hero card (like Parent/Teacher already have)
-- KPI cards: increase size, add trend indicators
-- Add chart placeholders for engagement metrics
-- Professional fintech style with clean spacing
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
 
-### 3F. Admin Dashboard (`src/pages/admin/AdminDashboard.tsx`)
+## Technical Approach
 
-- Increase card text sizes throughout
-- Chart area: larger, better labeled
-- Distribution cards: larger, clearer
-- Enterprise-grade spacing and typography
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
 
----
+## Estimated Scope
 
-## Phase 4: Accessibility & Performance
-
-### 4A. Accessibility Pass (all files)
-
-- Add `aria-label` to all icon-only buttons
-- Add `role` attributes where needed
-- Ensure focus ring visibility on all interactive elements
-- Add `sr-only` labels for screen readers on decorative elements
-
-### 4B. Animation Optimization
-
-- Reduce/remove `filter: 'blur(4px)'` from page transitions (expensive on mobile)
-- Keep animations subtle: `scale` max 1.02, short durations
-- Add `prefers-reduced-motion` media query support
-
----
-
-## Implementation Order
-
-Given the scope, I recommend implementing this across multiple messages:
-
-1. **Phase 1** (foundation) -- do first, benefits everything
-2. **Phase 2** (layouts) -- mobile nav for all roles
-3. **Phase 3** (dashboards) -- 2-3 dashboards per message
-4. **Phase 4** (polish) -- final pass
-
-Shall I proceed with **Phase 1** first?
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

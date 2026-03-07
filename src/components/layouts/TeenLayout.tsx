@@ -32,25 +32,25 @@ export function TeenLayout({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
         <div className="relative flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-chart-3 to-chart-4 flex items-center justify-center text-xl shadow-lg">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-chart-3 to-chart-4 flex items-center justify-center text-2xl shadow-lg">
               {user?.avatar}
             </div>
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-4 opacity-60" />
-              <p className="text-sm font-display font-bold text-foreground">
-                {user?.name} <span className="text-[10px] font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md ml-1">TEEN</span>
+              <p className="text-base font-display font-bold text-foreground">
+                {user?.name} <span className="text-small font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-md ml-1">TEEN</span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-1.5 bg-accent/15 rounded-full px-3 py-1.5 mr-1">
-              <span className="text-sm">🪙</span>
-              <span className="text-sm font-display font-bold text-accent-foreground">{teen.balance}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-accent/15 rounded-full px-3.5 py-2 mr-1">
+              <span className="text-base">🪙</span>
+              <span className="text-base font-display font-bold text-accent-foreground">{teen.balance}</span>
             </div>
             <ThemeToggle />
             <NotificationDropdown />
-            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">
-              <LogOut className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label="Sair">
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -59,19 +59,19 @@ export function TeenLayout({ children }: { children: ReactNode }) {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -16, scale: 0.98, filter: 'blur(4px)' }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="flex-1 p-4 pb-24 overflow-auto"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="flex-1 p-4 pb-28 overflow-auto"
         >
           {children}
         </motion.main>
       </AnimatePresence>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40">
+      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
-        <div className="relative px-3 py-2 flex justify-around items-center max-w-lg mx-auto">
+        <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
             const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
             const isActive = !locked && (item.url === '/teen'
@@ -82,14 +82,14 @@ export function TeenLayout({ children }: { children: ReactNode }) {
               return (
                 <div
                   key={item.title}
-                  className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
+                  className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
                   title="Requer upgrade"
                 >
                   <div className="relative p-2 rounded-xl">
-                    <item.icon className="h-5 w-5" />
-                    <Lock className="h-2.5 w-2.5 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
+                    <item.icon className="h-6 w-6" />
+                    <Lock className="h-3 w-3 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
                   </div>
-                  <span className="text-[10px] mt-0.5 font-semibold">{item.title}</span>
+                  <span className="text-caption mt-0.5 font-semibold">{item.title}</span>
                 </div>
               );
             }
@@ -99,7 +99,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
                 key={item.title}
                 to={item.url}
                 end={item.url === '/teen'}
-                className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all duration-200 text-muted-foreground"
+                className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
                 activeClassName="text-primary"
               >
                 <div className="relative p-2 rounded-xl">
@@ -111,23 +111,23 @@ export function TeenLayout({ children }: { children: ReactNode }) {
                     />
                   )}
                   <motion.div
-                    animate={isActive ? { scale: 1.15, y: -2 } : { scale: 1, y: 0 }}
+                    animate={isActive ? { scale: 1.1, y: -2 } : { scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   >
-                    <item.icon className={`h-5 w-5 relative z-10 transition-colors duration-200 ${isActive ? 'text-primary' : ''}`} />
+                    <item.icon className={`h-6 w-6 relative z-10 transition-colors duration-200 ${isActive ? 'text-primary' : ''}`} />
                   </motion.div>
                 </div>
                 <motion.span
                   animate={isActive ? { opacity: 1, y: 0 } : { opacity: 0.7, y: 2 }}
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                  className={`text-[10px] mt-0.5 font-semibold ${isActive ? 'text-primary' : ''}`}
+                  className={`text-caption mt-0.5 font-semibold ${isActive ? 'text-primary' : ''}`}
                 >
                   {item.title}
                 </motion.span>
                 {isActive && (
                   <motion.div
                     layoutId="teen-nav-dot"
-                    className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                    className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                   />
                 )}

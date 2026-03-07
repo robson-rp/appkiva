@@ -14,8 +14,24 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Space Grotesk", "sans-serif"],
+        display: ["Space Grotesk", "Poppins", "sans-serif"],
         body: ["Nunito", "sans-serif"],
+        heading: ["Poppins", "Space Grotesk", "sans-serif"],
+      },
+      fontSize: {
+        /* Mobile-first typography scale */
+        "heading": ["1.75rem", { lineHeight: "2.25rem", fontWeight: "700" }],      /* 28px */
+        "heading-lg": ["2rem", { lineHeight: "2.5rem", fontWeight: "700" }],        /* 32px - desktop */
+        "section": ["1.25rem", { lineHeight: "1.75rem", fontWeight: "600" }],       /* 20px */
+        "section-lg": ["1.5rem", { lineHeight: "2rem", fontWeight: "600" }],        /* 24px - desktop */
+        "body": ["1rem", { lineHeight: "1.5rem" }],                                 /* 16px */
+        "body-lg": ["1.125rem", { lineHeight: "1.75rem" }],                         /* 18px */
+        "small": ["0.875rem", { lineHeight: "1.25rem" }],                           /* 14px - minimum small */
+        "caption": ["0.8125rem", { lineHeight: "1.125rem" }],                       /* 13px - absolute floor */
+      },
+      spacing: {
+        "touch": "2.75rem",  /* 44px - minimum touch target */
+        "gap-mobile": "1rem", /* 16px - minimum gap */
       },
       colors: {
         border: "hsl(var(--border))",
@@ -78,6 +94,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         xl: "calc(var(--radius) + 4px)",
         "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "1.5rem",
       },
       keyframes: {
         "accordion-down": {
