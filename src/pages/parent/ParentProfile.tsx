@@ -1,29 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, User, Mail, Phone, Shield, Users, Crown } from 'lucide-react';
+import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
+import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
 export default function ParentProfile() {
   const { tierName } = useAllFeatures();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('+351 912 345 678');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [country, setCountry] = useState('AO');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    toast({ title: 'Perfil atualizado! ✅', description: 'As tuas alterações foram guardadas com sucesso.' });
+  // Load current country from profile
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('country')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.country) setCountry(data.country);
+      });
+  }, [user?.id]);
+
+  const handleSave = async () => {
+    if (!user?.profileId) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ country } as any)
+      .eq('id', user.profileId);
+    setSaving(false);
+    if (error) {
+      toast({ title: 'Erro ao guardar', description: error.message, variant: 'destructive' });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
+      toast({ title: 'Perfil atualizado! ✅', description: 'As tuas alterações foram guardadas com sucesso.' });
+    }
   };
 
   return (
@@ -120,6 +154,27 @@ export default function ParentProfile() {
               </Label>
               <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl" />
             </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" /> País / Moeda
+              </Label>
+              <Select value={country} onValueChange={setCountry}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRY_CURRENCIES.map(c => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name} — {c.currencySymbol} ({c.currency})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
@@ -156,8 +211,8 @@ export default function ParentProfile() {
 
       {/* Save */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <Button onClick={handleSave} className="w-full rounded-xl font-display h-12 text-base gap-2">
-          <Save className="h-4 w-4" /> Guardar Alterações
+        <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
+          <Save className="h-4 w-4" /> {saving ? 'A guardar...' : 'Guardar Alterações'}
         </Button>
       </motion.div>
     </div>
