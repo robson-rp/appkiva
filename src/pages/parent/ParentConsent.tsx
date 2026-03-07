@@ -229,24 +229,24 @@ export default function ParentConsent() {
                      </div>
                    </div>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 px-4 sm:px-6">
                   {CONSENT_TYPES.map(ct => {
                     const existing = child.consents.find((c: any) => c.consent_type === ct.key);
                     return (
-                      <div key={ct.key} className={`flex items-center justify-between gap-3 p-3 rounded-xl ${existing ? 'bg-secondary/5' : 'bg-muted/30'}`}>
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div key={ct.key} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 p-3 rounded-xl ${existing ? 'bg-secondary/5' : 'bg-muted/30'}`}>
+                        <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                           {existing ? (
-                            <ShieldCheck className="h-4 w-4 text-secondary shrink-0" />
+                            <ShieldCheck className="h-4 w-4 text-secondary shrink-0 mt-0.5 sm:mt-0" />
                           ) : (
-                            <Shield className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <Shield className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 sm:mt-0" />
                           )}
                           <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{ct.label}</p>
-                            <p className="text-xs text-muted-foreground truncate">{ct.desc}</p>
+                            <p className="text-sm font-medium">{ct.label}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2 sm:line-clamp-1">{ct.desc}</p>
                           </div>
                         </div>
                         {existing ? (
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0 ml-7 sm:ml-0">
                             <Badge className="bg-secondary/20 text-secondary text-[10px]">
                               {format(new Date(existing.granted_at), 'dd/MM/yy')}
                             </Badge>
@@ -260,7 +260,9 @@ export default function ParentConsent() {
                             </Button>
                           </div>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] text-muted-foreground">Não concedido</Badge>
+                          <div className="ml-7 sm:ml-0">
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">Não concedido</Badge>
+                          </div>
                         )}
                       </div>
                     );
