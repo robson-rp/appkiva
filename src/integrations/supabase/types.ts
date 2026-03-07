@@ -1420,6 +1420,10 @@ export type Database = {
         Returns: boolean
       }
       record_daily_activity: { Args: { _profile_id: string }; Returns: Json }
+      update_tenant_currency: {
+        Args: { _currency: string; _tenant_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "parent" | "child" | "teen" | "teacher" | "admin" | "partner"
