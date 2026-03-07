@@ -35,6 +35,7 @@ import TeacherDashboard from "./pages/teacher/TeacherDashboard";
 import TeacherClasses from "./pages/teacher/TeacherClasses";
 import TeacherChallenges from "./pages/teacher/TeacherChallenges";
 import TeacherStudentProfile from "./pages/teacher/TeacherStudentProfile";
+import TeacherSchoolProfile from "./pages/teacher/TeacherSchoolProfile";
 import TeenDashboard from "./pages/teen/TeenDashboard";
 import TeenWallet from "./pages/teen/TeenWallet";
 import TeenMissions from "./pages/teen/TeenMissions";
