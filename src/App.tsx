@@ -122,6 +122,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/parent/subscription" element={<ParentLayout><ParentSubscription /></ParentLayout>} />
         <Route path="/parent/consent" element={<ParentLayout><ParentConsent /></ParentLayout>} />
         {INVITE_ROUTE}
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/parent" replace />} />
       </Routes>
     );
