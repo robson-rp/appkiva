@@ -184,50 +184,50 @@ export default function ParentConsent() {
             <motion.div key={profileId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="border-border/50">
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">
-                        {child.avatar}
-                      </div>
-                      <div>
-                        <CardTitle className="text-base font-display">{child.name}</CardTitle>
-                        <p className="text-xs text-muted-foreground">{child.consents.length} consentimento(s) activo(s)</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl text-xs gap-1.5"
-                        onClick={() => setGrantDialog({ open: true, childId: profileId, childName: child.name })}
-                      >
-                        <Plus className="h-3.5 w-3.5" /> Conceder
-                      </Button>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-xl text-xs gap-1.5"
-                                disabled={!canExport || exportingChild === profileId}
-                                onClick={() => handleExportData(profileId)}
-                              >
-                                {canExport ? <FileDown className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                                {exportingChild === profileId ? 'A exportar...' : 'Exportar Dados'}
-                              </Button>
-                            </span>
-                          </TooltipTrigger>
-                          {!canExport && (
-                            <TooltipContent>
-                              <p className="text-xs">Requer upgrade para exportar dados</p>
-                            </TooltipContent>
-                          )}
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
+                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                     <div className="flex items-center gap-3">
+                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0">
+                         {child.avatar}
+                       </div>
+                       <div>
+                         <CardTitle className="text-base font-display">{child.name}</CardTitle>
+                         <p className="text-xs text-muted-foreground">{child.consents.length} consentimento(s) activo(s)</p>
+                       </div>
+                     </div>
+                     <div className="flex gap-2 w-full sm:w-auto">
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         className="rounded-xl text-xs gap-1.5 flex-1 sm:flex-none"
+                         onClick={() => setGrantDialog({ open: true, childId: profileId, childName: child.name })}
+                       >
+                         <Plus className="h-3.5 w-3.5" /> Conceder
+                       </Button>
+                       <TooltipProvider>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <span className="flex-1 sm:flex-none">
+                               <Button
+                                 variant="outline"
+                                 size="sm"
+                                 className="rounded-xl text-xs gap-1.5 w-full"
+                                 disabled={!canExport || exportingChild === profileId}
+                                 onClick={() => handleExportData(profileId)}
+                               >
+                                 {canExport ? <FileDown className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                                 {exportingChild === profileId ? 'A exportar...' : 'Exportar'}
+                               </Button>
+                             </span>
+                           </TooltipTrigger>
+                           {!canExport && (
+                             <TooltipContent>
+                               <p className="text-xs">Requer upgrade para exportar dados</p>
+                             </TooltipContent>
+                           )}
+                         </Tooltip>
+                       </TooltipProvider>
+                     </div>
+                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {CONSENT_TYPES.map(ct => {
