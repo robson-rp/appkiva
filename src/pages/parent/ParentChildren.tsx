@@ -62,8 +62,8 @@ export default function ParentChildren() {
 
   const openBudgetDialog = (child: typeof budgetChild & {}) => {
     setBudgetChild(child);
-    setBudgetValue(String(child.monthlyBudget || ''));
-    setDailyLimitValue(String(child.dailySpendLimit || 50));
+    setBudgetValue(String(child.monthlyBudget));
+    setDailyLimitValue(String(child.dailySpendLimit));
     setBudgetDialogOpen(true);
   };
 
