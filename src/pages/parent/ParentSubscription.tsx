@@ -20,10 +20,9 @@ import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices
 const FEATURE_LABELS: Record<string, string> = {
   basic_wallet: 'Carteira Básica',
   basic_tasks: 'Tarefas Básicas',
-  basic_rewards: 'Recompensas Básicas',
   savings_vaults: 'Cofres de Poupança',
   dream_vaults: 'Cofres de Sonhos',
-  custom_rewards: 'Recompensas Personalizadas',
+  custom_rewards: 'Recompensas',
   budget_exceptions: 'Exceções de Orçamento',
   multi_child: 'Multi-Criança',
   advanced_analytics: 'Relatórios Avançados',
