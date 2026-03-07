@@ -101,10 +101,10 @@ export default function PartnerPrograms() {
         </Card>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Programas 📋</h1>
-          <p className="text-muted-foreground font-body">Famílias e escolas associadas ao programa de parceria</p>
+          <h1 className="font-display text-heading md:text-heading-lg text-foreground">Programas 📋</h1>
+          <p className="text-small text-muted-foreground font-body">Famílias e escolas associadas ao programa de parceria</p>
         </div>
         <CreateProgramDialog />
       </div>

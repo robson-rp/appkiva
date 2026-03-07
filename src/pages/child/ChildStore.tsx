@@ -100,18 +100,18 @@ export default function ChildStore() {
         <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
           <div className="absolute bottom-4 left-4 w-20 h-20 bg-white/10 rounded-full blur-xl" />
-          <CardContent className="p-6 relative z-10">
-            <div className="flex items-center justify-between">
+          <CardContent className="p-5 sm:p-6 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <ShoppingBag className="h-6 w-6" />
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h1 className="font-display text-xl font-bold">Loja de Recompensas</h1>
-                  <p className="text-sm opacity-80">Resgata prémios com as tuas moedas!</p>
+                  <h1 className="font-display text-lg sm:text-xl font-bold">Loja de Recompensas</h1>
+                  <p className="text-small opacity-80">Resgata prémios com as tuas moedas!</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+              <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2 w-fit">
                 <span className="text-lg">🪙</span>
                 {loadingWallet ? (
                   <Skeleton className="h-6 w-10 bg-white/20" />
