@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockTeens } from '@/data/mock-data';
@@ -10,19 +10,21 @@ import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 
-const bottomNavItems = [
+const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Início', url: '/teen', icon: Home },
   { title: 'Carteira', url: '/teen/wallet', icon: Wallet },
   { title: 'Aprender', url: '/teen/learn', icon: BookOpen },
-  { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank },
-  { title: 'Análise', url: '/teen/analytics', icon: BarChart3 },
+  { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Análise', url: '/teen/analytics', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
 ];
 
 export function TeenLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const teen = mockTeens[0];
+  const { hasFeature } = useAllFeatures();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -71,9 +73,26 @@ export function TeenLayout({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
         <div className="relative px-3 py-2 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
-            const isActive = item.url === '/teen'
+            const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
+            const isActive = !locked && (item.url === '/teen'
               ? location.pathname === '/teen'
-              : location.pathname.startsWith(item.url);
+              : location.pathname.startsWith(item.url));
+
+            if (locked) {
+              return (
+                <div
+                  key={item.title}
+                  className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
+                  title="Requer upgrade"
+                >
+                  <div className="relative p-2 rounded-xl">
+                    <item.icon className="h-5 w-5" />
+                    <Lock className="h-2.5 w-2.5 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
+                  </div>
+                  <span className="text-[10px] mt-0.5 font-semibold">{item.title}</span>
+                </div>
+              );
+            }
 
             return (
               <NavLink

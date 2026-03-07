@@ -165,7 +165,7 @@ export default function ParentChildren() {
       </motion.div>
 
       {/* Pending Budget Exceptions */}
-      {pendingExceptions.length > 0 && (
+      {pendingExceptions.length > 0 && hasFeature(FEATURES.BUDGET_EXCEPTIONS) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-chart-1/30 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-chart-1 to-accent" />

@@ -13,6 +13,7 @@ import { useTeenBudget } from '@/hooks/use-teen-budget';
 import { useMonthlySpending } from '@/hooks/use-monthly-spending';
 import { useRequestBudgetException } from '@/hooks/use-budget-exceptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
 import { createNotification } from '@/hooks/use-notifications';
 import {
   AlertDialog,
@@ -47,6 +48,8 @@ export default function ChildStore() {
   const { data: monthlySpent = 0 } = useMonthlySpending();
   const claimReward = useClaimReward();
   const requestException = useRequestBudgetException();
+  const { hasFeature } = useAllFeatures();
+  const hasBudgetExceptions = hasFeature(FEATURES.BUDGET_EXCEPTIONS);
 
   const [confirmReward, setConfirmReward] = useState<{ id: string; name: string; price: number } | null>(null);
   const [exceptionReward, setExceptionReward] = useState<{ id: string; name: string; price: number; parentProfileId: string } | null>(null);
@@ -177,7 +180,7 @@ export default function ChildStore() {
             const canAfford = balance >= reward.price;
             const withinBudget = budgetRemaining >= reward.price;
             const canBuy = canAfford && withinBudget;
-            const canRequestException = canAfford && !withinBudget && monthlyBudget > 0;
+            const canRequestException = canAfford && !withinBudget && monthlyBudget > 0 && hasBudgetExceptions;
             return (
               <motion.div
                 key={reward.id}

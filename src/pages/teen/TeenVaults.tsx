@@ -15,6 +15,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { VaultGrowthChart } from '@/components/VaultGrowthChart';
 import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
+import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
+import { FeatureGateWrapper } from '@/components/UpgradePrompt';
 
 const calcMonthlyInterest = (amount: number, rate: number) =>
   Math.round(amount * (rate / 100));
@@ -30,6 +32,7 @@ const teenVaultsFallback = [
 
 export default function TeenVaults() {
   const { user } = useAuth();
+  const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: dbVaults, isLoading } = useSavingsVaults(user?.profileId);
   const { data: walletBalance } = useWalletBalance();
   const createVault = useCreateSavingsVault();
@@ -126,6 +129,12 @@ export default function TeenVaults() {
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
 
   return (
+    <FeatureGateWrapper
+      allowed={vaultsAllowed || gateLoading}
+      featureName="Cofres de Poupança"
+      description="Cria cofres para poupar para os teus objectivos com juros mensais. Disponível no plano Família Premium."
+      tierName={tierName}
+    >
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
@@ -403,5 +412,6 @@ export default function TeenVaults() {
         vaultIcon={confettiVault?.icon}
       />
     </div>
+    </FeatureGateWrapper>
   );
 }

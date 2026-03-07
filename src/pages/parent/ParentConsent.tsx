@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { Shield, ShieldCheck, ShieldOff, FileDown, Trash2, AlertTriangle, Eye, Plus } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldOff, FileDown, Trash2, AlertTriangle, Eye, Plus, Lock } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CONSENT_TYPES = [
   { key: 'platform_usage', label: 'Utilização da Plataforma', desc: 'Permite que a criança utilize todas as funcionalidades da KIVARA.' },
@@ -28,6 +30,8 @@ export default function ParentConsent() {
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; childId: string; childName: string }>({ open: false, childId: '', childName: '' });
   const [detailDialog, setDetailDialog] = useState<{ open: boolean; record: any }>({ open: false, record: null });
   const [exportingChild, setExportingChild] = useState<string | null>(null);
+  const { hasFeature } = useAllFeatures();
+  const canExport = hasFeature(FEATURES.EXPORT_REPORTS);
 
   // Fetch children profiles
   const { data: children = [] } = useQuery({
@@ -199,16 +203,29 @@ export default function ParentConsent() {
                       >
                         <Plus className="h-3.5 w-3.5" /> Conceder
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl text-xs gap-1.5"
-                        disabled={exportingChild === profileId}
-                        onClick={() => handleExportData(profileId)}
-                      >
-                        <FileDown className="h-3.5 w-3.5" />
-                        {exportingChild === profileId ? 'A exportar...' : 'Exportar Dados'}
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-xl text-xs gap-1.5"
+                                disabled={!canExport || exportingChild === profileId}
+                                onClick={() => handleExportData(profileId)}
+                              >
+                                {canExport ? <FileDown className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
+                                {exportingChild === profileId ? 'A exportar...' : 'Exportar Dados'}
+                              </Button>
+                            </span>
+                          </TooltipTrigger>
+                          {!canExport && (
+                            <TooltipContent>
+                              <p className="text-xs">Requer upgrade para exportar dados</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
                 </CardHeader>

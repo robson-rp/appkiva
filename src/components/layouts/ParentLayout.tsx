@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -13,15 +13,17 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const navItems = [
+const navItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Painel', url: '/parent', icon: LayoutDashboard },
   { title: 'Crianças', url: '/parent/children', icon: Users },
   { title: 'Tarefas', url: '/parent/tasks', icon: ListTodo },
   { title: 'Mesada', url: '/parent/allowance', icon: Wallet },
-  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank },
-  { title: 'Recompensas', url: '/parent/rewards', icon: Gift },
-  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3 },
+  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Recompensas', url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
+  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
   { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
@@ -32,6 +34,7 @@ function ParentSidebar() {
   const collapsed = state === 'collapsed';
   const { logout, user } = useAuth();
   const location = useLocation();
+  const { hasFeature } = useAllFeatures();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -50,9 +53,27 @@ function ParentSidebar() {
           <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-widest">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {navItems.map((item) => {
+                const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
+                    {locked ? (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-2 px-3 py-2 rounded-xl opacity-50 cursor-not-allowed select-none">
+                              <item.icon className="mr-2 h-4 w-4" />
+                              {!collapsed && <span>{item.title}</span>}
+                              {!collapsed && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p className="text-xs">Requer upgrade</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
                     <NavLink
                       to={item.url}
                       end={item.url === '/parent'}
@@ -62,9 +83,11 @@ function ParentSidebar() {
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
