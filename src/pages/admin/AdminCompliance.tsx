@@ -206,33 +206,21 @@ export default function AdminCompliance() {
               <p className="text-sm font-medium text-foreground">Exportação de Dados</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Exportar todos os dados de um utilizador em formato JSON conforme o direito de portabilidade (RGPD Art. 20).
+                Os encarregados podem exportar os dados dos filhos no painel de Consentimento.
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toast.info('A funcionalidade de exportação de dados requer integração com um serviço de geração de relatórios. Contacte o administrador do sistema.')}
-            >
-              Exportar
-            </Button>
+            <Badge variant="secondary" className="text-xs">Via Encarregado</Badge>
           </div>
           <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50">
             <Trash2 className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-foreground">Eliminação de Dados</p>
+              <p className="text-sm font-medium text-foreground">Anonimização de Dados</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Solicitar a eliminação ou anonimização de dados pessoais conforme o direito ao esquecimento (RGPD Art. 17).
-                Dados financeiros no ledger serão anonimizados mas mantidos para integridade contabilística.
+                A anonimização remove dados pessoais (nome, telefone, data de nascimento) mas mantém registos financeiros no ledger para integridade contabilística (RGPD Art. 17).
+                Os encarregados podem solicitar a anonimização dos dados dos filhos.
               </p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive border-destructive/30 hover:bg-destructive/10"
-              onClick={() => toast.info('Pedidos de eliminação devem ser submetidos via suporte. Os dados serão anonimizados no prazo de 30 dias.')}
-            >
-              Solicitar
-            </Button>
+            <Badge variant="outline" className="text-xs text-destructive border-destructive/30">Via Encarregado</Badge>
           </div>
           <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50">
             <Shield className="h-5 w-5 text-accent-foreground mt-0.5 shrink-0" />
