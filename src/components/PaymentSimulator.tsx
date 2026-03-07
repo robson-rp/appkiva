@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Crown, CreditCard, Check, Sparkles, Shield, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 
 interface SubscriptionTier {
   id: string;
@@ -56,6 +58,17 @@ export default function PaymentSimulator({
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState('');
 
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+
+  const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
+  const currencyCode = tenantCurrency?.code ?? 'AOA';
+  const decimals = tenantCurrency?.decimalPlaces ?? 0;
+
+  // Base prices are in EUR
+  const convertedPrice = (eurAmount: number) => convertPrice(eurAmount, 'EUR', currencyCode, rates);
+  const fmtPrice = (eurAmount: number) => formatPrice(convertedPrice(eurAmount), currencySymbol, decimals);
+
   const reset = () => {
     setStep('select');
     setSelectedTier(null);
@@ -86,10 +99,7 @@ export default function PaymentSimulator({
   const handlePay = async () => {
     if (!selectedTier) return;
     setStep('processing');
-
-    // Simulate processing delay
     await new Promise((r) => setTimeout(r, 2200));
-
     try {
       await onConfirmUpgrade(selectedTier.id);
       setStep('success');
@@ -122,7 +132,6 @@ export default function PaymentSimulator({
                 </DialogTitle>
               </DialogHeader>
 
-              {/* Billing toggle */}
               <div className="flex items-center justify-center gap-2 mt-4 mb-5">
                 <button
                   onClick={() => setBilling('monthly')}
@@ -163,7 +172,7 @@ export default function PaymentSimulator({
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="font-display font-bold text-sm">{tier.name}</h3>
                             <span className="font-display font-bold text-lg text-primary">
-                              €{price.toFixed(2)}
+                              {fmtPrice(price)}
                               <span className="text-xs text-muted-foreground font-normal">{period}</span>
                             </span>
                           </div>
@@ -216,14 +225,13 @@ export default function PaymentSimulator({
                 </DialogTitle>
               </DialogHeader>
 
-              {/* Summary */}
               <div className="bg-muted/50 rounded-xl p-3 mt-4 mb-5 flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">Plano selecionado</p>
                   <p className="font-display font-bold text-sm">{selectedTier.name}</p>
                 </div>
                 <p className="font-display font-bold text-primary">
-                  €{(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly).toFixed(2)}
+                  {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
                   <span className="text-[10px] text-muted-foreground font-normal">
                     /{billing === 'monthly' ? 'mês' : 'ano'}
                   </span>
@@ -233,43 +241,20 @@ export default function PaymentSimulator({
               <div className="space-y-4">
                 <div>
                   <Label className="text-xs font-medium">Nome no cartão</Label>
-                  <Input
-                    placeholder="João Silva"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    className="rounded-xl mt-1"
-                  />
+                  <Input placeholder="João Silva" value={cardName} onChange={(e) => setCardName(e.target.value)} className="rounded-xl mt-1" />
                 </div>
                 <div>
                   <Label className="text-xs font-medium">Número do cartão</Label>
-                  <Input
-                    placeholder="4242 4242 4242 4242"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                    className="rounded-xl mt-1 font-mono"
-                    maxLength={19}
-                  />
+                  <Input placeholder="4242 4242 4242 4242" value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={19} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label className="text-xs font-medium">Validade</Label>
-                    <Input
-                      placeholder="12/26"
-                      value={cardExpiry}
-                      onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
-                      className="rounded-xl mt-1 font-mono"
-                      maxLength={5}
-                    />
+                    <Input placeholder="12/26" value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={5} />
                   </div>
                   <div>
                     <Label className="text-xs font-medium">CVC</Label>
-                    <Input
-                      placeholder="123"
-                      value={cardCvc}
-                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      className="rounded-xl mt-1 font-mono"
-                      maxLength={4}
-                    />
+                    <Input placeholder="123" value={cardCvc} onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} className="rounded-xl mt-1 font-mono" maxLength={4} />
                   </div>
                 </div>
               </div>
@@ -283,13 +268,9 @@ export default function PaymentSimulator({
                 <Button variant="outline" className="rounded-xl font-display" onClick={() => setStep('select')}>
                   Voltar
                 </Button>
-                <Button
-                  className="flex-1 rounded-xl font-display gap-2"
-                  disabled={!isFormValid}
-                  onClick={handlePay}
-                >
+                <Button className="flex-1 rounded-xl font-display gap-2" disabled={!isFormValid} onClick={handlePay}>
                   <Crown className="h-4 w-4" />
-                  Pagar €{(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly).toFixed(2)}
+                  Pagar {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
                 </Button>
               </div>
             </motion.div>
@@ -297,17 +278,8 @@ export default function PaymentSimulator({
 
           {/* ─── Step 3: Processing ─── */}
           {step === 'processing' && (
-            <motion.div
-              key="processing"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="p-12 flex flex-col items-center justify-center text-center"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              >
+            <motion.div key="processing" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="p-12 flex flex-col items-center justify-center text-center">
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
                 <Loader2 className="h-10 w-10 text-primary" />
               </motion.div>
               <p className="font-display font-bold text-sm mt-4">A processar pagamento...</p>
@@ -317,40 +289,18 @@ export default function PaymentSimulator({
 
           {/* ─── Step 4: Success ─── */}
           {step === 'success' && (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="p-10 flex flex-col items-center justify-center text-center"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.1 }}
-                className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mb-4"
-              >
+            <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-10 flex flex-col items-center justify-center text-center">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 15, delay: 0.1 }} className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mb-4">
                 <Check className="h-8 w-8 text-secondary" />
               </motion.div>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                 <h3 className="font-display font-bold text-lg">Upgrade concluído! 🎉</h3>
                 <p className="text-sm text-muted-foreground mt-2">
                   O teu plano foi atualizado para <span className="font-bold text-foreground">{selectedTier?.name}</span>.
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  As novas funcionalidades já estão disponíveis.
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">As novas funcionalidades já estão disponíveis.</p>
               </motion.div>
-              <Button
-                className="mt-6 rounded-xl font-display gap-2"
-                onClick={() => {
-                  handleClose(false);
-                  window.location.reload();
-                }}
-              >
+              <Button className="mt-6 rounded-xl font-display gap-2" onClick={() => { handleClose(false); window.location.reload(); }}>
                 <Sparkles className="h-4 w-4" />
                 Começar a explorar
               </Button>

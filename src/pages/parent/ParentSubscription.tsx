@@ -12,6 +12,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 
 const FEATURE_LABELS: Record<string, string> = {
   savings_vaults: 'Cofres de Poupança',
@@ -42,6 +44,13 @@ export default function ParentSubscription() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [downgradeOpen, setDowngradeOpen] = useState(false);
   const [downgradeTarget, setDowngradeTarget] = useState<typeof tiers[0] | null>(null);
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+
+  const sym = tenantCurrency?.symbol ?? 'Kz';
+  const code = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
+  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', code, rates), sym, dec);
 
   const currentTier = tiers.find((t) => t.name === tierName);
   const currentIndex = tiers.findIndex((t) => t.name === tierName);
@@ -78,7 +87,7 @@ export default function ParentSubscription() {
                   {currentTier && (
                     <p className="text-sm opacity-80 mt-0.5">
                       {currentTier.priceMonthly > 0
-                        ? `€${currentTier.priceMonthly}/mês`
+                        ? `${fmtP(currentTier.priceMonthly)}/mês`
                         : 'Gratuito'}
                     </p>
                   )}

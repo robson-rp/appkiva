@@ -3,10 +3,19 @@ import { BarChart3, TrendingUp, BookOpen, Trophy, Download, Loader2 } from 'luci
 import { Button } from '@/components/ui/button';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
+import { useTenantCurrency } from '@/components/CurrencyDisplay';
+import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 
 export default function PartnerReports() {
   const { data: programs, isLoading: loadingP } = usePartnerPrograms();
   const { data: challenges, isLoading: loadingC } = useSponsoredChallenges();
+
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+  const sym = tenantCurrency?.symbol ?? 'Kz';
+  const cCode = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
+  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', cCode, rates), sym, dec);
 
   const isLoading = loadingP || loadingC;
 
@@ -42,7 +51,7 @@ export default function PartnerReports() {
   const impactMetrics = [
     { label: 'Total Participantes', value: totalParticipants.toLocaleString(), icon: BookOpen, color: 'text-primary' },
     { label: 'Desafios Concluídos', value: String(completedChallenges), icon: Trophy, color: 'text-chart-3' },
-    { label: 'Investimento/Criança', value: `€${avgSavingsPerChild}`, icon: TrendingUp, color: 'text-secondary' },
+    { label: 'Investimento/Criança', value: fmtP(avgSavingsPerChild), icon: TrendingUp, color: 'text-secondary' },
     { label: 'Taxa Média Conclusão', value: `${avgCompletion}%`, icon: BarChart3, color: 'text-accent-foreground' },
   ];
 
@@ -128,7 +137,7 @@ export default function PartnerReports() {
               <p className="text-sm text-muted-foreground mt-1">Crianças impactadas</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
-              <p className="font-display text-3xl font-bold text-foreground">€{totalInvestment.toLocaleString()}</p>
+              <p className="font-display text-3xl font-bold text-foreground">{fmtP(totalInvestment)}</p>
               <p className="text-sm text-muted-foreground mt-1">Investimento total</p>
             </div>
           </div>
