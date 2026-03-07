@@ -199,6 +199,7 @@ function AppRoutes() {
           <InstallPWAPrompt />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </motion.div>
