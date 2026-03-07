@@ -62,6 +62,8 @@ export default function OnboardingStepManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true });
   const [previewKey, setPreviewKey] = useState<string | null>(null);
+  const [duplicatingStep, setDuplicatingStep] = useState<StepRow | null>(null);
+  const [dupTargetRoles, setDupTargetRoles] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   const { data: steps = [], isLoading } = useQuery({
