@@ -432,6 +432,15 @@ export default function ParentChildren() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Upgrade Payment for extra children */}
+      <PaymentSimulator
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+        currentTierName={tierName}
+        tiers={tiers}
+        onConfirmUpgrade={upgrade}
+      />
     </div>
   );
 }
