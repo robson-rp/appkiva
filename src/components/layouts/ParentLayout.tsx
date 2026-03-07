@@ -62,7 +62,7 @@ function ParentSidebar() {
         <div className="p-4 flex items-center gap-3">
           {!collapsed && (
             <div>
-              <img src={kivaraLogo} alt="KIVARA" className="h-7 brightness-0 invert" />
+              <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
               <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Pequenos hábitos. Grandes futuros.</p>
             </div>
           )}
