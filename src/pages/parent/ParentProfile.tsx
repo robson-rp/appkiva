@@ -17,17 +17,47 @@ import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 
+const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
+
 export default function ParentProfile() {
   const { tierName } = useAllFeatures();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('+351 912 345 678');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [country, setCountry] = useState('AO');
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    toast({ title: 'Perfil atualizado! ✅', description: 'As tuas alterações foram guardadas com sucesso.' });
+  // Load current country from profile
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase
+      .from('profiles')
+      .select('country')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.country) setCountry(data.country);
+      });
+  }, [user?.id]);
+
+  const handleSave = async () => {
+    if (!user?.profileId) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ country } as any)
+      .eq('id', user.profileId);
+    setSaving(false);
+    if (error) {
+      toast({ title: 'Erro ao guardar', description: error.message, variant: 'destructive' });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
+      toast({ title: 'Perfil atualizado! ✅', description: 'As tuas alterações foram guardadas com sucesso.' });
+    }
   };
 
   return (
