@@ -433,7 +433,7 @@ export default function Login() {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form key={authMode} onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                   {/* ===== SIGNUP-ONLY FIELDS ===== */}
                   {authMode === 'signup' && (
                     <>
