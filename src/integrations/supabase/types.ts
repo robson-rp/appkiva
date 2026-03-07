@@ -702,6 +702,57 @@ export type Database = {
           },
         ]
       }
+      lessons: {
+        Row: {
+          blocks: Json
+          category: string
+          created_at: string
+          description: string
+          difficulty: string
+          estimated_minutes: number
+          icon: string
+          id: string
+          is_active: boolean
+          kiva_points_reward: number
+          quiz: Json
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          estimated_minutes?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          kiva_points_reward?: number
+          quiz?: Json
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          estimated_minutes?: number
+          icon?: string
+          id?: string
+          is_active?: boolean
+          kiva_points_reward?: number
+          quiz?: Json
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
