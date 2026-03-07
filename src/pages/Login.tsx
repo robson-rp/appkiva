@@ -157,7 +157,7 @@ export default function Login() {
                   phone: phoneWithPrefix,
                   institution_name: selectedRole === 'partner' ? displayName : undefined,
                   sector: sector || undefined,
-                  school_tenant_id: schoolTenantId || undefined,
+                  school_tenant_id: (schoolTenantId && schoolTenantId !== 'other') ? schoolTenantId : undefined,
                   avatar: selectedRole === 'parent' ? '👩' : selectedRole === 'teacher' ? '👨‍🏫' : selectedRole === 'teen' ? '🧑‍💻' : selectedRole === 'admin' ? '🛡️' : selectedRole === 'partner' ? '🏢' : '🦊',
                 },
               },
