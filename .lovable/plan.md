@@ -1,72 +1,128 @@
 
 
-## Plano: Gestão de Programas de Parceiros ligada aos Planos de Subscrição
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Contexto Actual
+## Current State Assessment
 
-Existe um único plano de subscrição para parceiros ("Parceiro", tipo `partner_program`) com limite de 200 crianças. No entanto, actualmente:
-- Não há validação de limites ao criar programas
-- O parceiro não vê o seu consumo vs. capacidade do plano
-- Não existem planos diferenciados para parceiros (e.g. Bronze, Prata, Ouro)
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### O que vamos implementar
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-**1. Planos de subscrição diferenciados para parceiros**
+## What Lovable Can and Cannot Build
 
-Criar 3 tiers de parceiro na tabela `subscription_tiers` (via insert tool):
-- **Parceiro Starter** — gratuito, até 50 crianças, 2 programas
-- **Parceiro Pro** — €49.99/mês, até 500 crianças, 10 programas
-- **Parceiro Enterprise** — €199.99/mês, crianças ilimitadas, programas ilimitados
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-Adicionar coluna `max_programs` à tabela `subscription_tiers` (via migration) para limitar o número de programas por plano.
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-**2. Barra de consumo no topo da página de Programas**
+## Implementation Plan (4 Phases)
 
-Mostrar ao parceiro:
-- Plano actual (nome + badge)
-- Programas usados / máximo permitido
-- Crianças impactadas / máximo permitido
-- Botão de upgrade quando próximo dos limites
+### Phase 1 — Multi-Tenant Foundation
 
-**3. Validação na criação de programas**
+**Database migrations:**
 
-Antes de criar um novo programa, verificar:
-- Se o número de programas activos < `max_programs` do tier
-- Se o total de crianças + novas crianças < `max_children` do tier
-- Se ultrapassar, mostrar prompt de upgrade em vez de permitir a criação
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-**4. Página de Subscrição do Parceiro**
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-Criar `/partner/subscription` (semelhante à `ParentSubscription`) com:
-- Plano actual e funcionalidades incluídas
-- Comparação entre planos de parceiro
-- Botão de upgrade com simulador de pagamento
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-Adicionar entrada "Subscrição" na sidebar do parceiro.
+4. Expand `app_role` enum to include `admin`
 
-### Alterações Técnicas
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-| Ficheiro | Acção |
-|----------|-------|
-| `subscription_tiers` (migration) | Adicionar coluna `max_programs` (int, default 0) |
-| `subscription_tiers` (insert tool) | Inserir tiers Starter/Pro/Enterprise, actualizar o tier "Parceiro" existente |
-| `src/hooks/use-partner-limits.ts` | Novo hook que consulta o tier do parceiro e calcula consumo vs. limites |
-| `src/pages/partner/PartnerPrograms.tsx` | Adicionar barra de consumo no topo; desactivar botão "Novo Programa" quando no limite |
-| `src/components/partner/CreateProgramDialog.tsx` | Validar limites antes de submeter |
-| `src/pages/partner/PartnerSubscription.tsx` | Nova página de gestão de plano do parceiro |
-| `src/components/layouts/PartnerLayout.tsx` | Adicionar item "Subscrição" na sidebar |
-| `src/App.tsx` | Registar rota `/partner/subscription` |
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-### Fluxo do Utilizador
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-```text
-Parceiro abre "Programas"
-  → Vê barra: "3/10 Programas · 120/500 Crianças · Plano Pro"
-  → Clica "Novo Programa"
-    → Se dentro dos limites → formulário normal
-    → Se no limite → mensagem "Limite atingido" + botão "Upgrade"
-  → Clica "Subscrição" na sidebar
-    → Vê plano actual vs. alternativas
-    → Pode fazer upgrade via simulador de pagamento
-```
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

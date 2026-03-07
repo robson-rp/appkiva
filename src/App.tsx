@@ -61,6 +61,7 @@ import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
 import PartnerReports from "./pages/partner/PartnerReports";
 import PartnerProfile from "./pages/partner/PartnerProfile";
+import PartnerSubscriptionPage from "./pages/partner/PartnerSubscription";
 import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
         <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
         <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
+        <Route path="/partner/subscription" element={<PartnerLayout><PartnerSubscriptionPage /></PartnerLayout>} />
         <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>

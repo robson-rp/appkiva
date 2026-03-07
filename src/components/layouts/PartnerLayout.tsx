@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings, Crown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
@@ -18,6 +18,7 @@ const navItems = [
   { title: 'Programas', url: '/partner/programs', icon: Users },
   { title: 'Desafios', url: '/partner/challenges', icon: Trophy },
   { title: 'Relatórios', url: '/partner/reports', icon: BarChart3 },
+  { title: 'Subscrição', url: '/partner/subscription', icon: Crown },
   { title: 'Perfil', url: '/partner/profile', icon: Settings },
 ];
 

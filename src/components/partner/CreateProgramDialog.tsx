@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreatePartnerProgram } from '@/hooks/use-partner-data';
+import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Loader2, Users, School } from 'lucide-react';
+import { Plus, Loader2, Users, School, Crown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export function CreateProgramDialog() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<'family' | 'school'>('family');
@@ -18,6 +21,11 @@ export function CreateProgramDialog() {
   const [investment, setInvestment] = useState('');
 
   const createProgram = useCreatePartnerProgram();
+  const limits = usePartnerLimits();
+
+  const parsedChildren = childrenCount ? parseInt(childrenCount) : 0;
+  const atProgramLimit = !limits.canCreateProgram;
+  const atChildrenLimit = !limits.canAddChildren(parsedChildren);
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -25,7 +33,16 @@ export function CreateProgramDialog() {
       return;
     }
 
-    // Fetch tenant_id from profile
+    if (atProgramLimit) {
+      toast.error('Limite de programas atingido. Faça upgrade do seu plano.');
+      return;
+    }
+
+    if (atChildrenLimit) {
+      toast.error('Limite de crianças atingido. Faça upgrade do seu plano.');
+      return;
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
       .select('tenant_id')
@@ -42,7 +59,7 @@ export function CreateProgramDialog() {
         partner_tenant_id: profile.tenant_id,
         program_name: name.trim(),
         program_type: type,
-        children_count: childrenCount ? parseInt(childrenCount) : 0,
+        children_count: parsedChildren,
         investment_amount: investment ? parseFloat(investment) : 0,
       });
       toast.success('Programa criado com sucesso!');
@@ -59,7 +76,7 @@ export function CreateProgramDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-1.5 rounded-xl">
+        <Button className="gap-1.5 rounded-xl" disabled={atProgramLimit}>
           <Plus className="h-4 w-4" />
           Novo Programa
         </Button>
@@ -69,69 +86,92 @@ export function CreateProgramDialog() {
           <DialogTitle className="font-display">Criar Novo Programa</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Nome do programa</label>
-            <Input
-              placeholder="Ex: Literacia Financeira 2026"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              className="rounded-xl"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Tipo</label>
-            <Select value={type} onValueChange={v => setType(v as 'family' | 'school')}>
-              <SelectTrigger className="rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="family">
-                  <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Família</span>
-                </SelectItem>
-                <SelectItem value="school">
-                  <span className="flex items-center gap-1.5"><School className="h-3.5 w-3.5" /> Escola</span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
+        {atProgramLimit ? (
+          <div className="text-center py-6 space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
+              <AlertTriangle className="h-7 w-7 text-destructive" />
+            </div>
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Nº de crianças</label>
+              <h3 className="font-display font-bold text-foreground">Limite atingido</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                O seu plano <strong>{limits.tierName}</strong> permite no máximo {limits.maxPrograms} programas.
+              </p>
+            </div>
+            <Button
+              onClick={() => { setOpen(false); navigate('/partner/subscription'); }}
+              className="rounded-xl gap-1.5"
+            >
+              <Crown className="h-4 w-4" /> Fazer Upgrade
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Nome do programa</label>
               <Input
-                type="number"
-                min="0"
-                placeholder="0"
-                value={childrenCount}
-                onChange={e => setChildrenCount(e.target.value)}
+                placeholder="Ex: Literacia Financeira 2026"
+                value={name}
+                onChange={e => setName(e.target.value)}
                 className="rounded-xl"
               />
             </div>
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Investimento (€)</label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={investment}
-                onChange={e => setInvestment(e.target.value)}
-                className="rounded-xl"
-              />
-            </div>
-          </div>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={createProgram.isPending}
-            className="w-full rounded-xl gap-1.5"
-          >
-            {createProgram.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Criar Programa
-          </Button>
-        </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Tipo</label>
+              <Select value={type} onValueChange={v => setType(v as 'family' | 'school')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="family">
+                    <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Família</span>
+                  </SelectItem>
+                  <SelectItem value="school">
+                    <span className="flex items-center gap-1.5"><School className="h-3.5 w-3.5" /> Escola</span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Nº de crianças</label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={childrenCount}
+                  onChange={e => setChildrenCount(e.target.value)}
+                  className="rounded-xl"
+                />
+                {atChildrenLimit && parsedChildren > 0 && (
+                  <p className="text-[10px] text-destructive mt-1">Excede o limite do plano ({limits.maxChildren})</p>
+                )}
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Investimento (€)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={investment}
+                  onChange={e => setInvestment(e.target.value)}
+                  className="rounded-xl"
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSubmit}
+              disabled={createProgram.isPending || atChildrenLimit}
+              className="w-full rounded-xl gap-1.5"
+            >
+              {createProgram.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Criar Programa
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
