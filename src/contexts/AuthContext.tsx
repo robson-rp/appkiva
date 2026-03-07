@@ -118,8 +118,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null };
   };
 
-  const signup = async (email: string, password: string, role: UserRole, displayName: string, country: string = 'AO') => {
-    const { error } = await supabase.auth.signUp({
+  const signup = async (
+    email: string,
+    password: string,
+    role: UserRole,
+    displayName: string,
+    country: string = 'AO',
+    extra?: {
+      gender?: string;
+      phone?: string;
+      institution_name?: string;
+      sector?: string;
+      school_tenant_id?: string;
+      invite_code?: string;
+    }
+  ) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -128,11 +142,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role,
           country,
           avatar: role === 'parent' ? '👩' : role === 'teacher' ? '👨‍🏫' : role === 'teen' ? '🧑‍💻' : role === 'admin' ? '🛡️' : role === 'partner' ? '🏢' : '🦊',
+          gender: extra?.gender,
+          phone: extra?.phone,
+          institution_name: extra?.institution_name,
+          sector: extra?.sector,
+          school_tenant_id: extra?.school_tenant_id,
         },
         emailRedirectTo: window.location.origin,
       },
     });
     if (error) return { error: error.message };
+
+    // If child/teen with invite code, claim it after signup
+    if (extra?.invite_code && data.user && (role === 'child' || role === 'teen')) {
+      // Wait for profile to be created by trigger, then claim
+      setTimeout(async () => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', data.user!.id)
+          .single();
+        if (profile) {
+          await supabase.rpc('claim_invite_code', {
+            _code: extra.invite_code!,
+            _profile_id: profile.id,
+          } as any);
+        }
+      }, 1000);
+    }
+
     return { error: null };
   };
 
