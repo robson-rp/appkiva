@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MicroLesson, DIFFICULTY_CONFIG } from '@/types/kivara';
-import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Sparkles, BookOpen, Lightbulb, Star, Zap, Image, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, XCircle, Sparkles, BookOpen, Lightbulb, Star, Zap, Image, Play, Volume2, Loader2, Square, Headphones } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface LessonViewerProps {
   lesson: MicroLesson;
@@ -22,6 +23,10 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
   const [answered, setAnswered] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [blockIndex, setBlockIndex] = useState(0);
+  const [ttsLoading, setTtsLoading] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   const totalBlocks = lesson.blocks.length;
   const totalQuestions = lesson.quiz.length;
@@ -57,6 +62,75 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     }
   };
 
+  const stopTts = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setTtsPlaying(false);
+  }, []);
+
+  const playTts = useCallback(async () => {
+    if (ttsPlaying) {
+      stopTts();
+      return;
+    }
+
+    // Gather text from all text-like blocks
+    const textContent = lesson.blocks
+      .filter(b => ['text', 'tip', 'example', 'highlight'].includes(b.type))
+      .map(b => b.content)
+      .join('\n\n');
+
+    if (!textContent.trim()) {
+      toast({ title: 'Sem conteúdo de texto para narrar', variant: 'destructive' });
+      return;
+    }
+
+    setTtsLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: textContent }),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+        throw new Error(err.error || `Erro ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        setTtsPlaying(false);
+        audioRef.current = null;
+      };
+
+      setTtsPlaying(true);
+      await audio.play();
+    } catch (e) {
+      console.error('TTS error:', e);
+      toast({
+        title: 'Erro ao gerar áudio',
+        description: e instanceof Error ? e.message : 'Tenta novamente',
+        variant: 'destructive',
+      });
+    } finally {
+      setTtsLoading(false);
+    }
+  }, [lesson.blocks, ttsPlaying, stopTts, toast]);
+
   const blockIcons: Record<string, typeof BookOpen> = {
     text: BookOpen,
     tip: Lightbulb,
@@ -64,6 +138,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     highlight: Zap,
     image: Image,
     video: Play,
+    audio: Headphones,
   };
 
   const blockColors: Record<string, string> = {
@@ -73,6 +148,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     highlight: 'bg-primary/10 border-primary/30',
     image: 'bg-muted/30 border-border/50',
     video: 'bg-primary/5 border-primary/20',
+    audio: 'bg-chart-5/10 border-chart-5/30',
   };
 
   const blockLabels: Record<string, string> = {
@@ -82,10 +158,31 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     highlight: 'Destaque',
     image: 'Imagem',
     video: 'Vídeo',
+    audio: 'Áudio',
   };
 
   const renderBlockContent = (block: any) => {
     const Icon = blockIcons[block.type] || BookOpen;
+
+    if (block.type === 'audio') {
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-chart-5 shrink-0" />
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Áudio</span>
+          </div>
+          <div className="rounded-xl bg-muted/50 p-3">
+            <audio
+              controls
+              src={block.content}
+              className="w-full h-10"
+              preload="metadata"
+            />
+          </div>
+          {block.caption && <p className="text-xs text-muted-foreground italic text-center">{block.caption}</p>}
+        </div>
+      );
+    }
 
     if (block.type === 'image') {
       return (
@@ -151,7 +248,7 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-xl shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => { stopTts(); onBack(); }} className="rounded-xl shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1 min-w-0">
@@ -165,6 +262,23 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
             </span>
           </div>
         </div>
+        {/* TTS Button */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-xl shrink-0"
+          onClick={playTts}
+          disabled={ttsLoading}
+          title={ttsPlaying ? 'Parar narração' : 'Ouvir lição'}
+        >
+          {ttsLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : ttsPlaying ? (
+            <Square className="h-4 w-4 fill-current" />
+          ) : (
+            <Volume2 className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       {/* Progress */}

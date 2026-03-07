@@ -82,7 +82,7 @@ A lição deve ser educativa, divertida e interactiva.`;
                     items: {
                       type: "object",
                       properties: {
-                        type: { type: "string", enum: ["text", "tip", "example", "highlight", "image", "video"] },
+                        type: { type: "string", enum: ["text", "tip", "example", "highlight", "image", "video", "audio"] },
                         content: { type: "string", description: "Conteúdo textual do bloco ou URL para image/video" },
                         caption: { type: "string", description: "Legenda para blocos image/video" },
                       },
