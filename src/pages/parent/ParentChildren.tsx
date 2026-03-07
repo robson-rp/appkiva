@@ -86,7 +86,6 @@ export default function ParentChildren() {
     } catch {
       toast({ title: 'Erro', description: 'Não foi possível atualizar os limites.', variant: 'destructive' });
     }
-    }
   };
 
   const inviteLink = `${window.location.origin}/join/${inviteCode}`;
