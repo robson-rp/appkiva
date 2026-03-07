@@ -316,7 +316,7 @@ export default function Login() {
         <div className="absolute bottom-[20%] right-[10%] w-32 h-[1px] bg-white/10 -rotate-30 hidden lg:block" />
         <div className="absolute top-[40%] right-[5%] w-16 h-[1px] bg-white/10 rotate-12 hidden lg:block" />
 
-        <div className="relative z-10 flex flex-row lg:flex-col items-center gap-2 lg:gap-5">
+        <div className="relative z-10 flex flex-row lg:flex-col items-center gap-2 lg:gap-5 w-full">
           {/* Logo — smaller on mobile, large on desktop */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -330,12 +330,12 @@ export default function Login() {
             />
           </motion.div>
 
-          {/* Slogan — inline on mobile, below on desktop */}
+          {/* Slogan — desktop: centered below logo */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:-mt-6 text-white/60 text-[9px] sm:text-[10px] lg:text-sm tracking-[0.2em] lg:tracking-[0.25em] uppercase font-light"
+            className="hidden lg:block lg:-mt-6 text-white/60 lg:text-sm tracking-[0.25em] uppercase font-light"
           >
             Pequenos hábitos. Grandes futuros
           </motion.p>
@@ -350,6 +350,16 @@ export default function Login() {
             beta v1.0
           </motion.span>
         </div>
+
+        {/* Slogan — mobile: bottom-right corner */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="lg:hidden absolute bottom-1.5 right-3 z-10 text-white/40 text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-light"
+        >
+          Pequenos hábitos. Grandes futuros
+        </motion.p>
       </div>
 
       {/* Right Form Panel */}
