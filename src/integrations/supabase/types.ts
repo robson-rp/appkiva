@@ -702,6 +702,48 @@ export type Database = {
           },
         ]
       }
+      lesson_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          kiva_points_earned: number
+          lesson_id: string
+          profile_id: string
+          score: number
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          kiva_points_earned?: number
+          lesson_id: string
+          profile_id: string
+          score?: number
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          kiva_points_earned?: number
+          lesson_id?: string
+          profile_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           blocks: Json
