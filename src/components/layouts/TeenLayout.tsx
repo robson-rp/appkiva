@@ -3,8 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock, UserCircle } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
-
-import { NotificationDropdown } from '@/components/NotificationDropdown';
+onents/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -25,9 +24,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
   const teen = mockTeens[0];
-  const { hasFeature } = useAllFeatures();
-
-  return (
+  const { hasFeatu  return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="relative z-50">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
