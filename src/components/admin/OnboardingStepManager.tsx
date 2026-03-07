@@ -85,11 +85,12 @@ export default function OnboardingStepManager() {
         if (error) throw error;
       } else {
         const newIndex = steps.length;
-        const { error } = await supabase.from('onboarding_steps').insert({
+        const { error } = await supabase.from('onboarding_steps').insert([{
           ...values,
           role: selectedRole,
           step_index: newIndex,
-        });
+          title: values.title ?? '',
+        }]);
         if (error) throw error;
       }
     },
