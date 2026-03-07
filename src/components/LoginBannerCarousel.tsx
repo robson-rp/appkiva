@@ -75,7 +75,7 @@ export default function LoginBannerCarousel() {
           {banners.map((b) => (
             <div key={b.id} className="min-w-0 shrink-0 grow-0 basis-full">
               <Wrapper href={b.link_url}>
-                <AspectRatio ratio={2.2}>
+                <AspectRatio ratio={1.8}>
                   <img
                     src={b.image_url}
                     alt={b.title}
@@ -90,16 +90,16 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
+        <div className="flex justify-center gap-1 mt-2">
           {banners.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
+                "h-1 rounded-full transition-all duration-300",
                 i === selectedIndex
-                  ? "w-6 bg-primary"
-                  : "w-1.5 bg-muted-foreground/30"
+                  ? "w-4 bg-primary"
+                  : "w-1 bg-muted-foreground/30"
               )}
               aria-label={`Banner ${i + 1}`}
             />
