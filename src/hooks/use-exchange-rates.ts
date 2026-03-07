@@ -33,8 +33,8 @@ export function convertPrice(
 ): number {
   if (fromCurrency === toCurrency) return amount;
 
-  const fromRate = rates.find(r => r.base_currency === 'EUR' && r.target_currency === fromCurrency);
-  const toRate = rates.find(r => r.base_currency === 'EUR' && r.target_currency === toCurrency);
+  const fromRate = rates.find(r => r.base_currency === 'USD' && r.target_currency === fromCurrency);
+  const toRate = rates.find(r => r.base_currency === 'USD' && r.target_currency === toCurrency);
 
   if (!fromRate || !toRate) return amount;
 
