@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import { OfflineBanner } from "./components/OfflineBanner";
+import { RewardAnimationProvider } from "./contexts/RewardAnimationContext";
 
 // Layouts (kept eager – small and always needed)
 import { ParentLayout } from "@/components/layouts/ParentLayout";
