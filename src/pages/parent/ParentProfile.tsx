@@ -26,7 +26,7 @@ export default function ParentProfile() {
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+351 912 345 678');
+  const [phone, setPhone] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
