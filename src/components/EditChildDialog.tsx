@@ -131,7 +131,11 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
                   captionLayout="dropdown-buttons"
                   fromYear={2000}
                   toYear={new Date().getFullYear()}
-                  disabled={(date) => date > new Date() || date < new Date('2000-01-01')}
+                  disabled={(date) => {
+                    const today = new Date();
+                    const minAgeDate = new Date(today.getFullYear() - 6, today.getMonth(), today.getDate());
+                    return date > minAgeDate || date < new Date('2000-01-01');
+                  }}
                   initialFocus
                   className={cn('p-3 pointer-events-auto')}
                   locale={pt}
