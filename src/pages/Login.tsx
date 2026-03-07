@@ -369,15 +369,15 @@ export default function Login() {
                 className="space-y-8"
               >
                 <div>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                     Bem-vindo! 👋
                   </h2>
-                  <p className="text-muted-foreground font-body">
+                  <p className="text-muted-foreground font-body text-sm sm:text-base">
                     Seleciona o teu perfil para continuar
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-2.5 sm:gap-3">
                   {ROLE_ORDER.map(role => {
                     const cfg = ROLE_CONFIG[role];
                     const Icon = cfg.icon;
@@ -393,15 +393,15 @@ export default function Login() {
                           setPassword('Test1234!');
                           setContactMethod('email');
                         }}
-                        className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
+                        className={`w-full p-3 sm:p-4 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 group ${cfg.bgClass.split(' ').pop()}`}
                       >
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
-                          <Icon className={`h-8 w-8 ${cfg.colorClass}`} />
+                        <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
+                          <Icon className={`h-5 w-5 sm:h-7 sm:w-7 ${cfg.colorClass}`} />
                         </div>
-                        <div className="flex-1">
-                          <span className="font-display font-bold text-lg text-foreground block">{cfg.label}</span>
-                          <span className="text-sm text-muted-foreground block">{cfg.description}</span>
-                          <span className="text-xs font-mono text-muted-foreground/70 mt-1 block">{cfg.testEmail} · Test1234!</span>
+                        <div className="flex-1 min-w-0 text-center sm:text-left">
+                          <span className="font-display font-bold text-sm sm:text-base text-foreground block truncate">{cfg.label}</span>
+                          <span className="text-xs text-muted-foreground hidden sm:block">{cfg.description}</span>
+                          <span className="text-xs font-mono text-muted-foreground/70 mt-0.5 hidden sm:block">{cfg.testEmail} · Test1234!</span>
                         </div>
                       </motion.button>
                     );
