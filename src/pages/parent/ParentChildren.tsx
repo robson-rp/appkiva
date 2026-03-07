@@ -294,7 +294,10 @@ export default function ParentChildren() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm">
+                    <Button variant="outline" size="sm" className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-primary hover:text-primary-foreground transition-all duration-200 text-xs sm:text-sm" onClick={() => {
+                      setEditChild({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, nickname: child.nickname, avatar: child.avatar, dateOfBirth: child.dateOfBirth });
+                      setEditOpen(true);
+                    }}>
                       <Edit className="h-3.5 w-3.5" /> Editar
                     </Button>
                     <Button
