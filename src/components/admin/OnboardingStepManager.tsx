@@ -50,6 +50,8 @@ interface StepRow {
   illustration_key: string;
   cta: string | null;
   is_active: boolean;
+  visible_from: string | null;
+  visible_until: string | null;
 }
 
 type FormData = {
@@ -58,7 +60,50 @@ type FormData = {
   illustration_key: string;
   cta: string;
   is_active: boolean;
+  visible_from: Date | null;
+  visible_until: Date | null;
 };
+
+function getVisibilityStatus(step: StepRow): 'active' | 'scheduled' | 'expired' | 'inactive' {
+  if (!step.is_active) return 'inactive';
+  const now = new Date();
+  if (step.visible_from && new Date(step.visible_from) > now) return 'scheduled';
+  if (step.visible_until && new Date(step.visible_until) < now) return 'expired';
+  return 'active';
+}
+
+const STATUS_BADGES: Record<string, { label: string; className: string }> = {
+  active: { label: 'Ativo agora', className: 'bg-green-500/10 text-green-600' },
+  scheduled: { label: 'Agendado', className: 'bg-chart-4/10 text-chart-4' },
+  expired: { label: 'Expirado', className: 'bg-destructive/10 text-destructive' },
+  inactive: { label: 'Inativo', className: 'bg-muted text-muted-foreground' },
+};
+
+function DatePickerField({ label, value, onChange }: { label: string; value: Date | null; onChange: (d: Date | null) => void }) {
+  return (
+    <div>
+      <Label>{label}</Label>
+      <div className="flex gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !value && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value ? format(value, "dd/MM/yyyy HH:mm") : "Sem limite"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={value ?? undefined} onSelect={(d) => onChange(d ?? null)} className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        {value && (
+          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => onChange(null)}>
+            ✕
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function OnboardingStepManager() {
   const [selectedRole, setSelectedRole] = useState<string>('parent');
