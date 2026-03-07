@@ -560,6 +560,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          monthly_emission_limit_override: number | null
           name: string
           tenant_id: string | null
           updated_at: string
@@ -567,6 +568,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          monthly_emission_limit_override?: number | null
           name: string
           tenant_id?: string | null
           updated_at?: string
@@ -574,6 +576,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          monthly_emission_limit_override?: number | null
           name?: string
           tenant_id?: string | null
           updated_at?: string
@@ -1345,6 +1348,7 @@ export type Database = {
           max_children: number
           max_classrooms: number
           max_programs: number
+          monthly_emission_limit: number
           name: string
           price_monthly: number
           price_yearly: number
@@ -1361,6 +1365,7 @@ export type Database = {
           max_children?: number
           max_classrooms?: number
           max_programs?: number
+          monthly_emission_limit?: number
           name: string
           price_monthly?: number
           price_yearly?: number
@@ -1377,6 +1382,7 @@ export type Database = {
           max_children?: number
           max_classrooms?: number
           max_programs?: number
+          monthly_emission_limit?: number
           name?: string
           price_monthly?: number
           price_yearly?: number
@@ -1740,6 +1746,10 @@ export type Database = {
         Returns: undefined
       }
       get_money_supply_stats: { Args: never; Returns: Json }
+      get_parent_emission_stats: {
+        Args: { _parent_profile_id: string }
+        Returns: Json
+      }
       get_profile_balance: { Args: { _profile_id: string }; Returns: number }
       get_system_wallet_id: { Args: never; Returns: string }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
