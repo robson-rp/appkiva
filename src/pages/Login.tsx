@@ -10,8 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import kivaraLogo from '@/assets/logo-kivara.svg';
-import kivoImg from '@/assets/kivo.svg';
+import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
