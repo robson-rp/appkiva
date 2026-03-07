@@ -1,0 +1,1 @@
+UPDATE subscription_tiers SET is_active = false WHERE name = 'Parceiro' AND tier_type = 'partner_program' AND is_active = true AND id != (SELECT id FROM subscription_tiers WHERE name = 'Parceiro Starter' AND tier_type = 'partner_program' LIMIT 1);
