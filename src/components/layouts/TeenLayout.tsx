@@ -23,8 +23,9 @@ const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?:
 export function TeenLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const teen = mockTeens[0];
-  const { hasFeatu  return (
+  const { hasFeature } = useAllFeatures();
+
+  return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="relative z-50">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />

@@ -24,8 +24,9 @@ const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?:
 export function ChildLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const child = mockChildren[0];
-  const { hasFeateturn (
+  const { hasFeature } = useAllFeatures();
+
+  return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="relative z-50">
