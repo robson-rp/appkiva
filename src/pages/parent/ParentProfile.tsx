@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { getCurrencyByCountry } from '@/data/countries-currencies';
 import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
