@@ -350,7 +350,55 @@ Deno.serve(async (req) => {
       return errorResponse("Erro ao registar transacção", 500, { details: insertError.message });
     }
 
-    // 12. Budget threshold notification for purchases
+    // 12a. Emission limit threshold notification (80% / 100%)
+    if (isEmission && (isParent || isAdmin) && body.entry_type !== "vault_interest") {
+      const { data: postEmissionStats } = await supabaseAdmin.rpc("get_parent_emission_stats", {
+        _parent_profile_id: callerProfile.id,
+      });
+
+      if (postEmissionStats && !postEmissionStats.error) {
+        const pctUsed = Number(postEmissionStats.percentage_used) || 0;
+        const emissionLimit = Number(postEmissionStats.emission_limit) || 0;
+        const emittedMonth = Number(postEmissionStats.emitted_this_month) || 0;
+
+        // Check if we already sent a notification for this threshold this month
+        const monthStart = postEmissionStats.month_start;
+        const thresholdType = pctUsed >= 100 ? "emission_100" : pctUsed >= 80 ? "emission_80" : null;
+
+        if (thresholdType) {
+          const { data: existingNotif } = await supabaseAdmin
+            .from("notifications")
+            .select("id")
+            .eq("profile_id", callerProfile.id)
+            .eq("type", thresholdType)
+            .gte("created_at", monthStart)
+            .limit(1);
+
+          if (!existingNotif || existingNotif.length === 0) {
+            if (pctUsed >= 100) {
+              await supabaseAdmin.from("notifications").insert({
+                profile_id: callerProfile.id,
+                title: "🚨 Limite de emissão atingido!",
+                message: `Atingiste 100% do limite mensal de emissão (${emittedMonth}/${emissionLimit} KVC). Não podes emitir mais KVC este mês.`,
+                type: "emission_100",
+                urgent: true,
+                metadata: { emitted: emittedMonth, limit: emissionLimit, pct: Math.round(pctUsed) },
+              });
+            } else {
+              await supabaseAdmin.from("notifications").insert({
+                profile_id: callerProfile.id,
+                title: "⚠️ Limite de emissão quase atingido",
+                message: `Já utilizaste ${Math.round(pctUsed)}% do limite mensal de emissão (${emittedMonth}/${emissionLimit} KVC). Gere com cuidado!`,
+                type: "emission_80",
+                metadata: { emitted: emittedMonth, limit: emissionLimit, pct: Math.round(pctUsed) },
+              });
+            }
+          }
+        }
+      }
+    }
+
+    // 12b. Budget threshold notification for purchases
     if (body.entry_type === "purchase") {
       const { data: childRecord } = await supabaseAdmin
         .from("children")
