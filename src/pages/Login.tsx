@@ -10,8 +10,7 @@ import {
 } from '@/components/ui/select';
 import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import kivaraLogo from '@/assets/logo-kivara.svg';
-import kivoImg from '@/assets/kivo.svg';
+import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
@@ -298,27 +297,19 @@ export default function Login() {
         <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-white/5 blur-3xl" />
         
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
           className="relative z-10 flex flex-row lg:flex-col items-center lg:text-center gap-4 lg:gap-0"
         >
-          <motion.div
-            animate={{ y: [0, -12, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="shrink-0 lg:mb-6"
-          >
-            <img src={kivoImg} alt="Kivo" className="w-16 h-16 sm:w-20 sm:h-20 lg:w-44 lg:h-44 drop-shadow-2xl" />
-          </motion.div>
-
-          <div className="flex flex-col lg:items-center">
-            <img src={kivaraLogo} alt="KIVARA" className="h-8 sm:h-10 lg:h-20 mb-1 lg:mb-4 brightness-0 invert drop-shadow-lg" />
+          <div className="flex flex-col items-center lg:items-center">
+            <img src={kivaraLogoWhite} alt="KIVARA" className="h-12 sm:h-14 lg:h-28 mb-2 lg:mb-6 drop-shadow-lg" />
 
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-white/90 font-body text-sm sm:text-base lg:text-xl font-medium tracking-wide"
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-white/85 font-body text-sm sm:text-base lg:text-xl font-medium tracking-wide italic"
             >
               Pequenos hábitos. Grandes futuros.
             </motion.p>
