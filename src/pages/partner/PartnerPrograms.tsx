@@ -139,9 +139,16 @@ export default function PartnerPrograms() {
               <p className="text-xs text-muted-foreground mt-1">
                 {prog.children_count} crianças • Desde {format(new Date(prog.started_at), 'MMM yyyy', { locale: pt })}
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Investimento: €{Number(prog.investment_amount).toLocaleString()}
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-xs text-muted-foreground">
+                  Orçamento: <span className="font-semibold text-foreground">{Number(prog.investment_amount).toLocaleString()} KVC</span>
+                </p>
+                {Number(prog.budget_spent) > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    • Gasto: <span className="font-semibold text-foreground">{Number(prog.budget_spent).toLocaleString()} KVC</span>
+                  </p>
+                )}
+              </div>
               <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
                 <ProgramInviteDialog
                   programId={prog.id}

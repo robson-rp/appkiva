@@ -149,12 +149,12 @@ export function CreateProgramDialog() {
                 )}
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Investimento (€)</label>
+                <label className="text-xs text-muted-foreground mb-1 block">Orçamento (KVC)</label>
                 <Input
                   type="number"
                   min="0"
-                  step="0.01"
-                  placeholder="0.00"
+                  step="1"
+                  placeholder="0"
                   value={investment}
                   onChange={e => setInvestment(e.target.value)}
                   className="rounded-xl"

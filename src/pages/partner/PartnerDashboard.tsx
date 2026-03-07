@@ -65,13 +65,13 @@ export default function PartnerDashboard() {
           <CardHeader>
             <CardTitle className="font-display text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Investimento Total
+              Orçamento Total
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8">
-              <p className="font-display text-4xl font-bold text-foreground">€{totalInvestment.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground mt-2">Investimento acumulado no programa</p>
+              <p className="font-display text-4xl font-bold text-foreground">{totalInvestment.toLocaleString()} KVC</p>
+              <p className="text-sm text-muted-foreground mt-2">Orçamento acumulado nos programas</p>
               <div className="flex justify-center gap-6 mt-6 text-sm">
                 <div>
                   <p className="font-bold text-foreground">{programs?.length ?? 0}</p>
