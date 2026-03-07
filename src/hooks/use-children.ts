@@ -99,3 +99,38 @@ export function useUpdateChildDailyLimit() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
 }
+
+export function useUpdateChild() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      childId,
+      profileId,
+      nickname,
+      avatar,
+      dateOfBirth,
+    }: {
+      childId: string;
+      profileId: string;
+      nickname: string | null;
+      avatar: string;
+      dateOfBirth: string | null;
+    }) => {
+      // Update children table (nickname + date_of_birth)
+      const { error: childError } = await supabase
+        .from('children')
+        .update({ nickname, date_of_birth: dateOfBirth } as any)
+        .eq('id', childId);
+      if (childError) throw childError;
+
+      // Update profile avatar
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ avatar })
+        .eq('id', profileId);
+      if (profileError) throw profileError;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
+  });
+}
