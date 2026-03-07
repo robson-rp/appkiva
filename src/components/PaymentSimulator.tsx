@@ -235,7 +235,7 @@ export default function PaymentSimulator({
                   <p className="font-display font-bold text-sm">{selectedTier.name}</p>
                 </div>
                 <p className="font-display font-bold text-primary">
-                  {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
+                  {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                   <span className="text-[10px] text-muted-foreground font-normal">
                     /{billing === 'monthly' ? 'mês' : 'ano'}
                   </span>
