@@ -63,7 +63,7 @@ export default function LearnPage() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Progresso</p>
-              <p className="text-lg font-display font-bold text-foreground">{completedCount}/{mockLessons.length} lições</p>
+              <p className="text-lg font-display font-bold text-foreground">{completedCount}/{lessons.length} lições</p>
             </div>
             <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2">
               <Sparkles className="h-4 w-4 text-primary" />
