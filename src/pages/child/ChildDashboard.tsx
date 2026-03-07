@@ -30,7 +30,7 @@ import { ChildAchievementsStrip } from '@/components/child/ChildAchievementsStri
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { useChildTasks } from '@/hooks/use-child-tasks';
 import { useDreamVaults } from '@/hooks/use-dream-vaults';
-import { useStreakData } from '@/hooks/use-streaks';
+import { useStreakDatafrom '@/hooks/use-streaks';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -51,7 +51,7 @@ export default function ChildDashboard() {
   const { data: weeklyData } = useWeeklySparkline();
   const { data: tasks = [] } = useChildTasks();
   const { data: dbVaults } = useDreamVaults(user?.profileId);
-  const { data: streakData } = useStrDataaks();
+  const { data: streakData } = useStrDateakData
 
   const childName = user?.name ?? 'Explorador';
   const childAvatar = user?.avatar ?? '🦊';
