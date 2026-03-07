@@ -359,13 +359,12 @@ export default function Login() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="w-full max-w-md"
         >
-          <AnimatePresence mode="wait">
-            {!selectedRole ? (
+          {!selectedRole ? (
               <motion.div
                 key="role-select"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
                 <div>
