@@ -216,6 +216,8 @@ export default function OnboardingStepManager() {
       illustration_key: step.illustration_key,
       cta: step.cta ?? '',
       is_active: step.is_active,
+      visible_from: step.visible_from ? new Date(step.visible_from) : null,
+      visible_until: step.visible_until ? new Date(step.visible_until) : null,
     });
   };
 
