@@ -1,20 +1,101 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LESSON_CATEGORIES, DIFFICULTY_CONFIG, LessonCategory, MicroLesson } from '@/types/kivara';
 import { LessonViewer } from '@/components/LessonViewer';
-import { BookOpen, Clock, Star, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { BookOpen, Clock, Star, CheckCircle, Sparkles, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLessons } from '@/hooks/use-lessons';
 import { useLessonProgress, useCompleteLessonMutation } from '@/hooks/use-lesson-progress';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 import savingImg from '@/assets/lessons/saving.png';
 import budgetingImg from '@/assets/lessons/budgeting.png';
 import investingImg from '@/assets/lessons/investing.png';
 import earningImg from '@/assets/lessons/earning.png';
 import donatingImg from '@/assets/lessons/donating.png';
+
+const ITEMS_PER_PAGE = 6;
+
+function PaginatedGrid({ lessons, completedIds, scoreMap, onStart }: {
+  lessons: MicroLesson[];
+  completedIds: Set<string>;
+  scoreMap: Map<string, number>;
+  onStart: (lesson: MicroLesson) => void;
+}) {
+  const [page, setPage] = useState(0);
+  const totalPages = Math.max(1, Math.ceil(lessons.length / ITEMS_PER_PAGE));
+  const paginated = lessons.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+
+  // Reset page when lessons change (e.g. tab switch)
+  useMemo(() => setPage(0), [lessons.length]);
+
+  return (
+    <div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={page}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -30 }}
+          transition={{ duration: 0.2 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          {paginated.map((lesson, i) => (
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              index={i}
+              completed={completedIds.has(lesson.id)}
+              score={scoreMap.get(lesson.id) ?? 0}
+              onStart={() => onStart(lesson)}
+            />
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-5">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            disabled={page === 0}
+            onClick={() => setPage(p => p - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`h-2 rounded-full transition-all duration-200 ${
+                  i === page
+                    ? 'w-6 bg-primary'
+                    : 'w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40'
+                }`}
+              />
+            ))}
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            disabled={page === totalPages - 1}
+            onClick={() => setPage(p => p + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LearnPage() {
   const { data: lessons = [], isLoading } = useLessons();
@@ -39,7 +120,6 @@ export default function LearnPage() {
         }
       );
     } else {
-      // retry — reset lesson
       setActiveLesson({ ...activeLesson });
     }
   };
@@ -96,17 +176,13 @@ export default function LearnPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="mt-4 grid grid-cols-2 gap-3">
-          {lessons.map((lesson, i) => (
-            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
-          ))}
+        <TabsContent value="all" className="mt-4">
+          <PaginatedGrid lessons={lessons} completedIds={completedIds} scoreMap={scoreMap} onStart={setActiveLesson} />
         </TabsContent>
 
         {categories.map(([key]) => (
-          <TabsContent key={key} value={key} className="mt-4 grid grid-cols-2 gap-3">
-            {lessons.filter(l => l.category === key).map((lesson, i) => (
-              <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
-            ))}
+          <TabsContent key={key} value={key} className="mt-4">
+            <PaginatedGrid lessons={lessons.filter(l => l.category === key)} completedIds={completedIds} scoreMap={scoreMap} onStart={setActiveLesson} />
           </TabsContent>
         ))}
       </Tabs>
