@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Sparkles, Crown, ArrowRight } from 'lucide-react';
+import { Lock, Sparkles, Crown, ArrowRight, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface UpgradePromptProps {
   /** The name of the blocked feature (e.g. "Cofres de Sonhos") */
