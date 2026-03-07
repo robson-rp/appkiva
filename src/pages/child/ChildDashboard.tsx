@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
 import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
+import { PlayerCard } from '@/components/PlayerCard';
 import { Kivo } from '@/components/Kivo';
 import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements } from '@/data/mock-data';
 import { StreakWidget } from '@/components/StreakWidget';
