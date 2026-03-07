@@ -388,7 +388,19 @@ export default function AdminSubscriptions() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={v => {
+                  if (!v && editId) {
+                    const currentTier = tiers?.find((t: any) => t.id === editId);
+                    if (currentTier && (currentTier.tenant_count ?? 0) > 0 && currentTier.is_active) {
+                      setDeactivateConfirmOpen(true);
+                      return;
+                    }
+                  }
+                  setForm(f => ({ ...f, is_active: v }));
+                }}
+              />
               <Label>Plano activo</Label>
             </div>
 
