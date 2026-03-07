@@ -70,6 +70,12 @@ export default function PartnerPrograms() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 Investimento: €{Number(prog.investment_amount).toLocaleString()}
               </p>
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <ProgramInviteDialog
+                  programId={prog.id}
+                  programName={prog.program_name}
+                  partnerTenantId={prog.partner_tenant_id}
+                />
             </CardContent>
           </Card>
         ))}
