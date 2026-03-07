@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock, UserCircle } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockTeens } from '@/data/mock-data';
