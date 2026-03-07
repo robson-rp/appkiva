@@ -139,6 +139,7 @@ export function NotificationDropdown() {
   const urgentNotif = allNotifications.find(n => n.urgent && !n.read);
 
   const [showBanner, setShowBanner] = useState(false);
+  const [dismissedBannerId, setDismissedBannerId] = useState<string | null>(null);
   const [muted, setMuted] = useState(() => localStorage.getItem('kivara-notif-muted') === 'true');
 
   const toggleMute = () => {
@@ -150,7 +151,7 @@ export function NotificationDropdown() {
   };
 
   useEffect(() => {
-    if (urgentNotif) {
+    if (urgentNotif && urgentNotif.id !== dismissedBannerId) {
       const timer = setTimeout(() => {
         setShowBanner(true);
         if (!muted) {
@@ -159,8 +160,10 @@ export function NotificationDropdown() {
         }
       }, 2000);
       return () => clearTimeout(timer);
+    } else {
+      setShowBanner(false);
     }
-  }, [urgentNotif, muted]);
+  }, [urgentNotif?.id, dismissedBannerId, muted]);
 
   const handleMarkRead = (id: string, isReal?: boolean) => {
     if (isReal) {
