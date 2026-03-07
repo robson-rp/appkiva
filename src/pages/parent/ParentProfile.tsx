@@ -30,18 +30,20 @@ export default function ParentProfile() {
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
+  const [gender, setGender] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Load current country from profile
+  // Load current country and gender from profile
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country')
+      .select('country, gender')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.country) setCountry(data.country);
+        if ((data as any)?.gender) setGender((data as any).gender);
       });
   }, [user?.id]);
 
