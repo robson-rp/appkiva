@@ -154,6 +154,7 @@ export default function AdminSubscriptions() {
           price_yearly: validData.price_yearly,
           max_children: validData.max_children,
           max_classrooms: validData.max_classrooms,
+          extra_child_price: validData.extra_child_price,
           currency: validData.currency,
           is_active: validData.is_active,
           features: validData.features,
