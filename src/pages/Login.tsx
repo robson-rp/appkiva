@@ -231,17 +231,34 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {authMode === 'signup' && (
-                    <div className="space-y-2">
-                      <Label htmlFor="displayName" className="font-semibold">Nome</Label>
-                      <Input
-                        id="displayName"
-                        placeholder="O teu nome"
-                        value={displayName}
-                        onChange={e => setDisplayName(e.target.value)}
-                        className="h-12 rounded-xl text-base"
-                        required
-                      />
-                    </div>
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="displayName" className="font-semibold">Nome</Label>
+                        <Input
+                          id="displayName"
+                          placeholder="O teu nome"
+                          value={displayName}
+                          onChange={e => setDisplayName(e.target.value)}
+                          className="h-12 rounded-xl text-base"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-semibold">País</Label>
+                        <Select value={country} onValueChange={setCountry}>
+                          <SelectTrigger className="h-12 rounded-xl text-base">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {COUNTRY_CURRENCIES.map(c => (
+                              <SelectItem key={c.code} value={c.code}>
+                                {c.name} ({c.currencySymbol})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
                   )}
 
                   <div className="space-y-2">
