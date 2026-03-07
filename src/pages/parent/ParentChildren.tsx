@@ -294,7 +294,7 @@ export default function ParentChildren() {
             <div className="text-5xl mb-4">👶</div>
             <h3 className="font-display font-bold text-lg mb-2">Ainda sem crianças</h3>
             <p className="text-sm text-muted-foreground mb-4">Adiciona ou convida uma criança para começar.</p>
-            <Button className="rounded-xl font-display gap-1.5" onClick={() => setInviteOpen(true)}>
+            <Button className="rounded-xl font-display gap-1.5" onClick={async () => { await generateAndPersistCode(); setInviteOpen(true); }}>
               <Link2 className="h-4 w-4" /> Convidar Criança
             </Button>
           </CardContent>
