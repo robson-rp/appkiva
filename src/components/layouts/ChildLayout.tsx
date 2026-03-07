@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut, BookOpen, Sparkles } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut, BookOpen, Sparkles, Lock } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockChildren } from '@/data/mock-data';
@@ -10,13 +10,14 @@ import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 
-const bottomNavItems = [
+const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Início', url: '/child', icon: Home },
   { title: 'Carteira', url: '/child/wallet', icon: Wallet },
   { title: 'Aprender', url: '/child/learn', icon: BookOpen },
-  { title: 'Cofres', url: '/child/vaults', icon: PiggyBank },
-  { title: 'Sonhos', url: '/child/dreams', icon: Sparkles },
+  { title: 'Cofres', url: '/child/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Sonhos', url: '/child/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
   { title: 'Loja', url: '/child/store', icon: ShoppingBag },
 ];
 
