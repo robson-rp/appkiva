@@ -1412,6 +1412,27 @@ export type Database = {
         }
         Relationships: []
       }
+      system_config: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           approved_at: string | null
@@ -1584,6 +1605,7 @@ export type Database = {
           currency: string
           id: string
           is_active: boolean
+          is_system: boolean
           profile_id: string
           updated_at: string
           wallet_type: Database["public"]["Enums"]["wallet_type"]
@@ -1593,6 +1615,7 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          is_system?: boolean
           profile_id: string
           updated_at?: string
           wallet_type?: Database["public"]["Enums"]["wallet_type"]
@@ -1602,6 +1625,7 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          is_system?: boolean
           profile_id?: string
           updated_at?: string
           wallet_type?: Database["public"]["Enums"]["wallet_type"]
@@ -1715,7 +1739,9 @@ export type Database = {
         Args: { _code: string; _profile_id: string }
         Returns: undefined
       }
+      get_money_supply_stats: { Args: never; Returns: Json }
       get_profile_balance: { Args: { _profile_id: string }; Returns: number }
+      get_system_wallet_id: { Args: never; Returns: string }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
