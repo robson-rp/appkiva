@@ -2,9 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Users, School, Search, Loader2, Trash2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Users, School, Search, Loader2, Trash2, Crown, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { usePartnerPrograms, useDeletePartnerProgram } from '@/hooks/use-partner-data';
+import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
 import { CreateProgramDialog } from '@/components/partner/CreateProgramDialog';
@@ -12,6 +14,7 @@ import { EditProgramDialog } from '@/components/partner/EditProgramDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export default function PartnerPrograms() {
   const { user } = useAuth();
