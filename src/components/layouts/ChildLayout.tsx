@@ -43,10 +43,6 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-accent/15 rounded-full px-3.5 py-2 mr-1">
-              <span className="text-base">🪙</span>
-              <span className="text-base font-display font-bold text-accent-foreground">{child.balance}</span>
-            </div>
             <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Conquistas">
               <Trophy className="h-5 w-5 text-muted-foreground" />
             </NavLink>
