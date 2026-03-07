@@ -14,6 +14,7 @@ import { TeenBudgetBar } from '@/components/teen/TeenBudgetBar';
 import { TeenCategoryBreakdown } from '@/components/teen/TeenCategoryBreakdown';
 import { TeenRecentTransactions } from '@/components/teen/TeenRecentTransactions';
 import { StreakWidget } from '@/components/StreakWidget';
+import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 
 export default function TeenDashboard() {
   const teen = mockTeens[0];
