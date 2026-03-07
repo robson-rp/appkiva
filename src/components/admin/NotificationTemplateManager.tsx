@@ -62,7 +62,7 @@ function useToggleTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('notification_templates')
         .update({ is_active } as any)
         .eq('id', id);
