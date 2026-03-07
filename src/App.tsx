@@ -65,6 +65,7 @@ const LearnPage = lazy(() => import("./pages/shared/LearnPage"));
 const BadgesPage = lazy(() => import("./pages/shared/BadgesPage"));
 const StreaksPage = lazy(() => import("./pages/shared/StreaksPage"));
 const AcceptProgramInvite = lazy(() => import("./pages/shared/AcceptProgramInvite"));
+const JoinFamily = lazy(() => import("./pages/shared/JoinFamily"));
 
 // Admin
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
