@@ -159,8 +159,7 @@ export default function OnboardingStepManager() {
     },
     onError: (e: any) => toast.error(e.message),
   });
-
-
+  const openEdit = (step: StepRow) => {
     setEditingStep(step);
     setForm({
       title: step.title,
