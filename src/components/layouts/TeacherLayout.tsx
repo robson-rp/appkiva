@@ -54,7 +54,7 @@ function TeacherSidebar() {
         <div className="p-4 flex items-center gap-3">
           {!collapsed && (
             <div>
-              <img src={kivaraLogo} alt="KIVARA" className="h-7 brightness-0 invert" />
+              <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
               <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Modo Escolar</p>
             </div>
           )}
@@ -157,7 +157,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-4">
                 {!isMobile && <SidebarTrigger />}
                 <div className="flex items-center gap-2">
-                  <img src={kivaraLogo} alt="KIVARA" className="h-6 opacity-70" />
+                  <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
                   <span className="text-caption font-display font-semibold text-muted-foreground bg-secondary/10 text-secondary px-2.5 py-1 rounded-lg">ESCOLA</span>
                 </div>
               </div>

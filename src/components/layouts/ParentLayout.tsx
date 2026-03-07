@@ -62,7 +62,7 @@ function ParentSidebar() {
         <div className="p-4 flex items-center gap-3">
           {!collapsed && (
             <div>
-              <img src={kivaraLogo} alt="KIVARA" className="h-7 brightness-0 invert" />
+              <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
               <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Pequenos hábitos. Grandes futuros.</p>
             </div>
           )}
@@ -162,7 +162,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             <div className="relative h-16 flex items-center justify-between px-4 gap-4">
               <div className="flex items-center gap-4">
                 {!isMobile && <SidebarTrigger />}
-                <img src={kivaraLogo} alt="KIVARA" className="h-6 opacity-70" />
+                <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
               </div>
               <div className="flex items-center gap-2">
                 <ThemeToggle />
