@@ -40,7 +40,8 @@ export default function ParentChildren() {
   const [inviteCode, setInviteCode] = useState(() => generateCode());
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
-
+  const [editOpen, setEditOpen] = useState(false);
+  const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   // Feature gate: check max_children limit
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
