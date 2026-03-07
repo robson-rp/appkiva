@@ -65,12 +65,12 @@ export default function PartnerReports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Relatórios de Impacto 📊</h1>
-          <p className="text-muted-foreground font-body">Métricas e evolução do programa de parceria</p>
+          <h1 className="font-display text-heading md:text-heading-lg text-foreground">Relatórios de Impacto 📊</h1>
+          <p className="text-small text-muted-foreground font-body">Métricas e evolução do programa de parceria</p>
         </div>
-        <Button variant="outline" className="rounded-xl gap-2">
+        <Button variant="outline" className="rounded-xl gap-2 w-full sm:w-auto">
           <Download className="h-4 w-4" />
           Exportar PDF
         </Button>

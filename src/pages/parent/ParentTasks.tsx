@@ -136,27 +136,28 @@ export default function ParentTasks() {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-5 sm:p-6 text-primary-foreground">
         <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute top-0 left-1/3 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="relative flex items-center justify-between">
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
-            <h1 className="font-display text-2xl font-bold mt-1">Tarefas</h1>
-            <p className="text-sm text-primary-foreground/60 mt-1">Cria e aprova tarefas para as crianças</p>
+            <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">Tarefas</h1>
+            <p className="text-small text-primary-foreground/60 mt-1">Cria e aprova tarefas para as crianças</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
               onClick={handleAiSuggest}
               disabled={aiLoading}
+              size="sm"
               className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm"
             >
               {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              Sugerir IA
+              <span className="hidden xs:inline">Sugerir</span> IA
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
+                <Button size="sm" className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
                   <Plus className="h-4 w-4" /> Nova Tarefa
                 </Button>
               </DialogTrigger>
@@ -290,15 +291,15 @@ export default function ParentTasks() {
               <motion.div key={task.id} variants={item} whileHover={{ x: 4 }}>
                 <Card className="group hover:shadow-kivara transition-all duration-300 border-border/50 overflow-hidden">
                   <div className="h-0.5 gradient-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <CardContent className="p-0">
-                    <div className="flex items-center gap-4 p-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-xl sm:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                         {task.childAvatar}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
                           <h3 className="font-display font-bold text-sm">{task.title}</h3>
-                          <span className="text-[10px] text-muted-foreground bg-muted rounded-lg px-2 py-0.5">{categoryLabels[task.category]}</span>
+                          <span className="text-caption text-muted-foreground bg-muted rounded-lg px-2 py-0.5">{categoryLabels[task.category]}</span>
                           {(task as any).is_recurring && (
                             <Badge variant="outline" className="text-[9px] gap-1 px-1.5 py-0 border-primary/30 text-primary">
                               <RefreshCw className="h-2.5 w-2.5" />
@@ -306,21 +307,28 @@ export default function ParentTasks() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{task.description}</p>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-xs font-display font-bold bg-[hsl(var(--kivara-light-gold))] px-2.5 py-0.5 rounded-xl">🪙 {task.reward}</span>
-                          <span className="text-xs text-muted-foreground">· {task.childDisplayName}</span>
+                        <p className="text-caption text-muted-foreground truncate">{task.description}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                          <span className="text-caption font-display font-bold bg-[hsl(var(--kivara-light-gold))] px-2.5 py-0.5 rounded-xl">🪙 {task.reward}</span>
+                          <span className="text-caption text-muted-foreground">· {task.childDisplayName}</span>
+                          <Badge variant="secondary" className="text-caption font-display gap-1 rounded-xl px-2 py-0.5 sm:hidden ${config.className}">
+                            <StatusIcon className="h-3 w-3" />
+                            {config.label}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="secondary" className={`text-[10px] font-display gap-1 rounded-xl px-2.5 py-1 ${config.className}`}>
-                          <StatusIcon className="h-3 w-3" />
-                          {config.label}
-                        </Badge>
+                    </div>
+                    {/* Actions row - always below on mobile */}
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30 sm:border-0 sm:pt-0 sm:mt-2">
+                      <Badge variant="secondary" className={`text-caption font-display gap-1 rounded-xl px-2.5 py-1 hidden sm:inline-flex ${config.className}`}>
+                        <StatusIcon className="h-3 w-3" />
+                        {config.label}
+                      </Badge>
+                      <div className="flex items-center gap-1.5 ml-auto">
                         {task.status === 'completed' && (
                           <Button
                             size="sm"
-                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm"
+                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9"
                             disabled={approveTask.isPending}
                             onClick={() => approveTask.mutate(task.id)}
                           >
@@ -331,15 +339,16 @@ export default function ParentTasks() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-xl h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            className="rounded-xl h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10"
                             onClick={() => openEditDialog({
                               id: task.id,
                               title: task.title,
                               reward: task.reward,
                               category: task.category,
                             })}
+                            aria-label="Editar tarefa"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                         )}
                         {task.status !== 'approved' && (
@@ -348,9 +357,10 @@ export default function ParentTasks() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-xl h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                className="rounded-xl h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                aria-label="Eliminar tarefa"
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
