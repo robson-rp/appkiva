@@ -70,6 +70,15 @@ export default function AdminSubscriptions() {
   const updateTier = useUpdateSubscriptionTier();
   const deleteTier = useDeleteSubscriptionTier();
 
+  // Regional prices
+  const { data: allRegionalPrices = [] } = useRegionalPrices();
+  const upsertRegional = useUpsertRegionalPrice();
+  const deleteRegional = useDeleteRegionalPrice();
+  const [rpCurrency, setRpCurrency] = useState('');
+  const [rpMonthly, setRpMonthly] = useState(0);
+  const [rpYearly, setRpYearly] = useState(0);
+  const [rpExtra, setRpExtra] = useState(0);
+
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
 
@@ -82,6 +91,11 @@ export default function AdminSubscriptions() {
   const [form, setForm] = useState<TierForm>(emptyForm);
   const [featuresText, setFeaturesText] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const tierRegionalPrices = useMemo(
+    () => editId ? allRegionalPrices.filter(rp => rp.tier_id === editId) : [],
+    [editId, allRegionalPrices]
+  );
 
   const filtered = useMemo(() => {
     if (!tiers) return [];
