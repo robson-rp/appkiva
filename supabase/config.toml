@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.upgrade-subscription]
 verify_jwt = false
+
+[functions.complete-challenge]
+verify_jwt = false
