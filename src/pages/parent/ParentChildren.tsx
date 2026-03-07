@@ -66,23 +66,26 @@ export default function ParentChildren() {
 
   const handleSaveBudget = async () => {
     if (!budgetChild) return;
-    const val = Number(budgetValue);
-    if (isNaN(val) || val < 0) return;
+    const monthlyVal = Number(budgetValue);
+    const dailyVal = Number(dailyLimitValue);
+    if (isNaN(monthlyVal) || monthlyVal < 0 || isNaN(dailyVal) || dailyVal < 0) return;
     try {
-      await updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: val });
-      toast({ title: 'Limite atualizado! 💰', description: `Limite de gasto mensal definido para ${val} 🪙.` });
+      await Promise.all([
+        updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: monthlyVal }),
+        updateDailyLimit.mutateAsync({ childId: budgetChild.childId, dailySpendLimit: dailyVal }),
+      ]);
+      toast({ title: 'Limites atualizados! 💰', description: `Mensal: ${monthlyVal} 🪙 · Diário: ${dailyVal} 🪙` });
       createNotification({
         profileId: budgetChild.profileId,
-        title: 'Limite de gasto atualizado 💰',
-        message: val > 0
-          ? `O teu limite de gasto mensal foi definido para ${val} 🪙.`
-          : 'O teu limite de gasto mensal foi removido.',
+        title: 'Limites de gasto atualizados 💰',
+        message: `Limite mensal: ${monthlyVal > 0 ? monthlyVal + ' KVC' : 'sem limite'} · Limite diário: ${dailyVal} KVC`,
         type: 'vault',
-        metadata: { monthlyBudget: val },
+        metadata: { monthlyBudget: monthlyVal, dailySpendLimit: dailyVal },
       });
       setBudgetDialogOpen(false);
     } catch {
-      toast({ title: 'Erro', description: 'Não foi possível atualizar o limite.', variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Não foi possível atualizar os limites.', variant: 'destructive' });
+    }
     }
   };
 
