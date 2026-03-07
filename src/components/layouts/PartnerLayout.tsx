@@ -18,6 +18,7 @@ const navItems = [
   { title: 'Programas', url: '/partner/programs', icon: Users },
   { title: 'Desafios', url: '/partner/challenges', icon: Trophy },
   { title: 'Relatórios', url: '/partner/reports', icon: BarChart3 },
+  { title: 'Perfil', url: '/partner/profile', icon: Settings },
 ];
 
 function PartnerSidebar() {
