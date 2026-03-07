@@ -28,6 +28,7 @@ export function useChildren() {
           nickname,
           profile_id,
           monthly_budget,
+          daily_spend_limit,
           profiles!children_profile_id_fkey (
             id,
             display_name,
