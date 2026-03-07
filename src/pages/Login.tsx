@@ -387,6 +387,9 @@ export default function Login() {
                         onClick={() => {
                           setSelectedRole(role);
                           setAuthMode('login');
+                          setEmail(cfg.testEmail);
+                          setPassword('Test1234!');
+                          setContactMethod('email');
                         }}
                         className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
                       >
