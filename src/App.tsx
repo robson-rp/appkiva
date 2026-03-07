@@ -94,6 +94,8 @@ function AppRoutes() {
         <Route path="/admin/risk" element={<AdminLayout><AdminRisk /></AdminLayout>} />
         <Route path="/admin/compliance" element={<AdminLayout><AdminCompliance /></AdminLayout>} />
         <Route path="/admin/schools" element={<AdminLayout><AdminSchools /></AdminLayout>} />
+        <Route path="/admin/finance" element={<AdminLayout><AdminFinance /></AdminLayout>} />
+        <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );

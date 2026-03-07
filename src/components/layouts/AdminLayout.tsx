@@ -13,11 +13,26 @@ import {
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 
+import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import kivaraLogo from '@/assets/logo-kivara.svg';
+import { NavLink } from '@/components/NavLink';
+import { useAuth } from '@/contexts/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
+} from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
   { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
   { title: 'Escolas', url: '/admin/schools', icon: School },
+  { title: 'Utilizadores', url: '/admin/users', icon: Users },
   { title: 'Subscrições', url: '/admin/subscriptions', icon: CreditCard },
+  { title: 'Finanças', url: '/admin/finance', icon: DollarSign },
   { title: 'Moedas', url: '/admin/currencies', icon: Globe },
   { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
   { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
