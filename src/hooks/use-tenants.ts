@@ -71,6 +71,17 @@ export function useUpdateSubscriptionTier() {
   });
 }
 
+export function useDeleteSubscriptionTier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('subscription_tiers').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['subscription_tiers'] }),
+  });
+}
+
 export function useCreateTenant() {
   const qc = useQueryClient();
   return useMutation({

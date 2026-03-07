@@ -15,9 +15,13 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
 import {
-  useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
+import {
+  useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier, useDeleteSubscriptionTier,
 } from '@/hooks/use-tenants';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -60,6 +64,9 @@ export default function AdminSubscriptions() {
   const { data: tiers, isLoading } = useSubscriptionTiers(true);
   const createTier = useCreateSubscriptionTier();
   const updateTier = useUpdateSubscriptionTier();
+  const deleteTier = useDeleteSubscriptionTier();
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -152,6 +159,22 @@ export default function AdminSubscriptions() {
       setDialogOpen(false);
     } catch (err: any) {
       toast.error(err.message || 'Erro ao guardar');
+    }
+  }
+
+  function canDelete(tier: any) {
+    return !tier.is_active && (tier.tenant_count ?? 0) === 0;
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await deleteTier.mutateAsync(deleteTarget.id);
+      toast.success(`Plano "${deleteTarget.name}" eliminado`);
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao eliminar');
+    } finally {
+      setDeleteTarget(null);
     }
   }
 
@@ -281,9 +304,18 @@ export default function AdminSubscriptions() {
                             {tier.is_active ? 'Activo' : 'Inactivo'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(tier)}>
                             <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={!canDelete(tier)}
+                            title={canDelete(tier) ? 'Eliminar plano' : 'Apenas planos inactivos sem tenants podem ser eliminados'}
+                            onClick={() => setDeleteTarget({ id: tier.id, name: tier.name })}
+                          >
+                            <Trash2 className={`h-4 w-4 ${canDelete(tier) ? 'text-destructive' : 'text-muted-foreground'}`} />
                           </Button>
                         </TableCell>
                       </TableRow>
@@ -373,6 +405,24 @@ export default function AdminSubscriptions() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar plano "{deleteTarget?.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acção é irreversível. O plano será permanentemente removido da plataforma.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
