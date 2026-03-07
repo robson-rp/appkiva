@@ -210,7 +210,7 @@ export function NotificationDropdown() {
                 <p className="text-xs font-display font-bold">{urgentNotif.title}</p>
                 <p className="text-[11px] opacity-90 line-clamp-2">{urgentNotif.message}</p>
               </div>
-              <button onClick={() => setShowBanner(false)} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
+              <button onClick={() => { setDismissedBannerId(urgentNotif.id); setShowBanner(false); }} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
