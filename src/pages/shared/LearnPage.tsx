@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockLessons } from '@/data/lessons-data';
 import { LESSON_CATEGORIES, DIFFICULTY_CONFIG, LessonCategory, MicroLesson } from '@/types/kivara';
 import { LessonViewer } from '@/components/LessonViewer';
-import { BookOpen, Clock, Star, CheckCircle, Sparkles } from 'lucide-react';
+import { BookOpen, Clock, Star, CheckCircle, Sparkles, Loader2 } from 'lucide-react';
+import { useLessons } from '@/hooks/use-lessons';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LearnPage() {
