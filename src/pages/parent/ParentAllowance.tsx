@@ -237,13 +237,20 @@ export default function ParentAllowance() {
                       </Button>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border/30">
-                      <Wallet className="h-3.5 w-3.5" />
-                      <span>
-                        {eff.lastSentAt
-                          ? `Última mesada enviada ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
-                          : 'Nenhuma mesada enviada ainda'}
-                      </span>
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border/30">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-3.5 w-3.5" />
+                        <span>
+                          {eff.lastSentAt
+                            ? `Última mesada ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
+                            : 'Nenhuma mesada enviada ainda'}
+                        </span>
+                      </div>
+                      {getConfig(child.profileId) && (
+                        <span className="flex items-center gap-1 text-[10px] text-secondary font-medium bg-secondary/10 rounded-full px-2 py-0.5">
+                          <BotMessageSquare className="h-3 w-3" /> Auto
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
