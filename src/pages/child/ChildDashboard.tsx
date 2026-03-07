@@ -93,12 +93,12 @@ export default function ChildDashboard() {
                 <div className="flex items-center gap-3">
                   <AvatarGlow level={child.level} size="md" />
                   <div>
-                    <p className="text-white/70 text-sm font-body">A tua carteira</p>
+                    <p className="text-white/70 text-small font-body">A tua carteira</p>
                     <div className="flex items-baseline gap-2">
-                      <motion.span key={balance} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-4xl font-bold text-white">
+                      <motion.span key={balance} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-5xl font-bold text-white">
                         {balance}
                       </motion.span>
-                      <span className="text-sm text-white/60 font-display">KivaCoins</span>
+                      <span className="text-small text-white/60 font-display">KivaCoins</span>
                     </div>
                   </div>
                 </div>
@@ -107,10 +107,10 @@ export default function ChildDashboard() {
                 </div>
               </div>
               <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} className="mt-1">
-                <img src={kivoImg} alt="Kivo" className="w-20 h-20 drop-shadow-2xl" />
+                <img src={kivoImg} alt="Kivo" className="w-24 h-24 drop-shadow-2xl" />
               </motion.div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setShowLevelUp(true)} className="mt-2 text-[10px] text-white/50 hover:text-white/80 hover:bg-white/10 font-display">
+            <Button size="sm" variant="ghost" onClick={() => setShowLevelUp(true)} className="mt-3 text-small text-white/50 hover:text-white/80 hover:bg-white/10 font-display">
               ✨ Ver evolução
             </Button>
           </CardContent>
@@ -130,18 +130,18 @@ export default function ChildDashboard() {
       )}
 
       {/* Quick Stats */}
-      <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+      <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
         {stats.map((stat) => (
           <motion.div key={stat.label} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
             <Card className="cursor-pointer border border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden" onClick={() => navigate(stat.to)}>
-              <CardContent className="p-4 text-center relative">
+              <CardContent className="p-5 text-center relative">
                 <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-40`} />
                 <div className="relative z-10">
-                  <div className="w-11 h-11 rounded-2xl bg-card/80 backdrop-blur flex items-center justify-center mx-auto mb-2 shadow-sm">
-                    <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+                  <div className="w-12 h-12 rounded-2xl bg-card/80 backdrop-blur flex items-center justify-center mx-auto mb-2.5 shadow-sm">
+                    <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
                   </div>
-                  <p className="font-display text-2xl font-bold">{stat.value}</p>
-                  <p className="text-[10px] text-muted-foreground font-semibold tracking-wide uppercase">{stat.label}</p>
+                  <p className="font-display text-3xl font-bold">{stat.value}</p>
+                  <p className="text-caption text-muted-foreground font-semibold tracking-wide uppercase mt-1">{stat.label}</p>
                 </div>
               </CardContent>
             </Card>

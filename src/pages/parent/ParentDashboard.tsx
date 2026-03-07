@@ -19,7 +19,7 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
-const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
+const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
@@ -67,16 +67,16 @@ export default function ParentDashboard() {
           <CardContent className="relative z-10 p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-2">
-                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Painel Familiar</p>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">
+                <p className="text-primary-foreground/60 text-small font-medium uppercase tracking-wider">Painel Familiar</p>
+                <h1 className="font-display text-heading md:text-heading-lg font-bold text-primary-foreground">
                   Olá, {user?.name}! 👋
                 </h1>
-                <p className="text-primary-foreground/60 text-sm max-w-md">
+                <p className="text-primary-foreground/60 text-base max-w-md">
                   Acompanha a evolução financeira dos teus filhos. Pequenos hábitos, grandes futuros.
                 </p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 text-center">
-                <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Saldo Total</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-5 text-center">
+                <p className="text-primary-foreground/60 text-caption uppercase tracking-wider font-medium">Saldo Total</p>
                 <motion.div
                   key={totalBalance}
                   initial={{ scale: 1.15, opacity: 0 }}
@@ -95,14 +95,14 @@ export default function ParentDashboard() {
       {children.length > 0 && (
         <motion.div variants={item} data-onboarding="allowance">
           <Card className="border-border/50 overflow-hidden border-dashed border-2 border-secondary/40 bg-secondary/5">
-            <CardContent className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <CardContent className="p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
+                <div className="w-11 h-11 rounded-2xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
                   <Send className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div>
-                  <p className="font-display font-bold text-sm">Enviar Mesada</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="font-display font-bold text-base">Enviar Mesada</p>
+                  <p className="text-small text-muted-foreground">
                     {children.length} {children.length === 1 ? 'criança' : 'crianças'} · Saldo total: <CurrencyDisplay amount={totalBalance} size="sm" className="inline" />
                   </p>
                 </div>
@@ -128,34 +128,34 @@ export default function ParentDashboard() {
       {emissionStats && (
         <motion.div variants={item}>
           <Card className="border-border/50 overflow-hidden">
-            <CardContent className="p-4">
+            <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Gauge className="h-4 w-4 text-primary" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Gauge className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-display font-bold text-sm">Limite de Emissão Mensal</p>
-                    <p className="text-[10px] text-muted-foreground">Controlo de inflação KVC</p>
+                    <p className="font-display font-bold text-base">Limite de Emissão Mensal</p>
+                    <p className="text-small text-muted-foreground">Controlo de inflação KVC</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-display font-bold text-sm">
+                  <p className="font-display font-bold text-base">
                     <CurrencyDisplay amount={emissionStats.emitted_this_month} size="sm" className="inline" />
                     <span className="text-muted-foreground font-normal"> / </span>
                     <CurrencyDisplay amount={emissionStats.emission_limit} size="sm" className="inline" />
                   </p>
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-small text-muted-foreground">
                     Restante: <CurrencyDisplay amount={emissionStats.remaining} size="sm" className="inline" />
                   </p>
                 </div>
               </div>
               <Progress 
                 value={Math.min(emissionStats.percentage_used, 100)} 
-                className="h-2"
+                className="h-2.5"
               />
               {emissionStats.percentage_used >= 80 && (
-                <p className="text-[10px] text-destructive mt-1.5 font-medium">
+                <p className="text-small text-destructive mt-2 font-medium">
                   ⚠️ {emissionStats.percentage_used >= 100 ? 'Limite atingido! Não podes emitir mais KVC este mês.' : `Atenção: ${emissionStats.percentage_used}% do limite utilizado.`}
                 </p>
               )}
@@ -171,17 +171,16 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-
-      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3" data-onboarding="tasks">
+      <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4" data-onboarding="tasks">
         {stats.map((stat, i) => (
-          <motion.div key={`${stat.label}-${i}`} whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}>
+          <motion.div key={`${stat.label}-${i}`} whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
             <Card
               className="cursor-pointer border-border/50 hover:shadow-kivara transition-all duration-300 overflow-hidden"
               onClick={() => navigate(stat.to)}
             >
               <div className="h-0.5 gradient-kivara" />
-              <CardContent className="p-4">
-                <div className={`w-10 h-10 rounded-2xl ${stat.bg} flex items-center justify-center mb-3`}>
+              <CardContent className="p-5">
+                <div className={`w-11 h-11 rounded-2xl ${stat.bg} flex items-center justify-center mb-3`}>
                   <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
                 </div>
                 {(stat as any).isCurrency ? (
@@ -189,7 +188,7 @@ export default function ParentDashboard() {
                 ) : (
                   <p className="font-display text-2xl font-bold">{stat.value}</p>
                 )}
-                <p className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">{stat.label}</p>
+                <p className="text-caption text-muted-foreground font-semibold tracking-wider uppercase mt-1">{stat.label}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -209,14 +208,14 @@ export default function ParentDashboard() {
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 gradient-kivara" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
-                  <Users className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base font-display flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
+                  <Users className="h-5 w-5 text-primary" />
                 </div>
                 Crianças
               </CardTitle>
-              <button onClick={() => navigate('/parent/children')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-                Ver todas <ChevronRight className="h-3 w-3" />
+              <button onClick={() => navigate('/parent/children')} className="text-small text-primary font-semibold flex items-center gap-0.5 hover:underline min-h-[44px]">
+                Ver todas <ChevronRight className="h-4 w-4" />
               </button>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -233,22 +232,22 @@ export default function ParentDashboard() {
                 ))
               ) : children.length === 0 ? (
                 <div className="py-6 text-center">
-                  <p className="text-muted-foreground text-sm">Nenhuma criança associada.</p>
-                  <p className="text-muted-foreground text-xs mt-1">Adiciona crianças na secção Crianças.</p>
+                  <p className="text-muted-foreground text-base">Nenhuma criança associada.</p>
+                  <p className="text-muted-foreground text-small mt-1">Adiciona crianças na secção Crianças.</p>
                 </div>
               ) : (
                 children.map((child) => (
                   <motion.div
                     key={child.childId}
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50"
+                    className="flex items-center gap-3 p-3.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 cursor-pointer border border-transparent hover:border-border/50 min-h-[60px]"
                     onClick={() => navigate('/parent/children')}
                   >
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-2xl shadow-sm">
                       {child.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-display font-bold text-sm">{child.displayName}</p>
+                      <p className="font-display font-bold text-base">{child.displayName}</p>
                       <CurrencyDisplay amount={child.balance} size="sm" className="text-muted-foreground" />
                     </div>
                     <CurrencyDisplay amount={child.balance} size="sm" />
@@ -264,9 +263,9 @@ export default function ParentDashboard() {
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-display flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-primary" />
+              <CardTitle className="text-base font-display flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 Actividade Recente
               </CardTitle>
@@ -276,7 +275,7 @@ export default function ParentDashboard() {
                 Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
                     <div className="flex items-center gap-3">
-                      <Skeleton className="w-9 h-9 rounded-xl" />
+                      <Skeleton className="w-10 h-10 rounded-xl" />
                       <div className="space-y-1">
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="h-3 w-20" />
@@ -287,8 +286,8 @@ export default function ParentDashboard() {
                 ))
               ) : realTransactions.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground text-sm">Ainda sem transacções.</p>
-                  <p className="text-muted-foreground text-xs mt-1">Envia uma mesada para começar!</p>
+                  <p className="text-muted-foreground text-base">Ainda sem transacções.</p>
+                  <p className="text-muted-foreground text-small mt-1">Envia uma mesada para começar!</p>
                 </div>
               ) : (
                 realTransactions.map((tx) => {
@@ -297,16 +296,16 @@ export default function ParentDashboard() {
                     ? format(new Date(tx.createdAt), "d MMM, HH:mm", { locale: pt })
                     : '';
                   return (
-                    <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0">
+                    <div key={tx.id} className="flex items-center justify-between py-3.5 border-b border-border/30 last:border-0 min-h-[56px]">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center">
                           {isCredit
-                            ? <ArrowDownLeft className="h-3.5 w-3.5 text-secondary" />
-                            : <ArrowUpRight className="h-3.5 w-3.5 text-destructive" />}
+                            ? <ArrowDownLeft className="h-4 w-4 text-secondary" />
+                            : <ArrowUpRight className="h-4 w-4 text-destructive" />}
                         </div>
                         <div>
-                          <p className="text-sm font-display font-bold">{tx.description || entryLabel[tx.entryType] || tx.entryType}</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-base font-display font-bold">{tx.description || entryLabel[tx.entryType] || tx.entryType}</p>
+                          <p className="text-small text-muted-foreground">
                             {tx.avatar} {tx.displayName} · {formattedDate}
                           </p>
                         </div>

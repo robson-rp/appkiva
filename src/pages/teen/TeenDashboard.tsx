@@ -51,32 +51,32 @@ export default function TeenDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl sm:text-3xl font-display font-bold text-foreground">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-heading md:text-heading-lg font-display font-bold text-foreground">
           Olá, {teen.name}! 💪
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
+        <p className="text-muted-foreground text-base mt-1">
           {levelConfig.avatar} {levelConfig.label} • {teen.kivaPoints} KivaPoints
         </p>
-        <Progress value={progressToNext} className="mt-2 h-2" />
-        <p className="text-[10px] text-muted-foreground mt-1">
+        <Progress value={progressToNext} className="mt-3 h-3" />
+        <p className="text-small text-muted-foreground mt-1.5">
           {nextLevel ? `${nextLevel[1].minPoints - teen.kivaPoints} pontos para ${nextLevel[1].label}` : 'Nível máximo!'}
         </p>
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3" data-onboarding="wallet">
+      <div className="grid grid-cols-2 gap-4" data-onboarding="wallet">
         {stats.map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+          <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card className="border-border/50">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                  <span className="text-xs text-muted-foreground">{stat.label}</span>
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  <span className="text-small text-muted-foreground">{stat.label}</span>
                 </div>
-                <p className="text-lg font-display font-bold text-foreground">{stat.value}</p>
+                <p className="text-xl font-display font-bold text-foreground">{stat.value}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -84,41 +84,41 @@ export default function TeenDashboard() {
       </div>
 
       {/* Streak */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <StreakWidget onClick={() => navigate('/teen/streaks')} />
       </motion.div>
 
       {/* Weekly Sparkline */}
       {weeklyData && weeklyData.points.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <WeeklySparkline points={weeklyData.points} totalEarned={weeklyData.totalEarned} totalSpent={weeklyData.totalSpent} />
         </motion.div>
       )}
 
       {/* Budget */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} data-onboarding="missions">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} data-onboarding="missions">
         <TeenBudgetBar totalSpent={totalSpent} monthlyBudget={monthlyBudget} budgetUsed={budgetUsed} />
       </motion.div>
 
       {/* Categories */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} data-onboarding="vaults">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} data-onboarding="vaults">
         <TeenCategoryBreakdown topCategories={topCategories} totalSpent={totalSpent} />
       </motion.div>
 
       {/* Recent Transactions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <TeenRecentTransactions transactions={recentTx} />
       </motion.div>
 
       {/* Monthly Chart */}
       {monthlySummary.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} data-onboarding="analytics">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} data-onboarding="analytics">
           <MonthlyEvolutionChart data={monthlySummary} />
         </motion.div>
       )}
 
       {/* Plan Summary */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <PlanSummaryWidget compact />
       </motion.div>
     </div>
