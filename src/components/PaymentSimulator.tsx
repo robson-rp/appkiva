@@ -176,7 +176,7 @@ export default function PaymentSimulator({
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="font-display font-bold text-sm">{tier.name}</h3>
                             <span className="font-display font-bold text-lg text-primary">
-                              {fmtPrice(price)}
+                              {fmtTierPrice(tier.id, price, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                               <span className="text-xs text-muted-foreground font-normal">{period}</span>
                             </span>
                           </div>
