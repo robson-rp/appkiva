@@ -178,6 +178,25 @@ Deno.serve(async (req) => {
     const requiresApproval = REQUIRES_APPROVAL_TYPES.includes(body.entry_type) && !isParent && !isAdmin;
     const isEmission = EMISSION_TYPES.includes(body.entry_type);
 
+    // 8b. Emission limit check (for parents emitting KVC)
+    if (isEmission && (isParent || isAdmin) && body.entry_type !== "vault_interest") {
+      const { data: emissionStats } = await supabaseAdmin.rpc("get_parent_emission_stats", {
+        _parent_profile_id: callerProfile.id,
+      });
+
+      if (emissionStats && !emissionStats.error) {
+        const remaining = Number(emissionStats.remaining) || 0;
+        if (body.amount > remaining) {
+          return errorResponse("Limite mensal de emissão de KVC excedido", 422, {
+            emission_limit: Number(emissionStats.emission_limit),
+            emitted_this_month: Number(emissionStats.emitted_this_month),
+            remaining,
+            requested: body.amount,
+          });
+        }
+      }
+    }
+
     switch (body.entry_type) {
       case "allowance":
       case "task_reward":
