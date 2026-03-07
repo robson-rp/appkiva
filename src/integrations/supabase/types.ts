@@ -2135,6 +2135,15 @@ export type Database = {
         Returns: boolean
       }
       record_daily_activity: { Args: { _profile_id: string }; Returns: Json }
+      update_child_profile: {
+        Args: {
+          _avatar?: string
+          _child_id: string
+          _date_of_birth?: string
+          _nickname?: string
+        }
+        Returns: undefined
+      }
       update_tenant_currency: {
         Args: { _currency: string; _tenant_id: string }
         Returns: undefined
