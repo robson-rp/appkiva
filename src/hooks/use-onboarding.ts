@@ -35,12 +35,20 @@ export function useOnboarding() {
         return ONBOARDING_STEPS[role] ?? [];
       }
 
-      return data.map((row): OnboardingStep => ({
-        title: row.title,
-        description: row.description,
-        illustrationKey: row.illustration_key,
-        cta: row.cta ?? undefined,
-      }));
+      // Client-side time-based visibility filter
+      const now = new Date();
+      return data
+        .filter((row: any) => {
+          const from = row.visible_from ? new Date(row.visible_from) : null;
+          const until = row.visible_until ? new Date(row.visible_until) : null;
+          return (!from || from <= now) && (!until || until >= now);
+        })
+        .map((row): OnboardingStep => ({
+          title: row.title,
+          description: row.description,
+          illustrationKey: row.illustration_key,
+          cta: row.cta ?? undefined,
+        }));
     },
     enabled: !!role,
   });
