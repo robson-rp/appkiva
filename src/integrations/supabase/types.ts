@@ -405,6 +405,102 @@ export type Database = {
         }
         Relationships: []
       }
+      donation_causes: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          tenant_id: string | null
+          total_received: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          tenant_id?: string | null
+          total_received?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          tenant_id?: string | null
+          total_received?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_causes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_causes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donations: {
+        Row: {
+          amount: number
+          cause_id: string
+          created_at: string | null
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          amount?: number
+          cause_id: string
+          created_at?: string | null
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          amount?: number
+          cause_id?: string
+          created_at?: string | null
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donations_cause_id_fkey"
+            columns: ["cause_id"]
+            isOneToOne: false
+            referencedRelation: "donation_causes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dream_vault_comments: {
         Row: {
           created_at: string
@@ -1544,7 +1640,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_recurring: boolean | null
           parent_profile_id: string
+          recurrence: string | null
+          recurrence_source_id: string | null
           reward: number
           status: Database["public"]["Enums"]["task_status"]
           title: string
@@ -1558,7 +1657,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_recurring?: boolean | null
           parent_profile_id: string
+          recurrence?: string | null
+          recurrence_source_id?: string | null
           reward?: number
           status?: Database["public"]["Enums"]["task_status"]
           title: string
@@ -1572,7 +1674,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_recurring?: boolean | null
           parent_profile_id?: string
+          recurrence?: string | null
+          recurrence_source_id?: string | null
           reward?: number
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
@@ -1591,6 +1696,13 @@ export type Database = {
             columns: ["parent_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_recurrence_source_id_fkey"
+            columns: ["recurrence_source_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
