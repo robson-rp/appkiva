@@ -54,6 +54,7 @@ import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
 import PartnerReports from "./pages/partner/PartnerReports";
+import PartnerProfile from "./pages/partner/PartnerProfile";
 
 const queryClient = new QueryClient();
 
