@@ -326,7 +326,7 @@ export default function Login() {
             <img 
               src={kivaraLogoWhite} 
               alt="KIVARA" 
-              className="h-10 sm:h-14 lg:h-64 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
+              className="h-12 sm:h-16 lg:h-64 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
             />
           </motion.div>
 
