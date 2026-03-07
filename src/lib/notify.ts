@@ -1,6 +1,7 @@
 /**
  * Smart Notification Helpers — KIVARA
  * Typed, personalised notification creators with Kivo mascot personality.
+ * Includes throttle engine to prevent notification fatigue.
  */
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,7 +13,8 @@ type NotifCategory =
   | 'streak'
   | 'class'
   | 'reward'
-  | 'vault';
+  | 'vault'
+  | 'report';
 
 interface NotifPayload {
   profileId: string;
@@ -23,17 +25,60 @@ interface NotifPayload {
   metadata?: Record<string, any>;
 }
 
-/** Low-level send — prefer typed helpers below */
+// ─── Throttle Engine ───────────────────────────────────────────
+
+/** Check if a profile can still receive notifications today */
+async function canSendNotification(profileId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc('check_notification_throttle', {
+      _profile_id: profileId,
+    });
+    if (error) {
+      console.warn('[notify] throttle check failed, allowing:', error.message);
+      return true; // fail-open
+    }
+    return data === true;
+  } catch {
+    return true;
+  }
+}
+
+/** Log a sent notification for throttle tracking */
+async function logNotification(profileId: string, notificationId?: string) {
+  const { error } = await supabase.from('notification_log' as any).insert({
+    profile_id: profileId,
+    notification_id: notificationId ?? null,
+  });
+  if (error) console.warn('[notify] log insert failed:', error.message);
+}
+
+// ─── Core Send ─────────────────────────────────────────────────
+
+/** Low-level send with throttle check */
 export async function send(payload: NotifPayload) {
-  const { error } = await supabase.from('notifications').insert({
+  // Check throttle
+  const allowed = await canSendNotification(payload.profileId);
+  if (!allowed) {
+    console.info('[notify] throttled for', payload.profileId);
+    return;
+  }
+
+  const { data, error } = await supabase.from('notifications').insert({
     profile_id: payload.profileId,
     title: payload.title,
     message: payload.message,
     type: payload.type,
     urgent: payload.urgent ?? false,
     metadata: payload.metadata ?? {},
-  });
-  if (error) console.error('[notify]', error.message);
+  }).select('id').single();
+
+  if (error) {
+    console.error('[notify]', error.message);
+    return;
+  }
+
+  // Log for throttle tracking
+  await logNotification(payload.profileId, data?.id);
 }
 
 /** createNotification for backward compat (accepts type as string) */
@@ -45,20 +90,18 @@ export async function createNotification(input: {
   urgent?: boolean;
   metadata?: Record<string, any>;
 }) {
-  const { error } = await supabase.from('notifications').insert({
-    profile_id: input.profileId,
+  return send({
+    profileId: input.profileId,
     title: input.title,
     message: input.message,
-    type: input.type,
-    urgent: input.urgent ?? false,
-    metadata: input.metadata ?? {},
+    type: input.type as NotifCategory,
+    urgent: input.urgent,
+    metadata: input.metadata,
   });
-  if (error) console.error('[notify]', error.message);
 }
 
 // ─── Task Notifications ────────────────────────────────────────
 
-/** Notify parent that a child completed a task */
 export function notifyTaskCompleted(parentProfileId: string, childName: string, taskTitle: string, taskId: string) {
   return send({
     profileId: parentProfileId,
@@ -69,7 +112,6 @@ export function notifyTaskCompleted(parentProfileId: string, childName: string, 
   });
 }
 
-/** Notify child that their task was approved */
 export function notifyTaskApproved(childProfileId: string, taskTitle: string, reward: number, taskId: string) {
   return send({
     profileId: childProfileId,
@@ -80,7 +122,6 @@ export function notifyTaskApproved(childProfileId: string, taskTitle: string, re
   });
 }
 
-/** Notify child that a new task was assigned */
 export function notifyNewTask(childProfileId: string, taskTitle: string, reward: number) {
   return send({
     profileId: childProfileId,
@@ -93,7 +134,6 @@ export function notifyNewTask(childProfileId: string, taskTitle: string, reward:
 
 // ─── Vault / Savings Notifications ─────────────────────────────
 
-/** Notify on savings milestone (25%, 50%, 75%, 100%) */
 export function notifySavingsMilestone(profileId: string, vaultName: string, percentage: number) {
   const emoji = percentage >= 100 ? '🎉' : percentage >= 75 ? '🚀' : percentage >= 50 ? '🐷' : '💪';
   return send({
@@ -108,7 +148,6 @@ export function notifySavingsMilestone(profileId: string, vaultName: string, per
   });
 }
 
-/** Notify parent when child makes a deposit */
 export function notifyVaultDeposit(parentProfileId: string, childName: string, amount: number, vaultName: string) {
   return send({
     profileId: parentProfileId,
@@ -121,7 +160,6 @@ export function notifyVaultDeposit(parentProfileId: string, childName: string, a
 
 // ─── Reward Notifications ──────────────────────────────────────
 
-/** Notify parent when a child claims a reward */
 export function notifyRewardClaimed(parentProfileId: string, childName: string, rewardName: string, price: number) {
   return send({
     profileId: parentProfileId,
@@ -132,7 +170,6 @@ export function notifyRewardClaimed(parentProfileId: string, childName: string, 
   });
 }
 
-/** Notify child on badge/achievement unlock */
 export function notifyAchievement(profileId: string, badgeName: string) {
   return send({
     profileId,
@@ -145,21 +182,29 @@ export function notifyAchievement(profileId: string, badgeName: string) {
 
 // ─── Streak Notifications ──────────────────────────────────────
 
-/** Notify on streak milestone */
 export function notifyStreakMilestone(profileId: string, days: number, reward: number) {
   return send({
     profileId,
     title: '🔥 Marco de sequência!',
     message: `Incrível! ${days} dias seguidos! Kivo está orgulhoso — +${reward} KivaPoints!`,
     type: 'streak',
-    urgent: false,
     metadata: { days, reward },
   });
 }
 
-// ─── Lesson Notifications ──────────────────────────────────────
+export function notifyStreakAtRisk(profileId: string, currentStreak: number) {
+  return send({
+    profileId,
+    title: '⚡ A tua sequência está em risco!',
+    message: `Kivo diz: A tua sequência de ${currentStreak} dias está prestes a acabar! Completa uma missão para a manter.`,
+    type: 'streak',
+    urgent: true,
+    metadata: { current_streak: currentStreak },
+  });
+}
 
-/** Notify on lesson completion */
+// ─── Lesson / Mission Notifications ────────────────────────────
+
 export function notifyLessonCompleted(profileId: string, lessonTitle: string, points: number) {
   return send({
     profileId,
@@ -170,9 +215,28 @@ export function notifyLessonCompleted(profileId: string, lessonTitle: string, po
   });
 }
 
+export function notifyMissionAvailable(profileId: string, missionTitle: string) {
+  return send({
+    profileId,
+    title: '🎯 Nova missão desbloqueada!',
+    message: `Kivo diz: Tens uma nova missão — "${missionTitle}". Aprende a fazer crescer as tuas poupanças!`,
+    type: 'mission',
+    metadata: { mission_title: missionTitle },
+  });
+}
+
+export function notifyDailyReminder(profileId: string, childName: string) {
+  return send({
+    profileId,
+    title: '👋 Pronto para o desafio de hoje?',
+    message: `Kivo diz: Olá ${childName}! Pronto para o desafio de dinheiro de hoje?`,
+    type: 'mission',
+    metadata: { trigger: 'daily_reminder' },
+  });
+}
+
 // ─── Donation Notifications ────────────────────────────────────
 
-/** Notify on donation */
 export function notifyDonationMade(profileId: string, causeName: string, amount: number) {
   return send({
     profileId,
@@ -183,7 +247,6 @@ export function notifyDonationMade(profileId: string, causeName: string, amount:
   });
 }
 
-/** Notify parent about child donation */
 export function notifyChildDonation(parentProfileId: string, childName: string, causeName: string, amount: number) {
   return send({
     profileId: parentProfileId,
@@ -196,7 +259,6 @@ export function notifyChildDonation(parentProfileId: string, childName: string, 
 
 // ─── Allowance Notifications ───────────────────────────────────
 
-/** Notify child about allowance received */
 export function notifyAllowanceReceived(childProfileId: string, amount: number) {
   return send({
     profileId: childProfileId,
@@ -209,19 +271,16 @@ export function notifyAllowanceReceived(childProfileId: string, amount: number) 
 
 // ─── System / Admin Notifications ──────────────────────────────
 
-/** Notify on level up */
 export function notifyLevelUp(profileId: string, newLevel: string) {
   return send({
     profileId,
     title: '🎮 Subiste de nível!',
     message: `Kivo diz: Parabéns! Atingiste o nível "${newLevel}". Novas missões e recompensas te esperam!`,
     type: 'achievement',
-    urgent: false,
     metadata: { level: newLevel },
   });
 }
 
-/** Notify on budget limit approaching */
 export function notifyBudgetWarning(parentProfileId: string, percentUsed: number) {
   return send({
     profileId: parentProfileId,
@@ -230,5 +289,29 @@ export function notifyBudgetWarning(parentProfileId: string, percentUsed: number
     type: 'savings',
     urgent: percentUsed >= 90,
     metadata: { percent_used: percentUsed },
+  });
+}
+
+// ─── School Challenge Notifications ────────────────────────────
+
+export function notifySchoolChallenge(profileId: string, challengeTitle: string) {
+  return send({
+    profileId,
+    title: '🏫 Novo desafio escolar!',
+    message: `Kivo diz: A tua turma tem um novo desafio de poupança — "${challengeTitle}". Consegues ajudar a tua equipa a ganhar?`,
+    type: 'class',
+    metadata: { challenge_title: challengeTitle },
+  });
+}
+
+// ─── Weekly Report ─────────────────────────────────────────────
+
+export function notifyWeeklyReport(parentProfileId: string, childName: string, coinsEarned: number, missionsCompleted: number, savingsProgress: number) {
+  return send({
+    profileId: parentProfileId,
+    title: '📊 Relatório semanal',
+    message: `Esta semana ${childName} ganhou ${coinsEarned} KivaCoins, completou ${missionsCompleted} missões e tem ${savingsProgress}% de progresso nas poupanças.`,
+    type: 'report',
+    metadata: { child_name: childName, coins_earned: coinsEarned, missions_completed: missionsCompleted, savings_progress: savingsProgress },
   });
 }

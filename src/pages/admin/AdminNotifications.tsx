@@ -48,6 +48,12 @@ export default function AdminNotifications() {
             <NotificationHistory />
           </motion.div>
         </TabsContent>
+
+        <TabsContent value="analytics">
+          <motion.div variants={item}>
+            <NotificationAnalytics />
+          </motion.div>
+        </TabsContent>
       </Tabs>
     </motion.div>
   );
