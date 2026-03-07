@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -359,13 +359,12 @@ export default function Login() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="w-full max-w-md"
         >
-          <AnimatePresence mode="wait">
-            {!selectedRole ? (
+          {!selectedRole ? (
               <motion.div
                 key="role-select"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
                 <div>
@@ -413,7 +412,7 @@ export default function Login() {
                 key="login-form"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-4 sm:space-y-6"
               >
                 <div>
@@ -434,7 +433,7 @@ export default function Login() {
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form key={authMode} onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                   {/* ===== SIGNUP-ONLY FIELDS ===== */}
                   {authMode === 'signup' && (
                     <>
@@ -747,7 +746,6 @@ export default function Login() {
                 </form>
               </motion.div>
             )}
-          </AnimatePresence>
 
           <p className="text-center text-xs text-muted-foreground mt-6 sm:mt-10 pb-4">
             © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
