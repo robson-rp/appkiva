@@ -24,6 +24,7 @@ import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Install = lazy(() => import("./pages/Install"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 // Parent
 const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
@@ -247,10 +248,11 @@ function AppRoutes() {
           <InstallPWAPrompt />
           <Suspense fallback={<LazyFallback />}>
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/join/:code" element={<JoinFamily />} />
               <Route path="/install" element={<Install />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </div>
