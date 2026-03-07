@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePartnerPrograms } from '@/hooks/use-partner-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
+import { CreateProgramDialog } from '@/components/partner/CreateProgramDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
