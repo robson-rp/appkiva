@@ -67,6 +67,7 @@ export default function AdminSubscriptions() {
   const deleteTier = useDeleteSubscriptionTier();
 
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
