@@ -248,10 +248,11 @@ function AppRoutes() {
           <InstallPWAPrompt />
           <Suspense fallback={<LazyFallback />}>
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/join/:code" element={<JoinFamily />} />
               <Route path="/install" element={<Install />} />
-              <Route path="*" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
         </div>
