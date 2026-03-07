@@ -99,6 +99,7 @@ export function useUpdateSponsoredChallenge() {
       id: string;
       title?: string;
       description?: string | null;
+      reward_amount?: number;
       start_date?: string;
       end_date?: string;
       status?: string;
