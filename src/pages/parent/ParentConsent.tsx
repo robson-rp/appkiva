@@ -143,17 +143,17 @@ export default function ParentConsent() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground overflow-hidden relative">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
-          <CardContent className="p-6 relative z-10">
+          <CardContent className="p-5 sm:p-6 relative z-10">
             <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Privacidade & Consentimento</p>
-            <h1 className="font-display text-2xl font-bold mt-1">Gestão de Consentimento</h1>
-            <p className="text-sm text-primary-foreground/70 mt-1">Controla as autorizações dos teus filhos na plataforma</p>
+            <h1 className="font-display text-xl sm:text-2xl font-bold mt-1">Gestão de Consentimento</h1>
+            <p className="text-xs sm:text-sm text-primary-foreground/70 mt-1">Controla as autorizações dos teus filhos na plataforma</p>
             <div className="flex flex-wrap gap-3 mt-4">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
                 <ShieldCheck className="h-4 w-4" />
                 <span className="font-display font-bold text-lg">{activeConsents.length}</span>
                 <span className="text-xs text-primary-foreground/60">activos</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2">
+              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
                 <ShieldOff className="h-4 w-4" />
                 <span className="font-display font-bold text-lg">{revokedConsents.length}</span>
                 <span className="text-xs text-primary-foreground/60">revogados</span>
