@@ -198,7 +198,6 @@ export function FeatureGateWrapper({
   description,
   tierName,
   children,
-  variant = 'overlay',
   className,
 }: {
   allowed: boolean;
@@ -206,7 +205,6 @@ export function FeatureGateWrapper({
   description?: string;
   tierName?: string | null;
   children: React.ReactNode;
-  variant?: 'inline' | 'overlay';
   className?: string;
 }) {
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -215,14 +213,16 @@ export function FeatureGateWrapper({
   const { upgrade } = useUpgradeSubscription();
   const { user } = useAuth();
 
-  const isParent = user?.role === 'parent' || user?.role === 'admin';
   const isChildOrTeen = user?.role === 'child' || user?.role === 'teen';
+
+  const suggestedTier = tierName
+    ? TIER_UPGRADE_MAP[tierName] ?? 'Família Premium'
+    : 'Família Premium';
 
   const handleRequestUpgrade = async () => {
     if (!user?.householdId || !user?.profileId) return;
     setRequesting(true);
     try {
-      // Find parent profile in the same household
       const { data: parentProfiles } = await supabase
         .from('profiles')
         .select('id')
@@ -234,7 +234,6 @@ export function FeatureGateWrapper({
         return;
       }
 
-      // Send notification to each parent
       for (const parent of parentProfiles) {
         await supabase.from('notifications').insert({
           profile_id: parent.id,
@@ -256,61 +255,64 @@ export function FeatureGateWrapper({
 
   return (
     <div className={cn('relative', className)}>
-      {children}
       {!allowed && (
-        <>
-          {isChildOrTeen ? (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="sticky top-0 z-20 rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent p-4 mb-4"
-            >
-              <div className="text-center space-y-3 max-w-xs px-4">
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
-                  className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-primary/10 flex items-center justify-center mx-auto"
-                >
-                  <Lock className="h-6 w-6 text-accent-foreground" />
-                </motion.div>
-                <div>
-                  <p className="font-display font-bold text-sm">{featureName}</p>
-                  {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
-                </div>
-                <p className="text-[10px] text-muted-foreground">
-                  Esta funcionalidade requer um plano superior. Pede ao teu encarregado!
-                </p>
-                <Button
-                  size="sm"
-                  className="rounded-xl font-display gap-1.5 w-full"
-                  onClick={handleRequestUpgrade}
-                  disabled={requesting}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  {requesting ? 'A enviar...' : 'Pedir Upgrade ao Encarregado'}
-                </Button>
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="sticky top-0 z-20 mb-4 rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent p-4"
+        >
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                <Lock className="h-4 w-4 text-accent-foreground" />
               </div>
-            </motion.div>
-          ) : (
-            <>
-              <UpgradePrompt
-                featureName={featureName}
-                description={description}
-                currentTier={tierName}
-                variant={variant}
-                onUpgrade={() => setPaymentOpen(true)}
-              />
-              <PaymentSimulator
-                open={paymentOpen}
-                onOpenChange={setPaymentOpen}
-                currentTierName={tierName}
-                tiers={tiers}
-                onConfirmUpgrade={upgrade}
-              />
-            </>
-          )}
-        </>
+              <div>
+                <p className="text-sm font-display font-bold text-foreground">
+                  {featureName} requer upgrade
+                </p>
+                {description && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground">
+                  Plano actual: <span className="font-semibold">{tierName ?? 'Gratuito'}</span>
+                  {' → '}
+                  <span className="font-semibold text-accent-foreground">{suggestedTier}</span>
+                </p>
+              </div>
+            </div>
+
+            {isChildOrTeen ? (
+              <Button
+                size="sm"
+                className="rounded-xl font-display gap-1.5"
+                onClick={handleRequestUpgrade}
+                disabled={requesting}
+              >
+                <Send className="h-3.5 w-3.5" />
+                {requesting ? 'A enviar...' : 'Pedir ao Encarregado'}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="rounded-xl font-display gap-1.5 bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => setPaymentOpen(true)}
+              >
+                <Crown className="h-3.5 w-3.5" />
+                Upgrade
+              </Button>
+            )}
+          </div>
+        </motion.div>
+      )}
+      {children}
+      {!isChildOrTeen && (
+        <PaymentSimulator
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          currentTierName={tierName}
+          tiers={tiers}
+          onConfirmUpgrade={upgrade}
+        />
       )}
     </div>
   );
