@@ -4,6 +4,7 @@ import NotificationStats, { useNotificationStats } from '@/components/admin/Noti
 import NotificationTemplateManager from '@/components/admin/NotificationTemplateManager';
 import NotificationBroadcast from '@/components/admin/NotificationBroadcast';
 import NotificationHistory from '@/components/admin/NotificationHistory';
+import NotificationAnalytics from '@/components/admin/NotificationAnalytics';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
