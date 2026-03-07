@@ -412,5 +412,6 @@ export default function TeenVaults() {
         vaultIcon={confettiVault?.icon}
       />
     </div>
+    </FeatureGateWrapper>
   );
 }
