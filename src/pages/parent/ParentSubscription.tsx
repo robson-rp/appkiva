@@ -47,11 +47,13 @@ export default function ParentSubscription() {
   const [downgradeTarget, setDowngradeTarget] = useState<typeof tiers[0] | null>(null);
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const code = tenantCurrency?.code ?? 'AOA';
   const dec = tenantCurrency?.decimalPlaces ?? 0;
-  const fmtP = (usdAmount: number) => formatPrice(convertPrice(usdAmount, 'USD', code, rates), sym, dec);
+  const fmtP = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
+    formatPrice(getRegionalPrice(tierId, field, usdAmount, code, regionalPrices, rates), sym, dec);
 
   const currentTier = tiers.find((t) => t.name === tierName);
   const currentIndex = tiers.findIndex((t) => t.name === tierName);
