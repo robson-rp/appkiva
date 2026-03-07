@@ -424,7 +424,7 @@ export default function Login() {
                     <ArrowLeft className="h-4 w-4" />
                     Voltar
                   </button>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                     {authMode === 'signup' ? 'Criar Conta' : `Área do ${ROLE_CONFIG[selectedRole].label}`}
                   </h2>
                   <p className="text-muted-foreground font-body">
