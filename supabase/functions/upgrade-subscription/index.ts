@@ -36,6 +36,21 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Check user role — only parents and admins can upgrade
+    const { data: userRole } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .single();
+
+    const role = userRole?.role;
+    if (role !== "parent" && role !== "admin") {
+      return new Response(JSON.stringify({ error: "Apenas encarregados podem fazer upgrade. Pede ao teu encarregado!" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { tier_id } = await req.json();
     if (!tier_id) {
       return new Response(JSON.stringify({ error: "tier_id is required" }), {

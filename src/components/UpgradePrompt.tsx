@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Sparkles, Crown, ArrowRight } from 'lucide-react';
+import { Lock, Sparkles, Crown, ArrowRight, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface UpgradePromptProps {
   /** The name of the blocked feature (e.g. "Cofres de Sonhos") */
@@ -207,28 +210,107 @@ export function FeatureGateWrapper({
   className?: string;
 }) {
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [requesting, setRequesting] = useState(false);
   const { data: tiers = [] } = useSubscriptionTiers();
   const { upgrade } = useUpgradeSubscription();
+  const { user } = useAuth();
+
+  const isParent = user?.role === 'parent' || user?.role === 'admin';
+  const isChildOrTeen = user?.role === 'child' || user?.role === 'teen';
+
+  const handleRequestUpgrade = async () => {
+    if (!user?.householdId || !user?.profileId) return;
+    setRequesting(true);
+    try {
+      // Find parent profile in the same household
+      const { data: parentProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('household_id', user.householdId)
+        .neq('id', user.profileId);
+
+      if (!parentProfiles?.length) {
+        toast({ title: 'Erro', description: 'Não encontrámos o teu encarregado.', variant: 'destructive' });
+        return;
+      }
+
+      // Send notification to each parent
+      for (const parent of parentProfiles) {
+        await supabase.from('notifications').insert({
+          profile_id: parent.id,
+          title: '🌟 Pedido de Upgrade',
+          message: `${user.name} pediu para fazer upgrade do plano para aceder a "${featureName}".`,
+          type: 'achievement',
+          urgent: true,
+          metadata: { feature: featureName, requester_profile_id: user.profileId, requester_name: user.name },
+        } as any);
+      }
+
+      toast({ title: 'Pedido enviado! 📨', description: 'O teu encarregado vai receber o pedido de upgrade.' });
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível enviar o pedido.', variant: 'destructive' });
+    } finally {
+      setRequesting(false);
+    }
+  };
 
   return (
     <div className={cn('relative', className)}>
       {children}
       {!allowed && (
         <>
-          <UpgradePrompt
-            featureName={featureName}
-            description={description}
-            currentTier={tierName}
-            variant={variant}
-            onUpgrade={() => setPaymentOpen(true)}
-          />
-          <PaymentSimulator
-            open={paymentOpen}
-            onOpenChange={setPaymentOpen}
-            currentTierName={tierName}
-            tiers={tiers}
-            onConfirmUpgrade={upgrade}
-          />
+          {isChildOrTeen ? (
+            // Child/teen: show request button instead of payment
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-[inherit]"
+            >
+              <div className="text-center space-y-3 max-w-xs px-4">
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
+                  className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-primary/10 flex items-center justify-center mx-auto"
+                >
+                  <Lock className="h-6 w-6 text-accent-foreground" />
+                </motion.div>
+                <div>
+                  <p className="font-display font-bold text-sm">{featureName}</p>
+                  {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Esta funcionalidade requer um plano superior. Pede ao teu encarregado!
+                </p>
+                <Button
+                  size="sm"
+                  className="rounded-xl font-display gap-1.5 w-full"
+                  onClick={handleRequestUpgrade}
+                  disabled={requesting}
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  {requesting ? 'A enviar...' : 'Pedir Upgrade ao Encarregado'}
+                </Button>
+              </div>
+            </motion.div>
+          ) : (
+            <>
+              <UpgradePrompt
+                featureName={featureName}
+                description={description}
+                currentTier={tierName}
+                variant={variant}
+                onUpgrade={() => setPaymentOpen(true)}
+              />
+              <PaymentSimulator
+                open={paymentOpen}
+                onOpenChange={setPaymentOpen}
+                currentTierName={tierName}
+                tiers={tiers}
+                onConfirmUpgrade={upgrade}
+              />
+            </>
+          )}
         </>
       )}
     </div>
