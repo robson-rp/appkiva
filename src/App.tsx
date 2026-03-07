@@ -59,6 +59,7 @@ const TeacherSchoolProfile = lazy(() => import("./pages/teacher/TeacherSchoolPro
 const TeenDashboard = lazy(() => import("./pages/teen/TeenDashboard"));
 const TeenWallet = lazy(() => import("./pages/teen/TeenWallet"));
 const TeenMissions = lazy(() => import("./pages/teen/TeenMissions"));
+const TeenTasks = lazy(() => import("./pages/teen/TeenTasks"));
 const TeenVaults = lazy(() => import("./pages/teen/TeenVaults"));
 const TeenAnalytics = lazy(() => import("./pages/teen/TeenAnalytics"));
 const TeenProfile = lazy(() => import("./pages/teen/TeenProfile"));
