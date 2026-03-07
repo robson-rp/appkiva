@@ -1258,6 +1258,7 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          extra_child_price: number
           features: Json
           id: string
           is_active: boolean
@@ -1272,6 +1273,7 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          extra_child_price?: number
           features?: Json
           id?: string
           is_active?: boolean
@@ -1286,6 +1288,7 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          extra_child_price?: number
           features?: Json
           id?: string
           is_active?: boolean
