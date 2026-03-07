@@ -61,14 +61,15 @@ export default function PaymentSimulator({
 
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
   const currencyCode = tenantCurrency?.code ?? 'AOA';
   const decimals = tenantCurrency?.decimalPlaces ?? 0;
 
-  // Base prices are in USD
-  const convertedPrice = (usdAmount: number) => convertPrice(usdAmount, 'USD', currencyCode, rates);
-  const fmtPrice = (usdAmount: number) => formatPrice(convertedPrice(usdAmount), currencySymbol, decimals);
+  // Use regional override if available, otherwise dynamic conversion
+  const fmtTierPrice = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
+    formatPrice(getRegionalPrice(tierId, field, usdAmount, currencyCode, regionalPrices, rates), currencySymbol, decimals);
 
   const reset = () => {
     setStep('select');
