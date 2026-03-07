@@ -376,6 +376,8 @@ export default function Login() {
                   </p>
                 </div>
 
+                <LoginBannerCarousel />
+
                 <div className="grid grid-cols-2 sm:grid-cols-1 gap-2.5 sm:gap-3">
                   {ROLE_ORDER.map(role => {
                     const cfg = ROLE_CONFIG[role];
