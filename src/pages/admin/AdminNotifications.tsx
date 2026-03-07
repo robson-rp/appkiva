@@ -88,7 +88,7 @@ function useBroadcastNotification() {
         const { data: roleUsers } = await supabase
           .from('user_roles')
           .select('user_id')
-          .eq('role', payload.role);
+          .eq('role', payload.role as any);
         const userIds = (roleUsers ?? []).map(r => r.user_id);
         if (userIds.length === 0) return { sent: 0 };
         const { data: profiles } = await supabase
