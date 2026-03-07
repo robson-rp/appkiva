@@ -51,7 +51,7 @@ export default function PartnerReports() {
   const impactMetrics = [
     { label: 'Total Participantes', value: totalParticipants.toLocaleString(), icon: BookOpen, color: 'text-primary' },
     { label: 'Desafios Concluídos', value: String(completedChallenges), icon: Trophy, color: 'text-chart-3' },
-    { label: 'Investimento/Criança', value: `€${avgSavingsPerChild}`, icon: TrendingUp, color: 'text-secondary' },
+    { label: 'Investimento/Criança', value: fmtP(avgSavingsPerChild), icon: TrendingUp, color: 'text-secondary' },
     { label: 'Taxa Média Conclusão', value: `${avgCompletion}%`, icon: BarChart3, color: 'text-accent-foreground' },
   ];
 
