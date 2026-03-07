@@ -110,10 +110,8 @@ export default function PaymentSimulator({
 
   const upgradeTiers = tiers.filter(
     (t) =>
-      t.tierType !== 'free' &&
-      t.tierType !== 'school_institutional' &&
-      t.tierType !== 'partner_program' &&
-      t.name !== currentTierName
+      t.name !== currentTierName &&
+      t.priceMonthly >= 0
   );
 
   return (

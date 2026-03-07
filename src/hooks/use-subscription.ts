@@ -61,6 +61,7 @@ export function useUpgradeSubscription() {
       queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
       queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
       queryClient.invalidateQueries({ queryKey: ['subscription-tiers'] });
+      queryClient.invalidateQueries({ queryKey: ['partner-limits'] });
 
       toast({
         title: 'Upgrade concluído! 🎉',

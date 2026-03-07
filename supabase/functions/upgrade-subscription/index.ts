@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
       .single();
 
     const role = userRole?.role;
-    if (role !== "parent" && role !== "admin") {
-      return new Response(JSON.stringify({ error: "Apenas encarregados podem fazer upgrade. Pede ao teu encarregado!" }), {
+    if (role !== "parent" && role !== "admin" && role !== "partner") {
+      return new Response(JSON.stringify({ error: "Apenas encarregados ou parceiros podem fazer upgrade." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -92,11 +92,12 @@ Deno.serve(async (req) => {
 
     // If no tenant exists, create one
     if (!tenantId) {
+      const tenantType = role === "partner" ? "institutional_partner" : "family";
       const { data: newTenant, error: createError } = await supabaseAdmin
         .from("tenants")
         .insert({
           name: `Tenant de ${user.email}`,
-          tenant_type: "family",
+          tenant_type: tenantType,
           subscription_tier_id: tier_id,
           currency: "EUR",
         })
