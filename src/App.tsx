@@ -15,6 +15,8 @@ import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Install from "./pages/Install";
+import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import ParentDashboard from "./pages/parent/ParentDashboard";
 import ParentChildren from "./pages/parent/ParentChildren";
 import ParentTasks from "./pages/parent/ParentTasks";
