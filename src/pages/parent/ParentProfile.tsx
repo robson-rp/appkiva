@@ -31,6 +31,8 @@ export default function ParentProfile() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
   const [gender, setGender] = useState('');
+  const [schoolTenantId, setSchoolTenantId] = useState('');
+  const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Load current country and gender from profile
