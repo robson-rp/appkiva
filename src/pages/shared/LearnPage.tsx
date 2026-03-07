@@ -242,6 +242,12 @@ function LessonCard({ lesson, index, completed, score, onStart }: { lesson: Micr
           <Badge className={`absolute bottom-2 left-2 text-[9px] border-0 backdrop-blur-sm ${DIFFICULTY_CONFIG[lesson.difficulty].color}`}>
             {DIFFICULTY_CONFIG[lesson.difficulty].label}
           </Badge>
+          {(hasAudio || hasVideo) && (
+            <div className="absolute top-2 left-2 flex gap-1">
+              {hasAudio && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-[10px]">🎧</span>}
+              {hasVideo && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-[10px]">🎬</span>}
+            </div>
+          )}
         </div>
 
         {/* Content */}
