@@ -119,6 +119,7 @@ export default function AdminSubscriptions() {
       price_yearly: Number(tier.price_yearly),
       max_children: tier.max_children,
       max_classrooms: tier.max_classrooms,
+      extra_child_price: Number(tier.extra_child_price ?? 0),
       currency: tier.currency,
       is_active: tier.is_active,
       features,
