@@ -7,6 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
 import { mockMissions } from '@/data/mock-data';
 import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
+import { toast } from 'sonner';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { DailyMissionCard } from '@/components/DailyMissionCard';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
@@ -398,9 +399,9 @@ function MissionsTab({
                       </div>
                       <Progress value={progress} className="h-2 rounded-full" />
                     </div>
-                    <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5">
-                      <Zap className="h-3.5 w-3.5" /> Continuar
-                    </Button>
+                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast('🚀 O sistema de missões interactivas estará disponível em breve!')}>
+                        <Zap className="h-3.5 w-3.5" /> Continuar
+                      </Button>
                   </CardContent>
                 </Card>
               );
@@ -445,7 +446,7 @@ function MissionsTab({
                           <span className="text-xs text-muted-foreground">Meta: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
                         </div>
                       )}
-                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm">
+                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast('🚀 O sistema de missões interactivas estará disponível em breve!')}>
                         <Target className="h-3.5 w-3.5" /> Começar Missão
                       </Button>
                     </CardContent>

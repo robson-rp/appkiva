@@ -6,7 +6,7 @@ import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { PlayerCard } from '@/components/PlayerCard';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren, mockTasks, mockMissions, mockVaults, mockTransactions, mockAchievements } from '@/data/mock-data';
+import { mockMissions, mockAchievements } from '@/data/mock-data';
 import { StreakWidget } from '@/components/StreakWidget';
 import { ListTodo, Target, PiggyBank } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,9 @@ import { ChildSavingsProgress } from '@/components/child/ChildSavingsProgress';
 import { ChildRecentActivity } from '@/components/child/ChildRecentActivity';
 import { ChildAchievementsStrip } from '@/components/child/ChildAchievementsStrip';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
+import { useChildTasks } from '@/hooks/use-child-tasks';
+import { useDreamVaults } from '@/hooks/use-dream-vaults';
+import { useStreakData } from '@/hooks/use-streaks';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,7 +42,6 @@ const itemVariants = {
 };
 
 export default function ChildDashboard() {
-  const child = mockChildren[0];
   const { user } = useAuth();
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
@@ -47,14 +49,35 @@ export default function ChildDashboard() {
   const { data: monthlySpent = 0 } = useMonthlySpending();
   const { data: monthlySummary = [] } = useMonthlySummary(6);
   const { data: weeklyData } = useWeeklySparkline();
-  const balance = walletBalance?.balance ?? child.balance;
+  const { data: tasks = [] } = useChildTasks();
+  const { data: dbVaults } = useDreamVaults(user?.profileId);
+  const { data: streakData } = useStreakData();
+
+  const childName = user?.name ?? 'Explorador';
+  const childAvatar = user?.avatar ?? '🦊';
+  const balance = walletBalance?.balance ?? 0;
+  const childLevel: Level = 'saver';
+  const childKivaPoints = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
+  const streakDays = streakData?.currentStreak ?? 0;
+
   const [showLevelUp, setShowLevelUp] = useState(false);
   const navigate = useNavigate();
 
   const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
-  const pendingTasks = mockTasks.filter((t) => t.childId === child.id && t.status === 'pending');
-  const activeMissions = mockMissions.filter((m) => m.status === 'available' || (m.status === 'in_progress' && m.childId === child.id));
-  const vaults = mockVaults.filter((v) => v.childId === child.id);
+  const pendingTasks = tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress');
+  const activeMissions = mockMissions.filter((m) => m.status === 'available' || m.status === 'in_progress');
+  const vaults = dbVaults ?? [];
+  const vaultsMapped = vaults.map(v => ({
+    id: v.id,
+    childId: user?.profileId ?? '',
+    name: v.title,
+    targetAmount: v.targetAmount,
+    currentAmount: v.currentAmount,
+    icon: v.icon,
+    createdAt: v.createdAt,
+    interestRate: 0,
+  }));
+
   const recentTransactions = ledgerTransactions && ledgerTransactions.length > 0
     ? ledgerTransactions.map(tx => ({
         id: tx.id,
@@ -63,11 +86,12 @@ export default function ChildDashboard() {
         type: tx.direction === 'credit' ? 'earned' : 'spent',
         date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
       }))
-    : mockTransactions.filter((t) => t.childId === child.id).slice(0, 4);
-  const unlockedAchievements = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
+    : [];
+
+  const unlockedAchievements = mockAchievements.filter((a) => a.unlockedAt);
 
   const levels = Object.keys(LEVEL_CONFIG) as Level[];
-  const currentLevelIndex = levels.indexOf(child.level);
+  const currentLevelIndex = levels.indexOf(childLevel);
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
   const stats = [
@@ -79,19 +103,19 @@ export default function ChildDashboard() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5 max-w-2xl mx-auto pb-4">
       {showLevelUp && (
-        <LevelUpCeremony fromLevel={previousLevel} toLevel={child.level} onComplete={() => setShowLevelUp(false)} />
+        <LevelUpCeremony fromLevel={previousLevel} toLevel={childLevel} onComplete={() => setShowLevelUp(false)} />
       )}
 
       {/* Player Card (Hero) */}
       <motion.div variants={itemVariants} data-onboarding="wallet">
         <PlayerCard
-          name={child.name}
-          level={child.level}
-          points={child.kivaPoints}
+          name={childName}
+          level={childLevel}
+          points={childKivaPoints}
           balance={balance}
-          streakDays={3}
+          streakDays={streakDays}
           badgeCount={unlockedAchievements.length}
-          weeklyPoints={child.kivaPoints}
+          weeklyPoints={childKivaPoints}
           onLevelUpClick={() => setShowLevelUp(true)}
         />
       </motion.div>
@@ -149,12 +173,22 @@ export default function ChildDashboard() {
 
       {/* Pending Tasks */}
       <motion.div variants={itemVariants} data-onboarding="missions">
-        <ChildPendingTasks tasks={pendingTasks} />
+        <ChildPendingTasks tasks={pendingTasks.map(t => ({
+          id: t.id,
+          childId: user?.profileId ?? '',
+          title: t.title,
+          description: t.description ?? '',
+          reward: t.reward,
+          category: t.category,
+          status: t.status,
+          parentId: '',
+          createdAt: t.createdAt,
+        }))} />
       </motion.div>
 
       {/* Savings */}
       <motion.div variants={itemVariants} data-onboarding="dreams">
-        <ChildSavingsProgress vaults={vaults} />
+        <ChildSavingsProgress vaults={vaultsMapped} />
       </motion.div>
 
       {/* Recent Activity */}
