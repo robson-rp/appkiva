@@ -29,57 +29,56 @@ export function ChildLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Premium Header */}
+      {/* Header */}
       <header className="relative z-50">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
         <div className="relative flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl shadow-lg shadow-primary/20">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl shadow-lg shadow-primary/20">
               {user?.avatar}
             </div>
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-4 opacity-60" />
-              <p className="text-sm font-display font-bold text-foreground">
+              <p className="text-base font-display font-bold text-foreground">
                 Olá, {user?.name}! <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            {/* Coin balance pill */}
-            <div className="flex items-center gap-1.5 bg-accent/15 rounded-full px-3 py-1.5 mr-1">
-              <span className="text-sm">🪙</span>
-              <span className="text-sm font-display font-bold text-accent-foreground">{child.balance}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-accent/15 rounded-full px-3.5 py-2 mr-1">
+              <span className="text-base">🪙</span>
+              <span className="text-base font-display font-bold text-accent-foreground">{child.balance}</span>
             </div>
-            <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95">
-              <Trophy className="h-4.5 w-4.5 text-muted-foreground" />
+            <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Conquistas">
+              <Trophy className="h-5 w-5 text-muted-foreground" />
             </NavLink>
             <ThemeToggle />
             <NotificationDropdown />
-            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl h-9 w-9 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95">
-              <LogOut className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label="Sair">
+              <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Content with page transitions */}
+      {/* Content */}
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, y: 20, scale: 0.98, filter: 'blur(4px)' }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -16, scale: 0.98, filter: 'blur(4px)' }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="flex-1 p-4 pb-24 overflow-auto"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="flex-1 p-4 pb-28 overflow-auto"
         >
           {children}
         </motion.main>
       </AnimatePresence>
 
-      {/* Premium Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40">
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
-        <div className="relative px-3 py-2 flex justify-around items-center max-w-lg mx-auto">
+        <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
             const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
             const isActive = !locked && (item.url === '/child'
@@ -90,14 +89,14 @@ export function ChildLayout({ children }: { children: ReactNode }) {
               return (
                 <div
                   key={item.title}
-                  className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
+                  className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
                   title="Requer upgrade"
                 >
                   <div className="relative p-1.5 rounded-xl">
-                    <item.icon className="h-5 w-5" />
-                    <Lock className="h-2.5 w-2.5 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
+                    <item.icon className="h-6 w-6" />
+                    <Lock className="h-3 w-3 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
                   </div>
-                  <span className="text-[10px] mt-0.5 font-semibold">{item.title}</span>
+                  <span className="text-caption mt-0.5 font-semibold">{item.title}</span>
                 </div>
               );
             }
@@ -107,7 +106,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
                 key={item.title}
                 to={item.url}
                 end={item.url === '/child'}
-                className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl transition-all duration-200 text-muted-foreground"
+                className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
                 activeClassName="text-primary"
               >
                 <div className={`relative p-1.5 rounded-xl transition-all duration-300 ${isActive ? 'bg-primary/10' : ''}`}>
@@ -118,15 +117,15 @@ export function ChildLayout({ children }: { children: ReactNode }) {
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />
                   )}
-                  <item.icon className={`h-5 w-5 relative z-10 transition-all duration-200 ${isActive ? 'text-primary' : ''}`} />
+                  <item.icon className={`h-6 w-6 relative z-10 transition-all duration-200 ${isActive ? 'text-primary' : ''}`} />
                 </div>
-                <span className={`text-[10px] mt-0.5 font-semibold transition-all duration-200 ${isActive ? 'text-primary' : ''}`}>
+                <span className={`text-caption mt-0.5 font-semibold transition-all duration-200 ${isActive ? 'text-primary' : ''}`}>
                   {item.title}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="nav-dot"
-                    className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-primary"
+                    className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary"
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
