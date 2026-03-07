@@ -30,6 +30,8 @@ export default function ParentConsent() {
   const [grantDialog, setGrantDialog] = useState<{ open: boolean; childId: string; childName: string }>({ open: false, childId: '', childName: '' });
   const [detailDialog, setDetailDialog] = useState<{ open: boolean; record: any }>({ open: false, record: null });
   const [exportingChild, setExportingChild] = useState<string | null>(null);
+  const { hasFeature } = useAllFeatures();
+  const canExport = hasFeature(FEATURES.EXPORT_REPORTS);
 
   // Fetch children profiles
   const { data: children = [] } = useQuery({
