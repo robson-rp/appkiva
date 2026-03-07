@@ -47,6 +47,7 @@ export function useCreateSubscriptionTier() {
       price_yearly: number;
       max_children: number;
       max_classrooms: number;
+      extra_child_price?: number;
       currency: string;
       is_active: boolean;
       features: string[];
