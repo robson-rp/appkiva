@@ -28,6 +28,7 @@ const navItems = [
   { title: 'Lições', url: '/admin/lessons', icon: BookOpen },
   { title: 'Onboarding', url: '/admin/onboarding', icon: Sparkles },
   { title: 'Notificações', url: '/admin/notifications', icon: Bell },
+  { title: 'Banners', url: '/admin/banners', icon: Image },
 ];
 
 const mobileNavItems = [
