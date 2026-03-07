@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockTeens } from '@/data/mock-data';
@@ -10,13 +10,14 @@ import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 
-const bottomNavItems = [
+const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Início', url: '/teen', icon: Home },
   { title: 'Carteira', url: '/teen/wallet', icon: Wallet },
   { title: 'Aprender', url: '/teen/learn', icon: BookOpen },
-  { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank },
-  { title: 'Análise', url: '/teen/analytics', icon: BarChart3 },
+  { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Análise', url: '/teen/analytics', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
 ];
 
 export function TeenLayout({ children }: { children: ReactNode }) {
