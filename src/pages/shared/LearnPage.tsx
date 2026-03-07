@@ -166,8 +166,12 @@ export default function LearnPage() {
       </motion.div>
 
       {/* Category Tabs */}
-      <Tabs defaultValue="all">
+      <Tabs defaultValue="map">
         <TabsList className="w-full h-auto flex-wrap gap-1 bg-muted/50 p-1 rounded-xl">
+          <TabsTrigger value="map" className="text-xs rounded-lg gap-1">
+            <Map className="h-3 w-3" />
+            <span>Mapa</span>
+          </TabsTrigger>
           <TabsTrigger value="all" className="text-xs rounded-lg">Todas</TabsTrigger>
           {categories.map(([key, cat]) => (
             <TabsTrigger key={key} value={key} className="text-xs rounded-lg gap-1">
@@ -176,6 +180,14 @@ export default function LearnPage() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="map" className="mt-4">
+          <LearningProgressMap
+            lessons={lessons}
+            completedIds={completedIds}
+            onStartLesson={setActiveLesson}
+          />
+        </TabsContent>
 
         <TabsContent value="all" className="mt-4">
           <PaginatedGrid lessons={lessons} completedIds={completedIds} scoreMap={scoreMap} onStart={setActiveLesson} />

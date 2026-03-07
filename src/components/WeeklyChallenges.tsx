@@ -42,6 +42,11 @@ export function WeeklyChallenges() {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
+      {/* League Badge */}
+      <motion.div variants={item}>
+        <LeagueBadge weeklyPoints={currentUser?.score ?? 0} />
+      </motion.div>
+
       {/* Leaderboard Summary */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden shadow-kivara">

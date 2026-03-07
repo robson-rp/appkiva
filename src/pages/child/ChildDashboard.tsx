@@ -82,40 +82,18 @@ export default function ChildDashboard() {
         <LevelUpCeremony fromLevel={previousLevel} toLevel={child.level} onComplete={() => setShowLevelUp(false)} />
       )}
 
-      {/* Hero Balance Card */}
+      {/* Player Card (Hero) */}
       <motion.div variants={itemVariants} data-onboarding="wallet">
-        <Card className="border-0 overflow-hidden relative shadow-kivara">
-          <div className="absolute inset-0 gradient-kivara" />
-          <div className="absolute top-[-30%] right-[-15%] w-[55%] h-[80%] rounded-full bg-white/5 blur-3xl" />
-          <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[60%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-6">
-            <div className="flex justify-between items-start">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <AvatarGlow level={child.level} size="md" />
-                  <div>
-                    <p className="text-white/70 text-small font-body">A tua carteira</p>
-                    <div className="flex items-baseline gap-2">
-                      <motion.span key={balance} initial={{ scale: 1.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-5xl font-bold text-white">
-                        {balance}
-                      </motion.span>
-                      <span className="text-small text-white/60 font-display">KivaCoins</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-1">
-                  <LevelBadge level={child.level} points={child.kivaPoints} showProgress showAvatar={false} />
-                </div>
-              </div>
-              <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }} className="mt-1">
-                <img src={kivoImg} alt="Kivo" className="w-24 h-24 drop-shadow-2xl" />
-              </motion.div>
-            </div>
-            <Button size="sm" variant="ghost" onClick={() => setShowLevelUp(true)} className="mt-3 text-small text-white/50 hover:text-white/80 hover:bg-white/10 font-display">
-              ✨ Ver evolução
-            </Button>
-          </CardContent>
-        </Card>
+        <PlayerCard
+          name={child.name}
+          level={child.level}
+          points={child.kivaPoints}
+          balance={balance}
+          streakDays={3}
+          badgeCount={unlockedAchievements.length}
+          weeklyPoints={child.kivaPoints}
+          onLevelUpClick={() => setShowLevelUp(true)}
+        />
       </motion.div>
 
       {/* Streak */}
