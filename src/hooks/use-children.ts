@@ -10,6 +10,7 @@ export interface ChildWithBalance {
   avatar: string;
   balance: number;
   monthlyBudget: number;
+  dailySpendLimit: number;
 }
 
 export function useChildren() {
