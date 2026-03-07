@@ -294,6 +294,10 @@ function MissionsTab({
   inProgress: any[];
   completed: any[];
 }) {
+  // Classify missions as daily or weekly based on index (demo heuristic)
+  const dailyMissions = [...available, ...inProgress].filter((_, i) => i % 2 === 0);
+  const weeklyMissions = [...available, ...inProgress].filter((_, i) => i % 2 !== 0);
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
       {/* Hero */}
@@ -308,13 +312,13 @@ function MissionsTab({
               </div>
               <div>
                 <h1 className="font-display text-xl font-bold text-white">Missões</h1>
-                <p className="text-sm text-white/60">Aprende e ganha recompensas!</p>
+                <p className="text-sm text-white/60">Completa missões diárias e semanais!</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Disponíveis', value: available.length, icon: Sparkles },
-                { label: 'Em Curso', value: inProgress.length, icon: Zap },
+                { label: 'Diárias', value: dailyMissions.length, icon: Sparkles },
+                { label: 'Semanais', value: weeklyMissions.length, icon: Zap },
                 { label: 'Concluídas', value: completed.length, icon: Trophy },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
@@ -327,6 +331,35 @@ function MissionsTab({
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Daily Missions */}
+      {dailyMissions.length > 0 && (
+        <motion.div variants={item}>
+          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-accent" /> Missões Diárias
+            <span className="text-[10px] text-muted-foreground font-normal ml-auto">Renovam a cada 24h</span>
+          </h2>
+          <div className="space-y-3">
+            {dailyMissions.map((mission) => (
+              <DailyMissionCard key={mission.id} mission={mission} type="daily" />
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Weekly Quests */}
+      {weeklyMissions.length > 0 && (
+        <motion.div variants={item}>
+          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" /> Quests Semanais
+          </h2>
+          <div className="space-y-3">
+            {weeklyMissions.map((mission) => (
+              <DailyMissionCard key={mission.id} mission={mission} type="weekly" />
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* In Progress */}
       {inProgress.length > 0 && (
