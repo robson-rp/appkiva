@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award, Trash2, Pencil } from 'lucide-react';
+import { Plus, CheckCircle, ListTodo, Clock, Loader2, Award, Trash2, Pencil, Sparkles, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useHouseholdTasks, useCreateTask, useApproveTask, useDeleteTask, useUpdateTask, type TaskCategory } from '@/hooks/use-household-tasks';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useChildren } from '@/hooks/use-children';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -25,6 +27,7 @@ const statusConfig = {
 };
 
 const categoryLabels: Record<string, string> = { cleaning: '🧹 Limpeza', studying: '📚 Estudo', helping: '🤝 Ajuda', other: '📌 Outro' };
+const recurrenceLabels: Record<string, string> = { daily: '🔄 Diária', weekly: '📅 Semanal', monthly: '🗓️ Mensal' };
 
 export default function ParentTasks() {
   const { data: tasks = [], isLoading } = useHouseholdTasks();
@@ -33,6 +36,7 @@ export default function ParentTasks() {
   const approveTask = useApproveTask();
   const deleteTask = useDeleteTask();
   const updateTask = useUpdateTask();
+  const { toast } = useToast();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -40,6 +44,7 @@ export default function ParentTasks() {
   const [reward, setReward] = useState('20');
   const [category, setCategory] = useState<TaskCategory>('other');
   const [selectedChild, setSelectedChild] = useState('');
+  const [recurrence, setRecurrence] = useState('none');
 
   // Edit state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -47,6 +52,11 @@ export default function ParentTasks() {
   const [editTitle, setEditTitle] = useState('');
   const [editReward, setEditReward] = useState('');
   const [editCategory, setEditCategory] = useState<TaskCategory>('other');
+
+  // AI suggest state
+  const [aiSuggestOpen, setAiSuggestOpen] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const openEditDialog = (task: { id: string; title: string; reward: number; category: TaskCategory }) => {
     setEditTaskId(task.id);
@@ -67,18 +77,53 @@ export default function ParentTasks() {
   const handleCreate = () => {
     if (!title || !selectedChild || !reward) return;
     createTask.mutate(
-      { title, description, reward: Number(reward), category, childProfileId: selectedChild },
+      {
+        title,
+        description,
+        reward: Number(reward),
+        category,
+        childProfileId: selectedChild,
+        isRecurring: recurrence !== 'none',
+        recurrence: recurrence !== 'none' ? recurrence : undefined,
+      },
       {
         onSuccess: () => {
           setDialogOpen(false);
           setTitle('');
           setDescription('');
-          setReward('');
+          setReward('20');
           setCategory('other');
           setSelectedChild('');
+          setRecurrence('none');
         },
       }
     );
+  };
+
+  const handleAiSuggest = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-tasks', {
+        body: { childAge: '8-12', category: category !== 'other' ? category : undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiSuggestions(data.suggestions || []);
+      setAiSuggestOpen(true);
+    } catch (e: any) {
+      toast({ title: '❌ Erro', description: e.message, variant: 'destructive' });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const applySuggestion = (s: any) => {
+    setTitle(s.title);
+    setDescription(s.description || '');
+    setReward(String(s.reward || 20));
+    setCategory(s.category || 'other');
+    setAiSuggestOpen(false);
+    setDialogOpen(true);
   };
 
   const stats = {
@@ -100,66 +145,90 @@ export default function ParentTasks() {
             <h1 className="font-display text-2xl font-bold mt-1">Tarefas</h1>
             <p className="text-sm text-primary-foreground/60 mt-1">Cria e aprova tarefas para as crianças</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
-                <Plus className="h-4 w-4" /> Nova Tarefa
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="font-display">Criar Tarefa</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Título</Label>
-                  <Input placeholder="Ex: Arrumar o quarto" value={title} onChange={e => setTitle(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Descrição</Label>
-                  <Textarea placeholder="Descreve a tarefa..." value={description} onChange={e => setDescription(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Recompensa (KVC)</Label>
-                    <Input type="number" placeholder="20" value={reward} onChange={e => setReward(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Categoria</Label>
-                    <Select value={category} onValueChange={v => setCategory(v as TaskCategory)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cleaning">🧹 Limpeza</SelectItem>
-                        <SelectItem value="studying">📚 Estudo</SelectItem>
-                        <SelectItem value="helping">🤝 Ajuda</SelectItem>
-                        <SelectItem value="other">📌 Outro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Criança</Label>
-                  <Select value={selectedChild} onValueChange={setSelectedChild}>
-                    <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
-                    <SelectContent>
-                      {children.map(c => (
-                        <SelectItem key={c.profileId} value={c.profileId}>
-                          {c.avatar} {c.displayName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  className="w-full rounded-xl font-display"
-                  disabled={!title || !selectedChild || !reward || createTask.isPending}
-                  onClick={handleCreate}
-                >
-                  {createTask.isPending ? 'A criar...' : '✅ Criar Tarefa'}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleAiSuggest}
+              disabled={aiLoading}
+              className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm"
+            >
+              {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Sugerir IA
+            </Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg">
+                  <Plus className="h-4 w-4" /> Nova Tarefa
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="font-display">Criar Tarefa</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Título</Label>
+                    <Input placeholder="Ex: Arrumar o quarto" value={title} onChange={e => setTitle(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Descrição</Label>
+                    <Textarea placeholder="Descreve a tarefa..." value={description} onChange={e => setDescription(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Recompensa (KVC)</Label>
+                      <Input type="number" placeholder="20" value={reward} onChange={e => setReward(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Categoria</Label>
+                      <Select value={category} onValueChange={v => setCategory(v as TaskCategory)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cleaning">🧹 Limpeza</SelectItem>
+                          <SelectItem value="studying">📚 Estudo</SelectItem>
+                          <SelectItem value="helping">🤝 Ajuda</SelectItem>
+                          <SelectItem value="other">📌 Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Criança</Label>
+                      <Select value={selectedChild} onValueChange={setSelectedChild}>
+                        <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                        <SelectContent>
+                          {children.map(c => (
+                            <SelectItem key={c.profileId} value={c.profileId}>
+                              {c.avatar} {c.displayName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Recorrência</Label>
+                      <Select value={recurrence} onValueChange={setRecurrence}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Única vez</SelectItem>
+                          <SelectItem value="daily">🔄 Diária</SelectItem>
+                          <SelectItem value="weekly">📅 Semanal</SelectItem>
+                          <SelectItem value="monthly">🗓️ Mensal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full rounded-xl font-display"
+                    disabled={!title || !selectedChild || !reward || createTask.isPending}
+                    onClick={handleCreate}
+                  >
+                    {createTask.isPending ? 'A criar...' : '✅ Criar Tarefa'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </motion.div>
 
@@ -230,6 +299,12 @@ export default function ParentTasks() {
                         <div className="flex items-center gap-2 mb-0.5">
                           <h3 className="font-display font-bold text-sm">{task.title}</h3>
                           <span className="text-[10px] text-muted-foreground bg-muted rounded-lg px-2 py-0.5">{categoryLabels[task.category]}</span>
+                          {(task as any).is_recurring && (
+                            <Badge variant="outline" className="text-[9px] gap-1 px-1.5 py-0 border-primary/30 text-primary">
+                              <RefreshCw className="h-2.5 w-2.5" />
+                              {recurrenceLabels[(task as any).recurrence] || 'Recorrente'}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-muted-foreground truncate">{task.description}</p>
                         <div className="flex items-center gap-2 mt-1.5">
@@ -344,6 +419,37 @@ export default function ParentTasks() {
               {updateTask.isPending ? 'A guardar...' : '✏️ Guardar Alterações'}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Suggestions Dialog */}
+      <Dialog open={aiSuggestOpen} onOpenChange={setAiSuggestOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> Sugestões da IA
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {aiSuggestions.map((s, i) => (
+              <motion.button
+                key={i}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => applySuggestion(s)}
+                className="w-full p-3 rounded-xl border border-border/50 text-left hover:border-primary/50 hover:bg-primary/5 transition-all"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-display font-bold text-sm">{s.title}</p>
+                  <Badge variant="outline" className="text-[10px]">🪙 {s.reward}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{s.description}</p>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
+              </motion.button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiSuggestOpen(false)}>Fechar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
