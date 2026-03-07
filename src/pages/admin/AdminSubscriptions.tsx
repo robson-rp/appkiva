@@ -436,6 +436,25 @@ export default function AdminSubscriptions() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Deactivate confirmation for tiers with tenants */}
+      <AlertDialog open={deactivateConfirmOpen} onOpenChange={setDeactivateConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Desactivar plano com tenants associados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este plano tem {editId ? (tiers?.find((t: any) => t.id === editId)?.tenant_count ?? 0) : 0} tenant(s) associado(s).
+              Ao desactivá-lo, esses tenants permanecerão vinculados mas o plano deixará de estar visível para novos utilizadores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setForm(f => ({ ...f, is_active: false })); setDeactivateConfirmOpen(false); }}>
+              Desactivar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
