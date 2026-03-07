@@ -65,9 +65,9 @@ export default function PaymentSimulator({
   const currencyCode = tenantCurrency?.code ?? 'AOA';
   const decimals = tenantCurrency?.decimalPlaces ?? 0;
 
-  // Base prices are in EUR
-  const convertedPrice = (eurAmount: number) => convertPrice(eurAmount, 'EUR', currencyCode, rates);
-  const fmtPrice = (eurAmount: number) => formatPrice(convertedPrice(eurAmount), currencySymbol, decimals);
+  // Base prices are in USD
+  const convertedPrice = (usdAmount: number) => convertPrice(usdAmount, 'USD', currencyCode, rates);
+  const fmtPrice = (usdAmount: number) => formatPrice(convertedPrice(usdAmount), currencySymbol, decimals);
 
   const reset = () => {
     setStep('select');

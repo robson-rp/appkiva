@@ -15,7 +15,7 @@ export default function PartnerReports() {
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const cCode = tenantCurrency?.code ?? 'AOA';
   const dec = tenantCurrency?.decimalPlaces ?? 0;
-  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', cCode, rates), sym, dec);
+  const fmtP = (usdAmount: number) => formatPrice(convertPrice(usdAmount, 'USD', cCode, rates), sym, dec);
 
   const isLoading = loadingP || loadingC;
 
