@@ -304,9 +304,18 @@ export default function AdminSubscriptions() {
                             {tier.is_active ? 'Activo' : 'Inactivo'}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(tier)}>
                             <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={!canDelete(tier)}
+                            title={canDelete(tier) ? 'Eliminar plano' : 'Apenas planos inactivos sem tenants podem ser eliminados'}
+                            onClick={() => setDeleteTarget({ id: tier.id, name: tier.name })}
+                          >
+                            <Trash2 className={`h-4 w-4 ${canDelete(tier) ? 'text-destructive' : 'text-muted-foreground'}`} />
                           </Button>
                         </TableCell>
                       </TableRow>
