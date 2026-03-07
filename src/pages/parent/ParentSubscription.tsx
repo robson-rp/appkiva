@@ -198,7 +198,7 @@ export default function ParentSubscription() {
         open={paymentOpen}
         onOpenChange={setPaymentOpen}
         currentTierName={tierName}
-        tiers={tiers}
+        tiers={familyTiers}
         onConfirmUpgrade={upgrade}
       />
 
