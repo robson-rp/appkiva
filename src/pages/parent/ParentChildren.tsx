@@ -122,9 +122,30 @@ export default function ParentChildren() {
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const generateAndPersistCode = async () => {
+    const newCode = generateCode();
+    if (!user?.profileId || !user?.householdId) {
+      setInviteCode(newCode);
+      return;
+    }
+    setInviteSaving(true);
+    try {
+      const { error } = await supabase.from('family_invite_codes').insert({
+        code: newCode,
+        parent_profile_id: user.profileId,
+        household_id: user.householdId,
+      });
+      if (error) throw error;
+      setInviteCode(newCode);
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível gerar o código.', variant: 'destructive' });
+    } finally {
+      setInviteSaving(false);
+    }
+  };
+
   const handleRegenerate = () => {
-    setInviteCode(generateCode());
-    toast({ title: 'Novo código gerado! 🔄' });
+    generateAndPersistCode();
   };
 
   const handleShare = async () => {
