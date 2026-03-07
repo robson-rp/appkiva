@@ -14,9 +14,11 @@ const FEATURE_LIST = [
 
 interface PlanSummaryWidgetProps {
   compact?: boolean;
+  onClick?: () => void;
+  upgradeLabel?: string;
 }
 
-export function PlanSummaryWidget({ compact = false }: PlanSummaryWidgetProps) {
+export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: PlanSummaryWidgetProps) {
   const { enabledFeatures, tierName, loading } = useAllFeatures();
 
   if (loading) return null;
