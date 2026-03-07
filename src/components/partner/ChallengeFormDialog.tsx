@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 const schema = z.object({
   title: z.string().trim().min(3, 'Mínimo 3 caracteres').max(100),
   description: z.string().trim().max(500).optional(),
+  reward_amount: z.coerce.number().min(0, 'Mínimo 0 KVC'),
   start_date: z.date({ required_error: 'Data de início obrigatória' }),
   end_date: z.date({ required_error: 'Data de fim obrigatória' }),
 }).refine(d => d.end_date > d.start_date, {
@@ -45,7 +46,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { title: '', description: '' },
+    defaultValues: { title: '', description: '', reward_amount: 0 },
   });
 
   useEffect(() => {
@@ -53,11 +54,12 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
       form.reset({
         title: challenge.title,
         description: challenge.description ?? '',
+        reward_amount: challenge.reward_amount ?? 0,
         start_date: new Date(challenge.start_date),
         end_date: new Date(challenge.end_date),
       });
     } else if (open) {
-      form.reset({ title: '', description: '' });
+      form.reset({ title: '', description: '', reward_amount: 0 });
     }
   }, [open, challenge]);
 
@@ -71,6 +73,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           id: challenge!.id,
           title: values.title,
           description: values.description || null,
+          reward_amount: values.reward_amount,
           start_date: format(values.start_date, 'yyyy-MM-dd'),
           end_date: format(values.end_date, 'yyyy-MM-dd'),
         });
@@ -92,6 +95,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           partner_tenant_id: profile.tenant_id,
           title: values.title,
           description: values.description || null,
+          reward_amount: values.reward_amount,
           start_date: format(values.start_date, 'yyyy-MM-dd'),
           end_date: format(values.end_date, 'yyyy-MM-dd'),
           status: 'draft',
@@ -130,6 +134,14 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
               <FormItem>
                 <FormLabel>Descrição (opcional)</FormLabel>
                 <FormControl><Textarea placeholder="Descreva o objectivo do desafio..." rows={3} {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            <FormField control={form.control} name="reward_amount" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prémio por conclusão (KVC)</FormLabel>
+                <FormControl><Input type="number" min="0" step="1" placeholder="Ex: 50" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />

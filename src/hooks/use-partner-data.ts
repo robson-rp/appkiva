@@ -10,6 +10,7 @@ export interface PartnerProgram {
   status: string;
   children_count: number;
   investment_amount: number;
+  budget_spent: number;
   started_at: string;
   created_at: string;
 }
@@ -22,6 +23,8 @@ export interface SponsoredChallenge {
   status: string;
   participants_count: number;
   completion_rate: number;
+  reward_amount: number;
+  program_id: string | null;
   start_date: string;
   end_date: string;
   created_at: string;
@@ -69,6 +72,7 @@ export function useCreateSponsoredChallenge() {
       partner_tenant_id: string;
       title: string;
       description?: string | null;
+      reward_amount?: number;
       start_date: string;
       end_date: string;
       status?: string;
@@ -95,6 +99,7 @@ export function useUpdateSponsoredChallenge() {
       id: string;
       title?: string;
       description?: string | null;
+      reward_amount?: number;
       start_date?: string;
       end_date?: string;
       status?: string;
