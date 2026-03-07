@@ -40,6 +40,7 @@ const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
 const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
 const ChildWallet = lazy(() => import("./pages/child/ChildWallet"));
 const ChildMissions = lazy(() => import("./pages/child/ChildMissions"));
+const ChildTasks = lazy(() => import("./pages/child/ChildTasks"));
 const ChildVaults = lazy(() => import("./pages/child/ChildVaults"));
 const ChildAchievements = lazy(() => import("./pages/child/ChildAchievements"));
 const ChildStore = lazy(() => import("./pages/child/ChildStore"));
