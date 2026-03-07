@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Users, School, Search, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { usePartnerPrograms } from '@/hooks/use-partner-data';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProgramInviteDialog } from '@/components/partner/ProgramInviteDialog';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
