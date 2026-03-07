@@ -25,31 +25,19 @@ The KIVARA platform demonstrates strong architectural foundations with a ledger-
 
 ## 1. CRITICAL ISSUES — Must Fix Before Deploy
 
-### 🔴 C1: Program Invitations RLS Vulnerability
-**Severity**: CRITICAL  
-**Table**: `program_invitations`  
-**Issue**: The SELECT policy `Parents can view pending invitations` grants every authenticated parent and teacher the ability to read ALL pending program invitations, including invite codes. The UPDATE policy `Users can accept invitations` allows any parent/teacher to accept any invitation — potentially joining partner programs and receiving financial benefits not intended for them.  
-**Fix**: Replace blanket role-based conditions with target-scoped checks:
-```sql
--- Replace current policies with:
-USING (
-  (target_type = 'family' AND target_household_id = get_user_household_id(auth.uid()))
-  OR
-  (target_type = 'school' AND target_tenant_id IN (SELECT school_tenant_id FROM profiles WHERE user_id = auth.uid()))
-)
-```
+### ✅ C1: Program Invitations RLS Vulnerability — FIXED
+**Status**: RESOLVED  
+**Fix Applied**: Replaced blanket role-based SELECT/UPDATE policies with target-scoped policies filtering by `target_type` (family/school).
 
-### 🔴 C2: `seed-test-accounts` Edge Function — No Auth Guard
-**Severity**: CRITICAL  
-**Issue**: This endpoint can be invoked by anyone without authentication. It creates test accounts with known passwords, which in production exposes the platform to abuse.  
-**Fix**: Either (a) remove this function entirely before production, or (b) add admin-only auth check via `getClaims()`.
+### ✅ C2: `seed-test-accounts` Edge Function — FIXED
+**Status**: RESOLVED  
+**Fix Applied**: Added admin-only auth guard via `getClaims()` + `user_roles` admin role check.
 
-### 🔴 C3: `risk-scan` Edge Function — No Auth Guard
-**Severity**: CRITICAL  
-**Issue**: Anyone can trigger the anomaly detection system by invoking this function. While it uses service role internally and doesn't expose data, an attacker could trigger excessive database load.  
-**Fix**: Add admin auth check or restrict to cron-only invocation via CRON_SECRET header.
+### ✅ C3: `risk-scan` Edge Function — FIXED
+**Status**: RESOLVED  
+**Fix Applied**: Added admin-only auth guard via `getClaims()` + `user_roles` admin role check.
 
-### 🔴 C4: Negative Wallet Balances
+### 🔴 C4: Negative Wallet Balances — PENDING
 **Severity**: CRITICAL  
 **Issue**: 2 non-system wallets have negative KVC balances:
 - **Teste Parent** (ae9bcd8a): **-75 KVC**
