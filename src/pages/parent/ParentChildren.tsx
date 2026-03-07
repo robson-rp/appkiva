@@ -17,6 +17,7 @@ import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
 import { useSubscriptionTiers } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
+import EditChildDialog from '@/components/EditChildDialog';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
