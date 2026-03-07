@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -29,6 +29,7 @@ const navItems: { title: string; url: string; icon: any; requiredFeature?: Featu
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
   { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
+  { title: 'Suporte', url: '/parent/support', icon: Headphones },
 ];
 
 const mobileFixedItems = [
@@ -45,6 +46,7 @@ const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
   { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
+  { title: 'Suporte', url: '/parent/support', icon: Headphones },
 ];
 
 function ParentSidebar() {
