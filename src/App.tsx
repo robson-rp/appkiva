@@ -61,8 +61,11 @@ import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
 import PartnerReports from "./pages/partner/PartnerReports";
 import PartnerProfile from "./pages/partner/PartnerProfile";
+import AcceptProgramInvite from "./pages/shared/AcceptProgramInvite";
 
 const queryClient = new QueryClient();
+
+const INVITE_ROUTE = <Route path="/invite/program/:code" element={<AcceptProgramInvite />} />;
 
 function renderRoutes(user: { role: string }) {
   if (user.role === 'admin') {
