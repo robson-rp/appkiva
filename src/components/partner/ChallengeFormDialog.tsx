@@ -138,6 +138,14 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
               </FormItem>
             )} />
 
+            <FormField control={form.control} name="reward_amount" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Prémio por conclusão (KVC)</FormLabel>
+                <FormControl><Input type="number" min="0" step="1" placeholder="Ex: 50" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )} />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="start_date" render={({ field }) => (
                 <FormItem className="flex flex-col">
