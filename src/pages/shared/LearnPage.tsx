@@ -125,8 +125,17 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   donating: 'from-rose-400/80 to-pink-600/80',
 };
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  saving: savingImg,
+  budgeting: budgetingImg,
+  investing: investingImg,
+  earning: earningImg,
+  donating: donatingImg,
+};
+
 function LessonCard({ lesson, index, completed, onStart }: { lesson: MicroLesson; index: number; completed: boolean; onStart: () => void }) {
   const gradient = CATEGORY_GRADIENTS[lesson.category] || 'from-primary/60 to-primary/80';
+  const categoryImage = CATEGORY_IMAGES[lesson.category];
 
   return (
     <motion.div
@@ -142,7 +151,11 @@ function LessonCard({ lesson, index, completed, onStart }: { lesson: MicroLesson
       >
         {/* Illustration area */}
         <div className={`relative h-28 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-          <span className="text-5xl drop-shadow-md">{lesson.icon}</span>
+          {categoryImage ? (
+            <img src={categoryImage} alt={lesson.category} className="h-24 w-24 object-contain drop-shadow-md" />
+          ) : (
+            <span className="text-5xl drop-shadow-md">{lesson.icon}</span>
+          )}
           {completed && (
             <div className="absolute top-2 right-2 bg-background/90 rounded-full p-1">
               <CheckCircle className="h-5 w-5 text-chart-3" />
