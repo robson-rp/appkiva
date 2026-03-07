@@ -340,16 +340,6 @@ export default function Login() {
             Pequenos hábitos. Grandes futuros
           </motion.p>
 
-          {/* Banner Carousel */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="w-full max-w-xs lg:max-w-md mt-2 lg:mt-4"
-          >
-            <LoginBannerCarousel />
-          </motion.div>
-
           {/* Version badge */}
           <motion.span
             initial={{ opacity: 0 }}
@@ -428,6 +418,7 @@ export default function Login() {
                 transition={{ duration: 0.3 }}
                 className="space-y-4 sm:space-y-6"
               >
+                <LoginBannerCarousel />
                 <div>
                   <button
                     onClick={resetForm}
