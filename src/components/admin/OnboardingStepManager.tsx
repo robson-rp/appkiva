@@ -372,6 +372,42 @@ export default function OnboardingStepManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Duplicate Dialog */}
+      <Dialog open={!!duplicatingStep} onOpenChange={(open) => { if (!open) { setDuplicatingStep(null); setDupTargetRoles([]); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">Duplicar Passo</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Selecione os papéis para onde duplicar "<span className="font-medium text-foreground">{duplicatingStep?.title}</span>"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {ROLES.filter(r => r !== duplicatingStep?.role).map(r => (
+              <label key={r} className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={dupTargetRoles.includes(r)}
+                  onCheckedChange={(checked) => {
+                    setDupTargetRoles(prev =>
+                      checked ? [...prev, r] : prev.filter(x => x !== r)
+                    );
+                  }}
+                />
+                <span className="text-sm">{ROLE_LABELS[r]}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setDuplicatingStep(null); setDupTargetRoles([]); }}>Cancelar</Button>
+            <Button
+              disabled={dupTargetRoles.length === 0 || duplicateMutation.isPending}
+              onClick={() => duplicatingStep && duplicateMutation.mutate({ step: duplicatingStep, targetRoles: dupTargetRoles })}
+            >
+              {duplicateMutation.isPending ? 'A duplicar...' : `Duplicar (${dupTargetRoles.length})`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
