@@ -1328,6 +1328,7 @@ export type Database = {
           is_active: boolean
           max_children: number
           max_classrooms: number
+          max_programs: number
           name: string
           price_monthly: number
           price_yearly: number
@@ -1343,6 +1344,7 @@ export type Database = {
           is_active?: boolean
           max_children?: number
           max_classrooms?: number
+          max_programs?: number
           name: string
           price_monthly?: number
           price_yearly?: number
@@ -1358,6 +1360,7 @@ export type Database = {
           is_active?: boolean
           max_children?: number
           max_classrooms?: number
+          max_programs?: number
           name?: string
           price_monthly?: number
           price_yearly?: number

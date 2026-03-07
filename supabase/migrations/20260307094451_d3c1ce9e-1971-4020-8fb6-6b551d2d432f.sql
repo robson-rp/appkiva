@@ -1,0 +1,1 @@
+ALTER TABLE public.subscription_tiers ADD COLUMN max_programs integer NOT NULL DEFAULT 0;
