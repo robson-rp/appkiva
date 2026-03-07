@@ -42,7 +42,7 @@ function useTemplates(search: string) {
   return useQuery({
     queryKey: ['admin-notification-templates', search],
     queryFn: async () => {
-      let query = supabase
+      let query = (supabase as any)
         .from('notification_templates')
         .select('*')
         .order('event', { ascending: true });
