@@ -74,6 +74,8 @@ export default function ChildDashboard() {
     targetAmount: v.targetAmount,
     currentAmount: v.currentAmount,
     icon: v.icon,
+    createdAt: v.createdAt,
+    interestRate: 0,
   }));
 
   const recentTransactions = ledgerTransactions && ledgerTransactions.length > 0
