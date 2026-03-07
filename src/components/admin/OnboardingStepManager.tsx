@@ -235,60 +235,104 @@ export default function OnboardingStepManager() {
         </div>
       )}
 
-      {/* Edit / Create Dialog */}
+      {/* Edit / Create Dialog with live preview */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setEditingStep(null); setIsCreating(false); } }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-display">{editingStep ? 'Editar Passo' : 'Novo Passo'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Título</Label>
-              <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+            {/* Left: Form */}
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+              <DialogHeader>
+                <DialogTitle className="font-display">{editingStep ? 'Editar Passo' : 'Novo Passo'}</DialogTitle>
+              </DialogHeader>
+              <div>
+                <Label>Título</Label>
+                <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Descrição</Label>
+                <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+              </div>
+              <div>
+                <Label>Ilustração</Label>
+                <Select value={form.illustration_key} onValueChange={v => setForm(f => ({ ...f, illustration_key: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ILLUSTRATION_KEYS.map(k => (
+                      <SelectItem key={k} value={k}>{k}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>CTA (botão, opcional)</Label>
+                <Input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="Ex: Começar" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
+                <Label>Ativo</Label>
+              </div>
+              <DialogFooter className="pt-2">
+                <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>Cancelar</Button>
+                <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>
+                  {saveMutation.isPending ? 'A guardar...' : 'Guardar'}
+                </Button>
+              </DialogFooter>
             </div>
-            <div>
-              <Label>Descrição</Label>
-              <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
-            </div>
-            <div>
-              <Label>Ilustração</Label>
-              <Select value={form.illustration_key} onValueChange={v => setForm(f => ({ ...f, illustration_key: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {ILLUSTRATION_KEYS.map(k => (
-                    <SelectItem key={k} value={k}>{k}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {form.illustration_key && (
-                <div className="mt-2 h-32 rounded-lg overflow-hidden bg-muted">
-                  <SplashIllustration illustrationKey={form.illustration_key} />
+
+            {/* Right: Live preview mimicking the actual walkthrough */}
+            <div className="hidden lg:flex items-center justify-center bg-background/80 backdrop-blur-sm p-6 border-l border-border/50">
+              <div className="w-full max-w-sm bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden">
+                {/* Top accent */}
+                <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
+                {/* Illustration */}
+                {form.illustration_key && (
+                  <div className="relative overflow-hidden">
+                    <SplashIllustration illustrationKey={form.illustration_key} />
+                  </div>
+                )}
+                {/* Content */}
+                <div className="px-6 pb-6 pt-2 text-center">
+                  <h2 className="text-lg font-display font-bold text-foreground mb-2">
+                    {form.title || 'Título do passo'}
+                  </h2>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
+                    {form.description || 'Descrição do passo aparecerá aqui...'}
+                  </p>
+                  {/* Dots */}
+                  <div className="flex justify-center gap-1.5 mt-4 mb-4">
+                    <div className="h-1.5 w-6 rounded-full bg-primary" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" />
+                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" />
+                  </div>
+                  {/* Actions */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground px-3 py-2">Saltar</span>
+                    <Button size="sm" className="rounded-xl px-5 gap-1.5 font-display font-semibold shadow-md shadow-primary/20">
+                      {form.cta || 'Seguinte'}
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div>
-              <Label>CTA (botão, opcional)</Label>
-              <Input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="Ex: Começar" />
-            </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
-              <Label>Ativo</Label>
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>
-              {saveMutation.isPending ? 'A guardar...' : 'Guardar'}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Full Preview Dialog */}
       <Dialog open={!!previewKey} onOpenChange={() => setPreviewKey(null)}>
         <DialogContent className="max-w-md p-0 overflow-hidden">
-          <div className="h-80">
+          <div className="w-full max-w-sm mx-auto bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
             {previewKey && <SplashIllustration illustrationKey={previewKey} />}
+            <div className="px-6 pb-6 pt-2 text-center">
+              <h2 className="text-lg font-display font-bold text-foreground mb-2">
+                {steps.find(s => s.illustration_key === previewKey)?.title}
+              </h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {steps.find(s => s.illustration_key === previewKey)?.description}
+              </p>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
