@@ -102,6 +102,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
         <Route path="/partner/subscription" element={<PartnerLayout><PartnerSubscriptionPage /></PartnerLayout>} />
         <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
     );
