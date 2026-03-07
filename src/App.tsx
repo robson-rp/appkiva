@@ -60,6 +60,7 @@ import AdminSchools from "./pages/admin/AdminSchools";
 import AdminFinance from "./pages/admin/AdminFinance";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLessons from "./pages/admin/AdminLessons";
+import AdminOnboarding from "./pages/admin/AdminOnboarding";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
