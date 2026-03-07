@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -13,15 +13,17 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const navItems = [
+const navItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
   { title: 'Painel', url: '/parent', icon: LayoutDashboard },
   { title: 'Crianças', url: '/parent/children', icon: Users },
   { title: 'Tarefas', url: '/parent/tasks', icon: ListTodo },
   { title: 'Mesada', url: '/parent/allowance', icon: Wallet },
-  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank },
-  { title: 'Recompensas', url: '/parent/rewards', icon: Gift },
-  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3 },
+  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+  { title: 'Recompensas', url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
+  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
   { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
   { title: 'Consentimento', url: '/parent/consent', icon: Shield },
   { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
