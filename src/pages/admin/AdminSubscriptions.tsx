@@ -15,9 +15,13 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
 import {
-  useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
+import {
+  useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier, useDeleteSubscriptionTier,
 } from '@/hooks/use-tenants';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
