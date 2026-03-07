@@ -63,6 +63,7 @@ export function useChildren() {
         balance: balanceMap.get(c.profile_id) ?? 0,
         monthlyBudget: Number(c.monthly_budget) || 0,
         dailySpendLimit: Number(c.daily_spend_limit) || 50,
+        dateOfBirth: c.date_of_birth ?? null,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
