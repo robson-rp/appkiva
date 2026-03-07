@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Crown, CreditCard, Check, Sparkles, Shield, Loader2 } from 'lucide-react';
+import { Crown, CreditCard, Check, Sparkles, Shield, Loader2, Smartphone, FileText, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
 import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
@@ -43,6 +43,29 @@ const FEATURE_LABELS: Record<string, string> = {
 };
 
 type Step = 'select' | 'payment' | 'processing' | 'success';
+type PaymentMethod = 'referencia' | 'multicaixa_express' | 'credit_card' | 'paypal' | 'stripe';
+
+interface PaymentMethodOption {
+  id: PaymentMethod;
+  label: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
+const ANGOLA_METHODS: PaymentMethodOption[] = [
+  { id: 'referencia', label: 'Referência de Pagamento', icon: <FileText className="h-5 w-5" />, description: 'Pagar via referência bancária' },
+  { id: 'multicaixa_express', label: 'Multicaixa Express', icon: <Smartphone className="h-5 w-5" />, description: 'Pagar com o telemóvel' },
+];
+
+const INTERNATIONAL_METHODS: PaymentMethodOption[] = [
+  { id: 'credit_card', label: 'Cartão de Crédito', icon: <CreditCard className="h-5 w-5" />, description: 'Visa, Mastercard, etc.' },
+  { id: 'paypal', label: 'PayPal', icon: <Globe className="h-5 w-5" />, description: 'Pagar com a sua conta PayPal' },
+  { id: 'stripe', label: 'Stripe', icon: <CreditCard className="h-5 w-5" />, description: 'Pagamento seguro via Stripe' },
+];
+
+function generateReference(): string {
+  return Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join('');
+}
 
 export default function PaymentSimulator({
   open,
@@ -54,10 +77,19 @@ export default function PaymentSimulator({
   const [step, setStep] = useState<Step>('select');
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier | null>(null);
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+
+  // Card fields
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
   const [cardName, setCardName] = useState('');
+
+  // Multicaixa Express fields
+  const [phoneNumber, setPhoneNumber] = useState('');
+
+  // Reference mock data
+  const [mockReference] = useState(() => generateReference());
 
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
@@ -67,17 +99,28 @@ export default function PaymentSimulator({
   const currencyCode = tenantCurrency?.code ?? 'AOA';
   const decimals = tenantCurrency?.decimalPlaces ?? 0;
 
-  // Use regional override if available, otherwise dynamic conversion
+  const isAngola = currencyCode === 'AOA';
+  const availableMethods = isAngola ? ANGOLA_METHODS : INTERNATIONAL_METHODS;
+
   const fmtTierPrice = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
     formatPrice(getRegionalPrice(tierId, field, usdAmount, currencyCode, regionalPrices, rates), currencySymbol, decimals);
+
+  const currentPrice = useMemo(() => {
+    if (!selectedTier) return '';
+    const amount = billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly;
+    const field = billing === 'monthly' ? 'price_monthly' : 'price_yearly';
+    return fmtTierPrice(selectedTier.id, amount, field);
+  }, [selectedTier, billing, currencyCode, regionalPrices, rates]);
 
   const reset = () => {
     setStep('select');
     setSelectedTier(null);
+    setSelectedMethod(null);
     setCardNumber('');
     setCardExpiry('');
     setCardCvc('');
     setCardName('');
+    setPhoneNumber('');
   };
 
   const handleClose = (open: boolean) => {
@@ -96,7 +139,26 @@ export default function PaymentSimulator({
     return digits;
   };
 
-  const isFormValid = cardNumber.replace(/\s/g, '').length === 16 && cardExpiry.length === 5 && cardCvc.length >= 3 && cardName.length >= 2;
+  const formatPhone = (val: string) => {
+    return val.replace(/\D/g, '').slice(0, 9);
+  };
+
+  const isFormValid = useMemo(() => {
+    if (!selectedMethod) return false;
+    switch (selectedMethod) {
+      case 'credit_card':
+        return cardNumber.replace(/\s/g, '').length === 16 && cardExpiry.length === 5 && cardCvc.length >= 3 && cardName.length >= 2;
+      case 'multicaixa_express':
+        return phoneNumber.length === 9 && phoneNumber.startsWith('9');
+      case 'referencia':
+        return true; // always valid — user just confirms
+      case 'paypal':
+      case 'stripe':
+        return true; // redirect-style
+      default:
+        return false;
+    }
+  }, [selectedMethod, cardNumber, cardExpiry, cardCvc, cardName, phoneNumber]);
 
   const handlePay = async () => {
     if (!selectedTier) return;
@@ -111,10 +173,112 @@ export default function PaymentSimulator({
   };
 
   const upgradeTiers = tiers.filter(
-    (t) =>
-      t.name !== currentTierName &&
-      t.priceMonthly >= 0
+    (t) => t.name !== currentTierName && t.priceMonthly >= 0
   );
+
+  const renderPaymentForm = () => {
+    if (!selectedMethod) return null;
+
+    switch (selectedMethod) {
+      case 'credit_card':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs font-medium">Nome no cartão</Label>
+              <Input placeholder="João Silva" value={cardName} onChange={(e) => setCardName(e.target.value)} className="rounded-xl mt-1" />
+            </div>
+            <div>
+              <Label className="text-xs font-medium">Número do cartão</Label>
+              <Input placeholder="4242 4242 4242 4242" value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={19} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs font-medium">Validade</Label>
+                <Input placeholder="12/26" value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={5} />
+              </div>
+              <div>
+                <Label className="text-xs font-medium">CVC</Label>
+                <Input placeholder="123" value={cardCvc} onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} className="rounded-xl mt-1 font-mono" maxLength={4} />
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'multicaixa_express':
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs font-medium">Número de telemóvel</Label>
+              <Input
+                placeholder="9XX XXX XXX"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(formatPhone(e.target.value))}
+                className="rounded-xl mt-1 font-mono"
+                maxLength={9}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">Número registado no Multicaixa Express (começa com 9)</p>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3 text-center">
+              <p className="text-xs text-muted-foreground">Valor a debitar</p>
+              <p className="font-display font-bold text-xl text-primary mt-1">{currentPrice}</p>
+            </div>
+          </div>
+        );
+
+      case 'referencia':
+        return (
+          <div className="space-y-3">
+            <div className="bg-muted/50 rounded-xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Entidade</span>
+                <span className="font-mono font-bold text-sm">11456</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Referência</span>
+                <span className="font-mono font-bold text-sm">{mockReference}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Montante</span>
+                <span className="font-display font-bold text-primary">{currentPrice}</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">
+              Efetue o pagamento num terminal Multicaixa ou via Internet Banking com os dados acima.
+            </p>
+          </div>
+        );
+
+      case 'paypal':
+        return (
+          <div className="bg-muted/50 rounded-xl p-6 text-center space-y-2">
+            <Globe className="h-8 w-8 mx-auto text-primary" />
+            <p className="font-display font-bold text-sm">Redirecionar para PayPal</p>
+            <p className="text-xs text-muted-foreground">Será redirecionado para completar o pagamento de <span className="font-bold text-foreground">{currentPrice}</span></p>
+          </div>
+        );
+
+      case 'stripe':
+        return (
+          <div className="bg-muted/50 rounded-xl p-6 text-center space-y-2">
+            <CreditCard className="h-8 w-8 mx-auto text-primary" />
+            <p className="font-display font-bold text-sm">Pagamento via Stripe</p>
+            <p className="text-xs text-muted-foreground">Será redirecionado para o checkout seguro de <span className="font-bold text-foreground">{currentPrice}</span></p>
+          </div>
+        );
+    }
+  };
+
+  const payButtonLabel = useMemo(() => {
+    if (!selectedMethod) return 'Pagar';
+    switch (selectedMethod) {
+      case 'referencia': return 'Confirmar pagamento';
+      case 'multicaixa_express': return `Pagar ${currentPrice}`;
+      case 'paypal': return 'Ir para PayPal';
+      case 'stripe': return 'Ir para Stripe';
+      case 'credit_card': return `Pagar ${currentPrice}`;
+      default: return 'Pagar';
+    }
+  }, [selectedMethod, currentPrice]);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -122,13 +286,7 @@ export default function PaymentSimulator({
         <AnimatePresence mode="wait">
           {/* ─── Step 1: Select Plan ─── */}
           {step === 'select' && (
-            <motion.div
-              key="select"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="p-6"
-            >
+            <motion.div key="select" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-6">
               <DialogHeader>
                 <DialogTitle className="font-display flex items-center gap-2">
                   <Crown className="h-5 w-5 text-accent-foreground" />
@@ -139,19 +297,13 @@ export default function PaymentSimulator({
               <div className="flex items-center justify-center gap-2 mt-4 mb-5">
                 <button
                   onClick={() => setBilling('monthly')}
-                  className={cn(
-                    'px-4 py-1.5 rounded-full text-xs font-semibold transition-all',
-                    billing === 'monthly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                  )}
+                  className={cn('px-4 py-1.5 rounded-full text-xs font-semibold transition-all', billing === 'monthly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}
                 >
                   Mensal
                 </button>
                 <button
                   onClick={() => setBilling('yearly')}
-                  className={cn(
-                    'px-4 py-1.5 rounded-full text-xs font-semibold transition-all',
-                    billing === 'yearly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                  )}
+                  className={cn('px-4 py-1.5 rounded-full text-xs font-semibold transition-all', billing === 'yearly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}
                 >
                   Anual <span className="text-[10px] ml-1 opacity-70">-17%</span>
                 </button>
@@ -166,9 +318,7 @@ export default function PaymentSimulator({
                       <Card
                         className={cn(
                           'cursor-pointer border-2 transition-all hover:shadow-md',
-                          selectedTier?.id === tier.id
-                            ? 'border-primary bg-primary/5 shadow-md'
-                            : 'border-border/50 hover:border-primary/30'
+                          selectedTier?.id === tier.id ? 'border-primary bg-primary/5 shadow-md' : 'border-border/50 hover:border-primary/30'
                         )}
                         onClick={() => setSelectedTier(tier)}
                       >
@@ -199,11 +349,7 @@ export default function PaymentSimulator({
                 })}
               </div>
 
-              <Button
-                className="w-full mt-5 rounded-xl font-display gap-2"
-                disabled={!selectedTier}
-                onClick={() => setStep('payment')}
-              >
+              <Button className="w-full mt-5 rounded-xl font-display gap-2" disabled={!selectedTier} onClick={() => { setSelectedMethod(null); setStep('payment'); }}>
                 <CreditCard className="h-4 w-4" />
                 Continuar para pagamento
               </Button>
@@ -212,13 +358,7 @@ export default function PaymentSimulator({
 
           {/* ─── Step 2: Payment Form ─── */}
           {step === 'payment' && selectedTier && (
-            <motion.div
-              key="payment"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="p-6"
-            >
+            <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-6">
               <DialogHeader>
                 <DialogTitle className="font-display flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" />
@@ -229,52 +369,68 @@ export default function PaymentSimulator({
                 </DialogTitle>
               </DialogHeader>
 
-              <div className="bg-muted/50 rounded-xl p-3 mt-4 mb-5 flex items-center justify-between">
+              <div className="bg-muted/50 rounded-xl p-3 mt-4 mb-4 flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">Plano selecionado</p>
                   <p className="font-display font-bold text-sm">{selectedTier.name}</p>
                 </div>
                 <p className="font-display font-bold text-primary">
-                  {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
+                  {currentPrice}
                   <span className="text-[10px] text-muted-foreground font-normal">
                     /{billing === 'monthly' ? 'mês' : 'ano'}
                   </span>
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label className="text-xs font-medium">Nome no cartão</Label>
-                  <Input placeholder="João Silva" value={cardName} onChange={(e) => setCardName(e.target.value)} className="rounded-xl mt-1" />
-                </div>
-                <div>
-                  <Label className="text-xs font-medium">Número do cartão</Label>
-                  <Input placeholder="4242 4242 4242 4242" value={cardNumber} onChange={(e) => setCardNumber(formatCardNumber(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={19} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs font-medium">Validade</Label>
-                    <Input placeholder="12/26" value={cardExpiry} onChange={(e) => setCardExpiry(formatExpiry(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={5} />
-                  </div>
-                  <div>
-                    <Label className="text-xs font-medium">CVC</Label>
-                    <Input placeholder="123" value={cardCvc} onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} className="rounded-xl mt-1 font-mono" maxLength={4} />
-                  </div>
+              {/* Payment method selector */}
+              <div className="space-y-2 mb-4">
+                <Label className="text-xs font-medium text-muted-foreground">Método de pagamento</Label>
+                <div className="grid grid-cols-1 gap-2">
+                  {availableMethods.map((method) => (
+                    <button
+                      key={method.id}
+                      onClick={() => setSelectedMethod(method.id)}
+                      className={cn(
+                        'flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left',
+                        selectedMethod === method.id
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border/50 hover:border-primary/30'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
+                        selectedMethod === method.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      )}>
+                        {method.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-display font-bold text-xs">{method.label}</p>
+                        <p className="text-[10px] text-muted-foreground">{method.description}</p>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-4 text-[10px] text-muted-foreground">
+              {/* Conditional form per method */}
+              {selectedMethod && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
+                  {renderPaymentForm()}
+                </motion.div>
+              )}
+
+              <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                 <Shield className="h-3.5 w-3.5" />
                 <span>Simulador seguro — nenhum pagamento real será processado</span>
               </div>
 
-              <div className="flex gap-2 mt-5">
+              <div className="flex gap-2 mt-4">
                 <Button variant="outline" className="rounded-xl font-display" onClick={() => setStep('select')}>
                   Voltar
                 </Button>
-                <Button className="flex-1 rounded-xl font-display gap-2" disabled={!isFormValid} onClick={handlePay}>
+                <Button className="flex-1 rounded-xl font-display gap-2" disabled={!selectedMethod || !isFormValid} onClick={handlePay}>
                   <Crown className="h-4 w-4" />
-                  Pagar {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
+                  {payButtonLabel}
                 </Button>
               </div>
             </motion.div>
