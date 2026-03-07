@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 export default function PartnerPrograms() {
+  const { user } = useAuth();
   const [search, setSearch] = useState('');
   const { data: programs, isLoading } = usePartnerPrograms();
 
