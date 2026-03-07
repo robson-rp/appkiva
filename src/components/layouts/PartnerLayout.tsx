@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings, Crown } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
