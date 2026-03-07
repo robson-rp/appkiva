@@ -74,7 +74,9 @@ export default function PartnerSubscription() {
                   <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
                   <h1 className="font-display text-2xl font-bold">{limits.tierName}</h1>
                     <p className="text-sm opacity-80 mt-0.5">
-                      {limits.priceMonthly > 0 ? `${localPrice(limits.priceMonthly)}/mês` : 'Gratuito'}
+                      {limits.priceMonthly > 0
+                        ? `${localPrice(partnerTiers.find(t => t.name === limits.tierName)?.id ?? '', limits.priceMonthly)}/mês`
+                        : 'Gratuito'}
                     </p>
                 </div>
               </div>
