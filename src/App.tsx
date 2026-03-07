@@ -87,6 +87,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/finance" element={<AdminLayout><AdminFinance /></AdminLayout>} />
         <Route path="/admin/users" element={<AdminLayout><AdminUsers /></AdminLayout>} />
         <Route path="/admin/lessons" element={<AdminLayout><AdminLessons /></AdminLayout>} />
+        {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
