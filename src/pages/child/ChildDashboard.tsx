@@ -26,6 +26,7 @@ import { ChildPendingTasks } from '@/components/child/ChildPendingTasks';
 import { ChildSavingsProgress } from '@/components/child/ChildSavingsProgress';
 import { ChildRecentActivity } from '@/components/child/ChildRecentActivity';
 import { ChildAchievementsStrip } from '@/components/child/ChildAchievementsStrip';
+import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -185,6 +186,11 @@ export default function ChildDashboard() {
       {/* Achievements */}
       <motion.div variants={itemVariants} data-onboarding="achievements">
         <ChildAchievementsStrip achievements={unlockedAchievements} />
+      </motion.div>
+
+      {/* Plan Summary */}
+      <motion.div variants={itemVariants}>
+        <PlanSummaryWidget compact />
       </motion.div>
 
       <Kivo page="dashboard" />

@@ -14,6 +14,7 @@ import { TeenBudgetBar } from '@/components/teen/TeenBudgetBar';
 import { TeenCategoryBreakdown } from '@/components/teen/TeenCategoryBreakdown';
 import { TeenRecentTransactions } from '@/components/teen/TeenRecentTransactions';
 import { StreakWidget } from '@/components/StreakWidget';
+import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 
 export default function TeenDashboard() {
   const teen = mockTeens[0];
@@ -115,6 +116,11 @@ export default function TeenDashboard() {
           <MonthlyEvolutionChart data={monthlySummary} />
         </motion.div>
       )}
+
+      {/* Plan Summary */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+        <PlanSummaryWidget compact />
+      </motion.div>
     </div>
   );
 }
