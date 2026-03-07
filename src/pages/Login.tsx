@@ -393,9 +393,10 @@ export default function Login() {
                         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
                           <Icon className={`h-8 w-8 ${cfg.colorClass}`} />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <span className="font-display font-bold text-lg text-foreground block">{cfg.label}</span>
-                          <span className="text-sm text-muted-foreground">{cfg.description}</span>
+                          <span className="text-sm text-muted-foreground block">{cfg.description}</span>
+                          <span className="text-xs font-mono text-muted-foreground/70 mt-1 block">{cfg.testEmail} · Test1234!</span>
                         </div>
                       </motion.button>
                     );
