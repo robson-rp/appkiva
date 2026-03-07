@@ -67,7 +67,7 @@ export default function Login() {
 
   // Fetch schools for teacher signup
   useEffect(() => {
-    if (selectedRole === 'teacher' && authMode === 'signup') {
+    if ((selectedRole === 'teacher' || selectedRole === 'parent') && authMode === 'signup') {
       supabase
         .from('tenants')
         .select('id, name')
