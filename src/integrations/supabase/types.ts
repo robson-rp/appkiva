@@ -408,6 +408,41 @@ export type Database = {
         }
         Relationships: []
       }
+      diary_entries: {
+        Row: {
+          created_at: string
+          id: string
+          mood: string
+          profile_id: string
+          tags: string[] | null
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mood?: string
+          profile_id: string
+          tags?: string[] | null
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mood?: string
+          profile_id?: string
+          tags?: string[] | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_entries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donation_causes: {
         Row: {
           category: string | null
@@ -2119,6 +2154,7 @@ export type Database = {
         Args: { _code: string; _profile_id: string }
         Returns: undefined
       }
+      delete_child_safe: { Args: { _child_id: string }; Returns: undefined }
       get_money_supply_stats: { Args: never; Returns: Json }
       get_parent_emission_stats: {
         Args: { _parent_profile_id: string }
