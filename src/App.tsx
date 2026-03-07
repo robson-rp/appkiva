@@ -193,6 +193,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teen/learn" element={<TeenLayout><S><LearnPage /></S></TeenLayout>} />
         <Route path="/teen/badges" element={<TeenLayout><S><BadgesPage /></S></TeenLayout>} />
         <Route path="/teen/streaks" element={<TeenLayout><S><StreaksPage /></S></TeenLayout>} />
+        <Route path="/teen/profile" element={<TeenLayout><S><TeenProfile /></S></TeenLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>

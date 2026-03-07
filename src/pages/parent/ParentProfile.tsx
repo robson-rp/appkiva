@@ -40,10 +40,13 @@ export default function ParentProfile() {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country, gender, school_tenant_id')
+      .select('display_name, avatar, phone, country, gender, school_tenant_id')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
+        if (data?.display_name) setName(data.display_name);
+        if (data?.avatar) setSelectedAvatar(data.avatar);
+        if (data?.phone) setPhone(data.phone);
         if (data?.country) setCountry(data.country);
         if (data?.gender) setGender(data.gender);
         if (data?.school_tenant_id) setSchoolTenantId(data.school_tenant_id);
