@@ -35,17 +35,35 @@ function generateCode() {
 
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
+  const { user } = useAuth();
+  const qc = useQueryClient();
   const updateBudget = useUpdateChildBudget();
   const updateDailyLimit = useUpdateChildDailyLimit();
   const { data: pendingExceptions = [] } = usePendingBudgetExceptions();
   const resolveException = useResolveBudgetException();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteCode, setInviteCode] = useState(() => generateCode());
+  const [inviteCode, setInviteCode] = useState('');
+  const [inviteSaving, setInviteSaving] = useState(false);
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
+  const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
+  const deleteChildMutation = useMutation({
+    mutationFn: async (childId: string) => {
+      const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['children'] });
+      toast({ title: 'Criança removida', description: 'O perfil foi removido com sucesso.' });
+      setDeleteChild(null);
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível remover a criança.', variant: 'destructive' });
+    },
+  });
   // Feature gate: check max_children limit
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
