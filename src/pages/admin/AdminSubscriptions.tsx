@@ -15,7 +15,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle } from 'lucide-react';
+import { CreditCard, Plus, Pencil, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
 import {
   useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier,
 } from '@/hooks/use-tenants';
@@ -245,6 +245,7 @@ export default function AdminSubscriptions() {
                     <TableHead className="text-center">Crianças</TableHead>
                     <TableHead className="text-center">Turmas</TableHead>
                     <TableHead>Moeda</TableHead>
+                    <TableHead className="text-center">Tenants</TableHead>
                     <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acções</TableHead>
                   </TableRow>
@@ -252,7 +253,7 @@ export default function AdminSubscriptions() {
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
                         Nenhum plano encontrado
                       </TableCell>
                     </TableRow>
@@ -270,6 +271,11 @@ export default function AdminSubscriptions() {
                         <TableCell className="text-center">{tier.max_children}</TableCell>
                         <TableCell className="text-center">{tier.max_classrooms}</TableCell>
                         <TableCell>{tier.currency}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {tier.tenant_count ?? 0}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={tier.is_active ? 'default' : 'outline'} className="text-xs">
                             {tier.is_active ? 'Activo' : 'Inactivo'}
