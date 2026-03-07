@@ -234,6 +234,8 @@ export default function OnboardingStepManager() {
       illustration_key: form.illustration_key,
       cta: form.cta || null,
       is_active: form.is_active,
+      visible_from: form.visible_from?.toISOString() ?? null,
+      visible_until: form.visible_until?.toISOString() ?? null,
     };
     saveMutation.mutate(
       { id: editingStep?.id, values },
