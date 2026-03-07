@@ -158,6 +158,7 @@ function CurrenciesTab() {
       </Dialog>
     </>
   );
+}
 
 // ─── Exchange Rates Tab ──────────────────────────────────
 
