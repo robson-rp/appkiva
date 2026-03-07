@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, BarChart3, LogOut, BookOpen, Lock, UserCircle } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockTeens } from '@/data/mock-data';
@@ -49,6 +49,9 @@ export function TeenLayout({ children }: { children: ReactNode }) {
               <span className="text-base font-display font-bold text-accent-foreground">{teen.balance}</span>
             </div>
             <ThemeToggle />
+            <NavLink to="/teen/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Perfil">
+              <UserCircle className="h-5 w-5 text-muted-foreground" />
+            </NavLink>
             <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label="Sair">
               <LogOut className="h-5 w-5" />

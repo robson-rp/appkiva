@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut, BookOpen, Sparkles, Lock } from 'lucide-react';
+import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut, BookOpen, Sparkles, Lock, UserCircle } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { mockChildren } from '@/data/mock-data';
@@ -52,6 +52,9 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             </div>
             <NavLink to="/child/achievements" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Conquistas">
               <Trophy className="h-5 w-5 text-muted-foreground" />
+            </NavLink>
+            <NavLink to="/child/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Perfil">
+              <UserCircle className="h-5 w-5 text-muted-foreground" />
             </NavLink>
             <ThemeToggle />
             <NotificationDropdown />

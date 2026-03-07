@@ -44,7 +44,11 @@ export default function PartnerProfile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ country } as any)
+      .update({
+        display_name: name.trim() || user.name,
+        avatar: selectedAvatar,
+        country,
+      })
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep it in sync

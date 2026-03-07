@@ -45,6 +45,7 @@ const ChildAchievements = lazy(() => import("./pages/child/ChildAchievements"));
 const ChildStore = lazy(() => import("./pages/child/ChildStore"));
 const ChildDiary = lazy(() => import("./pages/child/ChildDiary"));
 const ChildDreams = lazy(() => import("./pages/child/ChildDreams"));
+const ChildProfile = lazy(() => import("./pages/child/ChildProfile"));
 
 // Teacher
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard"));
@@ -59,6 +60,7 @@ const TeenWallet = lazy(() => import("./pages/teen/TeenWallet"));
 const TeenMissions = lazy(() => import("./pages/teen/TeenMissions"));
 const TeenVaults = lazy(() => import("./pages/teen/TeenVaults"));
 const TeenAnalytics = lazy(() => import("./pages/teen/TeenAnalytics"));
+const TeenProfile = lazy(() => import("./pages/teen/TeenProfile"));
 
 // Shared
 const LearnPage = lazy(() => import("./pages/shared/LearnPage"));
@@ -191,6 +193,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teen/learn" element={<TeenLayout><S><LearnPage /></S></TeenLayout>} />
         <Route path="/teen/badges" element={<TeenLayout><S><BadgesPage /></S></TeenLayout>} />
         <Route path="/teen/streaks" element={<TeenLayout><S><StreaksPage /></S></TeenLayout>} />
+        <Route path="/teen/profile" element={<TeenLayout><S><TeenProfile /></S></TeenLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teen" replace />} />
       </Routes>
@@ -209,9 +212,10 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child/store" element={<ChildLayout><S><ChildStore /></S></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><S><ChildDiary /></S></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><S><ChildDreams /></S></ChildLayout>} />
-      <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
-      {INSTALL_ROUTE}
-      <Route path="*" element={<Navigate to="/child" replace />} />
+        <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
+        <Route path="/child/profile" element={<ChildLayout><S><ChildProfile /></S></ChildLayout>} />
+        {INSTALL_ROUTE}
+        <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
 }

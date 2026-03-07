@@ -26,7 +26,7 @@ export default function ParentProfile() {
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('+351 912 345 678');
+  const [phone, setPhone] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👩');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
@@ -40,10 +40,13 @@ export default function ParentProfile() {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country, gender, school_tenant_id')
+      .select('display_name, avatar, phone, country, gender, school_tenant_id')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
+        if (data?.display_name) setName(data.display_name);
+        if (data?.avatar) setSelectedAvatar(data.avatar);
+        if (data?.phone) setPhone(data.phone);
         if (data?.country) setCountry(data.country);
         if (data?.gender) setGender(data.gender);
         if (data?.school_tenant_id) setSchoolTenantId(data.school_tenant_id);
@@ -68,7 +71,14 @@ export default function ParentProfile() {
     const updatedSchool = schoolTenantId && schoolTenantId !== 'none' ? schoolTenantId : null;
     const { error } = await supabase
       .from('profiles')
-      .update({ country, gender, school_tenant_id: updatedSchool })
+      .update({
+        display_name: name.trim() || user.name,
+        avatar: selectedAvatar,
+        phone: phone.trim() || null,
+        country,
+        gender: gender || null,
+        school_tenant_id: updatedSchool,
+      })
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep household in sync
