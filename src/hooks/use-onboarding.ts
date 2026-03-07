@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { ONBOARDING_STEPS } from '@/data/onboarding-steps';
+import { ONBOARDING_STEPS, type OnboardingStep } from '@/data/onboarding-steps';
 import { useCallback, useRef } from 'react';
 
 function trackEvent(profileId: string, role: string, eventType: string, stepIndex: number, metadata?: Record<string, unknown>) {
@@ -16,8 +16,34 @@ export function useOnboarding() {
   const queryClient = useQueryClient();
   const profileId = user?.profileId;
   const role = user?.role;
-  const steps = role ? ONBOARDING_STEPS[role] : [];
   const trackedSteps = useRef<Set<number>>(new Set());
+
+  // Fetch steps from DB with fallback to hardcoded
+  const { data: steps = [] } = useQuery({
+    queryKey: ['onboarding-steps', role],
+    queryFn: async () => {
+      if (!role) return [];
+      const { data, error } = await supabase
+        .from('onboarding_steps')
+        .select('title, description, illustration_key, cta')
+        .eq('role', role)
+        .eq('is_active', true)
+        .order('step_index', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        // Fallback to hardcoded
+        return ONBOARDING_STEPS[role] ?? [];
+      }
+
+      return data.map((row): OnboardingStep => ({
+        title: row.title,
+        description: row.description,
+        illustrationKey: row.illustration_key,
+        cta: row.cta ?? undefined,
+      }));
+    },
+    enabled: !!role,
+  });
 
   const { data: progress, isLoading } = useQuery({
     queryKey: ['onboarding', profileId],
@@ -48,7 +74,6 @@ export function useOnboarding() {
   const showOnboarding = !isLoading && !!profileId && !progress?.completed && !progress?.skipped;
   const currentStep = progress?.current_step ?? 0;
 
-  // Track step view (once per step per session)
   const trackView = useCallback((step: number) => {
     if (!profileId || !role || trackedSteps.current.has(step)) return;
     trackedSteps.current.add(step);
