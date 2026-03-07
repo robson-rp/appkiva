@@ -54,11 +54,12 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
       form.reset({
         title: challenge.title,
         description: challenge.description ?? '',
+        reward_amount: challenge.reward_amount ?? 0,
         start_date: new Date(challenge.start_date),
         end_date: new Date(challenge.end_date),
       });
     } else if (open) {
-      form.reset({ title: '', description: '' });
+      form.reset({ title: '', description: '', reward_amount: 0 });
     }
   }, [open, challenge]);
 
