@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { createNotification } from '@/hooks/use-notifications';
+import { notifyTaskApproved, notifyNewTask } from '@/lib/notify';
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'approved';
 export type TaskCategory = 'cleaning' | 'studying' | 'helping' | 'other';
