@@ -231,28 +231,17 @@ function AppRoutes() {
   const { user, loading } = useAuth();
 
   return (
-    <AnimatePresence mode="wait">
+    <>
       {loading ? (
-        <motion.div
-          key="loader"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.25 }}
+        <div
           className="min-h-screen flex items-center justify-center"
           role="status"
           aria-label="A carregar aplicação"
         >
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </motion.div>
+        </div>
       ) : !user ? (
-        <motion.div
-          key="login"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div>
           <InstallPWAPrompt />
           <Suspense fallback={<LazyFallback />}>
             <Routes>
@@ -262,19 +251,14 @@ function AppRoutes() {
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </Suspense>
-        </motion.div>
+        </div>
       ) : (
-        <motion.div
-          key={`dashboard-${user.role}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        >
+        <div>
           <InstallPWAPrompt />
           {renderRoutes(user)}
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }
 
