@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useChildren, useUpdateChildBudget } from '@/hooks/use-children';
+import { useChildren, useUpdateChildBudget, useUpdateChildDailyLimit } from '@/hooks/use-children';
 import { usePendingBudgetExceptions, useResolveBudgetException } from '@/hooks/use-budget-exceptions';
 import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
