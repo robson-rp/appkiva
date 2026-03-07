@@ -154,6 +154,27 @@ export default function ParentProfile() {
               </Label>
               <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl" />
             </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" /> País / Moeda
+              </Label>
+              <Select value={country} onValueChange={setCountry}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRY_CURRENCIES.map(c => (
+                    <SelectItem key={c.code} value={c.code}>
+                      {c.name} — {c.currencySymbol} ({c.currency})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
