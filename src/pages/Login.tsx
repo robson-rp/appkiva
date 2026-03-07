@@ -291,8 +291,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left Hero Panel — compact on mobile, full on desktop */}
-      <div className="relative flex flex-col items-center justify-center px-6 py-5 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
+      {/* Left Hero Panel — minimal on mobile, showcase on desktop */}
+      <div className="relative flex flex-col items-center justify-center px-4 py-3 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
         {/* Soft glow orbs */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
           <div className="absolute top-[-20%] right-[-15%] w-[45%] h-[45%] rounded-full bg-white/[0.04] blur-3xl" />
@@ -311,13 +311,13 @@ export default function Login() {
           <rect width="100%" height="100%" fill="url(#geo-grid)" />
         </svg>
 
-        {/* Accent lines */}
+        {/* Accent lines — desktop only */}
         <div className="absolute top-[15%] left-[8%] w-24 h-[1px] bg-white/10 rotate-45 hidden lg:block" />
         <div className="absolute bottom-[20%] right-[10%] w-32 h-[1px] bg-white/10 -rotate-30 hidden lg:block" />
         <div className="absolute top-[40%] right-[5%] w-16 h-[1px] bg-white/10 rotate-12 hidden lg:block" />
 
-        <div className="relative z-10 flex flex-col items-center gap-3 lg:gap-5">
-          {/* Logo */}
+        <div className="relative z-10 flex flex-row lg:flex-col items-center gap-2 lg:gap-5">
+          {/* Logo — smaller on mobile, large on desktop */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -326,21 +326,21 @@ export default function Login() {
             <img 
               src={kivaraLogoWhite} 
               alt="KIVARA" 
-              className="h-24 sm:h-28 lg:h-64 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
+              className="h-10 sm:h-14 lg:h-64 drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]" 
             />
           </motion.div>
 
-          {/* Slogan */}
+          {/* Slogan — inline on mobile, below on desktop */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="-mt-6 lg:-mt-12 text-white/60 text-[10px] lg:text-sm tracking-[0.25em] uppercase font-light"
+            className="lg:-mt-12 text-white/60 text-[9px] sm:text-[10px] lg:text-sm tracking-[0.2em] lg:tracking-[0.25em] uppercase font-light"
           >
             Pequenos hábitos. Grandes futuros
           </motion.p>
 
-          {/* Version badge */}
+          {/* Version badge — desktop only */}
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
