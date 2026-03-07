@@ -37,6 +37,7 @@ function useTenantsByTier() {
 
 export default function AdminFinance() {
   const { data, isLoading } = useTenantsByTier();
+  const { data: moneySupply, isLoading: moneyLoading } = useMoneySupply();
   const tenants = data?.tenants ?? [];
   const tiers = data?.tiers ?? [];
 
