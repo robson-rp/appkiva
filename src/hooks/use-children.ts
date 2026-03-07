@@ -75,11 +75,15 @@ export function useUpdateChildBudget() {
 
   return useMutation({
     mutationFn: async ({ childId, monthlyBudget }: { childId: string; monthlyBudget: number }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('children')
-        .update({ monthly_budget: monthlyBudget } as any)
-        .eq('id', childId);
+        .update({ monthly_budget: monthlyBudget })
+        .eq('id', childId)
+        .select('id, monthly_budget')
+        .single();
       if (error) throw error;
+      if (!data) throw new Error('Não foi possível atualizar o orçamento mensal');
+      return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
@@ -90,11 +94,15 @@ export function useUpdateChildDailyLimit() {
 
   return useMutation({
     mutationFn: async ({ childId, dailySpendLimit }: { childId: string; dailySpendLimit: number }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('children')
-        .update({ daily_spend_limit: dailySpendLimit } as any)
-        .eq('id', childId);
+        .update({ daily_spend_limit: dailySpendLimit })
+        .eq('id', childId)
+        .select('id, daily_spend_limit')
+        .single();
       if (error) throw error;
+      if (!data) throw new Error('Não foi possível atualizar o limite diário');
+      return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
