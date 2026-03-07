@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
       .single();
 
     const role = userRole?.role;
-    if (role !== "parent" && role !== "admin") {
-      return new Response(JSON.stringify({ error: "Apenas encarregados podem fazer upgrade. Pede ao teu encarregado!" }), {
+    if (role !== "parent" && role !== "admin" && role !== "partner") {
+      return new Response(JSON.stringify({ error: "Apenas encarregados ou parceiros podem fazer upgrade." }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
