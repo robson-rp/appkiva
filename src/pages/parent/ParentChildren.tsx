@@ -438,7 +438,7 @@ export default function ParentChildren() {
         open={paymentOpen}
         onOpenChange={setPaymentOpen}
         currentTierName={tierName}
-        tiers={tiers}
+        tiers={tiers.filter(t => t.tierType === 'free' || t.tierType === 'family_premium')}
         onConfirmUpgrade={upgrade}
       />
     </div>
