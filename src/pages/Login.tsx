@@ -45,7 +45,7 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
-        const { error } = await signup(email, password, selectedRole, displayName || email);
+        const { error } = await signup(email, password, selectedRole, displayName || email, country);
         if (error) {
           toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
           setSubmitting(false);
