@@ -126,10 +126,16 @@ export default function ParentAllowance() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 right-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="relative">
-          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
-          <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
+        <div className="relative flex items-start justify-between">
+          <div>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
+            <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
+            <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
+          </div>
+          <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
+            <BotMessageSquare className="h-3.5 w-3.5" />
+            <span className="text-[10px] font-medium">Automático</span>
+          </div>
         </div>
         <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
