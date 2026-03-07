@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
-import { Shield, ShieldCheck, ShieldOff, FileDown, Trash2, AlertTriangle, Eye, Plus } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldOff, FileDown, Trash2, AlertTriangle, Eye, Plus, Lock } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CONSENT_TYPES = [
   { key: 'platform_usage', label: 'Utilização da Plataforma', desc: 'Permite que a criança utilize todas as funcionalidades da KIVARA.' },
