@@ -130,7 +130,7 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
                   onSelect={setDateOfBirth}
                   captionLayout="dropdown-buttons"
                   fromYear={2000}
-                  toYear={new Date().getFullYear()}
+                  toYear={new Date().getFullYear() - 6}
                   disabled={(date) => {
                     const today = new Date();
                     const minAgeDate = new Date(today.getFullYear() - 6, today.getMonth(), today.getDate());
