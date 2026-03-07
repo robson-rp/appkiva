@@ -155,3 +155,49 @@ export function hapticUrgent() {
     // Vibration not supported
   }
 }
+
+/** Play a coin-collect sound (short bright ping) */
+export function playCoinSound() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    // Quick ascending ping
+    const notes = [1047, 1319, 1568]; // C6, E6, G6
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.07);
+      gain.gain.setValueAtTime(0, now + i * 0.07);
+      gain.gain.linearRampToValueAtTime(0.12, now + i * 0.07 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.25);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + i * 0.07);
+      osc.stop(now + i * 0.07 + 0.3);
+    });
+  } catch {
+    // Audio not supported
+  }
+}
+
+/** Play a subtle XP gain chime */
+export function playXPGainSound() {
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(784, now); // G5
+    osc.frequency.linearRampToValueAtTime(1047, now + 0.15); // → C6
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.45);
+  } catch {
+    // Audio not supported
+  }
+}

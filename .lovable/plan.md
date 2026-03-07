@@ -1,103 +1,128 @@
 
 
-# Game Design System -- Enhance Existing KIVARA Gamification
+# Plan: KIVARA Core Platform Architecture Evolution
 
-## Current State (Already Built)
+## Current State Assessment
 
-The platform already has substantial gamification:
-- **5-level progression** (Apprentice → Master) with evolving emoji avatars and LevelUpCeremony
-- **20 collectible badges** across 4 categories/tiers with BadgeUnlockCeremony (confetti, sound, haptics)
-- **KivaPoints** (equivalent to FXP/XP) earned from tasks, missions, lessons
-- **StreakWidget** with daily activity tracking and milestone rewards
-- **Weekly Challenges** with class leaderboard and podium UI
-- **AvatarGlow** with orbital particles per level
-- **CoinDisplay** and celebration sound/haptic effects
-- **Family Rankings** (Saver, Planner, Donor categories)
-- **Missions, Lessons, Store** pages
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-## What to Build (Enhancing Existing System)
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-### 1. Persistent XP Progress Header
+## What Lovable Can and Cannot Build
 
-Add a compact, always-visible XP/level indicator to the child and teen layouts (below the nav bar). Shows current level avatar, XP bar to next level, and animates on point gain.
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-- New component: `src/components/XPProgressBar.tsx`
-- Update `ChildLayout.tsx` and `TeenLayout.tsx` to include it
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### 2. Financial Learning Progress Map
+## Implementation Plan (4 Phases)
 
-A visual, game-style progression map showing lesson categories as "worlds" (Understanding Money → Saving → Budgeting → Investing → Entrepreneurship). Each world has nodes (lessons) that unlock sequentially. Completed nodes glow, locked ones are greyed.
+### Phase 1 — Multi-Tenant Foundation
 
-- New component: `src/components/LearningProgressMap.tsx`
-- Add as a new tab or section in `LearnPage.tsx`
-- Uses existing `lessons` and `lesson_progress` data
+**Database migrations:**
 
-### 3. Coin-Flying Reward Animation
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-A reusable animation overlay that shows coins flying from a source point into the wallet icon. Triggered on task approval, mission completion, lesson completion.
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-- New component: `src/components/CoinFlyAnimation.tsx`
-- New context: `src/contexts/RewardAnimationContext.tsx` (provides `triggerCoinFly()` globally)
-- Integrate into existing mutation hooks' `onSuccess` callbacks
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-### 4. Daily/Weekly Mission Cards
+4. Expand `app_role` enum to include `admin`
 
-Enhance the ChildMissions page to distinguish Daily Missions (quick, 1-day expiry) from Weekly Quests (multi-step, 7-day). Add countdown timers and "daily refresh" indicator.
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-- Update `src/pages/child/ChildMissions.tsx` to add Daily/Weekly sub-sections within the existing missions tab
-- New component: `src/components/DailyMissionCard.tsx` with countdown timer
-- Uses existing `mockMissions` data, filtered by a new `duration` field added to the type
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-### 5. Enhanced Reward Feedback System
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-Unify all reward moments with consistent micro-animations:
-- Task approved → coin fly + XP pulse + sound
-- Lesson completed → star burst + XP gain toast
-- Badge unlocked → existing ceremony (already great)
-- Level up → existing ceremony (already great)
-- Savings milestone → progress ring fill animation
+**Database:**
 
-- Update `src/lib/celebration-effects.ts` with `playCoinSound()` and `playXPGain()`
-- Add `src/components/XPGainToast.tsx` -- a floating "+15 XP" that fades upward
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-### 6. League System (Weekly Ranking Tiers)
+2. Add `real_money_enabled` flag to tenants
 
-Build on existing weekly challenges leaderboard. Add league tiers (Bronze, Silver, Gold, Diamond) based on weekly XP. Users promote/demote at week end.
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-- New component: `src/components/LeagueBadge.tsx` showing current league tier
-- Update `WeeklyChallenges.tsx` to show league tier alongside the class ranking
-- Visual: animated medal/shield that changes color per tier
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-### 7. Avatar Profile Card Enhancement
+### Phase 3 — Audit Logging & Compliance
 
-Enhance the existing avatar display to show level, league tier, badge count, and streak in a compact "player card" format. Visible on dashboard hero and profile pages.
+**Database:**
 
-- New component: `src/components/PlayerCard.tsx`
-- Replaces the simple AvatarGlow + LevelBadge combo in dashboard hero sections
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
 
----
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
 
-## File Changes Summary
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
 
-| Area | File | Action |
-|------|------|--------|
-| XP Bar | `src/components/XPProgressBar.tsx` | New |
-| XP Bar | `src/components/layouts/ChildLayout.tsx` | Update (add bar) |
-| XP Bar | `src/components/layouts/TeenLayout.tsx` | Update (add bar) |
-| Progress Map | `src/components/LearningProgressMap.tsx` | New |
-| Progress Map | `src/pages/shared/LearnPage.tsx` | Update (add map tab) |
-| Coin Animation | `src/components/CoinFlyAnimation.tsx` | New |
-| Coin Animation | `src/contexts/RewardAnimationContext.tsx` | New |
-| Coin Animation | `src/App.tsx` | Update (wrap provider) |
-| Daily Missions | `src/components/DailyMissionCard.tsx` | New |
-| Daily Missions | `src/pages/child/ChildMissions.tsx` | Update |
-| Reward Feedback | `src/components/XPGainToast.tsx` | New |
-| Reward Feedback | `src/lib/celebration-effects.ts` | Update (add sounds) |
-| League | `src/components/LeagueBadge.tsx` | New |
-| League | `src/components/WeeklyChallenges.tsx` | Update |
-| Player Card | `src/components/PlayerCard.tsx` | New |
-| Player Card | `src/pages/child/ChildDashboard.tsx` | Update (hero section) |
-| Types | `src/types/kivara.ts` | Update (add League types) |
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
 
-No database changes required -- all enhancements use existing data (KivaPoints, lessons, streaks, badges).
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

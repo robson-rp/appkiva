@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { lazy, Suspense } from "react";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import { OfflineBanner } from "./components/OfflineBanner";
+import { RewardAnimationProvider } from "./contexts/RewardAnimationContext";
 
 // Layouts (kept eager – small and always needed)
 import { ParentLayout } from "@/components/layouts/ParentLayout";
@@ -270,12 +271,14 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            {/* Skip-to-content link for keyboard users */}
-            <a href="#main-content" className="skip-to-content">
-              Saltar para o conteúdo
-            </a>
-            <OfflineBanner />
-            <AppRoutes />
+            <RewardAnimationProvider>
+              {/* Skip-to-content link for keyboard users */}
+              <a href="#main-content" className="skip-to-content">
+                Saltar para o conteúdo
+              </a>
+              <OfflineBanner />
+              <AppRoutes />
+            </RewardAnimationProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
