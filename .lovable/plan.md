@@ -1,56 +1,128 @@
 
 
-## Plan: Admin Splash Screen Management
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Problem
-Onboarding steps are hardcoded in `src/data/onboarding-steps.ts`. Admins cannot edit titles, descriptions, reorder steps, or add/remove steps without code changes.
+## Current State Assessment
 
-### Approach
-Move onboarding step content to the database and add a management UI in the existing AdminOnboarding page using tabs (Analytics + Gestao).
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### Database Changes
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-**New table: `onboarding_steps`**
+## What Lovable Can and Cannot Build
 
-| Column | Type | Notes |
-|---|---|---|
-| id | uuid | PK |
-| role | text | parent, child, teen, teacher, admin, partner |
-| step_index | integer | order within role |
-| title | text | |
-| description | text | |
-| illustration_key | text | maps to SplashIllustration |
-| cta | text | nullable, button label for first step |
-| is_active | boolean | default true |
-| created_at / updated_at | timestamptz | |
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-**RLS**: Admin-only for all operations. Authenticated users can SELECT active steps.
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-**Seed migration**: Insert all current hardcoded steps from `onboarding-steps.ts` into the new table.
+## Implementation Plan (4 Phases)
 
-### File Changes
+### Phase 1 — Multi-Tenant Foundation
 
-| File | Action |
-|---|---|
-| Migration SQL | Create `onboarding_steps` table + seed data + RLS |
-| `src/hooks/use-onboarding.ts` | Fetch steps from DB instead of hardcoded import; fallback to hardcoded if empty |
-| `src/pages/admin/AdminOnboarding.tsx` | Add Tabs: "Analytics" (existing) + "Gestao" with per-role step editor |
-| `src/data/onboarding-steps.ts` | Keep as fallback only |
+**Database migrations:**
 
-### Admin UI (Gestao Tab)
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-- Role selector (tabs or dropdown) to filter steps
-- Card list showing each step with: title, description, illustration key, CTA, sort order
-- Inline edit dialog (Dialog with form) to update title, description, CTA
-- Add new step button per role
-- Delete step with confirmation
-- Drag-free reorder via up/down arrow buttons (swap `step_index`)
-- Live preview thumbnail showing the SplashIllustration for the selected `illustration_key`
-- Dropdown of available illustration keys from SplashIllustration component
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-### Hook Changes
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-- `use-onboarding.ts`: Query `onboarding_steps` table filtered by role, ordered by `step_index`, where `is_active = true`
-- Map DB rows to the existing `OnboardingStep` interface
-- Keep hardcoded data as fallback if DB query returns empty (graceful degradation)
+4. Expand `app_role` enum to include `admin`
+
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
+
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
