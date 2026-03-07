@@ -211,9 +211,10 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child/store" element={<ChildLayout><S><ChildStore /></S></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><S><ChildDiary /></S></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><S><ChildDreams /></S></ChildLayout>} />
-      <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
-      {INSTALL_ROUTE}
-      <Route path="*" element={<Navigate to="/child" replace />} />
+        <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
+        <Route path="/child/profile" element={<ChildLayout><S><ChildProfile /></S></ChildLayout>} />
+        {INSTALL_ROUTE}
+        <Route path="*" element={<Navigate to="/child" replace />} />
     </Routes>
   );
 }
