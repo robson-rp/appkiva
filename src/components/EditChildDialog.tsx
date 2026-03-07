@@ -128,6 +128,9 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
                   mode="single"
                   selected={dateOfBirth}
                   onSelect={setDateOfBirth}
+                  captionLayout="dropdown-buttons"
+                  fromYear={2000}
+                  toYear={new Date().getFullYear()}
                   disabled={(date) => date > new Date() || date < new Date('2000-01-01')}
                   initialFocus
                   className={cn('p-3 pointer-events-auto')}
