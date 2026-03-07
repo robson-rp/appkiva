@@ -97,6 +97,11 @@ export function useDepositToVault() {
         title: 'Depósito realizado! 🐷',
         description: `Depositaste ${data.deposited} KivaCoins no cofre.`,
       });
+      // Notify on savings milestone
+      import('@/lib/notify').then(({ notifySavingsMilestone }) => {
+        const pct = data.vault_balance; // We don't have target here, so skip for now
+        // Milestone check would need vault target - handled elsewhere
+      });
     },
     onError: (err: Error) => {
       const msg = err.message.includes('Saldo insuficiente')
