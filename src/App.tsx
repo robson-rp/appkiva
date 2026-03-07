@@ -53,6 +53,8 @@ import AdminAudit from "./pages/admin/AdminAudit";
 import AdminRisk from "./pages/admin/AdminRisk";
 import AdminCompliance from "./pages/admin/AdminCompliance";
 import AdminSchools from "./pages/admin/AdminSchools";
+import AdminFinance from "./pages/admin/AdminFinance";
+import AdminUsers from "./pages/admin/AdminUsers";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
