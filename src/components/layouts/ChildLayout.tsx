@@ -53,7 +53,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
               {user?.avatar}
             </div>
             <div>
-              <img src={kivaraLogo} alt="KIVARA" className="h-4 opacity-60" />
+              <img src={kivaraLogo} alt="KIVARA" className="h-7 opacity-60" />
               <p className="text-base font-display font-bold text-foreground">
                 Olá, {user?.name}! <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
               </p>

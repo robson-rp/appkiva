@@ -49,7 +49,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
               {user?.avatar}
             </div>
             <div>
-              <img src={kivaraLogo} alt="KIVARA" className="h-4 opacity-60" />
+              <img src={kivaraLogo} alt="KIVARA" className="h-7 opacity-60" />
               <p className="text-base font-display font-bold text-foreground">
                 {user?.name} <span className="text-small font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-md ml-1">TEEN</span>
               </p>

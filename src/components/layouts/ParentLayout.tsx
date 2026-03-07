@@ -162,7 +162,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             <div className="relative h-16 flex items-center justify-between px-4 gap-4">
               <div className="flex items-center gap-4">
                 {!isMobile && <SidebarTrigger />}
-                <img src={kivaraLogo} alt="KIVARA" className="h-6 opacity-70" />
+                <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
               </div>
               <div className="flex items-center gap-2">
                 <ThemeToggle />

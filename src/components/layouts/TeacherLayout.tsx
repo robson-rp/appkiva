@@ -157,7 +157,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-4">
                 {!isMobile && <SidebarTrigger />}
                 <div className="flex items-center gap-2">
-                  <img src={kivaraLogo} alt="KIVARA" className="h-6 opacity-70" />
+                  <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
                   <span className="text-caption font-display font-semibold text-muted-foreground bg-secondary/10 text-secondary px-2.5 py-1 rounded-lg">ESCOLA</span>
                 </div>
               </div>
