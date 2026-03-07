@@ -10,6 +10,13 @@ export default function PartnerReports() {
   const { data: programs, isLoading: loadingP } = usePartnerPrograms();
   const { data: challenges, isLoading: loadingC } = useSponsoredChallenges();
 
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+  const sym = tenantCurrency?.symbol ?? 'Kz';
+  const cCode = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
+  const fmtP = (eurAmount: number) => formatPrice(convertPrice(eurAmount, 'EUR', cCode, rates), sym, dec);
+
   const isLoading = loadingP || loadingC;
 
   const totalChildren = programs?.reduce((sum, p) => sum + p.children_count, 0) ?? 0;
