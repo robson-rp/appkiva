@@ -53,8 +53,9 @@ export default function ParentChildren() {
 
   // Budget edit dialog
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
-  const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number } | null>(null);
+  const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number; dailySpendLimit: number } | null>(null);
   const [budgetValue, setBudgetValue] = useState('');
+  const [dailyLimitValue, setDailyLimitValue] = useState('');
 
   const openBudgetDialog = (child: typeof budgetChild & {}) => {
     setBudgetChild(child);
