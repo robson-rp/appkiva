@@ -202,14 +202,8 @@ export function useApproveTask() {
 
       if (txError) throw txError;
 
-      // Create notification for the child
-      await createNotification({
-        profileId: task.child_profile_id,
-        title: 'Tarefa aprovada! ✅',
-        message: `A tarefa "${task.title}" foi aprovada. +${task.reward} KivaCoins!`,
-        type: 'task',
-        metadata: { task_id: taskId, reward: task.reward },
-      });
+      // Notify child about approval
+      await notifyTaskApproved(task.child_profile_id, task.title, Number(task.reward), taskId);
     },
     onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
