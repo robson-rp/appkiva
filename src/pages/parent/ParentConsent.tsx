@@ -305,10 +305,10 @@ export default function ParentConsent() {
 
       {/* Grant Consent Dialog */}
       <Dialog open={grantDialog.open} onOpenChange={(o) => !o && setGrantDialog({ open: false, childId: '', childName: '' })}>
-        <DialogContent className="sm:max-w-md rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display text-lg flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-secondary" /> Conceder Consentimento
+              <ShieldCheck className="h-5 w-5 text-secondary shrink-0" /> Conceder Consentimento
             </DialogTitle>
             <DialogDescription>Seleciona o tipo de consentimento para {grantDialog.childName}.</DialogDescription>
           </DialogHeader>
@@ -321,7 +321,7 @@ export default function ParentConsent() {
                 <Button
                   key={ct.key}
                   variant="outline"
-                  className="w-full justify-start gap-3 h-auto py-3 rounded-xl text-left"
+                  className="w-full justify-start gap-3 h-auto py-3 rounded-xl text-left whitespace-normal"
                   disabled={alreadyGranted || grantMutation.isPending}
                   onClick={() => {
                     grantMutation.mutate({ childProfileId: grantDialog.childId, consentType: ct.key });
@@ -329,11 +329,11 @@ export default function ParentConsent() {
                   }}
                 >
                   {alreadyGranted ? <ShieldCheck className="h-4 w-4 text-secondary shrink-0" /> : <Shield className="h-4 w-4 shrink-0" />}
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{ct.label}</p>
-                    <p className="text-xs text-muted-foreground">{ct.desc}</p>
+                    <p className="text-xs text-muted-foreground whitespace-normal">{ct.desc}</p>
                   </div>
-                  {alreadyGranted && <Badge className="ml-auto text-[10px] bg-secondary/20 text-secondary">Activo</Badge>}
+                  {alreadyGranted && <Badge className="ml-auto text-[10px] bg-secondary/20 text-secondary shrink-0">Activo</Badge>}
                 </Button>
               );
             })}
@@ -343,7 +343,7 @@ export default function ParentConsent() {
 
       {/* Revoke Consent Dialog */}
       <Dialog open={revokeDialog.open} onOpenChange={(o) => !o && setRevokeDialog({ open: false, id: '', childName: '', type: '' })}>
-        <DialogContent className="sm:max-w-sm rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" /> Revogar Consentimento
@@ -377,7 +377,7 @@ export default function ParentConsent() {
 
       {/* Detail Dialog */}
       <Dialog open={detailDialog.open} onOpenChange={(o) => !o && setDetailDialog({ open: false, record: null })}>
-        <DialogContent className="rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display">Detalhe do Consentimento</DialogTitle>
           </DialogHeader>
