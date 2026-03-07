@@ -56,8 +56,8 @@ export function OnboardingWalkthrough() {
           }
         }}
       >
-
-        {/* Illustration area */}
+        {/* Top accent */}
+        <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
