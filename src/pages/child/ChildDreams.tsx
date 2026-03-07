@@ -228,6 +228,29 @@ export default function ChildDreams() {
       </motion.div>
 
       <Kivo page="dreams" />
+
+      {/* Deposit Dialog */}
+      <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle className="font-display">Poupar para o Sonho</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Quanto queres poupar? (KivaCoins)</Label>
+              <Input type="number" placeholder="10" min={1} value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
+            </div>
+            <div className="flex gap-2 flex-wrap justify-center">
+              {[5, 10, 25, 50].map(v => (
+                <button key={v} type="button" onClick={() => setDepositAmount(String(v))} className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${depositAmount === String(v) ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}>
+                  {v} 🪙
+                </button>
+              ))}
+            </div>
+            <Button className="w-full rounded-xl font-display" onClick={handleDeposit} disabled={depositToDream.isPending}>
+              {depositToDream.isPending ? 'A poupar...' : '🪙 Depositar'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
     </FeatureGateWrapper>
   );
