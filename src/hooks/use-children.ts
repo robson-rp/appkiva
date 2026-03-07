@@ -81,3 +81,18 @@ export function useUpdateChildBudget() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
 }
+
+export function useUpdateChildDailyLimit() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ childId, dailySpendLimit }: { childId: string; dailySpendLimit: number }) => {
+      const { error } = await supabase
+        .from('children')
+        .update({ daily_spend_limit: dailySpendLimit } as any)
+        .eq('id', childId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
+  });
+}
