@@ -234,6 +234,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <OfflineBanner />
             <AppRoutes />
           </AuthProvider>
         </BrowserRouter>
