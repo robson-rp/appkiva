@@ -291,8 +291,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left Hero Panel */}
-      <div className="relative flex-1 flex flex-col items-center justify-center p-8 lg:p-16 gradient-kivara overflow-hidden">
+      {/* Left Hero Panel — compact on mobile, full on desktop */}
+      <div className="relative flex flex-col items-center justify-center px-6 py-8 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-white/5 blur-3xl" />
         
@@ -300,26 +300,28 @@ export default function Login() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="relative z-10 flex flex-col items-center text-center"
+          className="relative z-10 flex flex-row lg:flex-col items-center lg:text-center gap-4 lg:gap-0"
         >
           <motion.div
             animate={{ y: [0, -12, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="mb-6"
+            className="shrink-0 lg:mb-6"
           >
-            <img src={kivoImg} alt="Kivo" className="w-32 h-32 lg:w-44 lg:h-44 drop-shadow-2xl" />
+            <img src={kivoImg} alt="Kivo" className="w-16 h-16 sm:w-20 sm:h-20 lg:w-44 lg:h-44 drop-shadow-2xl" />
           </motion.div>
 
-          <img src={kivaraLogo} alt="KIVARA" className="h-14 lg:h-20 mb-4 brightness-0 invert drop-shadow-lg" />
+          <div className="flex flex-col lg:items-center">
+            <img src={kivaraLogo} alt="KIVARA" className="h-8 sm:h-10 lg:h-20 mb-1 lg:mb-4 brightness-0 invert drop-shadow-lg" />
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-white/90 font-body text-lg lg:text-xl font-medium tracking-wide"
-          >
-            Pequenos hábitos. Grandes futuros.
-          </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-white/90 font-body text-sm sm:text-base lg:text-xl font-medium tracking-wide"
+            >
+              Pequenos hábitos. Grandes futuros.
+            </motion.p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -350,7 +352,7 @@ export default function Login() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-16 bg-background">
+      <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-16 bg-background overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -367,15 +369,15 @@ export default function Login() {
                 className="space-y-8"
               >
                 <div>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                     Bem-vindo! 👋
                   </h2>
-                  <p className="text-muted-foreground font-body">
+                  <p className="text-muted-foreground font-body text-sm sm:text-base">
                     Seleciona o teu perfil para continuar
                   </p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-1 gap-2.5 sm:gap-3">
                   {ROLE_ORDER.map(role => {
                     const cfg = ROLE_CONFIG[role];
                     const Icon = cfg.icon;
@@ -391,15 +393,15 @@ export default function Login() {
                           setPassword('Test1234!');
                           setContactMethod('email');
                         }}
-                        className={`w-full p-6 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex items-center gap-5 group ${cfg.bgClass.split(' ').pop()}`}
+                        className={`w-full p-3 sm:p-4 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 group ${cfg.bgClass.split(' ').pop()}`}
                       >
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
-                          <Icon className={`h-8 w-8 ${cfg.colorClass}`} />
+                        <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-colors ${cfg.bgClass.split(' ').slice(0, 2).join(' ')}`}>
+                          <Icon className={`h-5 w-5 sm:h-7 sm:w-7 ${cfg.colorClass}`} />
                         </div>
-                        <div className="flex-1">
-                          <span className="font-display font-bold text-lg text-foreground block">{cfg.label}</span>
-                          <span className="text-sm text-muted-foreground block">{cfg.description}</span>
-                          <span className="text-xs font-mono text-muted-foreground/70 mt-1 block">{cfg.testEmail} · Test1234!</span>
+                        <div className="flex-1 min-w-0 text-center sm:text-left">
+                          <span className="font-display font-bold text-sm sm:text-base text-foreground block truncate">{cfg.label}</span>
+                          <span className="text-xs text-muted-foreground hidden sm:block">{cfg.description}</span>
+                          <span className="text-xs font-mono text-muted-foreground/70 mt-0.5 hidden sm:block">{cfg.testEmail} · Test1234!</span>
                         </div>
                       </motion.button>
                     );
@@ -412,7 +414,7 @@ export default function Login() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="space-y-6"
+                className="space-y-4 sm:space-y-6"
               >
                 <div>
                   <button
@@ -422,7 +424,7 @@ export default function Login() {
                     <ArrowLeft className="h-4 w-4" />
                     Voltar
                   </button>
-                  <h2 className="font-display text-3xl font-bold text-foreground mb-2">
+                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                     {authMode === 'signup' ? 'Criar Conta' : `Área do ${ROLE_CONFIG[selectedRole].label}`}
                   </h2>
                   <p className="text-muted-foreground font-body">
@@ -747,7 +749,7 @@ export default function Login() {
             )}
           </AnimatePresence>
 
-          <p className="text-center text-xs text-muted-foreground mt-10">
+          <p className="text-center text-xs text-muted-foreground mt-6 sm:mt-10 pb-4">
             © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
           </p>
         </motion.div>
