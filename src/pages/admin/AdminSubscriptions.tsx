@@ -271,6 +271,11 @@ export default function AdminSubscriptions() {
                         <TableCell className="text-center">{tier.max_children}</TableCell>
                         <TableCell className="text-center">{tier.max_classrooms}</TableCell>
                         <TableCell>{tier.currency}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="text-xs font-mono">
+                            {tier.tenant_count ?? 0}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={tier.is_active ? 'default' : 'outline'} className="text-xs">
                             {tier.is_active ? 'Activo' : 'Inactivo'}
