@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown } from 'lucide-react';
