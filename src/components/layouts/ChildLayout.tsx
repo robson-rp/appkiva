@@ -81,9 +81,26 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
         <div className="relative px-3 py-2 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
-            const isActive = item.url === '/child'
+            const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
+            const isActive = !locked && (item.url === '/child'
               ? location.pathname === '/child'
-              : location.pathname.startsWith(item.url);
+              : location.pathname.startsWith(item.url));
+
+            if (locked) {
+              return (
+                <div
+                  key={item.title}
+                  className="relative flex flex-col items-center py-1.5 px-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
+                  title="Requer upgrade"
+                >
+                  <div className="relative p-1.5 rounded-xl">
+                    <item.icon className="h-5 w-5" />
+                    <Lock className="h-2.5 w-2.5 absolute -top-0.5 -right-0.5 text-muted-foreground/60" />
+                  </div>
+                  <span className="text-[10px] mt-0.5 font-semibold">{item.title}</span>
+                </div>
+              );
+            }
 
             return (
               <NavLink

@@ -53,9 +53,27 @@ function ParentSidebar() {
           <SidebarGroupLabel className="text-sidebar-foreground/40 text-[10px] uppercase tracking-widest">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {navItems.map((item) => {
+                const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
+                return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
+                    {locked ? (
+                      <TooltipProvider delayDuration={200}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="flex items-center gap-2 px-3 py-2 rounded-xl opacity-50 cursor-not-allowed select-none">
+                              <item.icon className="mr-2 h-4 w-4" />
+                              {!collapsed && <span>{item.title}</span>}
+                              {!collapsed && <Lock className="h-3 w-3 ml-auto text-muted-foreground" />}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p className="text-xs">Requer upgrade</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
                     <NavLink
                       to={item.url}
                       end={item.url === '/parent'}
@@ -65,9 +83,11 @@ function ParentSidebar() {
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
