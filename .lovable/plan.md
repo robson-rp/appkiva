@@ -1,128 +1,81 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Auditoria: Botoes, Links e Funcionalidades Sem Accao
 
-## Current State Assessment
+## Problemas Encontrados
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+### 1. Botao "Apagar Crianca" (Trash) - ParentChildren.tsx (linha 312)
+O botao de lixeira para apagar uma crianca nao tem `onClick` handler. E puramente visual.
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+**Correcao:** Adicionar dialogo de confirmacao e logica de eliminacao (crianca + perfil associado) via RPC segura.
 
-## What Lovable Can and Cannot Build
+### 2. Rota `/join/:code` nao existe no router
+O `ParentChildren.tsx` gera links de convite com `${origin}/join/${inviteCode}` (linha 94), mas o `App.tsx` nao define nenhuma rota `/join/:code`. Qualquer pessoa que clique no link de convite vai para uma pagina 404 ou e redirecionada.
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+**Correcao:** Adicionar rota `/join/:code` no App.tsx que redireciona para o fluxo de registo/associacao de crianca.
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+### 3. Botao "Poupar" nos Sonhos (ChildDreams.tsx, linha 162)
+O botao "Poupar" dentro de cada sonho (dream vault) nao tem `onClick` handler. E um botao morto.
 
-## Implementation Plan (4 Phases)
+**Correcao:** Adicionar logica de deposito no dream vault, semelhante ao deposito nos savings vaults.
 
-### Phase 1 — Multi-Tenant Foundation
+### 4. Missoes usam dados mock e nao sao interactivas (ChildMissions.tsx)
+O separador "Missoes" usa `mockMissions` e o componente `DailyMissionCard` nao tem nenhum botao de accao (iniciar, completar). As missoes sao puramente visuais/informativas.
 
-**Database migrations:**
+**Correcao:** A medio prazo, criar tabela de missoes no backend. A curto prazo, adicionar botoes "Iniciar" e "Completar" com logica mock ou toast informativo.
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+### 5. Diario Financeiro usa apenas dados mock (ChildDiary.tsx)
+O diario guarda entradas apenas em estado local (`useState`). Ao recarregar a pagina, tudo se perde.
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+**Correcao:** Criar tabela `diary_entries` no backend e persistir as entradas.
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+### 6. Relatorios do Pai usam dados mock (ParentReports.tsx)
+A pagina de relatorios usa `mockChildren`, `mockTasks`, `mockTransactions`, `mockInsights` e `mockVaults` em vez de dados reais do backend.
 
-4. Expand `app_role` enum to include `admin`
+**Correcao:** Substituir dados mock por queries reais ao backend.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+### 7. Codigo de convite nao e persistido no backend
+O `ParentChildren.tsx` gera codigos de convite aleatoriamente no frontend (`generateCode()`), mas nunca os guarda na base de dados. Existe uma tabela `family_invite_codes` e funcoes `validate_invite_code`/`claim_invite_code`, mas nao sao utilizadas.
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+**Correcao:** Ao gerar codigo, inseri-lo na tabela `family_invite_codes`. Ao abrir rota `/join/:code`, validar e consumir o codigo.
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+### 8. Dashboard da Crianca usa mock data parcialmente
+`ChildDashboard.tsx` usa `mockChildren[0]` para nome, nivel, pontos e outros dados estaticos em vez do perfil real autenticado. Tarefas pendentes e missoes vem de mock data.
 
-**Database:**
+**Correcao:** Substituir `mockChildren[0]` pelo perfil real do utilizador autenticado.
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+---
 
-2. Add `real_money_enabled` flag to tenants
+## Plano de Implementacao (por prioridade)
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+### Prioridade Alta (funcionalidade quebrada para o utilizador)
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+1. **Adicionar rota `/join/:code`** no App.tsx para todos os roles que a necessitam, mapeando para uma pagina de registo/associacao de crianca.
 
-### Phase 3 — Audit Logging & Compliance
+2. **Persistir codigos de convite** - Ao clicar "Convidar"/"Adicionar" em ParentChildren, inserir o codigo na tabela `family_invite_codes` via Supabase.
 
-**Database:**
+3. **Botao "Apagar Crianca"** - Adicionar `onClick` com dialogo AlertDialog de confirmacao e chamada de eliminacao.
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+4. **Botao "Poupar" nos Sonhos** - Adicionar dialogo de deposito semelhante ao dos cofres normais.
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+### Prioridade Media (dados mock em vez de reais)
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+5. **Migrar ChildDashboard** de mock data para dados reais do utilizador autenticado.
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
+6. **Migrar ParentReports** para usar dados reais de transaccoes e tarefas.
 
-### Phase 4 — Risk Monitoring & Anti-Fraud
+7. **Persistir Diario Financeiro** criando tabela `diary_entries` e migrando do estado local.
 
-**Database:**
+### Prioridade Baixa (funcionalidade futura)
 
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+8. **Sistema de Missoes** - Criar backend para missoes diarias/semanais em vez de mock data.
 
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
+---
 
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+## Detalhes Tecnicos
 
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+- **Rota `/join/:code`:** Ja existe `validate_invite_code` e `claim_invite_code` como funcoes RPC. Basta criar a rota e a pagina.
+- **Apagar crianca:** Necessita funcao RPC `SECURITY DEFINER` que verifique propriedade do pai antes de eliminar o registo `children` (cascata para perfil e wallets).
+- **Dream vault deposit:** Reutilizar a edge function `vault-deposit` existente, adaptando para dream vaults.
+- **Persistencia do diario:** Criar migration com tabela `diary_entries(id, profile_id, text, mood, tags, created_at)` com RLS.
 
