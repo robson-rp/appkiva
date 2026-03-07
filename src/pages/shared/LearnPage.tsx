@@ -18,7 +18,7 @@ import donatingImg from '@/assets/lessons/donating.png';
 
 export default function LearnPage() {
   const { data: lessons = [], isLoading } = useLessons();
-  const { completedIds, totalPoints, isLoading: progressLoading } = useLessonProgress();
+  const { completedIds, totalPoints, scoreMap, isLoading: progressLoading } = useLessonProgress();
   const completeLesson = useCompleteLessonMutation();
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
   const { toast } = useToast();
@@ -98,14 +98,14 @@ export default function LearnPage() {
 
         <TabsContent value="all" className="mt-4 grid grid-cols-2 gap-3">
           {lessons.map((lesson, i) => (
-            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
+            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
           ))}
         </TabsContent>
 
         {categories.map(([key]) => (
           <TabsContent key={key} value={key} className="mt-4 grid grid-cols-2 gap-3">
             {lessons.filter(l => l.category === key).map((lesson, i) => (
-              <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
+              <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => setActiveLesson(lesson)} />
             ))}
           </TabsContent>
         ))}
@@ -130,9 +130,12 @@ const CATEGORY_IMAGES: Record<string, string> = {
   donating: donatingImg,
 };
 
-function LessonCard({ lesson, index, completed, onStart }: { lesson: MicroLesson; index: number; completed: boolean; onStart: () => void }) {
+function LessonCard({ lesson, index, completed, score, onStart }: { lesson: MicroLesson; index: number; completed: boolean; score: number; onStart: () => void }) {
   const gradient = CATEGORY_GRADIENTS[lesson.category] || 'from-primary/60 to-primary/80';
   const categoryImage = CATEGORY_IMAGES[lesson.category];
+  const quizTotal = lesson.quiz.length;
+  const correctCount = completed ? Math.round((score / 100) * quizTotal) : 0;
+  const pct = completed ? score : 0;
 
   return (
     <motion.div
@@ -176,6 +179,24 @@ function LessonCard({ lesson, index, completed, onStart }: { lesson: MicroLesson
             <span className="flex items-center gap-0.5">
               <Star className="h-3 w-3 text-chart-2" /> {lesson.kivaPointsReward}
             </span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="mt-2.5">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[9px] text-muted-foreground">
+                {completed ? `${correctCount}/${quizTotal} corretas` : `0/${quizTotal} perguntas`}
+              </span>
+              <span className="text-[9px] font-semibold text-foreground">{pct}%</span>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full ${pct === 100 ? 'bg-chart-3' : pct > 0 ? 'bg-primary' : 'bg-muted-foreground/20'}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.6, delay: index * 0.03 + 0.2 }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
