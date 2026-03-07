@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Home, Wallet, Target, PiggyBank, ShoppingBag, Trophy, LogOut, BookOpen, Sparkles, Lock, UserCircle } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
-nts/NotificationDropdown';
+import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
