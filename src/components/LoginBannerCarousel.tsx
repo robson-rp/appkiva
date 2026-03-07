@@ -101,7 +101,7 @@ export default function LoginBannerCarousel() {
           {banners.map((b) => (
             <div key={b.id} className="min-w-0 shrink-0 grow-0 basis-full">
               <Wrapper href={b.link_url}>
-                <AspectRatio ratio={1.8}>
+                <AspectRatio ratio={1.5}>
                   <img
                     src={b.image_url}
                     alt={b.title}
