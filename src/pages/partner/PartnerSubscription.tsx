@@ -8,7 +8,8 @@ import { Crown, Check, Sparkles, Shield, Zap, Building2 } from 'lucide-react';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
 import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { cn } from '@/lib/utils';
 
