@@ -57,6 +57,8 @@ export function TeenLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      <XPProgressBar />
+
       <AnimatePresence mode="wait">
         <motion.main
           id="main-content"
