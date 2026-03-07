@@ -1,17 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, User, Mail, Phone, Shield, Users, Crown } from 'lucide-react';
+import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
-
-const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
+import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 
 export default function ParentProfile() {
   const { tierName } = useAllFeatures();
