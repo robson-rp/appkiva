@@ -8,7 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Crown, CreditCard, Check, Sparkles, Shield, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 
 interface SubscriptionTier {
   id: string;
