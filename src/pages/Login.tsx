@@ -5,10 +5,14 @@ import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import kivoImg from '@/assets/kivo.svg';
+import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 
 type AuthMode = 'login' | 'signup';
 
