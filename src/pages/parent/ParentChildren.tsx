@@ -30,6 +30,7 @@ function generateCode() {
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
   const updateBudget = useUpdateChildBudget();
+  const updateDailyLimit = useUpdateChildDailyLimit();
   const { data: pendingExceptions = [] } = usePendingBudgetExceptions();
   const resolveException = useResolveBudgetException();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
