@@ -118,6 +118,26 @@ export default function ParentReports() {
         ))}
       </motion.div>
 
+      {/* Insight da Semana — Top */}
+      <motion.div variants={item} initial="hidden" animate="show">
+        <Card className="gradient-kivara text-primary-foreground border-0 overflow-hidden relative">
+          <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+          <CardContent className="p-6 relative">
+            <div className="flex items-start gap-3">
+              <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-3 shrink-0">
+                <Lightbulb className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-lg mb-1">Insight da Semana</p>
+                <p className="text-primary-foreground/70 text-sm leading-relaxed">
+                  A Ana poupou 43% das moedas ganhas este mês — excelente! 🎉 O Pedro precisa de mais incentivos para poupar. Considere criar uma meta partilhada ou aumentar o bónus por tarefas.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Behavioral Insights */}
       <motion.div variants={item} initial="hidden" animate="show">
         <Card className="border-border/50 overflow-hidden">
