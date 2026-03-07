@@ -40,6 +40,7 @@ const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
 const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
 const ChildWallet = lazy(() => import("./pages/child/ChildWallet"));
 const ChildMissions = lazy(() => import("./pages/child/ChildMissions"));
+const ChildTasks = lazy(() => import("./pages/child/ChildTasks"));
 const ChildVaults = lazy(() => import("./pages/child/ChildVaults"));
 const ChildAchievements = lazy(() => import("./pages/child/ChildAchievements"));
 const ChildStore = lazy(() => import("./pages/child/ChildStore"));
@@ -58,6 +59,7 @@ const TeacherSchoolProfile = lazy(() => import("./pages/teacher/TeacherSchoolPro
 const TeenDashboard = lazy(() => import("./pages/teen/TeenDashboard"));
 const TeenWallet = lazy(() => import("./pages/teen/TeenWallet"));
 const TeenMissions = lazy(() => import("./pages/teen/TeenMissions"));
+const TeenTasks = lazy(() => import("./pages/teen/TeenTasks"));
 const TeenVaults = lazy(() => import("./pages/teen/TeenVaults"));
 const TeenAnalytics = lazy(() => import("./pages/teen/TeenAnalytics"));
 const TeenProfile = lazy(() => import("./pages/teen/TeenProfile"));
@@ -188,6 +190,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teen" element={<TeenLayout><S><TeenDashboard /></S></TeenLayout>} />
         <Route path="/teen/wallet" element={<TeenLayout><S><TeenWallet /></S></TeenLayout>} />
         <Route path="/teen/missions" element={<TeenLayout><S><TeenMissions /></S></TeenLayout>} />
+        <Route path="/teen/tasks" element={<TeenLayout><S><TeenTasks /></S></TeenLayout>} />
         <Route path="/teen/vaults" element={<TeenLayout><S><TeenVaults /></S></TeenLayout>} />
         <Route path="/teen/analytics" element={<TeenLayout><S><TeenAnalytics /></S></TeenLayout>} />
         <Route path="/teen/learn" element={<TeenLayout><S><LearnPage /></S></TeenLayout>} />
@@ -205,6 +208,7 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child" element={<ChildLayout><S><ChildDashboard /></S></ChildLayout>} />
       <Route path="/child/wallet" element={<ChildLayout><S><ChildWallet /></S></ChildLayout>} />
       <Route path="/child/missions" element={<ChildLayout><S><ChildMissions /></S></ChildLayout>} />
+      <Route path="/child/tasks" element={<ChildLayout><S><ChildTasks /></S></ChildLayout>} />
       <Route path="/child/vaults" element={<ChildLayout><S><ChildVaults /></S></ChildLayout>} />
       <Route path="/child/achievements" element={<ChildLayout><S><ChildAchievements /></S></ChildLayout>} />
       <Route path="/child/badges" element={<ChildLayout><S><BadgesPage /></S></ChildLayout>} />

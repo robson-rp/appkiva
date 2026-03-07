@@ -29,7 +29,7 @@ export function ChildPendingTasks({ tasks }: ChildPendingTasksProps) {
           </div>
           Próximas Tarefas
         </CardTitle>
-        <button onClick={() => navigate('/child/missions')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
+        <button onClick={() => navigate('/child/tasks')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
           Ver todas <ChevronRight className="h-3 w-3" />
         </button>
       </CardHeader>
