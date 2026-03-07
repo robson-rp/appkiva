@@ -26,6 +26,7 @@ import { ChildPendingTasks } from '@/components/child/ChildPendingTasks';
 import { ChildSavingsProgress } from '@/components/child/ChildSavingsProgress';
 import { ChildRecentActivity } from '@/components/child/ChildRecentActivity';
 import { ChildAchievementsStrip } from '@/components/child/ChildAchievementsStrip';
+import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 
 const containerVariants = {
   hidden: { opacity: 0 },
