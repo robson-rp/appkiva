@@ -161,6 +161,77 @@ export default function ParentTasks() {
                   <Plus className="h-4 w-4" /> Nova Tarefa
                 </Button>
               </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="font-display">Criar Tarefa</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Título</Label>
+                    <Input placeholder="Ex: Arrumar o quarto" value={title} onChange={e => setTitle(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Descrição</Label>
+                    <Textarea placeholder="Descreve a tarefa..." value={description} onChange={e => setDescription(e.target.value)} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Recompensa (KVC)</Label>
+                      <Input type="number" placeholder="20" value={reward} onChange={e => setReward(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Categoria</Label>
+                      <Select value={category} onValueChange={v => setCategory(v as TaskCategory)}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cleaning">🧹 Limpeza</SelectItem>
+                          <SelectItem value="studying">📚 Estudo</SelectItem>
+                          <SelectItem value="helping">🤝 Ajuda</SelectItem>
+                          <SelectItem value="other">📌 Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Criança</Label>
+                      <Select value={selectedChild} onValueChange={setSelectedChild}>
+                        <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                        <SelectContent>
+                          {children.map(c => (
+                            <SelectItem key={c.profileId} value={c.profileId}>
+                              {c.avatar} {c.displayName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Recorrência</Label>
+                      <Select value={recurrence} onValueChange={setRecurrence}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Única vez</SelectItem>
+                          <SelectItem value="daily">🔄 Diária</SelectItem>
+                          <SelectItem value="weekly">📅 Semanal</SelectItem>
+                          <SelectItem value="monthly">🗓️ Mensal</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full rounded-xl font-display"
+                    disabled={!title || !selectedChild || !reward || createTask.isPending}
+                    onClick={handleCreate}
+                  >
+                    {createTask.isPending ? 'A criar...' : '✅ Criar Tarefa'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Stats */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-3">
