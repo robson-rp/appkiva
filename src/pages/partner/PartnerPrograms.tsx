@@ -88,12 +88,24 @@ export default function PartnerPrograms() {
               <p className="text-xs text-muted-foreground mt-0.5">
                 Investimento: €{Number(prog.investment_amount).toLocaleString()}
               </p>
-              <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-between">
                 <ProgramInviteDialog
                   programId={prog.id}
                   programName={prog.program_name}
                   partnerTenantId={prog.partner_tenant_id}
                 />
+                <div className="flex gap-1">
+                  <EditProgramDialog program={prog} />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg text-destructive hover:text-destructive"
+                    onClick={() => handleDelete(prog.id, prog.program_name)}
+                    disabled={deleteProgram.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
