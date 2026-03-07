@@ -48,6 +48,8 @@ export default function ChildStore() {
   const { data: monthlySpent = 0 } = useMonthlySpending();
   const claimReward = useClaimReward();
   const requestException = useRequestBudgetException();
+  const { hasFeature } = useAllFeatures();
+  const hasBudgetExceptions = hasFeature(FEATURES.BUDGET_EXCEPTIONS);
 
   const [confirmReward, setConfirmReward] = useState<{ id: string; name: string; price: number } | null>(null);
   const [exceptionReward, setExceptionReward] = useState<{ id: string; name: string; price: number; parentProfileId: string } | null>(null);
