@@ -274,7 +274,7 @@ export default function PaymentSimulator({
                 </Button>
                 <Button className="flex-1 rounded-xl font-display gap-2" disabled={!isFormValid} onClick={handlePay}>
                   <Crown className="h-4 w-4" />
-                  Pagar {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
+                  Pagar {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                 </Button>
               </div>
             </motion.div>
