@@ -398,9 +398,9 @@ function MissionsTab({
                       </div>
                       <Progress value={progress} className="h-2 rounded-full" />
                     </div>
-                    <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5">
-                      <Zap className="h-3.5 w-3.5" /> Continuar
-                    </Button>
+                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast({ title: '🚀 Em breve!', description: 'O sistema de missões interactivas estará disponível em breve.' })}>
+                        <Zap className="h-3.5 w-3.5" /> Continuar
+                      </Button>
                   </CardContent>
                 </Card>
               );
