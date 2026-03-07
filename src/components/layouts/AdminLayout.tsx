@@ -25,6 +25,7 @@ const navItems = [
   { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
   { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
   { title: 'Compliance', url: '/admin/compliance', icon: Shield },
+  { title: 'Lições', url: '/admin/lessons', icon: BookOpen },
 ];
 
 function AdminSidebar() {
