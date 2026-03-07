@@ -13,8 +13,8 @@ import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
 import { useEmissionStats } from '@/hooks/use-emission-stats';
-import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
-import { Badge } from '@/components/ui/badge';
+import { useAllFeatures } from '@/hooks/use-feature-gate';
+import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
