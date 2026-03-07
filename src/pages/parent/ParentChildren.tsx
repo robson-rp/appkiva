@@ -120,10 +120,21 @@ export default function ParentChildren() {
             <p className="text-sm text-primary-foreground/60 mt-1">Gere os perfis das tuas crianças</p>
           </div>
           <div className="flex gap-2">
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => setInviteOpen(true)}>
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
+              if (!canAddChild) {
+                setPaymentOpen(true);
+                return;
+              }
+              setInviteOpen(true);
+            }}>
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Convidar
             </Button>
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm">
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
+              if (!canAddChild) {
+                setPaymentOpen(true);
+                return;
+              }
+            }}>
               <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
             </Button>
           </div>
@@ -132,13 +143,19 @@ export default function ParentChildren() {
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Users className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">{children.length}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">crianças</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">/ {maxChildren} crianças</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
             <span className="text-[10px] sm:text-xs text-primary-foreground/60">saldo total</span>
           </div>
+          {!canAddChild && (
+            <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setPaymentOpen(true)}>
+              <Crown className="h-4 w-4 text-accent-foreground" />
+              <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">Upgrade para mais crianças</span>
+            </div>
+          )}
         </div>
       </motion.div>
 
