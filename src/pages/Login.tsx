@@ -211,7 +211,7 @@ export default function Login() {
               phone: phone ? phoneWithPrefix : undefined,
               institution_name: selectedRole === 'partner' ? displayName : undefined,
               sector: sector || undefined,
-              school_tenant_id: schoolTenantId || undefined,
+              school_tenant_id: (schoolTenantId && schoolTenantId !== 'other') ? schoolTenantId : undefined,
               invite_code: inviteCode || undefined,
             }
           );
