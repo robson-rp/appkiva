@@ -33,6 +33,16 @@ export default function PartnerSubscription() {
   const { data: allTiers = [], isLoading } = useSubscriptionTiers();
   const { upgrade, loading: upgradeLoading } = useUpgradeSubscription();
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const { data: tenantCurrency } = useTenantCurrency();
+  const { data: rates = [] } = useExchangeRates();
+
+  const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
+  const currencyCode = tenantCurrency?.code ?? 'AOA';
+
+  const localPrice = (eurAmount: number) => {
+    const converted = convertPrice(eurAmount, 'EUR', currencyCode, rates);
+    return formatPrice(converted, currencySymbol, tenantCurrency?.decimalPlaces ?? 0);
+  };
 
   const partnerTiers = allTiers.filter(t => t.tierType === 'partner_program');
   const currentTierIndex = partnerTiers.findIndex(t => t.name === limits.tierName);
