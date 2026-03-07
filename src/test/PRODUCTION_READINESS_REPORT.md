@@ -18,8 +18,8 @@ The KIVARA platform demonstrates strong architectural foundations with a ledger-
 | Money Supply Conservation | ⚠️ 1 KVC conservation error |
 | Tenant Isolation | ✅ No cross-tenant integrity violations |
 | Audit Logging | ✅ 73 entries, triggers active |
-| Edge Function Auth | 🔴 2 functions unprotected |
-| Program Invitations | 🔴 Critical RLS vulnerability |
+| Edge Function Auth | ✅ All functions now protected |
+| Program Invitations | ✅ RLS vulnerability fixed |
 
 ---
 
