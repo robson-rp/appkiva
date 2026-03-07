@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { motion } from 'framer-motion';
-import { Wallet, Send, TrendingUp, Calendar, Zap, Target, ListTodo, Settings, Loader2, PiggyBank, Percent } from 'lucide-react';
+import { Wallet, Send, TrendingUp, Calendar, Zap, Target, ListTodo, Settings, Loader2, PiggyBank, Percent, BotMessageSquare } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
@@ -126,10 +126,16 @@ export default function ParentAllowance() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl gradient-kivara p-6 text-primary-foreground">
         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 right-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
-        <div className="relative">
-          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
-          <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
+        <div className="relative flex items-start justify-between">
+          <div>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
+            <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
+            <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
+          </div>
+          <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
+            <BotMessageSquare className="h-3.5 w-3.5" />
+            <span className="text-[10px] font-medium">Automático</span>
+          </div>
         </div>
         <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
@@ -231,13 +237,20 @@ export default function ParentAllowance() {
                       </Button>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border/30">
-                      <Wallet className="h-3.5 w-3.5" />
-                      <span>
-                        {eff.lastSentAt
-                          ? `Última mesada enviada ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
-                          : 'Nenhuma mesada enviada ainda'}
-                      </span>
+                    <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground bg-muted/40 rounded-xl p-3 border border-border/30">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-3.5 w-3.5" />
+                        <span>
+                          {eff.lastSentAt
+                            ? `Última mesada ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
+                            : 'Nenhuma mesada enviada ainda'}
+                        </span>
+                      </div>
+                      {getConfig(child.profileId) && (
+                        <span className="flex items-center gap-1 text-[10px] text-secondary font-medium bg-secondary/10 rounded-full px-2 py-0.5">
+                          <BotMessageSquare className="h-3 w-3" /> Auto
+                        </span>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
