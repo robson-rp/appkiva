@@ -1,128 +1,103 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+## Plan: AI Lesson Generator, Recurring Tasks, and Donations System
 
-## Current State Assessment
+This is a large scope covering three distinct features. Here is the breakdown.
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+---
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+### Feature 1: AI-Powered Lesson Generator (Admin Panel)
 
-## What Lovable Can and Cannot Build
+Add a "Generate with AI" button to the admin lessons page that creates a complete lesson (blocks + quiz + metadata) based on category and difficulty selection.
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+**Database**: No schema changes needed -- lessons table already supports all fields.
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+**Backend (Edge Function)**: `supabase/functions/generate-lesson/index.ts`
+- Accepts `{ category, difficulty, topic?: string }` 
+- Uses Lovable AI (`google/gemini-3-flash-preview`) with a structured prompt to generate lesson content in Portuguese
+- Returns complete lesson JSON (title, description, icon, blocks with text/tip/example/highlight types, 3-question quiz with options and explanations, estimated_minutes, kiva_points_reward)
+- Uses tool calling to extract structured output reliably
+- Config: `verify_jwt = false` in config.toml
 
-## Implementation Plan (4 Phases)
+**Frontend (`AdminLessons.tsx`)**:
+- Add "Gerar com IA" button next to "Nova Lição"
+- Small dialog: pick category + difficulty + optional topic hint
+- On submit, call edge function, receive generated lesson, populate the edit form so admin can review/adjust before saving
+- Blocks and quiz fields pre-filled with generated JSON
 
-### Phase 1 — Multi-Tenant Foundation
+**Media (images/videos)**: For now, add support for `image` and `video` block types in the lesson viewer and data model. The AI prompt will include URLs for instructional videos (YouTube embeds) where relevant. Image generation can use the Nano banana model for lesson illustrations.
 
-**Database migrations:**
+**Changes to `LessonViewer.tsx`**: Add rendering for `image` and `video` block types (img tag and iframe for YouTube).
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+| File | Action |
+|---|---|
+| `supabase/functions/generate-lesson/index.ts` | New edge function |
+| `supabase/config.toml` | Add function config |
+| `src/pages/admin/AdminLessons.tsx` | Add AI generate button + dialog |
+| `src/components/LessonViewer.tsx` | Support image/video blocks |
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+---
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+### Feature 2: Auto-Generated and Recurring Tasks
 
-4. Expand `app_role` enum to include `admin`
+Allow parents (and later teachers/partners) to create recurring tasks that automatically repeat daily, weekly, or monthly.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+**Database Migration**:
+- Add columns to `tasks` table: `is_recurring boolean DEFAULT false`, `recurrence text` ('daily'|'weekly'|'monthly'), `recurrence_source_id uuid` (links copies to original)
+- Create edge function `generate-recurring-tasks` that clones pending tasks based on recurrence schedule
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+**Backend**: 
+- Edge function `generate-recurring-tasks/index.ts` -- queries recurring task templates, creates new task instances if the previous period's task was completed/approved
+- Optional: AI task suggestion via a `suggest-tasks` edge function using Lovable AI that proposes age-appropriate tasks based on child profile
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+**Frontend (`ParentTasks.tsx`)**:
+- Add recurrence selector (None/Daily/Weekly/Monthly) to create task dialog
+- Add "Sugerir com IA" button that generates task ideas based on category and child age
+- Visual badge on recurring tasks
 
-**Database:**
+| File | Action |
+|---|---|
+| DB migration | Add recurring columns to tasks |
+| `supabase/functions/generate-recurring-tasks/index.ts` | New edge function |
+| `supabase/functions/suggest-tasks/index.ts` | New AI suggestion function |
+| `supabase/config.toml` | Add function configs |
+| `src/hooks/use-household-tasks.ts` | Update create mutation for recurrence fields |
+| `src/pages/parent/ParentTasks.tsx` | Add recurrence UI + AI suggest button |
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+---
 
-2. Add `real_money_enabled` flag to tenants
+### Feature 3: Donations System (Database-Backed)
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+Replace mock donation data with a real database model. Allow children to donate KivaCoins to causes, with parents/admins managing causes.
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+**Database Migration**:
+- `donation_causes` table: id, name, description, icon, category (education/solidarity/environment), total_received, is_active, created_by, tenant_id
+- `donations` table: id, profile_id, cause_id, amount, created_at -- linked to ledger via the existing `create-transaction` edge function with `entry_type = 'donation'`
+- RLS: anyone can view active causes; authenticated users can donate (insert); admins can manage causes
 
-### Phase 3 — Audit Logging & Compliance
+**Backend**: 
+- Donations flow through the existing `create-transaction` edge function (already supports `donation` entry type)
+- After successful transaction, insert into `donations` table and increment `total_received` on the cause
 
-**Database:**
+**Frontend**:
+- New hook `use-donations.ts`: fetch causes, make donation (calls create-transaction + inserts donation record), fetch user donation history
+- Update `ChildWallet.tsx`: replace `mockDonationCauses` with real data
+- Optional: Admin page for managing donation causes
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+| File | Action |
+|---|---|
+| DB migration | Create donation_causes + donations tables with RLS |
+| `src/hooks/use-donations.ts` | New hook |
+| `src/pages/child/ChildWallet.tsx` | Replace mock data with real queries |
+| `src/pages/admin/AdminDashboard.tsx` | Optional: link to causes management |
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+---
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+### Implementation Order
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
+1. **Feature 1** (AI Lessons) -- highest impact, admin-facing, no breaking changes
+2. **Feature 3** (Donations) -- replaces mock data, child-facing
+3. **Feature 2** (Recurring Tasks) -- schema extension, needs cron setup
 
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+Total: ~8 files to create, ~5 files to modify, 2 DB migrations, 2-3 new edge functions.
 
