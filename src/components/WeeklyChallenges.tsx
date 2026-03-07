@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Trophy, Clock, CheckCircle2, Flame, Users, Medal, Crown, ChevronRight } from 'lucide-react';
 import { mockWeeklyChallenges, mockClassLeaderboard } from '@/data/weekly-challenges-data';
 import { WeeklyChallenge, WeeklyChallengeStatus } from '@/types/kivara';
+import { LeagueBadge } from '@/components/LeagueBadge';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
