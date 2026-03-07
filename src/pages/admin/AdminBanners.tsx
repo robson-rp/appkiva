@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Image as ImageIcon, MousePointerClick, TrendingUp, BarChart3 } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface Banner {
@@ -20,10 +20,18 @@ interface Banner {
   created_at: string;
 }
 
+interface BannerClickStats {
+  banner_id: string;
+  total_clicks: number;
+  clicks_today: number;
+  clicks_7d: number;
+}
+
 const EMPTY_FORM = { title: '', image_url: '', link_url: '', display_order: 0, is_active: true };
 
 export default function AdminBanners() {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [clickStats, setClickStats] = useState<Record<string, BannerClickStats>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Banner | null>(null);
@@ -40,7 +48,30 @@ export default function AdminBanners() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchBanners(); }, []);
+  const fetchClickStats = async () => {
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { data: allClicks } = await supabase
+      .from('banner_clicks')
+      .select('banner_id, clicked_at');
+
+    if (!allClicks) return;
+
+    const statsMap: Record<string, BannerClickStats> = {};
+    for (const click of allClicks) {
+      if (!statsMap[click.banner_id]) {
+        statsMap[click.banner_id] = { banner_id: click.banner_id, total_clicks: 0, clicks_today: 0, clicks_7d: 0 };
+      }
+      statsMap[click.banner_id].total_clicks++;
+      if (click.clicked_at >= todayStart) statsMap[click.banner_id].clicks_today++;
+      if (click.clicked_at >= weekAgo) statsMap[click.banner_id].clicks_7d++;
+    }
+    setClickStats(statsMap);
+  };
+
+  useEffect(() => { fetchBanners(); fetchClickStats(); }, []);
 
   const openCreate = () => {
     setEditing(null);
@@ -101,6 +132,7 @@ export default function AdminBanners() {
     if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
     toast({ title: 'Banner eliminado' });
     fetchBanners();
+    fetchClickStats();
   };
 
   const handleToggleActive = async (b: Banner) => {
@@ -120,6 +152,11 @@ export default function AdminBanners() {
     fetchBanners();
   };
 
+  // Aggregate stats
+  const totalClicks = Object.values(clickStats).reduce((s, c) => s + c.total_clicks, 0);
+  const totalToday = Object.values(clickStats).reduce((s, c) => s + c.clicks_today, 0);
+  const total7d = Object.values(clickStats).reduce((s, c) => s + c.clicks_7d, 0);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -132,6 +169,45 @@ export default function AdminBanners() {
           Novo Banner
         </Button>
       </div>
+
+      {/* Click Stats Summary */}
+      {totalClicks > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                <MousePointerClick className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground">Total cliques</p>
+                <p className="text-lg font-bold text-foreground">{totalClicks}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-accent/10 flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground">Últimos 7 dias</p>
+                <p className="text-lg font-bold text-foreground">{total7d}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-caption text-muted-foreground">Hoje</p>
+                <p className="text-lg font-bold text-foreground">{totalToday}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -149,42 +225,61 @@ export default function AdminBanners() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {banners.map((b, idx) => (
-            <Card key={b.id} className={`transition-opacity ${!b.is_active ? 'opacity-50' : ''}`}>
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="flex flex-col gap-1">
-                  <button onClick={() => moveOrder(b, -1)} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20 p-1">
-                    <GripVertical className="h-4 w-4 rotate-180" />
-                  </button>
-                  <span className="text-caption text-center text-muted-foreground font-mono">{b.display_order}</span>
-                  <button onClick={() => moveOrder(b, 1)} disabled={idx === banners.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20 p-1">
-                    <GripVertical className="h-4 w-4" />
-                  </button>
-                </div>
+          {banners.map((b, idx) => {
+            const stats = clickStats[b.id];
+            return (
+              <Card key={b.id} className={`transition-opacity ${!b.is_active ? 'opacity-50' : ''}`}>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
+                    <button onClick={() => moveOrder(b, -1)} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20 p-1">
+                      <GripVertical className="h-4 w-4 rotate-180" />
+                    </button>
+                    <span className="text-caption text-center text-muted-foreground font-mono">{b.display_order}</span>
+                    <button onClick={() => moveOrder(b, 1)} disabled={idx === banners.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20 p-1">
+                      <GripVertical className="h-4 w-4" />
+                    </button>
+                  </div>
 
-                <div className="w-32 shrink-0 rounded-xl overflow-hidden border border-border">
-                  <AspectRatio ratio={3}>
-                    <img src={b.image_url} alt={b.title} className="w-full h-full object-cover" />
-                  </AspectRatio>
-                </div>
+                  <div className="w-32 shrink-0 rounded-xl overflow-hidden border border-border">
+                    <AspectRatio ratio={3}>
+                      <img src={b.image_url} alt={b.title} className="w-full h-full object-cover" />
+                    </AspectRatio>
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-display font-semibold text-foreground truncate">{b.title}</p>
-                  {b.link_url && (
-                    <a href={b.link_url} target="_blank" rel="noopener noreferrer" className="text-small text-primary flex items-center gap-1 hover:underline">
-                      <ExternalLink className="h-3 w-3" /> Link
-                    </a>
-                  )}
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display font-semibold text-foreground truncate">{b.title}</p>
+                    {b.link_url && (
+                      <a href={b.link_url} target="_blank" rel="noopener noreferrer" className="text-small text-primary flex items-center gap-1 hover:underline">
+                        <ExternalLink className="h-3 w-3" /> Link
+                      </a>
+                    )}
+                    {stats && (
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="text-caption text-muted-foreground flex items-center gap-1">
+                          <MousePointerClick className="h-3 w-3" /> {stats.total_clicks} total
+                        </span>
+                        <span className="text-caption text-muted-foreground">
+                          {stats.clicks_7d} (7d)
+                        </span>
+                        <span className="text-caption text-muted-foreground">
+                          {stats.clicks_today} hoje
+                        </span>
+                      </div>
+                    )}
+                    {b.link_url && !stats && (
+                      <p className="text-caption text-muted-foreground/50 mt-1">Sem cliques registados</p>
+                    )}
+                  </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <Switch checked={b.is_active} onCheckedChange={() => handleToggleActive(b)} />
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(b)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(b.id)}><Trash2 className="h-4 w-4" /></Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Switch checked={b.is_active} onCheckedChange={() => handleToggleActive(b)} />
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(b)}><Pencil className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(b.id)}><Trash2 className="h-4 w-4" /></Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
