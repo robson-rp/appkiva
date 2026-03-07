@@ -56,25 +56,25 @@ export const ONBOARDING_STEPS: Record<UserRole, OnboardingStep[]> = {
   ],
   teen: [
     {
-      title: 'Bem-vindo ao KIVARA! 🚀',
-      description: 'Aprende a gerir as tuas finanças de forma inteligente. Ganha moedas, poupa e acompanha os teus gastos.',
-      illustrationKey: 'child-kivo',
+      title: 'As tuas finanças, o teu controlo 🚀',
+      description: 'O KIVARA dá-te ferramentas reais para gerir o teu dinheiro, acompanhar gastos e tomar decisões financeiras inteligentes.',
+      illustrationKey: 'teen-welcome',
       cta: 'Começar',
     },
     {
-      title: 'Ganha moedas com missões financeiras',
-      description: 'Completa desafios e lições para ganhar moedas e aprender conceitos financeiros importantes.',
-      illustrationKey: 'child-coins',
+      title: 'Controla o teu orçamento',
+      description: 'Vê para onde vai o teu dinheiro, analisa categorias de gastos e mantém-te dentro dos limites.',
+      illustrationKey: 'teen-budget',
     },
     {
-      title: 'Poupa para os teus objetivos',
-      description: 'Cria cofres para objetivos específicos e vê os teus juros a crescer.',
-      illustrationKey: 'child-dreams',
+      title: 'Investe nos teus objetivos',
+      description: 'Cria cofres com juros simulados e aprende o poder dos juros compostos para atingir as tuas metas.',
+      illustrationKey: 'teen-invest',
     },
     {
-      title: 'Desbloqueia conquistas e sobe de nível',
-      description: 'Ganha medalhas por poupar, completar missões e atingir metas financeiras!',
-      illustrationKey: 'child-achievements',
+      title: 'Evolui e desbloqueia níveis',
+      description: 'Completa missões financeiras, mantém streaks e sobe no ranking para provar a tua literacia financeira.',
+      illustrationKey: 'teen-level-up',
     },
   ],
   teacher: [
