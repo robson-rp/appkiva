@@ -60,6 +60,7 @@ export function useChildren() {
         avatar: (c.profiles as any)?.avatar ?? '👧',
         balance: balanceMap.get(c.profile_id) ?? 0,
         monthlyBudget: Number(c.monthly_budget) || 0,
+        dailySpendLimit: Number(c.daily_spend_limit) || 50,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
