@@ -100,6 +100,7 @@ function AppRoutes() {
         <Route path="/partner/programs" element={<PartnerLayout><PartnerPrograms /></PartnerLayout>} />
         <Route path="/partner/challenges" element={<PartnerLayout><PartnerChallenges /></PartnerLayout>} />
         <Route path="/partner/reports" element={<PartnerLayout><PartnerReports /></PartnerLayout>} />
+        <Route path="/partner/profile" element={<PartnerLayout><PartnerProfile /></PartnerLayout>} />
         <Route path="*" element={<Navigate to="/partner" replace />} />
       </Routes>
     );
