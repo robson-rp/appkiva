@@ -76,6 +76,8 @@ export function useCreateTask() {
       reward: number;
       category: TaskCategory;
       childProfileId: string;
+      isRecurring?: boolean;
+      recurrence?: string;
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
@@ -86,6 +88,8 @@ export function useCreateTask() {
         category: input.category,
         child_profile_id: input.childProfileId,
         parent_profile_id: user.profileId,
+        is_recurring: input.isRecurring ?? false,
+        recurrence: input.recurrence ?? null,
       });
 
       if (error) throw error;

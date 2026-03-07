@@ -309,9 +309,10 @@ export interface QuizQuestion {
 }
 
 export interface LessonBlock {
-  type: 'text' | 'tip' | 'example' | 'highlight';
+  type: 'text' | 'tip' | 'example' | 'highlight' | 'image' | 'video';
   content: string;
   icon?: string;
+  caption?: string;
 }
 
 export interface MicroLesson {
