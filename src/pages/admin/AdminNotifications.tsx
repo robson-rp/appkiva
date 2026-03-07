@@ -28,6 +28,7 @@ export default function AdminNotifications() {
           <TabsTrigger value="templates">🧩 Templates ({stats?.activeTemplates ?? 0})</TabsTrigger>
           <TabsTrigger value="broadcast">📢 Enviar</TabsTrigger>
           <TabsTrigger value="history">📋 Histórico</TabsTrigger>
+          <TabsTrigger value="analytics">📊 Métricas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="templates">
