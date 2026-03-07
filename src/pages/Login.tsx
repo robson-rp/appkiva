@@ -335,7 +335,7 @@ export default function Login() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="lg:-mt-12 text-white/60 text-[9px] sm:text-[10px] lg:text-sm tracking-[0.2em] lg:tracking-[0.25em] uppercase font-light"
+            className="lg:-mt-6 text-white/60 text-[9px] sm:text-[10px] lg:text-sm tracking-[0.2em] lg:tracking-[0.25em] uppercase font-light"
           >
             Pequenos hábitos. Grandes futuros
           </motion.p>
