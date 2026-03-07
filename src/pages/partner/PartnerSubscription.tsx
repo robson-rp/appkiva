@@ -8,7 +8,8 @@ import { Crown, Check, Sparkles, Shield, Zap, Building2 } from 'lucide-react';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
 import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { cn } from '@/lib/utils';
 
@@ -35,13 +36,15 @@ export default function PartnerSubscription() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
   const currencyCode = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
 
-  const localPrice = (usdAmount: number) => {
-    const converted = convertPrice(usdAmount, 'USD', currencyCode, rates);
-    return formatPrice(converted, currencySymbol, tenantCurrency?.decimalPlaces ?? 0);
+  const localPrice = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') => {
+    const converted = getRegionalPrice(tierId, field, usdAmount, currencyCode, regionalPrices, rates);
+    return formatPrice(converted, currencySymbol, dec);
   };
 
   const partnerTiers = allTiers.filter(t => t.tierType === 'partner_program');
@@ -71,7 +74,9 @@ export default function PartnerSubscription() {
                   <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
                   <h1 className="font-display text-2xl font-bold">{limits.tierName}</h1>
                     <p className="text-sm opacity-80 mt-0.5">
-                      {limits.priceMonthly > 0 ? `${localPrice(limits.priceMonthly)}/mês` : 'Gratuito'}
+                      {limits.priceMonthly > 0
+                        ? `${localPrice(partnerTiers.find(t => t.name === limits.tierName)?.id ?? '', limits.priceMonthly)}/mês`
+                        : 'Gratuito'}
                     </p>
                 </div>
               </div>
@@ -135,7 +140,7 @@ export default function PartnerSubscription() {
                     <span className="text-3xl">{TIER_ICONS[tier.name] ?? '📋'}</span>
                     <h3 className="font-display font-bold mt-2">{tier.name}</h3>
                     <p className="text-2xl font-bold text-foreground mt-1">
-                      {tier.priceMonthly > 0 ? localPrice(tier.priceMonthly) : 'Grátis'}
+                      {tier.priceMonthly > 0 ? localPrice(tier.id, tier.priceMonthly) : 'Grátis'}
                       {tier.priceMonthly > 0 && <span className="text-xs text-muted-foreground font-normal">/mês</span>}
                     </p>
                     {isCurrent && (

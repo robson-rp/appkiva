@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 
 const FEATURE_LABELS: Record<string, string> = {
   savings_vaults: 'Cofres de Poupança',
@@ -46,11 +47,13 @@ export default function ParentSubscription() {
   const [downgradeTarget, setDowngradeTarget] = useState<typeof tiers[0] | null>(null);
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const code = tenantCurrency?.code ?? 'AOA';
   const dec = tenantCurrency?.decimalPlaces ?? 0;
-  const fmtP = (usdAmount: number) => formatPrice(convertPrice(usdAmount, 'USD', code, rates), sym, dec);
+  const fmtP = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
+    formatPrice(getRegionalPrice(tierId, field, usdAmount, code, regionalPrices, rates), sym, dec);
 
   const currentTier = tiers.find((t) => t.name === tierName);
   const currentIndex = tiers.findIndex((t) => t.name === tierName);
@@ -87,7 +90,7 @@ export default function ParentSubscription() {
                   {currentTier && (
                     <p className="text-sm opacity-80 mt-0.5">
                       {currentTier.priceMonthly > 0
-                        ? `${fmtP(currentTier.priceMonthly)}/mês`
+                        ? `${fmtP(currentTier.id, currentTier.priceMonthly)}/mês`
                         : 'Gratuito'}
                     </p>
                   )}

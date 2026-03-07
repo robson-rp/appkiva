@@ -1519,6 +1519,47 @@ export type Database = {
           },
         ]
       }
+      tier_regional_prices: {
+        Row: {
+          created_at: string
+          currency_code: string
+          extra_child_price: number
+          id: string
+          price_monthly: number
+          price_yearly: number
+          tier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code: string
+          extra_child_price?: number
+          id?: string
+          price_monthly?: number
+          price_yearly?: number
+          tier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          extra_child_price?: number
+          id?: string
+          price_monthly?: number
+          price_yearly?: number
+          tier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier_regional_prices_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

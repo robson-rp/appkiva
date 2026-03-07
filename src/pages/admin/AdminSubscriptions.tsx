@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -19,10 +20,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users } from 'lucide-react';
+import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users, Globe } from 'lucide-react';
 import {
   useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier, useDeleteSubscriptionTier,
 } from '@/hooks/use-tenants';
+import { useRegionalPrices, useUpsertRegionalPrice, useDeleteRegionalPrice, type RegionalPrice } from '@/hooks/use-regional-prices';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -68,6 +70,15 @@ export default function AdminSubscriptions() {
   const updateTier = useUpdateSubscriptionTier();
   const deleteTier = useDeleteSubscriptionTier();
 
+  // Regional prices
+  const { data: allRegionalPrices = [] } = useRegionalPrices();
+  const upsertRegional = useUpsertRegionalPrice();
+  const deleteRegional = useDeleteRegionalPrice();
+  const [rpCurrency, setRpCurrency] = useState('');
+  const [rpMonthly, setRpMonthly] = useState(0);
+  const [rpYearly, setRpYearly] = useState(0);
+  const [rpExtra, setRpExtra] = useState(0);
+
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [deactivateConfirmOpen, setDeactivateConfirmOpen] = useState(false);
 
@@ -80,6 +91,11 @@ export default function AdminSubscriptions() {
   const [form, setForm] = useState<TierForm>(emptyForm);
   const [featuresText, setFeaturesText] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const tierRegionalPrices = useMemo(
+    () => editId ? allRegionalPrices.filter(rp => rp.tier_id === editId) : [],
+    [editId, allRegionalPrices]
+  );
 
   const filtered = useMemo(() => {
     if (!tiers) return [];
@@ -421,6 +437,120 @@ export default function AdminSubscriptions() {
               <Textarea rows={4} value={featuresText} onChange={e => setFeaturesText(e.target.value)} placeholder="savings_vaults&#10;dream_vaults&#10;advanced_reports" />
             </div>
           </div>
+
+          {/* Regional Prices Section — only in edit mode */}
+          {editId && (
+            <>
+              <Separator className="my-2" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <Label className="font-semibold text-sm">Preços Regionais (override)</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Define preços fixos por moeda. Quando definidos, substituem a conversão dinâmica USD→local.
+                </p>
+
+                {tierRegionalPrices.length > 0 && (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-xs">Moeda</TableHead>
+                        <TableHead className="text-xs text-right">Mensal</TableHead>
+                        <TableHead className="text-xs text-right">Anual</TableHead>
+                        <TableHead className="text-xs text-right">Extra/Criança</TableHead>
+                        <TableHead className="w-10" />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tierRegionalPrices.map((rp) => (
+                        <TableRow key={rp.id}>
+                          <TableCell className="font-mono text-xs">{rp.currency_code}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{rp.price_monthly}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{rp.price_yearly}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">{rp.extra_child_price}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={async () => {
+                                try {
+                                  await deleteRegional.mutateAsync(rp.id);
+                                  toast.success(`Preço regional ${rp.currency_code} removido`);
+                                } catch (e: any) {
+                                  toast.error(e.message);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+
+                <div className="grid grid-cols-4 gap-2 items-end">
+                  <div>
+                    <Label className="text-[10px]">Moeda</Label>
+                    <Input
+                      placeholder="AOA"
+                      value={rpCurrency}
+                      onChange={(e) => setRpCurrency(e.target.value.toUpperCase())}
+                      maxLength={5}
+                      className="font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px]">Mensal</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={rpMonthly}
+                      onChange={(e) => setRpMonthly(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px]">Anual</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={rpYearly}
+                      onChange={(e) => setRpYearly(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!rpCurrency || upsertRegional.isPending}
+                    onClick={async () => {
+                      try {
+                        await upsertRegional.mutateAsync({
+                          tier_id: editId,
+                          currency_code: rpCurrency,
+                          price_monthly: rpMonthly,
+                          price_yearly: rpYearly,
+                          extra_child_price: rpExtra,
+                        });
+                        toast.success(`Preço ${rpCurrency} guardado`);
+                        setRpCurrency('');
+                        setRpMonthly(0);
+                        setRpYearly(0);
+                        setRpExtra(0);
+                      } catch (e: any) {
+                        toast.error(e.message);
+                      }
+                    }}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>

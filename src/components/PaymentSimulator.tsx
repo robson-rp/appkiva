@@ -8,7 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Crown, CreditCard, Check, Sparkles, Shield, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
-import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
+import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 
 interface SubscriptionTier {
   id: string;
@@ -60,14 +61,15 @@ export default function PaymentSimulator({
 
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
   const currencyCode = tenantCurrency?.code ?? 'AOA';
   const decimals = tenantCurrency?.decimalPlaces ?? 0;
 
-  // Base prices are in USD
-  const convertedPrice = (usdAmount: number) => convertPrice(usdAmount, 'USD', currencyCode, rates);
-  const fmtPrice = (usdAmount: number) => formatPrice(convertedPrice(usdAmount), currencySymbol, decimals);
+  // Use regional override if available, otherwise dynamic conversion
+  const fmtTierPrice = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') =>
+    formatPrice(getRegionalPrice(tierId, field, usdAmount, currencyCode, regionalPrices, rates), currencySymbol, decimals);
 
   const reset = () => {
     setStep('select');
@@ -174,7 +176,7 @@ export default function PaymentSimulator({
                           <div className="flex items-center justify-between mb-2">
                             <h3 className="font-display font-bold text-sm">{tier.name}</h3>
                             <span className="font-display font-bold text-lg text-primary">
-                              {fmtPrice(price)}
+                              {fmtTierPrice(tier.id, price, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                               <span className="text-xs text-muted-foreground font-normal">{period}</span>
                             </span>
                           </div>
@@ -233,7 +235,7 @@ export default function PaymentSimulator({
                   <p className="font-display font-bold text-sm">{selectedTier.name}</p>
                 </div>
                 <p className="font-display font-bold text-primary">
-                  {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
+                  {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                   <span className="text-[10px] text-muted-foreground font-normal">
                     /{billing === 'monthly' ? 'mês' : 'ano'}
                   </span>
@@ -272,7 +274,7 @@ export default function PaymentSimulator({
                 </Button>
                 <Button className="flex-1 rounded-xl font-display gap-2" disabled={!isFormValid} onClick={handlePay}>
                   <Crown className="h-4 w-4" />
-                  Pagar {fmtPrice(billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly)}
+                  Pagar {fmtTierPrice(selectedTier.id, billing === 'monthly' ? selectedTier.priceMonthly : selectedTier.priceYearly, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}
                 </Button>
               </div>
             </motion.div>
