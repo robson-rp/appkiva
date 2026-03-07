@@ -489,6 +489,9 @@ export default function ParentChildren() {
         tiers={tiers.filter(t => t.tierType === 'free' || t.tierType === 'family_premium')}
         onConfirmUpgrade={upgrade}
       />
+
+      {/* Edit Child Dialog */}
+      <EditChildDialog open={editOpen} onOpenChange={setEditOpen} child={editChild} />
     </div>
   );
 }
