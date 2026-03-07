@@ -24,6 +24,7 @@ import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Install = lazy(() => import("./pages/Install"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 // Parent
 const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
