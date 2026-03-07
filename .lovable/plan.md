@@ -1,128 +1,132 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+## Plano: Revisão e Correcção de Funcionalidades em Falta
 
-## Current State Assessment
+Após análise detalhada do código, identifico os seguintes problemas e implementações necessárias, agrupados por área:
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+---
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+### 1. TeacherClasses: Migrar de mock data para dados reais (Supabase)
 
-## What Lovable Can and Cannot Build
+**Problema**: `TeacherClasses.tsx` usa `mockClassrooms` e `mockLeaderboard` (dados estáticos). Não há botões de remover/adicionar alunos visíveis com dados reais.
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+**Solução**: Reescrever `TeacherClasses.tsx` para usar os hooks já existentes (`useClassrooms`, `useClassroomStudents`, `useCreateClassroom`, `useDeleteClassroom`, `useAddClassroomStudents`, `useRemoveClassroomStudent`, `useSchoolStudents`). As operações CRUD já existem nos hooks — apenas a UI não os utiliza.
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+- Substituir `useState(() => mockClassrooms...)` por `useClassrooms()`
+- Substituir `mockLeaderboard` por `useSchoolStudents(schoolTenantId)` para o picker de alunos
+- Usar `useAllClassroomStudents()` para listar alunos por turma
+- Adicionar botão de remover aluno em cada card de aluno
+- Adicionar dialog de "Adicionar Alunos" com checkbox picker usando dados reais
 
-## Implementation Plan (4 Phases)
+---
 
-### Phase 1 — Multi-Tenant Foundation
+### 2. Perfil da Escola: Permitir edição pelo professor
 
-**Database migrations:**
+**Problema**: `TeacherSchoolProfile.tsx` é read-only. Não permite editar dados da escola.
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+**Solução**: Adicionar formulário de edição básica (nome, settings) para professores verem e potencialmente editarem campos informativos da escola (somente admin edita campos críticos como plano). Manter como visualização detalhada com dados reais.
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+---
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+### 3. Registo de Criança/Adolescente: Encarregado define escola
 
-4. Expand `app_role` enum to include `admin`
+**Problema**: No registo de criança/teen via convite, não há campo para definir a escola. A escola deveria ser herdada do encarregado ou seleccionável.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+**Solução**: No fluxo de registo de criança/teen (após código de convite válido), adicionar campo opcional "Escola" pré-preenchido com a escola do encarregado (via `parent_profile_id` do convite → `profiles.school_tenant_id`). Também no `ParentChildren.tsx`, ao gerar convite/adicionar criança, permitir definir a escola.
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+---
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+### 4. Upgrade: Crianças/teens apenas solicitam (já implementado — verificar)
 
-**Database:**
+**Estado**: Já implementado no `UpgradePrompt.tsx` com detecção de role child/teen e envio de notificação ao encarregado. **Verificar** que o banner aparece no topo e não no centro.
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+**Correcção**: O `UpgradePrompt` com `variant='banner'` já renderiza no topo. O `FeatureGateWrapper` usa `variant='overlay'` (centro). Para child/teen, forçar `variant='banner'` em vez de `overlay`.
 
-2. Add `real_money_enabled` flag to tenants
+---
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+### 5. Moeda padrão AOA
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+**Estado**: Já implementado — `country` default é `'AO'` e `getCurrencyByCountry('AO')` retorna `'AOA'`. Verificado nos profiles e tenants.
 
-### Phase 3 — Audit Logging & Compliance
+---
 
-**Database:**
+### 6. Registo de Professor: Escola obrigatória
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+**Estado**: Já implementado — validação `if (selectedRole === 'teacher' && !schoolTenantId)` existe na linha 126 do Login.tsx.
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+---
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+### 7. Registo de Parceiro: Nome da Instituição + Sector
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
+**Estado**: Já implementado — label muda para "Nome da Instituição" quando `selectedRole === 'partner'` e campo Sector aparece com `PARTNER_SECTORS`.
 
-### Phase 4 — Risk Monitoring & Anti-Fraud
+---
 
-**Database:**
+### 8. Contacto por telefone/email + OTP
 
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+**Estado**: Já implementado — toggle Email/Telefone existe com fluxo OTP via `supabase.auth.signInWithOtp`.
 
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
+---
 
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+### 9. Género no perfil do encarregado
 
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
+**Estado**: Já implementado — campo género existe tanto no registo como no `ParentProfile.tsx`.
 
-## Technical Approach
+---
 
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+### 10. Notificação de upgrade no topo (não centro)
 
-## Estimated Scope
+**Problema**: O `FeatureGateWrapper` usa overlay centrado que obriga scroll.
 
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+**Solução**: Modificar `FeatureGateWrapper` para usar `variant='banner'` fixo no topo do conteúdo em vez de overlay absoluto centrado. Para children/teens, usar variante com botão "Pedir ao Encarregado".
+
+---
+
+### 11. Admin: Módulo Financeiro
+
+**Problema**: Não existe página `AdminFinance` para receitas de subscrições, simulações e projecções.
+
+**Solução**: Criar `src/pages/admin/AdminFinance.tsx` com:
+- Resumo de receita mensal/anual (calculado a partir de `tenants` + `subscription_tiers` prices)
+- Gráfico de evolução de receita
+- Simulador: "Se X novos tenants no tier Y, receita projectada = Z"
+- Tabela de tenants por tier com valores
+
+---
+
+### 12. Admin: Gestão de Utilizadores e Vínculos
+
+**Problema**: Não existe página para ver contas e vínculos familiares/escolares/parceiros.
+
+**Solução**: Criar `src/pages/admin/AdminUsers.tsx` com:
+- Lista de todos os profiles com role, tenant, household, school
+- Filtros por role, tenant type, escola
+- Visualização de vínculos: família (household_id), escola (school_tenant_id), parceiro (tenant com partner type)
+- Expandir linha para ver filhos/membros da família
+
+---
+
+### 13. Custo de crianças extras gerido pelo admin
+
+**Problema**: O custo de registo extra de crianças não é configurável no admin.
+
+**Solução**: Adicionar campo `extra_child_price` à tabela `subscription_tiers` (via migration). No `AdminSubscriptions.tsx`, adicionar campo para configurar este preço. No `ParentChildren.tsx`, mostrar o preço do tier actual ao atingir o limite.
+
+---
+
+### Resumo de ficheiros a criar/editar
+
+| Ficheiro | Acção |
+|----------|-------|
+| `src/pages/teacher/TeacherClasses.tsx` | Reescrever com hooks reais |
+| `src/pages/teacher/TeacherSchoolProfile.tsx` | Adicionar edição |
+| `src/pages/admin/AdminFinance.tsx` | Criar novo |
+| `src/pages/admin/AdminUsers.tsx` | Criar novo |
+| `src/components/layouts/AdminLayout.tsx` | Adicionar nav items Finance e Users |
+| `src/App.tsx` | Adicionar rotas admin/finance e admin/users |
+| `src/components/FeatureGateWrapper.tsx` | Banner no topo em vez de overlay |
+| `src/pages/Login.tsx` | Campo escola para child/teen |
+| `src/pages/admin/AdminSubscriptions.tsx` | Campo extra_child_price |
+| `src/pages/parent/ParentChildren.tsx` | Mostrar preço extra_child |
+| Migration SQL | Adicionar `extra_child_price` a `subscription_tiers` |
 
