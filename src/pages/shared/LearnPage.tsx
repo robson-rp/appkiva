@@ -212,6 +212,8 @@ function LessonCard({ lesson, index, completed, score, onStart }: { lesson: Micr
   const quizTotal = lesson.quiz.length;
   const correctCount = completed ? Math.round((score / 100) * quizTotal) : 0;
   const pct = completed ? score : 0;
+  const hasAudio = lesson.blocks.some(b => b.type === 'audio');
+  const hasVideo = lesson.blocks.some(b => b.type === 'video');
 
   return (
     <motion.div
