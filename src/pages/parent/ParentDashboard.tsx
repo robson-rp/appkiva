@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send } from 'lucide-react';
+import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send, Gauge } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
@@ -12,6 +12,7 @@ import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
+import { useEmissionStats } from '@/hooks/use-emission-stats';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
@@ -24,6 +25,7 @@ export default function ParentDashboard() {
   const { data: children = [], isLoading: childrenLoading } = useChildren();
   const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
+  const { data: emissionStats } = useEmissionStats();
 
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
 
@@ -118,6 +120,46 @@ export default function ParentDashboard() {
         onOpenChange={setAllowanceOpen}
         children={children}
       />
+
+      {/* Emission Limit Widget */}
+      {emissionStats && (
+        <motion.div variants={item}>
+          <Card className="border-border/50 overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Gauge className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-display font-bold text-sm">Limite de Emissão Mensal</p>
+                    <p className="text-[10px] text-muted-foreground">Controlo de inflação KVC</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-display font-bold text-sm">
+                    <CurrencyDisplay amount={emissionStats.emitted_this_month} size="sm" className="inline" />
+                    <span className="text-muted-foreground font-normal"> / </span>
+                    <CurrencyDisplay amount={emissionStats.emission_limit} size="sm" className="inline" />
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Restante: <CurrencyDisplay amount={emissionStats.remaining} size="sm" className="inline" />
+                  </p>
+                </div>
+              </div>
+              <Progress 
+                value={Math.min(emissionStats.percentage_used, 100)} 
+                className="h-2"
+              />
+              {emissionStats.percentage_used >= 80 && (
+                <p className="text-[10px] text-destructive mt-1.5 font-medium">
+                  ⚠️ {emissionStats.percentage_used >= 100 ? 'Limite atingido! Não podes emitir mais KVC este mês.' : `Atenção: ${emissionStats.percentage_used}% do limite utilizado.`}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Stats */}
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-3" data-onboarding="tasks">
