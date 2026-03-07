@@ -26,6 +26,7 @@ const navItems = [
   { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
   { title: 'Compliance', url: '/admin/compliance', icon: Shield },
   { title: 'Lições', url: '/admin/lessons', icon: BookOpen },
+  { title: 'Onboarding', url: '/admin/onboarding', icon: Sparkles },
 ];
 
 function AdminSidebar() {
