@@ -227,6 +227,26 @@ export default function ParentProfile() {
               </Select>
               <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
             </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /> Escola dos filhos
+              </Label>
+              <Select value={schoolTenantId || 'none'} onValueChange={setSchoolTenantId}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar escola" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhuma (editar depois)</SelectItem>
+                  {schools.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Associa a escola dos teus filhos quando estiver disponível.</p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
