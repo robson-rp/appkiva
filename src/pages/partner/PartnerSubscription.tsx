@@ -36,13 +36,15 @@ export default function PartnerSubscription() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
+  const { data: regionalPrices = [] } = useRegionalPrices();
 
   const currencySymbol = tenantCurrency?.symbol ?? 'Kz';
   const currencyCode = tenantCurrency?.code ?? 'AOA';
+  const dec = tenantCurrency?.decimalPlaces ?? 0;
 
-  const localPrice = (usdAmount: number) => {
-    const converted = convertPrice(usdAmount, 'USD', currencyCode, rates);
-    return formatPrice(converted, currencySymbol, tenantCurrency?.decimalPlaces ?? 0);
+  const localPrice = (tierId: string, usdAmount: number, field: 'price_monthly' | 'price_yearly' = 'price_monthly') => {
+    const converted = getRegionalPrice(tierId, field, usdAmount, currencyCode, regionalPrices, rates);
+    return formatPrice(converted, currencySymbol, dec);
   };
 
   const partnerTiers = allTiers.filter(t => t.tierType === 'partner_program');
