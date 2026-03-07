@@ -41,6 +41,7 @@ const tierSchema = z.object({
   price_yearly: z.number().min(0, 'Deve ser ≥ 0'),
   max_children: z.number().int().min(0),
   max_classrooms: z.number().int().min(0),
+  extra_child_price: z.number().min(0, 'Deve ser ≥ 0'),
   currency: z.string().trim().min(1).max(10),
   is_active: z.boolean(),
   features: z.array(z.string()),
