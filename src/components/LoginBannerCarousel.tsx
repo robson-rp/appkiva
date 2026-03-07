@@ -90,16 +90,16 @@ export default function LoginBannerCarousel() {
       </div>
 
       {banners.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
+        <div className="flex justify-center gap-1 mt-2">
           {banners.map((_, i) => (
             <button
               key={i}
               onClick={() => emblaApi?.scrollTo(i)}
               className={cn(
-                "h-[3px] rounded-full transition-all duration-500 ease-out",
+                "h-[2px] rounded-full transition-all duration-500 ease-out",
                 i === selectedIndex
-                  ? "w-8 bg-primary"
-                  : "w-4 bg-muted-foreground/20 hover:bg-muted-foreground/35"
+                  ? "w-5 bg-primary/70"
+                  : "w-2.5 bg-muted-foreground/15"
               )}
               aria-label={`Banner ${i + 1}`}
             />
