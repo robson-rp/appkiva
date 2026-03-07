@@ -749,7 +749,7 @@ export default function Login() {
             )}
           </AnimatePresence>
 
-          <p className="text-center text-xs text-muted-foreground mt-10">
+          <p className="text-center text-xs text-muted-foreground mt-6 sm:mt-10 pb-4">
             © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
           </p>
         </motion.div>
