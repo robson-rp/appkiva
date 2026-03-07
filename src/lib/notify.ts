@@ -156,6 +156,3 @@ export function notifyStreakMilestone(profileId: string, days: number, reward: n
     metadata: { days, reward },
   });
 }
-
-// ─── Re-export for backward compat ─────────────────────────────
-export { send as createNotification };

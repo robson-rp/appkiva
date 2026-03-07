@@ -75,7 +75,7 @@ export function useClaimReward() {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
       // Notify parent about the claim
       if (variables.parentProfileId) {
-        notifyRewardClaimed(variables.parentProfileId, user?.displayName ?? 'O teu filho', data.reward_name, variables.price);
+        notifyRewardClaimed(variables.parentProfileId, user?.name ?? 'O teu filho', data.reward_name, variables.price);
       }
       toast({
         title: 'Recompensa resgatada! 🎉',
