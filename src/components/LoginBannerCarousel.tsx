@@ -77,8 +77,6 @@ export default function LoginBannerCarousel() {
     startTimeRef.current = Date.now() - (progress * AUTO_PLAY_MS);
   }, [progress]);
 
-  if (!banners.length) return null;
-
   const trackClick = useCallback((bannerId: string) => {
     supabase.from("banner_clicks").insert({
       banner_id: bannerId,
@@ -86,6 +84,8 @@ export default function LoginBannerCarousel() {
       referrer: document.referrer || null,
     }).then(() => {});
   }, []);
+
+  if (!banners.length) return null;
 
   const Wrapper = ({ href, bannerId, children, className }: { href: string | null; bannerId: string; children: React.ReactNode; className?: string }) =>
     href ? (
