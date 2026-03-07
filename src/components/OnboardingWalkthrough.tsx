@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useOnboarding } from '@/hooks/use-onboarding';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,15 @@ const slideVariants = {
 };
 
 export function OnboardingWalkthrough() {
-  const { showOnboarding, currentStep, totalSteps, steps, nextStep, prevStep, skipWalkthrough } = useOnboarding();
+  const { showOnboarding, currentStep, totalSteps, steps, nextStep, prevStep, skipWalkthrough, trackView } = useOnboarding();
   const [direction, setDirection] = useState(1);
+
+  // Track each step view
+  useEffect(() => {
+    if (showOnboarding && steps.length > 0) {
+      trackView(currentStep);
+    }
+  }, [showOnboarding, currentStep, steps.length, trackView]);
 
   const handleNext = useCallback(() => {
     setDirection(1);

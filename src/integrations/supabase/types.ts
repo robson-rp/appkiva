@@ -935,6 +935,44 @@ export type Database = {
           },
         ]
       }
+      onboarding_analytics: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          profile_id: string
+          role: string
+          step_index: number
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          profile_id: string
+          role: string
+          step_index?: number
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          profile_id?: string
+          role?: string
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_analytics_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_progress: {
         Row: {
           completed: boolean
