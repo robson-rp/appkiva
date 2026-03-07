@@ -288,10 +288,21 @@ export default function OnboardingStepManager() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <Badge variant="outline" className="text-[10px]">Passo {step.step_index + 1}</Badge>
-                    {!step.is_active && <Badge variant="secondary" className="text-[10px]"><EyeOff className="h-3 w-3 mr-1" />Inativo</Badge>}
+                    {(() => {
+                      const status = getVisibilityStatus(step);
+                      const badge = STATUS_BADGES[status];
+                      return <Badge className={cn("text-[10px]", badge.className)}>{status === 'scheduled' && <Clock className="h-3 w-3 mr-1" />}{badge.label}</Badge>;
+                    })()}
                     {step.cta && <Badge className="text-[10px] bg-primary/10 text-primary">CTA: {step.cta}</Badge>}
+                    {(step.visible_from || step.visible_until) && (
+                      <span className="text-[9px] text-muted-foreground">
+                        {step.visible_from ? format(new Date(step.visible_from), 'dd/MM/yy') : '∞'}
+                        {' → '}
+                        {step.visible_until ? format(new Date(step.visible_until), 'dd/MM/yy') : '∞'}
+                      </span>
+                    )}
                   </div>
                   <h4 className="text-sm font-display font-bold text-foreground truncate">{step.title}</h4>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{step.description}</p>
