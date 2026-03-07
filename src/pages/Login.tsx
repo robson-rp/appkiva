@@ -291,8 +291,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left Hero Panel */}
-      <div className="relative flex-1 flex flex-col items-center justify-center p-8 lg:p-16 gradient-kivara overflow-hidden">
+      {/* Left Hero Panel — compact on mobile, full on desktop */}
+      <div className="relative flex flex-col items-center justify-center px-6 py-8 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/5 blur-3xl" />
         <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] rounded-full bg-white/5 blur-3xl" />
         
@@ -300,26 +300,28 @@ export default function Login() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="relative z-10 flex flex-col items-center text-center"
+          className="relative z-10 flex flex-row lg:flex-col items-center lg:text-center gap-4 lg:gap-0"
         >
           <motion.div
             animate={{ y: [0, -12, 0] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            className="mb-6"
+            className="shrink-0 lg:mb-6"
           >
-            <img src={kivoImg} alt="Kivo" className="w-32 h-32 lg:w-44 lg:h-44 drop-shadow-2xl" />
+            <img src={kivoImg} alt="Kivo" className="w-16 h-16 sm:w-20 sm:h-20 lg:w-44 lg:h-44 drop-shadow-2xl" />
           </motion.div>
 
-          <img src={kivaraLogo} alt="KIVARA" className="h-14 lg:h-20 mb-4 brightness-0 invert drop-shadow-lg" />
+          <div className="flex flex-col lg:items-center">
+            <img src={kivaraLogo} alt="KIVARA" className="h-8 sm:h-10 lg:h-20 mb-1 lg:mb-4 brightness-0 invert drop-shadow-lg" />
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-white/90 font-body text-lg lg:text-xl font-medium tracking-wide"
-          >
-            Pequenos hábitos. Grandes futuros.
-          </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-white/90 font-body text-sm sm:text-base lg:text-xl font-medium tracking-wide"
+            >
+              Pequenos hábitos. Grandes futuros.
+            </motion.p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0 }}
