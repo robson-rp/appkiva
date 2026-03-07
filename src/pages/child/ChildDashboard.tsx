@@ -188,6 +188,11 @@ export default function ChildDashboard() {
         <ChildAchievementsStrip achievements={unlockedAchievements} />
       </motion.div>
 
+      {/* Plan Summary */}
+      <motion.div variants={itemVariants}>
+        <PlanSummaryWidget compact />
+      </motion.div>
+
       <Kivo page="dashboard" />
     </motion.div>
   );
