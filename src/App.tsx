@@ -15,6 +15,8 @@ import { PartnerLayout } from "@/components/layouts/PartnerLayout";
 
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Install from "./pages/Install";
+import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import ParentDashboard from "./pages/parent/ParentDashboard";
 import ParentChildren from "./pages/parent/ParentChildren";
 import ParentTasks from "./pages/parent/ParentTasks";
@@ -194,8 +196,10 @@ function AppRoutes() {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.3 }}
         >
+          <InstallPWAPrompt />
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </motion.div>
@@ -206,6 +210,7 @@ function AppRoutes() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
+          <InstallPWAPrompt />
           {renderRoutes(user)}
         </motion.div>
       )}
