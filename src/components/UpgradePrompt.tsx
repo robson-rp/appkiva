@@ -262,10 +262,10 @@ export function FeatureGateWrapper({
           {isChildOrTeen ? (
             // Child/teen: show request button instead of payment
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 z-20 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-[inherit]"
-            >
+265:               initial={{ opacity: 0, y: -8 }}
+266:               animate={{ opacity: 1, y: 0 }}
+267:               className="sticky top-0 z-20 rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent p-4 mb-4"
+268:             >
               <div className="text-center space-y-3 max-w-xs px-4">
                 <motion.div
                   initial={{ scale: 0.8 }}
