@@ -259,6 +259,15 @@ Deno.serve(async (req) => {
 
     // 10. Spending limit check (for children/teens)
     if (body.entry_type === "purchase" && !isParent && !isAdmin) {
+      // Get configurable daily limit from children table
+      const { data: childLimitRecord } = await supabaseAdmin
+        .from("children")
+        .select("daily_spend_limit")
+        .eq("profile_id", callerProfile.id)
+        .maybeSingle();
+
+      const dailySpendLimit = Number(childLimitRecord?.daily_spend_limit) || 50;
+
       const today = new Date().toISOString().split("T")[0];
       const { data: todaySpending } = await supabaseAdmin
         .from("ledger_entries")
@@ -268,11 +277,10 @@ Deno.serve(async (req) => {
         .gte("created_at", `${today}T00:00:00Z`);
 
       const dailyTotal = (todaySpending ?? []).reduce((sum, e) => sum + Number(e.amount), 0) + body.amount;
-      const DAILY_SPEND_LIMIT = 50;
 
-      if (dailyTotal > DAILY_SPEND_LIMIT) {
+      if (dailyTotal > dailySpendLimit) {
         return errorResponse("Limite diário de gastos excedido", 422, {
-          daily_limit: DAILY_SPEND_LIMIT,
+          daily_limit: dailySpendLimit,
           spent_today: dailyTotal - body.amount,
           requested: body.amount,
         });

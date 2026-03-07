@@ -10,6 +10,7 @@ export interface ChildWithBalance {
   avatar: string;
   balance: number;
   monthlyBudget: number;
+  dailySpendLimit: number;
 }
 
 export function useChildren() {
@@ -27,6 +28,7 @@ export function useChildren() {
           nickname,
           profile_id,
           monthly_budget,
+          daily_spend_limit,
           profiles!children_profile_id_fkey (
             id,
             display_name,
@@ -58,6 +60,7 @@ export function useChildren() {
         avatar: (c.profiles as any)?.avatar ?? '👧',
         balance: balanceMap.get(c.profile_id) ?? 0,
         monthlyBudget: Number(c.monthly_budget) || 0,
+        dailySpendLimit: Number(c.daily_spend_limit) || 50,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
@@ -72,6 +75,21 @@ export function useUpdateChildBudget() {
       const { error } = await supabase
         .from('children')
         .update({ monthly_budget: monthlyBudget } as any)
+        .eq('id', childId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
+  });
+}
+
+export function useUpdateChildDailyLimit() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ childId, dailySpendLimit }: { childId: string; dailySpendLimit: number }) => {
+      const { error } = await supabase
+        .from('children')
+        .update({ daily_spend_limit: dailySpendLimit } as any)
         .eq('id', childId);
       if (error) throw error;
     },

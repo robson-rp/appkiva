@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useChildren, useUpdateChildBudget } from '@/hooks/use-children';
+import { useChildren, useUpdateChildBudget, useUpdateChildDailyLimit } from '@/hooks/use-children';
 import { usePendingBudgetExceptions, useResolveBudgetException } from '@/hooks/use-budget-exceptions';
 import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,6 +30,7 @@ function generateCode() {
 export default function ParentChildren() {
   const { data: children = [], isLoading } = useChildren();
   const updateBudget = useUpdateChildBudget();
+  const updateDailyLimit = useUpdateChildDailyLimit();
   const { data: pendingExceptions = [] } = usePendingBudgetExceptions();
   const resolveException = useResolveBudgetException();
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
@@ -52,34 +53,38 @@ export default function ParentChildren() {
 
   // Budget edit dialog
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
-  const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number } | null>(null);
+  const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number; dailySpendLimit: number } | null>(null);
   const [budgetValue, setBudgetValue] = useState('');
+  const [dailyLimitValue, setDailyLimitValue] = useState('');
 
   const openBudgetDialog = (child: typeof budgetChild & {}) => {
     setBudgetChild(child);
     setBudgetValue(String(child.monthlyBudget || ''));
+    setDailyLimitValue(String(child.dailySpendLimit || 50));
     setBudgetDialogOpen(true);
   };
 
   const handleSaveBudget = async () => {
     if (!budgetChild) return;
-    const val = Number(budgetValue);
-    if (isNaN(val) || val < 0) return;
+    const monthlyVal = Number(budgetValue);
+    const dailyVal = Number(dailyLimitValue);
+    if (isNaN(monthlyVal) || monthlyVal < 0 || isNaN(dailyVal) || dailyVal < 0) return;
     try {
-      await updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: val });
-      toast({ title: 'Limite atualizado! 💰', description: `Limite de gasto mensal definido para ${val} 🪙.` });
+      await Promise.all([
+        updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: monthlyVal }),
+        updateDailyLimit.mutateAsync({ childId: budgetChild.childId, dailySpendLimit: dailyVal }),
+      ]);
+      toast({ title: 'Limites atualizados! 💰', description: `Mensal: ${monthlyVal} 🪙 · Diário: ${dailyVal} 🪙` });
       createNotification({
         profileId: budgetChild.profileId,
-        title: 'Limite de gasto atualizado 💰',
-        message: val > 0
-          ? `O teu limite de gasto mensal foi definido para ${val} 🪙.`
-          : 'O teu limite de gasto mensal foi removido.',
+        title: 'Limites de gasto atualizados 💰',
+        message: `Limite mensal: ${monthlyVal > 0 ? monthlyVal + ' KVC' : 'sem limite'} · Limite diário: ${dailyVal} KVC`,
         type: 'vault',
-        metadata: { monthlyBudget: val },
+        metadata: { monthlyBudget: monthlyVal, dailySpendLimit: dailyVal },
       });
       setBudgetDialogOpen(false);
     } catch {
-      toast({ title: 'Erro', description: 'Não foi possível atualizar o limite.', variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Não foi possível atualizar os limites.', variant: 'destructive' });
     }
   };
 
@@ -271,7 +276,7 @@ export default function ParentChildren() {
                     </div>
                     <div
                       className="bg-muted/50 rounded-2xl p-3.5 text-center cursor-pointer hover:bg-muted/80 transition-colors group/budget"
-                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
                         <Wallet className="h-3 w-3" /> Limite Mensal
@@ -290,7 +295,7 @@ export default function ParentChildren() {
                       variant="outline"
                       size="sm"
                       className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs sm:text-sm"
-                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget })}
+                      onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
                       <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
@@ -376,21 +381,22 @@ export default function ParentChildren() {
         </DialogContent>
       </Dialog>
 
-      {/* Budget Dialog */}
+      {/* Budget & Daily Limit Dialog */}
       <Dialog open={budgetDialogOpen} onOpenChange={setBudgetDialogOpen}>
         <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              Limite de Gasto Mensal
+              Limites de Gasto
             </DialogTitle>
             <DialogDescription>
-              Define quanto {budgetChild?.displayName} pode gastar por mês.
+              Define os limites de gasto de {budgetChild?.displayName}.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* Monthly limit */}
             <div className="space-y-2">
-              <Label>Limite mensal (KivaCoins)</Label>
+              <Label className="text-xs font-display font-bold">Limite mensal (KivaCoins)</Label>
               <Input
                 type="number"
                 placeholder="Ex: 500"
@@ -399,35 +405,68 @@ export default function ParentChildren() {
                 min={0}
                 className="rounded-xl text-lg font-display text-center"
               />
+              <div className="flex gap-2 flex-wrap justify-center">
+                {[100, 250, 500, 1000].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setBudgetValue(String(v))}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
+                      budgetValue === String(v)
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {v} 🪙
+                  </button>
+                ))}
+              </div>
               <p className="text-[10px] text-muted-foreground text-center">
-                Define 0 para remover o limite
+                Define 0 para remover o limite mensal
               </p>
             </div>
 
-            <div className="flex gap-2 flex-wrap justify-center">
-              {[100, 250, 500, 1000].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setBudgetValue(String(v))}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
-                    budgetValue === String(v)
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                  }`}
-                >
-                  {v} 🪙
-                </button>
-              ))}
+            <div className="h-px bg-border/50" />
+
+            {/* Daily limit */}
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">Limite diário (KivaCoins)</Label>
+              <Input
+                type="number"
+                placeholder="Ex: 50"
+                value={dailyLimitValue}
+                onChange={e => setDailyLimitValue(e.target.value)}
+                min={0}
+                className="rounded-xl text-lg font-display text-center"
+              />
+              <div className="flex gap-2 flex-wrap justify-center">
+                {[20, 50, 100, 200].map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setDailyLimitValue(String(v))}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-display font-bold transition-all ${
+                      dailyLimitValue === String(v)
+                        ? 'bg-secondary text-secondary-foreground shadow-sm'
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {v} 🪙
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                Máximo que pode gastar por dia em compras
+              </p>
             </div>
 
             <Button
               className="w-full rounded-xl font-display gap-2"
               onClick={handleSaveBudget}
-              disabled={updateBudget.isPending}
+              disabled={updateBudget.isPending || updateDailyLimit.isPending}
             >
               <Wallet className="h-4 w-4" />
-              {updateBudget.isPending ? 'A guardar...' : 'Guardar Limite'}
+              {(updateBudget.isPending || updateDailyLimit.isPending) ? 'A guardar...' : 'Guardar Limites'}
             </Button>
           </div>
         </DialogContent>
