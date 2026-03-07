@@ -109,7 +109,7 @@ export default function OnboardingStepManager() {
   const [selectedRole, setSelectedRole] = useState<string>('parent');
   const [editingStep, setEditingStep] = useState<StepRow | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true });
+  const [form, setForm] = useState<FormData>({ title: '', description: '', illustration_key: '', cta: '', is_active: true, visible_from: null, visible_until: null });
   const [previewKey, setPreviewKey] = useState<string | null>(null);
   const [duplicatingStep, setDuplicatingStep] = useState<StepRow | null>(null);
   const [dupTargetRoles, setDupTargetRoles] = useState<string[]>([]);
