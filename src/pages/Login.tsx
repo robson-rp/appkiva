@@ -386,11 +386,11 @@ export default function Login() {
                         key={role}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => {
+                      onClick={() => {
                           setSelectedRole(role);
                           setAuthMode('login');
-                          setEmail(cfg.testEmail);
-                          setPassword('Test1234!');
+                          setEmail('');
+                          setPassword('');
                           setContactMethod('email');
                         }}
                         className={`w-full p-3 sm:p-4 rounded-2xl border-2 border-border bg-card hover:shadow-md transition-all text-left flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4 group ${cfg.bgClass.split(' ').pop()}`}
