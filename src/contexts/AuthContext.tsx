@@ -83,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (event, newSession) => {
         setSession(newSession);
         if (newSession?.user) {
+          setLoading(true);
           // Use setTimeout to avoid potential deadlocks with Supabase client
           setTimeout(async () => {
             const kivaraUser = await fetchKivaraUser(newSession.user);
