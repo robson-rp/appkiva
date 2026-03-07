@@ -67,13 +67,44 @@ const queryClient = new QueryClient();
 function AppRoutes() {
   const { user, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {loading ? (
+        <motion.div
+          key="loader"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.25 }}
+          className="min-h-screen flex items-center justify-center"
+        >
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </motion.div>
+      ) : !user ? (
+        <motion.div
+          key="login"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </motion.div>
+      ) : (
+        <motion.div
+          key={`dashboard-${user.role}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          {renderRoutes(user)}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   if (!user) {
     return (
