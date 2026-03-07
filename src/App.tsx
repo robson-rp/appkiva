@@ -190,6 +190,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teen" element={<TeenLayout><S><TeenDashboard /></S></TeenLayout>} />
         <Route path="/teen/wallet" element={<TeenLayout><S><TeenWallet /></S></TeenLayout>} />
         <Route path="/teen/missions" element={<TeenLayout><S><TeenMissions /></S></TeenLayout>} />
+        <Route path="/teen/tasks" element={<TeenLayout><S><TeenTasks /></S></TeenLayout>} />
         <Route path="/teen/vaults" element={<TeenLayout><S><TeenVaults /></S></TeenLayout>} />
         <Route path="/teen/analytics" element={<TeenLayout><S><TeenAnalytics /></S></TeenLayout>} />
         <Route path="/teen/learn" element={<TeenLayout><S><LearnPage /></S></TeenLayout>} />
