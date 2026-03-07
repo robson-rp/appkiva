@@ -10,6 +10,7 @@ import { useLessons } from '@/hooks/use-lessons';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LearnPage() {
+  const { data: lessons = [], isLoading } = useLessons();
   const [activeLesson, setActiveLesson] = useState<MicroLesson | null>(null);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [earnedPoints, setEarnedPoints] = useState(0);
