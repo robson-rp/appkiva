@@ -248,7 +248,11 @@ export default function ParentDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-display font-bold text-base">{child.displayName}</p>
-                      <CurrencyDisplay amount={child.balance} size="sm" className="text-muted-foreground" />
+                      <p className="text-small text-muted-foreground">
+                        {child.dateOfBirth
+                          ? `${differenceInYears(new Date(), new Date(child.dateOfBirth))} anos`
+                          : <CurrencyDisplay amount={child.balance} size="sm" className="text-muted-foreground" />}
+                      </p>
                     </div>
                     <CurrencyDisplay amount={child.balance} size="sm" />
                   </motion.div>
