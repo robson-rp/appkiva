@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings, Crown } from 'lucide-react';
+import { ReactNode, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Users, Trophy, BarChart3, LogOut, Settings, Crown, MoreHorizontal } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 const navItems = [
   { title: 'Dashboard', url: '/partner', icon: LayoutDashboard },
@@ -23,11 +24,15 @@ const navItems = [
   { title: 'Perfil', url: '/partner/profile', icon: Settings },
 ];
 
-const mobileNavItems = [
+const mobileFixedItems = [
   { title: 'Dashboard', url: '/partner', icon: LayoutDashboard },
   { title: 'Programas', url: '/partner/programs', icon: Users },
   { title: 'Desafios', url: '/partner/challenges', icon: Trophy },
   { title: 'Relatórios', url: '/partner/reports', icon: BarChart3 },
+];
+
+const mobileMoreItems = [
+  { title: 'Subscrição', url: '/partner/subscription', icon: Crown },
   { title: 'Perfil', url: '/partner/profile', icon: Settings },
 ];
 
@@ -102,8 +107,14 @@ function PartnerSidebar() {
 
 export function PartnerLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { logout } = useAuth();
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const isMoreRouteActive = mobileMoreItems.some((item) =>
+    location.pathname === item.url || location.pathname.startsWith(item.url + '/')
+  );
 
   return (
     <SidebarProvider>
@@ -147,7 +158,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
             <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
               <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
               <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
-                {mobileNavItems.map((item) => {
+                {mobileFixedItems.map((item) => {
                   const isActive = item.url === '/partner'
                     ? location.pathname === '/partner'
                     : location.pathname.startsWith(item.url);
@@ -176,9 +187,59 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
                     </NavLink>
                   );
                 })}
+
+                {/* More button */}
+                <button
+                  onClick={() => setMoreOpen(true)}
+                  className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
+                  aria-label="Mais opções"
+                >
+                  <div className={`relative p-2 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
+                    <MoreHorizontal className="h-6 w-6 relative z-10" />
+                  </div>
+                  <span className="text-caption mt-0.5 font-semibold">Mais</span>
+                  {isMoreRouteActive && (
+                    <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                  )}
+                </button>
               </div>
             </nav>
           )}
+
+          {/* More Menu Sheet */}
+          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+            <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
+              <SheetHeader className="pb-2">
+                <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+              </SheetHeader>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-3 gap-3 pt-2"
+              >
+                {mobileMoreItems.map((item) => {
+                  const isActive = location.pathname === item.url || location.pathname.startsWith(item.url + '/');
+
+                  return (
+                    <button
+                      key={item.title}
+                      onClick={() => {
+                        setMoreOpen(false);
+                        navigate(item.url);
+                      }}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-200 active:scale-95 ${isActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/60'}`}
+                    >
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${isActive ? 'bg-primary/15' : 'bg-muted/80'}`}>
+                        <item.icon className="h-6 w-6" />
+                      </div>
+                      <span className="text-xs font-semibold">{item.title}</span>
+                    </button>
+                  );
+                })}
+              </motion.div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
       <OnboardingWalkthrough />
