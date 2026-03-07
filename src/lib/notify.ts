@@ -23,7 +23,8 @@ interface NotifPayload {
   metadata?: Record<string, any>;
 }
 
-async function send(payload: NotifPayload) {
+/** Low-level send — prefer typed helpers below */
+export async function send(payload: NotifPayload) {
   const { error } = await supabase.from('notifications').insert({
     profile_id: payload.profileId,
     title: payload.title,
@@ -31,6 +32,26 @@ async function send(payload: NotifPayload) {
     type: payload.type,
     urgent: payload.urgent ?? false,
     metadata: payload.metadata ?? {},
+  });
+  if (error) console.error('[notify]', error.message);
+}
+
+/** createNotification for backward compat (accepts type as string) */
+export async function createNotification(input: {
+  profileId: string;
+  title: string;
+  message: string;
+  type: string;
+  urgent?: boolean;
+  metadata?: Record<string, any>;
+}) {
+  const { error } = await supabase.from('notifications').insert({
+    profile_id: input.profileId,
+    title: input.title,
+    message: input.message,
+    type: input.type,
+    urgent: input.urgent ?? false,
+    metadata: input.metadata ?? {},
   });
   if (error) console.error('[notify]', error.message);
 }

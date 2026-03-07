@@ -76,7 +76,7 @@ export function useCompleteTask() {
       if (error) throw error;
 
       // Notify parent about task completion
-      const childName = user?.displayName ?? 'O teu filho';
+      const childName = user?.name ?? 'O teu filho';
       await notifyTaskCompleted(task.parent_profile_id, childName, task.title, taskId);
     },
     onSuccess: () => {
