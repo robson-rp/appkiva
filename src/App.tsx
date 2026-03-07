@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import Install from "./pages/Install";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
+import { OfflineBanner } from "./components/OfflineBanner";
 import ParentDashboard from "./pages/parent/ParentDashboard";
 import ParentChildren from "./pages/parent/ParentChildren";
 import ParentTasks from "./pages/parent/ParentTasks";
@@ -233,6 +234,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <OfflineBanner />
             <AppRoutes />
           </AuthProvider>
         </BrowserRouter>
