@@ -69,6 +69,7 @@ export function useOnboarding() {
     steps,
     isLoading,
     nextStep,
+    prevStep,
     skipWalkthrough,
     resetWalkthrough,
   };
