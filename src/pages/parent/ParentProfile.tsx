@@ -211,8 +211,8 @@ export default function ParentProfile() {
 
       {/* Save */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <Button onClick={handleSave} className="w-full rounded-xl font-display h-12 text-base gap-2">
-          <Save className="h-4 w-4" /> Guardar Alterações
+        <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
+          <Save className="h-4 w-4" /> {saving ? 'A guardar...' : 'Guardar Alterações'}
         </Button>
       </motion.div>
     </div>
