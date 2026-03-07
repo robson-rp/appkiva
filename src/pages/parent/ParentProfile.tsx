@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { getCurrencyByCountry } from '@/data/countries-currencies';
-import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe } from 'lucide-react';
+import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
@@ -31,28 +31,44 @@ export default function ParentProfile() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [country, setCountry] = useState('AO');
   const [gender, setGender] = useState('');
+  const [schoolTenantId, setSchoolTenantId] = useState('');
+  const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
-  // Load current country and gender from profile
+  // Load current country, gender and school from profile
   useEffect(() => {
     if (!user?.id) return;
     supabase
       .from('profiles')
-      .select('country, gender')
+      .select('country, gender, school_tenant_id')
       .eq('user_id', user.id)
       .single()
       .then(({ data }) => {
         if (data?.country) setCountry(data.country);
-        if ((data as any)?.gender) setGender((data as any).gender);
+        if (data?.gender) setGender(data.gender);
+        if (data?.school_tenant_id) setSchoolTenantId(data.school_tenant_id);
       });
   }, [user?.id]);
+
+  // Load available schools
+  useEffect(() => {
+    supabase
+      .from('tenants')
+      .select('id, name')
+      .eq('tenant_type', 'school')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (data) setSchools(data);
+      });
+  }, []);
 
   const handleSave = async () => {
     if (!user?.profileId) return;
     setSaving(true);
+    const updatedSchool = schoolTenantId && schoolTenantId !== 'none' ? schoolTenantId : null;
     const { error } = await supabase
       .from('profiles')
-      .update({ country, gender } as any)
+      .update({ country, gender, school_tenant_id: updatedSchool })
       .eq('id', user.profileId);
 
     // Also update the tenant's currency to keep household in sync
@@ -210,6 +226,26 @@ export default function ParentProfile() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /> Escola dos filhos
+              </Label>
+              <Select value={schoolTenantId || 'none'} onValueChange={setSchoolTenantId}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar escola" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhuma (editar depois)</SelectItem>
+                  {schools.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Associa a escola dos teus filhos quando estiver disponível.</p>
             </div>
           </CardContent>
         </Card>

@@ -157,7 +157,7 @@ export default function Login() {
                   phone: phoneWithPrefix,
                   institution_name: selectedRole === 'partner' ? displayName : undefined,
                   sector: sector || undefined,
-                  school_tenant_id: schoolTenantId || undefined,
+                  school_tenant_id: (schoolTenantId && schoolTenantId !== 'other') ? schoolTenantId : undefined,
                   avatar: selectedRole === 'parent' ? '👩' : selectedRole === 'teacher' ? '👨‍🏫' : selectedRole === 'teen' ? '🧑‍💻' : selectedRole === 'admin' ? '🛡️' : selectedRole === 'partner' ? '🏢' : '🦊',
                 },
               },
@@ -211,7 +211,7 @@ export default function Login() {
               phone: phone ? phoneWithPrefix : undefined,
               institution_name: selectedRole === 'partner' ? displayName : undefined,
               sector: sector || undefined,
-              school_tenant_id: schoolTenantId || undefined,
+              school_tenant_id: (schoolTenantId && schoolTenantId !== 'other') ? schoolTenantId : undefined,
               invite_code: inviteCode || undefined,
             }
           );
@@ -498,21 +498,21 @@ export default function Login() {
                           {selectedRole === 'parent' && (
                             <div className="space-y-2">
                               <Label className="font-semibold">Escola dos filhos <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                              {schools.length === 0 ? (
-                                <p className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-xl">
-                                  Nenhuma escola registada de momento.
+                              <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
+                                <SelectTrigger className="h-12 rounded-xl text-base">
+                                  <SelectValue placeholder="Selecionar escola (opcional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {schools.map(s => (
+                                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                  ))}
+                                  <SelectItem value="other">Outra (editar depois)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              {schoolTenantId === 'other' && (
+                                <p className="text-xs text-muted-foreground">
+                                  Podes associar a escola mais tarde no teu perfil.
                                 </p>
-                              ) : (
-                                <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
-                                  <SelectTrigger className="h-12 rounded-xl text-base">
-                                    <SelectValue placeholder="Selecionar escola (opcional)" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {schools.map(s => (
-                                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
                               )}
                             </div>
                           )}
