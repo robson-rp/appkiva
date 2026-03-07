@@ -50,6 +50,7 @@ import AdminCurrencies from "./pages/admin/AdminCurrencies";
 import AdminAudit from "./pages/admin/AdminAudit";
 import AdminRisk from "./pages/admin/AdminRisk";
 import AdminCompliance from "./pages/admin/AdminCompliance";
+import AdminSchools from "./pages/admin/AdminSchools";
 import PartnerDashboard from "./pages/partner/PartnerDashboard";
 import PartnerPrograms from "./pages/partner/PartnerPrograms";
 import PartnerChallenges from "./pages/partner/PartnerChallenges";
@@ -88,6 +89,7 @@ function AppRoutes() {
         <Route path="/admin/audit" element={<AdminLayout><AdminAudit /></AdminLayout>} />
         <Route path="/admin/risk" element={<AdminLayout><AdminRisk /></AdminLayout>} />
         <Route path="/admin/compliance" element={<AdminLayout><AdminCompliance /></AdminLayout>} />
+        <Route path="/admin/schools" element={<AdminLayout><AdminSchools /></AdminLayout>} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );

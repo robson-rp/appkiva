@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
@@ -16,6 +16,7 @@ import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 const navItems = [
   { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
   { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
+  { title: 'Escolas', url: '/admin/schools', icon: School },
   { title: 'Subscrições', url: '/admin/subscriptions', icon: CreditCard },
   { title: 'Moedas', url: '/admin/currencies', icon: Globe },
   { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
