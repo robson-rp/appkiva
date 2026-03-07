@@ -30,8 +30,12 @@ export default function ChildDreams() {
   const { allowed: dreamVaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.DREAM_VAULTS);
   const { data: dbDreams, isLoading } = useDreamVaults(user?.profileId);
   const createDream = useCreateDreamVault();
+  const depositToDream = useDepositToDream();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [depositDialogOpen, setDepositDialogOpen] = useState(false);
+  const [depositDreamId, setDepositDreamId] = useState<string | null>(null);
+  const [depositAmount, setDepositAmount] = useState('');
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newTarget, setNewTarget] = useState('');
