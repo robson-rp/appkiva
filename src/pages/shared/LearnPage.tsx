@@ -90,14 +90,14 @@ export default function LearnPage() {
           ))}
         </TabsList>
 
-        <TabsContent value="all" className="mt-4 space-y-3">
+        <TabsContent value="all" className="mt-4 grid grid-cols-2 gap-3">
           {lessons.map((lesson, i) => (
             <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
           ))}
         </TabsContent>
 
         {categories.map(([key]) => (
-          <TabsContent key={key} value={key} className="mt-4 space-y-3">
+          <TabsContent key={key} value={key} className="mt-4 grid grid-cols-2 gap-3">
             {lessons.filter(l => l.category === key).map((lesson, i) => (
               <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} onStart={() => setActiveLesson(lesson)} />
             ))}
