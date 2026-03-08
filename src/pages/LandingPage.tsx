@@ -224,13 +224,11 @@ function Hero() {
             viewport={{ once: true }}
             className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight text-foreground"
           >
-            <StaggerWords text="Ensinar crianças a" />
+            <StaggerWords text="Pequenos hábitos." />
             <br />
             <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease_infinite]">
-              <StaggerWords text="dominar o dinheiro" />
+              <StaggerWords text="Grandes futuros." />
             </span>
-            <br />
-            <StaggerWords text="desde cedo" />
           </motion.h1>
 
           <motion.p variants={fadeUp} className="mt-5 text-body md:text-body-lg text-muted-foreground max-w-lg">
