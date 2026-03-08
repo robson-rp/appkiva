@@ -822,34 +822,34 @@ function TrustSection() {
     <Section className="!bg-foreground !text-background">
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center1 min-[420px]:grid-cols-">
         <div>
-          <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-1 min-[420px]:grid-cols-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
+          <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
             Segurança
           </motion.div>
-          1 min-[420px]:grid-cols-<motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance 1 min-[420px]:grid-cols-leading-[1.1]">
+          <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
             Criado para ser seguro
           </motion.h2>
-          <motion.p variants={fadeUp} cl1 min-[420px]:grid-cols-assName="opacity-60 mb-8 text-lg text-balance">
-            KIVARA foi concebida com segurança e privacidade como1 min-[420px]:grid-cols- prioridade máxima.
+          <motion.p variants={fadeUp} className="opacity-60 mb-8 text-lg text-balance">
+            KIVARA foi concebida com segurança e privacidade como prioridade máxima.
           </motion.p>
-          <motion.div variants={staggerFast} className="grid grid-cols-2 gap-3">
+          <motion.div variants={staggerFast} className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
             {points.map((p, i) => (
               <motion.div
                 key={i}
                 variants={fadeUp}
                 whileHover={{ y: -4, boxShadow: "0 12px 30px -8px hsl(var(--secondary) / 0.3)" }}
-                className="bg-background/[0.06] rounded-2xl p-5 flex flex-col items-center text-center gap-3 transition-all border border-background/[0.08] groupsm sm:max-w-md md:max-w-"
+                className="bg-background/[0.06] rounded-2xl p-5 flex flex-col items-center text-center gap-3 transition-all border border-background/[0.08] group"
               >
                 <div className="rounded-full p-2.5 bg-background/10 transition-transform group-hover:scale-110">
-       sm sm:max-w-md md:max-w-           <AnimatedIcon icon={p.icon} animation={p.anim} className="w-5 h-5" />
+                  <AnimatedIcon icon={p.icon} animation={p.anim} className="w-5 h-5" />
                 </div>
-                <span className="fsm sm:max-w-md md:max-w-ont-display text-sm font-semibold">{p.text}</span>
+                <span className="font-display text-sm font-semibold">{p.text}</span>
               </motion.div>
             ))}
           </motion.div>
         </div>
-    sm sm:max-w-md md:max-w-    <motion.div variants={fadeUp} className="flex justify-center relative">
-          <div className="absolute inset-0 rounded-full bg-secsm sm:max-w-md md:max-w-ondary/15 blur-3xl scale-75 pointer-events-none" />
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-xl opacity-90 relative z-10 drop-shadow-2xl" />
+        <motion.div variants={fadeUp} className="flex justify-center relative">
+          <div className="absolute inset-0 rounded-full bg-secondary/15 blur-3xl scale-75 pointer-events-none" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-sm sm:max-w-md md:max-w-xl opacity-90 relative z-10 drop-shadow-2xl" />
         </motion.div>
       </div>
     </Section>
