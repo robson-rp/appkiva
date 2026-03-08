@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import PricingSection from "@/components/PricingSection";
 
 /* ─── animation variants ─── */
 const easeOut = [0.22, 1, 0.36, 1] as const;
