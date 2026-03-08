@@ -422,14 +422,24 @@ function Hero() {
         </div>
       </div>
 
-      {/* Slide indicators — sliding line */}
+      {/* Slide indicators — sliding line with progress */}
       <div className="relative z-10 pb-2 md:pb-3 px-5 sm:px-8">
         <div className="relative h-[1.5px] mx-12 rounded-full bg-muted-foreground/8">
+          {/* Background segment (position indicator) */}
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
+            className="absolute inset-y-0 left-0 rounded-full bg-primary/20 transition-[left] duration-500 ease-out"
             style={{
               width: `${100 / HERO_SLIDES.length}%`,
               left: `${(selectedIndex / HERO_SLIDES.length) * 100}%`,
+            }}
+          />
+          {/* Progress fill within active segment */}
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary/50"
+            style={{
+              width: `${(progress * 100) / HERO_SLIDES.length}%`,
+              left: `${(selectedIndex / HERO_SLIDES.length) * 100}%`,
+              transition: progress === 0 ? 'left 0.5s ease-out, width 0.1s' : 'none',
             }}
           />
         </div>
