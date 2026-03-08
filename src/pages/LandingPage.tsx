@@ -958,7 +958,7 @@ function Footer() {
       <div className="mx-auto max-w-6xl relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
-            <img src={kivaraLogoWhite} alt="KIVARA" className="h-9 opacity-90 mb-4 drop-shadow-lg" />
+            <img src={kivaraLogoWhite} alt="KIVARA" className="h-11 md:h-14 opacity-90 mb-4 drop-shadow-lg" />
             <p className="text-caption opacity-60">Educação financeira gamificada para crianças e famílias.</p>
           </div>
           <div>
