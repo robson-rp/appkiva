@@ -46,10 +46,10 @@ export default function TeenDashboard() {
     .slice(0, 4) as [string, number][];
 
   const stats = [
-    { label: 'Saldo', value: `${teen.balance} 🪙`, icon: Wallet, color: 'text-primary' },
-    { label: 'Orçamento', value: `${Math.round(budgetUsed)}% usado`, icon: Target, color: budgetUsed > 80 ? 'text-destructive' : 'text-chart-3' },
-    { label: 'Poupado', value: `${totalSaved} 🪙`, icon: PiggyBank, color: 'text-chart-3' },
-    { label: 'Gasto', value: `${totalSpent} 🪙`, icon: TrendingUp, color: 'text-chart-1' },
+    { label: t('common.balance'), value: `${teen.balance} 🪙`, icon: Wallet, color: 'text-primary' },
+    { label: t('teen.wallet.title'), value: `${Math.round(budgetUsed)}%`, icon: Target, color: budgetUsed > 80 ? 'text-destructive' : 'text-chart-3' },
+    { label: t('tx.vault_deposit'), value: `${totalSaved} 🪙`, icon: PiggyBank, color: 'text-chart-3' },
+    { label: t('tx.purchase'), value: `${totalSpent} 🪙`, icon: TrendingUp, color: 'text-chart-1' },
   ];
 
   return (
