@@ -1,128 +1,70 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Tradução Completa da Plataforma + Vinculação da Moeda ao Back Office
 
-## Current State Assessment
+## Dimensão do Problema
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+A plataforma tem **~55 ficheiros** com strings hardcoded em português (35 páginas + 20 componentes), totalizando **~900+ strings** a traduzir. Os dicionários atuais têm apenas ~60 chaves cada (landing page e perfis).
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+## Estratégia
 
-## What Lovable Can and Cannot Build
+### Fase 1 — Expandir os dicionários (pt.ts / en.ts)
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+Organizar por domínio, cobrindo **todas** as áreas da plataforma:
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+| Domínio | Exemplos de chaves | Estimativa |
+|---------|-------------------|------------|
+| `nav.*` | Menus de navegação (Parent, Child, Teen, Teacher, Partner, Admin layouts) | ~40 chaves |
+| `landing.*` | Todas as secções da LandingPage (Hero slides, Problem, Solution, HowItWorks, Universe, Benefits, Gamification, Trust, Social, Footer) | ~120 chaves |
+| `parent.*` | Dashboard, Children, Tasks, Allowance, Vaults, Rewards, Reports, Consent, Support | ~100 chaves |
+| `child.*` | Dashboard, Tasks, Missions, Wallet, Vaults, Dreams, Store, Diary, Achievements, Profile | ~80 chaves |
+| `teen.*` | Dashboard, Wallet, Tasks, Missions, Vaults, Analytics, Profile | ~60 chaves |
+| `teacher.*` | Dashboard, Classes, Challenges, SchoolProfile | ~40 chaves |
+| `partner.*` | Dashboard, Programs, Challenges, Reports, Profile | ~50 chaves |
+| `admin.*` | Dashboard, Users, Tenants, Finance, Subscriptions, etc. | ~80 chaves |
+| `common.*` | Botões (Guardar, Cancelar, Eliminar), estados (A carregar, Erro), labels genéricos | ~50 chaves |
+| `auth.*` | Login, Signup, esqueci palavra-passe | ~20 chaves |
+| `notifications.*` | Tipos de notificação, templates | ~20 chaves |
 
-## Implementation Plan (4 Phases)
+**Total estimado: ~660 chaves** em cada dicionário.
 
-### Phase 1 — Multi-Tenant Foundation
+### Fase 2 — Aplicar `t()` em todos os ficheiros
 
-**Database migrations:**
+Substituir cada string hardcoded por `t('chave.correspondente')`. Ficheiros a alterar:
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+- **Landing**: `LandingPage.tsx` (Hero slides, todas as secções inline)
+- **Layouts**: `ParentLayout.tsx`, `ChildLayout.tsx`, `TeenLayout.tsx`, `TeacherLayout.tsx`, `PartnerLayout.tsx`, `AdminLayout.tsx`
+- **Páginas Parent**: `ParentDashboard.tsx`, `ParentChildren.tsx`, `ParentTasks.tsx`, `ParentAllowance.tsx`, `ParentVaults.tsx`, `ParentRewards.tsx`, `ParentReports.tsx`, `ParentConsent.tsx`, `ParentSupport.tsx`, `ParentSubscription.tsx`, `ParentProfile.tsx`
+- **Páginas Child**: `ChildDashboard.tsx`, `ChildTasks.tsx`, `ChildMissions.tsx`, `ChildWallet.tsx`, `ChildVaults.tsx`, `ChildDreams.tsx`, `ChildStore.tsx`, `ChildDiary.tsx`, `ChildAchievements.tsx`, `ChildProfile.tsx`
+- **Páginas Teen**: `TeenDashboard.tsx`, `TeenWallet.tsx`, `TeenTasks.tsx`, `TeenMissions.tsx`, `TeenVaults.tsx`, `TeenAnalytics.tsx`, `TeenProfile.tsx`
+- **Páginas Teacher/Partner/Admin**: Todas as restantes
+- **Componentes partilhados**: `SendAllowanceDialog.tsx`, `EditChildDialog.tsx`, `PaymentSimulator.tsx`, `PlanSummaryWidget.tsx`, `StreakWidget.tsx`, `WeeklyChallenges.tsx`, `DailyMissionCard.tsx`, `OnboardingWalkthrough.tsx`, `LessonViewer.tsx`, `NotificationDropdown.tsx`, `UpgradePrompt.tsx`, etc.
+- **Auth**: `Login.tsx`
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+### Fase 3 — Vincular moeda ao Back Office
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+Atualmente o `PricingSection` usa um seletor de moeda local (state `currency`). O `CurrencyDisplay` já se vincula ao tenant via `useTenantCurrency()`.
 
-4. Expand `app_role` enum to include `admin`
+**Alteração**: Unificar a lógica de moeda:
+1. Na **landing page** (visitante não autenticado): manter o seletor manual de moeda — funciona com `currency_exchange_rates` e `tier_regional_prices` geridos no Back Office (Admin → Currencies e Admin → Subscriptions)
+2. Na **plataforma** (utilizador autenticado): a moeda vem do **tenant** (`tenants.currency`), que é definido pelo admin no Back Office. Quando o utilizador muda a moeda no perfil, chama `update_tenant_currency()` (já existe). Isto garante que preços e valores reais são sempre consistentes com o que o admin configurou nas tabelas `supported_currencies` e `currency_exchange_rates`.
+3. Garantir que o `ParentSubscription.tsx` usa a mesma moeda do tenant (já faz via `CurrencyDisplay`) e que os preços regionais (`tier_regional_prices`) são respeitados.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+**Nenhuma migração DB necessária** — as tabelas e funções já existem.
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+## Ficheiros
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+### Novos/Reescritos
+| Ficheiro | Descrição |
+|----------|-----------|
+| `src/i18n/pt.ts` | Expandir de ~60 para ~660 chaves |
+| `src/i18n/en.ts` | Expandir de ~60 para ~660 chaves |
 
-**Database:**
+### Alterados (~55 ficheiros)
+Todos os ficheiros de páginas e componentes listados acima para substituir strings hardcoded por chamadas `t()`.
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+## Observações
+- As strings do admin podem permanecer em PT numa primeira fase (administradores são internos)
+- Os dados dinâmicos (nomes de lições, notificações, etc.) vêm da DB e não são traduzidos pelo i18n — isso requer uma coluna `locale` nas tabelas de conteúdo, que está fora do scope atual
+- A moeda na plataforma já está vinculada ao Back Office via `useTenantCurrency()` → `tenants.currency` → `supported_currencies`; na landing usa conversão dinâmica via `currency_exchange_rates`
 
