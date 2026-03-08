@@ -169,7 +169,7 @@ export default function ChildWallet() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="font-display flex items-center gap-2">
-                      <Heart className="h-5 w-5 text-destructive" /> Fazer uma Doação
+                      <Heart className="h-5 w-5 text-destructive" /> {t('child.wallet.make_donation')}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
