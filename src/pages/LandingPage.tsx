@@ -185,17 +185,18 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-16">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-18 md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="relative text-base font-semibold text-muted-foreground hover:text-foreground transition-colors tracking-wide
+                after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-0 after:rounded-full after:bg-primary after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.label}
             </a>
@@ -203,10 +204,10 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" asChild>
             <Link to="/login">Entrar</Link>
           </Button>
-          <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shimmer" asChild>
+          <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shimmer" asChild>
             <Link to="/login">Criar conta</Link>
           </Button>
         </div>
@@ -224,18 +225,25 @@ function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden bg-background/95 backdrop-blur-2xl border-b border-border px-5 pb-4 space-y-3"
+          className="md:hidden bg-background/95 backdrop-blur-2xl border-b border-border px-5 pb-5 pt-2"
         >
-          {navLinks.map((link) => (
-            <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-base font-medium text-muted-foreground py-2">
+          {navLinks.map((link, i) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center text-lg font-semibold text-foreground/80 hover:text-foreground py-3 transition-colors ${
+                i < navLinks.length - 1 ? "border-b border-border/30" : ""
+              }`}
+            >
               {link.label}
             </a>
           ))}
-          <div className="flex gap-3 pt-2">
-            <Button variant="outline" size="sm" className="flex-1" asChild>
+          <div className="flex gap-3 pt-4">
+            <Button variant="outline" size="lg" className="flex-1" asChild>
               <Link to="/login">Entrar</Link>
             </Button>
-            <Button size="sm" className="flex-1 bg-secondary text-secondary-foreground" asChild>
+            <Button size="lg" className="flex-1 bg-secondary text-secondary-foreground" asChild>
               <Link to="/login">Criar conta</Link>
             </Button>
           </div>
