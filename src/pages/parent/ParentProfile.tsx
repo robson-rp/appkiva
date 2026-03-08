@@ -24,6 +24,7 @@ const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '�
 export default function ParentProfile() {
   const { tierName } = useAllFeatures();
   const { user } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
