@@ -180,6 +180,23 @@ export default function PartnerProfile() {
               </Select>
               <p className="text-xs text-muted-foreground">A moeda dos relatórios e investimentos será ajustada automaticamente.</p>
             </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardContent>
         </Card>
       </motion.div>

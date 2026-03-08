@@ -80,6 +80,7 @@ export default function ParentProfile() {
         country,
         gender: gender || null,
         school_tenant_id: updatedSchool,
+        language: locale,
       })
       .eq('id', user.profileId);
 

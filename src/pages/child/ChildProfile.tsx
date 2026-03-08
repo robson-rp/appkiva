@@ -103,10 +103,28 @@ export default function ChildProfile() {
         </motion.div>
       )}
 
-      {/* Info */}
+      {/* Preferences */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardContent className="p-5 space-y-3">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Languages className="h-4 w-4 text-primary" />
+              <h2 className="font-display font-semibold">{t('profile.preferences')}</h2>
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-sm text-muted-foreground">O teu nome e outros dados são geridos pelo teu encarregado. Aqui podes personalizar o teu avatar!</p>
           </CardContent>
         </Card>
