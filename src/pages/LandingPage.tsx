@@ -710,7 +710,7 @@ function SchoolBenefits() {
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section id="escolas" className="bg-muted/40">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div>
             <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
               Para escolas
