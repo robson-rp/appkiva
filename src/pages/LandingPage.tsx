@@ -740,16 +740,16 @@ function SchoolBenefits() {
                   className="flex items-center gap-4 bg-card/80 backdrop-blur-sm rounded-2xl border border-border/60 p-3.5 transition-all group"
                 >
                   <div className={`${item.bg} rounded-xl p-2 shrink-0 transition-transform group-hover:scale-110`}>
-                    <item.icon classm sm:max-w-md md:max-w-sName={`w-5 h-5 ${item.color}`} />
+                    <item.icon className={`w-5 h-5 ${item.color}`} />
                   </div>
-      sm sm:max-w-md md:max-w-            <p className="text-base text-foreground font-medium flsm sm:max-w-md md:max-w-ex-1">{item.text}</p>
+                  <p className="text-base text-foreground font-medium flex-1">{item.text}</p>
                 </motion.div>
-              sm sm:max-w-md md:max-w-))}
+              ))}
             </motion.div>
           </div>
-          <motion.dsm sm:max-w-md md:max-w-iv variants={fadeUp} className="flex justify-center relative">
-   sm sm:max-w-md md:max-w-         <div className="absolute inset-0 rounded-full bg-accent/8sm sm:max-w-md md:max-w- blur-3xl scale-75 pointer-events-none" />
-            <img src={ssm sm:max-w-md md:max-w-choolBenefit} alt="Sala de aula africana" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+          <motion.div variants={fadeUp} className="flex justify-center relative">
+            <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
+            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
       </Section>
