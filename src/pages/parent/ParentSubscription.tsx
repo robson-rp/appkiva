@@ -15,25 +15,16 @@ import { cn } from '@/lib/utils';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
 import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
 import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
+import { useT } from '@/contexts/LanguageContext';
 
-// Only family-relevant features for parent subscription page
-const FEATURE_LABELS: Record<string, string> = {
-  basic_wallet: 'Carteira Básica',
-  basic_tasks: 'Tarefas Básicas',
-  savings_vaults: 'Cofres de Poupança',
-  dream_vaults: 'Cofres de Sonhos',
-  custom_rewards: 'Recompensas',
-  budget_exceptions: 'Exceções de Orçamento',
-  multi_child: 'Multi-Criança',
-  advanced_analytics: 'Relatórios Avançados',
-  export_reports: 'Exportar Relatórios',
-  real_money_wallet: 'Carteira Dinheiro Real',
-  priority_support: 'Suporte Prioritário',
-};
-
-const ALL_FEATURES = Object.keys(FEATURE_LABELS);
+const FEATURE_KEYS = [
+  'basic_wallet', 'basic_tasks', 'savings_vaults', 'dream_vaults',
+  'custom_rewards', 'budget_exceptions', 'multi_child',
+  'advanced_analytics', 'export_reports', 'real_money_wallet', 'priority_support',
+];
 
 export default function ParentSubscription() {
+  const t = useT();
   const { enabledFeatures, tierName, loading: gateLoading } = useAllFeatures();
   const { data: tiers = [], isLoading: tiersLoading } = useSubscriptionTiers();
   const { upgrade, loading: upgradeLoading } = useUpgradeSubscription();
@@ -79,21 +70,21 @@ export default function ParentSubscription() {
                   <Crown className="h-7 w-7" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
+                  <p className="text-xs uppercase tracking-widest opacity-70">{t('parent.subscription.title')}</p>
                   <h1 className="font-display text-2xl font-bold">
-                    {gateLoading ? '...' : tierName ?? 'Gratuito'}
+                    {gateLoading ? '...' : tierName ?? t('pricing.free')}
                   </h1>
                   {currentTier && (
                     <p className="text-sm opacity-80 mt-0.5">
                       {currentTier.priceMonthly > 0
-                        ? `${fmtP(currentTier.id, currentTier.priceMonthly)}/mês`
-                        : 'Gratuito'}
+                        ? `${fmtP(currentTier.id, currentTier.priceMonthly)}${t('pricing.per_month')}`
+                        : t('pricing.free')}
                     </p>
                   )}
                 </div>
               </div>
               <Badge className="bg-white/20 text-white border-0 font-display">
-                <Shield className="h-3 w-3 mr-1" /> Activo
+                <Shield className="h-3 w-3 mr-1" /> ✓
               </Badge>
             </div>
           </CardContent>
@@ -106,41 +97,21 @@ export default function ParentSubscription() {
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles className="h-4 w-4 text-primary" />
-              <h2 className="font-display font-semibold">Funcionalidades incluídas</h2>
+              <h2 className="font-display font-semibold">{t('common.more_features')}</h2>
             </div>
-
             <div className="grid gap-2">
-              {ALL_FEATURES.map((feature) => {
+              {FEATURE_KEYS.map((feature) => {
                 const included = enabledFeatures.includes(feature);
                 return (
-                  <div
-                    key={feature}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors',
-                      included ? 'bg-primary/5' : 'bg-muted/30 opacity-50'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'w-6 h-6 rounded-lg flex items-center justify-center shrink-0',
-                        included
-                          ? 'bg-primary/15 text-primary'
-                          : 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {included ? (
-                        <Check className="h-3.5 w-3.5" />
-                      ) : (
-                        <span className="text-[10px] font-bold">—</span>
-                      )}
+                  <div key={feature} className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors', included ? 'bg-primary/5' : 'bg-muted/30 opacity-50')}>
+                    <div className={cn('w-6 h-6 rounded-lg flex items-center justify-center shrink-0', included ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground')}>
+                      {included ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px] font-bold">—</span>}
                     </div>
                     <span className={cn('text-sm', included ? 'font-medium' : 'text-muted-foreground')}>
-                      {FEATURE_LABELS[feature] ?? feature}
+                      {t(`feature.${feature}`)}
                     </span>
                     {!included && (
-                      <Badge variant="outline" className="ml-auto text-[10px] border-accent/30 text-accent-foreground">
-                        Premium
-                      </Badge>
+                      <Badge variant="outline" className="ml-auto text-[10px] border-accent/30 text-accent-foreground">Premium</Badge>
                     )}
                   </div>
                 );
@@ -152,35 +123,16 @@ export default function ParentSubscription() {
 
       {/* Actions */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3">
-        {/* Upgrade */}
-        <Button
-          onClick={() => setPaymentOpen(true)}
-          className="w-full rounded-xl font-display h-12 text-base gap-2 bg-accent hover:bg-accent/90 text-accent-foreground"
-        >
-          <Crown className="h-4 w-4" /> Fazer Upgrade
+        <Button onClick={() => setPaymentOpen(true)} className="w-full rounded-xl font-display h-12 text-base gap-2 bg-accent hover:bg-accent/90 text-accent-foreground">
+          <Crown className="h-4 w-4" /> Upgrade
         </Button>
-
-        {/* Downgrade */}
         {!isFreeTier && lowerTiers.length > 0 && (
           <div className="space-y-2">
             <Separator />
-            <p className="text-xs text-muted-foreground text-center">
-              Ou mudar para um plano inferior
-            </p>
             <div className="flex flex-wrap gap-2 justify-center">
               {lowerTiers.map((tier) => (
-                <Button
-                  key={tier.id}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl text-xs gap-1.5"
-                  onClick={() => {
-                    setDowngradeTarget(tier);
-                    setDowngradeOpen(true);
-                  }}
-                >
-                  <ArrowDown className="h-3 w-3" />
-                  {tier.name}
+                <Button key={tier.id} variant="outline" size="sm" className="rounded-xl text-xs gap-1.5" onClick={() => { setDowngradeTarget(tier); setDowngradeOpen(true); }}>
+                  <ArrowDown className="h-3 w-3" /> {tier.name}
                 </Button>
               ))}
             </div>
@@ -188,57 +140,37 @@ export default function ParentSubscription() {
         )}
       </motion.div>
 
-      {/* Payment Simulator */}
-      <PaymentSimulator
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-        currentTierName={tierName}
-        tiers={familyTiers}
-        onConfirmUpgrade={upgrade}
-      />
+      <PaymentSimulator open={paymentOpen} onOpenChange={setPaymentOpen} currentTierName={tierName} tiers={familyTiers} onConfirmUpgrade={upgrade} />
 
-      {/* Downgrade Confirmation Dialog */}
+      {/* Downgrade Confirmation */}
       <Dialog open={downgradeOpen} onOpenChange={setDowngradeOpen}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Confirmar downgrade
+              {t('common.confirm')}
             </DialogTitle>
             <DialogDescription>
-              Ao mudar para <strong>{downgradeTarget?.name}</strong>, perderás acesso a algumas funcionalidades premium.
-              Esta alteração é imediata.
+              {downgradeTarget?.name}
             </DialogDescription>
           </DialogHeader>
-
           {downgradeTarget && (
             <div className="space-y-2 py-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Funcionalidades que perdes:
-              </p>
               {enabledFeatures
                 .filter((f) => !downgradeTarget.features.includes(f))
                 .map((f) => (
                   <div key={f} className="flex items-center gap-2 text-sm text-destructive/80">
                     <span>✕</span>
-                    <span>{FEATURE_LABELS[f] ?? f}</span>
+                    <span>{t(`feature.${f}`)}</span>
                   </div>
                 ))}
             </div>
           )}
-
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDowngradeOpen(false)} className="rounded-xl">
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDowngrade}
-              disabled={upgradeLoading}
-              className="rounded-xl font-display gap-1.5"
-            >
+            <Button variant="outline" onClick={() => setDowngradeOpen(false)} className="rounded-xl">{t('common.cancel')}</Button>
+            <Button variant="destructive" onClick={handleDowngrade} disabled={upgradeLoading} className="rounded-xl font-display gap-1.5">
               <ArrowDown className="h-3.5 w-3.5" />
-              {upgradeLoading ? 'A processar...' : 'Confirmar Downgrade'}
+              {upgradeLoading ? t('common.loading') : t('common.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
