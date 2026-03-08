@@ -925,7 +925,7 @@ function FinalCTA() {
           className="inline-flex items-center justify-center glass rounded-full p-5 mb-8"
         >
           <div className="absolute inset-0 rounded-full glow-accent animate-pulse-glow" />
-          <img src={kivoSvg} alt="Kivo" className="w-14 h-14 relative z-10" />
+          <img src={kivoSvg} alt="Kivo" className="w-16 h-16 md:w-20 md:h-20 relative z-10" />
         </motion.div>
         <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mb-5">
           <GradientText>Comece hoje a construir o futuro financeiro do seu filho</GradientText>
