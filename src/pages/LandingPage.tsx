@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem] md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -378,7 +378,7 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-              <div className="relative px-510sm:px108 py-8 md:py-16">
+              <div className="relativ10 px-510sm:px108 py-8 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -393,7 +393,7 @@ function Hero() {
                     <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
                       {slide.subtitle}
                     </p>
-                    <div className="mt-8 flecol sm:flex-row gap-3p gap-4">
+                    <div className="mcol sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
                       <Button
                         size="lg"
                         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
@@ -420,7 +420,7 @@ function Hero() {
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full max-w-[200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
+                      classNam80px] sm:max-w-sm200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
