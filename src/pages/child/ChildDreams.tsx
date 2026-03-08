@@ -15,17 +15,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
 import UpgradePrompt, { FeatureGateWrapper } from '@/components/UpgradePrompt';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
-const priorityConfig = {
-  high: { label: 'Prioridade Alta', className: 'bg-destructive/10 text-destructive border-destructive/20' },
-  medium: { label: 'Prioridade Média', className: 'bg-accent/10 text-accent-foreground border-accent/20' },
-  low: { label: 'Prioridade Baixa', className: 'bg-muted text-muted-foreground border-muted' },
-};
-
 export default function ChildDreams() {
+  const t = useT();
   const { user } = useAuth();
   const { allowed: dreamVaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.DREAM_VAULTS);
   const { data: dbDreams, isLoading } = useDreamVaults(user?.profileId);
@@ -40,7 +36,12 @@ export default function ChildDreams() {
   const [newDesc, setNewDesc] = useState('');
   const [newTarget, setNewTarget] = useState('');
 
-  // Fallback to mock data
+  const priorityConfig = {
+    high: { label: t('child.dreams.priority.high'), className: 'bg-destructive/10 text-destructive border-destructive/20' },
+    medium: { label: t('child.dreams.priority.medium'), className: 'bg-accent/10 text-accent-foreground border-accent/20' },
+    low: { label: t('child.dreams.priority.low'), className: 'bg-muted text-muted-foreground border-muted' },
+  };
+
   const child = mockChildren[0];
   const mockFallback = mockDreamVaults.filter(d => d.childId === child.id).map(d => ({
     id: d.id, profileId: '', householdId: null, title: d.title, description: d.description,
@@ -57,9 +58,9 @@ export default function ChildDreams() {
     if (!newTitle || !newTarget) return;
     try {
       await createDream.mutateAsync({ title: newTitle, description: newDesc || undefined, targetAmount: Number(newTarget) });
-      toast.success('Sonho criado! ✨');
+      toast(t('child.dreams.dream_created'));
       setNewTitle(''); setNewDesc(''); setNewTarget(''); setDialogOpen(false);
-    } catch { toast.error('Erro ao criar sonho'); }
+    } catch { toast(t('child.dreams.dream_error')); }
   };
 
   const handleDeposit = async () => {
@@ -68,14 +69,13 @@ export default function ChildDreams() {
     if (isNaN(amount) || amount <= 0) return;
     try {
       await depositToDream.mutateAsync({ dreamId: depositDreamId, amount });
-      toast.success(`+${amount} 🪙 depositados no sonho!`);
+      toast(`+${amount} 🪙 ${t('child.dreams.deposited')}`);
       setDepositAmount('');
       setDepositDialogOpen(false);
       setDepositDreamId(null);
-    } catch { toast.error('Erro ao depositar'); }
+    } catch { toast(t('child.dreams.deposit_error')); }
   };
 
-  // Set first expanded if not set
   if (!expandedId && dreams.length > 0 && dreams[0].parentComments.length > 0) {
     setExpandedId(dreams[0].id);
   }
@@ -83,8 +83,8 @@ export default function ChildDreams() {
   return (
     <FeatureGateWrapper
       allowed={dreamVaultsAllowed || gateLoading}
-      featureName="Cofres de Sonhos"
-      description="Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium."
+      featureName={t('child.dreams.upgrade_title')}
+      description={t('child.dreams.upgrade_desc')}
       tierName={tierName}
     >
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -98,13 +98,13 @@ export default function ChildDreams() {
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl">✨</div>
               <div>
-                <p className="text-xs opacity-70 uppercase tracking-wider font-medium">Cofre dos Sonhos</p>
-                <h1 className="font-display text-xl font-bold">Os meus desejos</h1>
+                <p className="text-xs opacity-70 uppercase tracking-wider font-medium">{t('child.dreams.title')}</p>
+                <h1 className="font-display text-xl font-bold">{t('child.dreams.my_wishes')}</h1>
               </div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mt-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm opacity-80">{dreams.length} sonhos activos</span>
+                <span className="text-sm opacity-80">{dreams.length} {t('child.dreams.active_dreams')}</span>
                 <span className="font-display font-bold">🪙 {totalSaved} / {totalTarget}</span>
               </div>
               {totalTarget > 0 && <Progress value={Math.round((totalSaved / totalTarget) * 100)} className="h-2.5 bg-white/20" />}
@@ -116,21 +116,21 @@ export default function ChildDreams() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="font-display text-lg font-bold">Vision Board</h2>
-          <p className="text-xs text-muted-foreground">Visualiza e acompanha os teus sonhos</p>
+          <h2 className="font-display text-lg font-bold">{t('child.dreams.vision_board')}</h2>
+          <p className="text-xs text-muted-foreground">{t('child.dreams.vision_desc')}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="rounded-xl font-display gap-1"><Plus className="h-4 w-4" /> Novo Sonho</Button>
+            <Button size="sm" className="rounded-xl font-display gap-1"><Plus className="h-4 w-4" /> {t('child.dreams.new_dream')}</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle className="font-display">Adicionar Sonho</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-display">{t('child.dreams.add_dream')}</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div className="space-y-2"><Label>O que sonhas?</Label><Input placeholder="Ex: Ir à Disneylândia" value={newTitle} onChange={e => setNewTitle(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Descreve o teu sonho</Label><Textarea placeholder="Porque é importante para ti?" value={newDesc} onChange={e => setNewDesc(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Quanto precisas? (KivaCoins)</Label><Input type="number" placeholder="500" value={newTarget} onChange={e => setNewTarget(e.target.value)} /></div>
+              <div className="space-y-2"><Label>{t('child.dreams.what_dream')}</Label><Input placeholder={t('child.dreams.dream_placeholder')} value={newTitle} onChange={e => setNewTitle(e.target.value)} /></div>
+              <div className="space-y-2"><Label>{t('child.dreams.describe')}</Label><Textarea placeholder={t('child.dreams.why_important')} value={newDesc} onChange={e => setNewDesc(e.target.value)} /></div>
+              <div className="space-y-2"><Label>{t('child.dreams.how_much')}</Label><Input type="number" placeholder="500" value={newTarget} onChange={e => setNewTarget(e.target.value)} /></div>
               <Button className="w-full rounded-xl font-display" onClick={handleCreate} disabled={createDream.isPending}>
-                {createDream.isPending ? 'A criar...' : '✨ Criar Sonho'}
+                {createDream.isPending ? t('child.dreams.creating') : t('child.dreams.create_btn')}
               </Button>
             </div>
           </DialogContent>
@@ -139,7 +139,7 @@ export default function ChildDreams() {
 
       {/* Dream Cards */}
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">A carregar sonhos...</div>
+        <div className="text-center py-8 text-muted-foreground">{t('child.dreams.loading')}</div>
       ) : (
         <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
           {dreams.map((dream) => {
@@ -167,7 +167,7 @@ export default function ChildDreams() {
                     <div className="mt-4 space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="font-display font-bold text-primary">🪙 {dream.currentAmount}</span>
-                        <span className="text-muted-foreground font-display">Meta: {dream.targetAmount}</span>
+                        <span className="text-muted-foreground font-display">{t('child.dreams.target')}: {dream.targetAmount}</span>
                       </div>
                       <div className="relative">
                         <Progress value={pct} className="h-3 rounded-full" />
@@ -177,7 +177,7 @@ export default function ChildDreams() {
 
                     <div className="flex gap-2 mt-3">
                       <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-8 gap-1 flex-1 hover:bg-primary hover:text-primary-foreground transition-colors" onClick={() => { setDepositDreamId(dream.id); setDepositAmount(''); setDepositDialogOpen(true); }}>
-                        <Plus className="h-3 w-3" /> Poupar
+                        <Plus className="h-3 w-3" /> {t('child.dreams.save')}
                       </Button>
                       <Button variant="ghost" size="sm" className="rounded-xl text-xs font-display h-8 gap-1" onClick={() => setExpandedId(isExpanded ? null : dream.id)}>
                         <MessageCircle className="h-3 w-3" />
@@ -192,7 +192,7 @@ export default function ChildDreams() {
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
                         <CardContent className="pt-4 pb-4 space-y-3 bg-muted/20 border-t border-border/30">
                           <div className="flex items-center gap-2 text-xs text-muted-foreground font-display font-semibold">
-                            <Heart className="h-3.5 w-3.5 text-destructive" /> Mensagens dos pais
+                            <Heart className="h-3.5 w-3.5 text-destructive" /> {t('child.dreams.parent_messages')}
                           </div>
                           {dream.parentComments.map((comment) => (
                             <motion.div key={comment.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3 items-start">
@@ -221,8 +221,8 @@ export default function ChildDreams() {
             <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }} className="text-4xl">
               <Sparkles className="h-8 w-8 text-accent-foreground mx-auto" />
             </motion.div>
-            <h3 className="font-display font-bold text-sm">Cada moeda te aproxima dos teus sonhos!</h3>
-            <p className="text-xs text-muted-foreground">Poupa um pouco todos os dias e vê a magia acontecer. ✨</p>
+            <h3 className="font-display font-bold text-sm">{t('child.dreams.motivational')}</h3>
+            <p className="text-xs text-muted-foreground">{t('child.dreams.motivational_desc')}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -232,10 +232,10 @@ export default function ChildDreams() {
       {/* Deposit Dialog */}
       <Dialog open={depositDialogOpen} onOpenChange={setDepositDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle className="font-display">Poupar para o Sonho</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-display">{t('child.dreams.save_for_dream')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Quanto queres poupar? (KivaCoins)</Label>
+              <Label>{t('child.dreams.how_much_save')}</Label>
               <Input type="number" placeholder="10" min={1} value={depositAmount} onChange={e => setDepositAmount(e.target.value)} />
             </div>
             <div className="flex gap-2 flex-wrap justify-center">
@@ -246,7 +246,7 @@ export default function ChildDreams() {
               ))}
             </div>
             <Button className="w-full rounded-xl font-display" onClick={handleDeposit} disabled={depositToDream.isPending}>
-              {depositToDream.isPending ? 'A poupar...' : '🪙 Depositar'}
+              {depositToDream.isPending ? t('child.dreams.saving') : t('child.dreams.deposit_btn')}
             </Button>
           </div>
         </DialogContent>
