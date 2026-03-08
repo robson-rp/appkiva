@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-18 md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
