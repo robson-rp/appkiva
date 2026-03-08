@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, GripVertical, ExternalLink, Image as ImageIcon, MousePointerClick, TrendingUp, BarChart3 } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Banner {
   id: string;
@@ -30,6 +31,7 @@ interface BannerClickStats {
 const EMPTY_FORM = { title: '', image_url: '', link_url: '', display_order: 0, is_active: true };
 
 export default function AdminBanners() {
+  const t = useT();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [clickStats, setClickStats] = useState<Record<string, BannerClickStats>>({});
   const [loading, setLoading] = useState(true);
@@ -93,7 +95,7 @@ export default function AdminBanners() {
     const path = `${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from('banners').upload(path, file, { upsert: true });
     if (error) {
-      toast({ title: 'Erro ao carregar imagem', description: error.message, variant: 'destructive' });
+      toast({ title: t('admin.banners.upload_error'), description: error.message, variant: 'destructive' });
     } else {
       const { data } = supabase.storage.from('banners').getPublicUrl(path);
       setForm(f => ({ ...f, image_url: data.publicUrl }));
@@ -103,7 +105,7 @@ export default function AdminBanners() {
 
   const handleSave = async () => {
     if (!form.title || !form.image_url) {
-      toast({ title: 'Preenche o título e a imagem', variant: 'destructive' });
+      toast({ title: t('admin.banners.fill_required'), variant: 'destructive' });
       return;
     }
     const payload = {
@@ -116,12 +118,12 @@ export default function AdminBanners() {
 
     if (editing) {
       const { error } = await supabase.from('login_banners').update(payload).eq('id', editing.id);
-      if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
-      toast({ title: 'Banner atualizado' });
+      if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: t('admin.banners.updated') });
     } else {
       const { error } = await supabase.from('login_banners').insert(payload);
-      if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
-      toast({ title: 'Banner criado' });
+      if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
+      toast({ title: t('admin.banners.created') });
     }
     setDialogOpen(false);
     fetchBanners();
@@ -129,8 +131,8 @@ export default function AdminBanners() {
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from('login_banners').delete().eq('id', id);
-    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
-    toast({ title: 'Banner eliminado' });
+    if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
+    toast({ title: t('admin.banners.deleted') });
     fetchBanners();
     fetchClickStats();
   };
@@ -152,7 +154,6 @@ export default function AdminBanners() {
     fetchBanners();
   };
 
-  // Aggregate stats
   const totalClicks = Object.values(clickStats).reduce((s, c) => s + c.total_clicks, 0);
   const totalToday = Object.values(clickStats).reduce((s, c) => s + c.clicks_today, 0);
   const total7d = Object.values(clickStats).reduce((s, c) => s + c.clicks_7d, 0);
@@ -161,16 +162,15 @@ export default function AdminBanners() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-heading font-bold text-foreground">Banners</h1>
-          <p className="text-muted-foreground text-small">Gestão de banners publicitários da página de login</p>
+          <h1 className="font-display text-heading font-bold text-foreground">{t('admin.banners.title')}</h1>
+          <p className="text-muted-foreground text-small">{t('admin.banners.subtitle')}</p>
         </div>
         <Button onClick={openCreate} className="gap-2" disabled={banners.length >= 5}>
           <Plus className="h-4 w-4" />
-          Novo Banner
+          {t('admin.banners.new')}
         </Button>
       </div>
 
-      {/* Click Stats Summary */}
       {totalClicks > 0 && (
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -179,7 +179,7 @@ export default function AdminBanners() {
                 <MousePointerClick className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-caption text-muted-foreground">Total cliques</p>
+                <p className="text-caption text-muted-foreground">{t('admin.banners.total_clicks')}</p>
                 <p className="text-lg font-bold text-foreground">{totalClicks}</p>
               </div>
             </CardContent>
@@ -190,7 +190,7 @@ export default function AdminBanners() {
                 <TrendingUp className="h-4 w-4 text-accent-foreground" />
               </div>
               <div>
-                <p className="text-caption text-muted-foreground">Últimos 7 dias</p>
+                <p className="text-caption text-muted-foreground">{t('admin.banners.last_7d')}</p>
                 <p className="text-lg font-bold text-foreground">{total7d}</p>
               </div>
             </CardContent>
@@ -201,7 +201,7 @@ export default function AdminBanners() {
                 <BarChart3 className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-caption text-muted-foreground">Hoje</p>
+                <p className="text-caption text-muted-foreground">{t('admin.banners.today')}</p>
                 <p className="text-lg font-bold text-foreground">{totalToday}</p>
               </div>
             </CardContent>
@@ -217,9 +217,9 @@ export default function AdminBanners() {
         <Card>
           <CardContent className="py-12 text-center">
             <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-            <p className="text-muted-foreground">Nenhum banner criado</p>
+            <p className="text-muted-foreground">{t('admin.banners.no_banners')}</p>
             <Button onClick={openCreate} variant="outline" className="mt-4 gap-2">
-              <Plus className="h-4 w-4" /> Criar primeiro banner
+              <Plus className="h-4 w-4" /> {t('admin.banners.create_first')}
             </Button>
           </CardContent>
         </Card>
@@ -262,12 +262,12 @@ export default function AdminBanners() {
                           {stats.clicks_7d} (7d)
                         </span>
                         <span className="text-caption text-muted-foreground">
-                          {stats.clicks_today} hoje
+                          {stats.clicks_today} {t('admin.banners.today').toLowerCase()}
                         </span>
                       </div>
                     )}
                     {b.link_url && !stats && (
-                      <p className="text-caption text-muted-foreground/50 mt-1">Sem cliques registados</p>
+                      <p className="text-caption text-muted-foreground/50 mt-1">{t('admin.banners.no_clicks')}</p>
                     )}
                   </div>
 
@@ -283,21 +283,21 @@ export default function AdminBanners() {
         </div>
       )}
 
-      <p className="text-caption text-muted-foreground">Máximo 5 banners. Apenas banners activos são exibidos na página de login.</p>
+      <p className="text-caption text-muted-foreground">{t('admin.banners.max_info')}</p>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display">{editing ? 'Editar Banner' : 'Novo Banner'}</DialogTitle>
+            <DialogTitle className="font-display">{editing ? t('admin.banners.edit') : t('admin.banners.new_dialog')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Título *</Label>
-              <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Nome da campanha" />
+              <Label>{t('admin.banners.label_title')}</Label>
+              <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder={t('admin.banners.placeholder_title')} />
             </div>
 
             <div>
-              <Label>Imagem *</Label>
+              <Label>{t('admin.banners.label_image')}</Label>
               {form.image_url && (
                 <div className="mb-2 rounded-xl overflow-hidden border border-border">
                   <AspectRatio ratio={3}>
@@ -309,7 +309,7 @@ export default function AdminBanners() {
                 <Input
                   value={form.image_url}
                   onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
-                  placeholder="URL da imagem ou faz upload"
+                  placeholder={t('admin.banners.placeholder_image')}
                   className="flex-1"
                 />
                 <Button variant="outline" size="icon" className="shrink-0 relative" disabled={uploading}>
@@ -320,18 +320,18 @@ export default function AdminBanners() {
             </div>
 
             <div>
-              <Label>Link (opcional)</Label>
+              <Label>{t('admin.banners.label_link')}</Label>
               <Input value={form.link_url} onChange={e => setForm(f => ({ ...f, link_url: e.target.value }))} placeholder="https://..." />
             </div>
 
             <div className="flex items-center gap-3">
               <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
-              <Label>Activo</Label>
+              <Label>{t('admin.banners.label_active')}</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={uploading}>{editing ? 'Guardar' : 'Criar'}</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('admin.banners.cancel')}</Button>
+            <Button onClick={handleSave} disabled={uploading}>{editing ? t('admin.banners.save') : t('admin.banners.create')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

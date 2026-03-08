@@ -9,8 +9,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function AdminRisk() {
+  const t = useT();
   const { toast } = useToast();
   const qc = useQueryClient();
   const [scanning, setScanning] = useState(false);
@@ -33,10 +35,10 @@ export default function AdminRisk() {
     try {
       const { data, error } = await supabase.functions.invoke('risk-scan');
       if (error) throw error;
-      toast({ title: 'Scan concluído', description: `${data?.flags_created ?? 0} novas flags criadas` });
+      toast({ title: t('admin.risk.scan_done'), description: t('admin.risk.scan_desc').replace('{count}', String(data?.flags_created ?? 0)) });
       qc.invalidateQueries({ queryKey: ['risk-flags'] });
     } catch (e: any) {
-      toast({ title: 'Erro no scan', description: e.message, variant: 'destructive' });
+      toast({ title: t('admin.risk.scan_error'), description: e.message, variant: 'destructive' });
     } finally {
       setScanning(false);
     }
@@ -52,7 +54,7 @@ export default function AdminRisk() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['risk-flags'] });
-      toast({ title: 'Flag resolvida' });
+      toast({ title: t('admin.risk.flag_resolved') });
     },
   });
 
@@ -70,12 +72,12 @@ export default function AdminRisk() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Monitorização de Risco</h1>
-          <p className="text-sm text-muted-foreground">Detecção de anomalias e fraude na plataforma</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.risk.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('admin.risk.subtitle')}</p>
         </div>
         <Button onClick={runScan} disabled={scanning}>
           <RefreshCw className={`h-4 w-4 mr-2 ${scanning ? 'animate-spin' : ''}`} />
-          {scanning ? 'A analisar...' : 'Executar Scan'}
+          {scanning ? t('admin.risk.scanning') : t('admin.risk.run_scan')}
         </Button>
       </div>
 
@@ -83,7 +85,7 @@ export default function AdminRisk() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Flags Abertas</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('admin.risk.open_flags')}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </CardHeader>
             <CardContent>
@@ -94,7 +96,7 @@ export default function AdminRisk() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <Card className="border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Resolvidas</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('admin.risk.resolved')}</CardTitle>
               <Shield className="h-4 w-4 text-secondary" />
             </CardHeader>
             <CardContent>
@@ -105,7 +107,7 @@ export default function AdminRisk() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="border-border/50">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t('admin.risk.total')}</CardTitle>
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -117,22 +119,22 @@ export default function AdminRisk() {
 
       <Card className="border-border/50">
         <CardHeader>
-          <CardTitle className="text-base font-display">Flags Activas</CardTitle>
+          <CardTitle className="text-base font-display">{t('admin.risk.active_flags')}</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">A carregar...</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.risk.loading')}</p>
           ) : !openFlags.length ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Nenhuma flag aberta. ✅</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.risk.no_flags')}</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Severidade</TableHead>
-                  <TableHead>Descrição</TableHead>
-                  <TableHead>Acções</TableHead>
+                  <TableHead>{t('admin.risk.date')}</TableHead>
+                  <TableHead>{t('admin.risk.type')}</TableHead>
+                  <TableHead>{t('admin.risk.severity')}</TableHead>
+                  <TableHead>{t('admin.risk.description')}</TableHead>
+                  <TableHead>{t('admin.risk.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -150,7 +152,7 @@ export default function AdminRisk() {
                     <TableCell className="text-sm max-w-[300px] truncate">{flag.description}</TableCell>
                     <TableCell>
                       <Button size="sm" variant="outline" onClick={() => resolveFlag.mutate(flag.id)}>
-                        Resolver
+                        {t('admin.risk.resolve')}
                       </Button>
                     </TableCell>
                   </TableRow>

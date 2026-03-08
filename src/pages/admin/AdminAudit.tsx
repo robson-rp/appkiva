@@ -7,8 +7,10 @@ import { ScrollText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function AdminAudit() {
+  const t = useT();
   const [resourceFilter, setResourceFilter] = useState('all');
   const [actionFilter, setActionFilter] = useState('all');
 
@@ -44,26 +46,26 @@ export default function AdminAudit() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Registo de Auditoria</h1>
-        <p className="text-sm text-muted-foreground">Histórico de acções sensíveis na plataforma</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.audit.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('admin.audit.subtitle')}</p>
       </div>
 
       <div className="flex gap-3">
         <Select value={resourceFilter} onValueChange={setResourceFilter}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Recurso" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]"><SelectValue placeholder={t('admin.audit.resource')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos os recursos</SelectItem>
-            <SelectItem value="ledger_entries">Ledger</SelectItem>
-            <SelectItem value="wallets">Wallets</SelectItem>
-            <SelectItem value="profiles">Perfis</SelectItem>
-            <SelectItem value="consent_records">Consentimento</SelectItem>
-            <SelectItem value="user_roles">Roles</SelectItem>
+            <SelectItem value="all">{t('admin.audit.all_resources')}</SelectItem>
+            <SelectItem value="ledger_entries">{t('admin.audit.ledger')}</SelectItem>
+            <SelectItem value="wallets">{t('admin.audit.wallets')}</SelectItem>
+            <SelectItem value="profiles">{t('admin.audit.profiles')}</SelectItem>
+            <SelectItem value="consent_records">{t('admin.audit.consent')}</SelectItem>
+            <SelectItem value="user_roles">{t('admin.audit.roles')}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={actionFilter} onValueChange={setActionFilter}>
-          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Acção" /></SelectTrigger>
+          <SelectTrigger className="w-[180px]"><SelectValue placeholder={t('admin.audit.action')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todas as acções</SelectItem>
+            <SelectItem value="all">{t('admin.audit.all_actions')}</SelectItem>
             <SelectItem value="insert">Insert</SelectItem>
             <SelectItem value="update">Update</SelectItem>
             <SelectItem value="delete">Delete</SelectItem>
@@ -75,23 +77,23 @@ export default function AdminAudit() {
         <CardHeader>
           <CardTitle className="text-base font-display flex items-center gap-2">
             <ScrollText className="h-4 w-4" />
-            Registos ({logs?.length ?? 0})
+            {t('admin.audit.records')} ({logs?.length ?? 0})
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">A carregar...</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.audit.loading')}</p>
           ) : !logs?.length ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Nenhum registo de auditoria encontrado.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.audit.empty')}</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Acção</TableHead>
-                    <TableHead>Recurso</TableHead>
-                    <TableHead>ID Recurso</TableHead>
+                    <TableHead>{t('admin.audit.date')}</TableHead>
+                    <TableHead>{t('admin.audit.action')}</TableHead>
+                    <TableHead>{t('admin.audit.resource')}</TableHead>
+                    <TableHead>{t('admin.audit.resource_id')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

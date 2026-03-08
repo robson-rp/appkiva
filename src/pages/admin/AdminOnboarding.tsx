@@ -5,44 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Eye, SkipForward, CheckCircle2, TrendingDown, Users } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 const OnboardingStepManager = lazy(() => import('@/components/admin/OnboardingStepManager'));
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
 
-const ROLE_LABELS: Record<string, string> = {
-  parent: 'Encarregado', child: 'Criança', teen: 'Adolescente',
-  teacher: 'Professor', admin: 'Admin', partner: 'Parceiro',
-};
-
-const ROLE_STEPS: Record<string, number> = {
-  parent: 4, child: 4, teen: 4, teacher: 3, admin: 3, partner: 3,
-};
+const ROLE_STEPS: Record<string, number> = { parent: 4, child: 4, teen: 4, teacher: 3, admin: 3, partner: 3 };
 
 const PIE_COLORS = [
   'hsl(var(--kivara-blue))', 'hsl(var(--kivara-green))', 'hsl(var(--kivara-gold))',
   'hsl(var(--destructive))', 'hsl(var(--primary))', 'hsl(var(--secondary))',
 ];
 
-interface AnalyticsRow {
-  event_type: string; step_index: number; role: string; profile_id: string; created_at: string;
-}
+interface AnalyticsRow { event_type: string; step_index: number; role: string; profile_id: string; created_at: string; }
 
 function useOnboardingAnalytics() {
   return useQuery({
     queryKey: ['admin-onboarding-analytics'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('onboarding_analytics')
-        .select('event_type, step_index, role, profile_id, created_at')
-        .order('created_at', { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as AnalyticsRow[];
-    },
+    queryFn: async () => { const { data, error } = await supabase.from('onboarding_analytics').select('event_type, step_index, role, profile_id, created_at').order('created_at', { ascending: true }); if (error) throw error; return (data ?? []) as AnalyticsRow[]; },
   });
 }
 
@@ -59,7 +42,7 @@ function computeMetrics(rows: AnalyticsRow[]) {
   return byRole;
 }
 
-function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.ElementType; label: string; value: string | number; sub?: string; color?: string }) {
+function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: string | number; color?: string }) {
   return (
     <Card className="border-border/50">
       <CardContent className="p-4 flex items-center gap-4">
@@ -69,7 +52,6 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.Elemen
         <div>
           <p className="text-2xl font-display font-bold text-foreground">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
-          {sub && <p className="text-[10px] text-muted-foreground/70">{sub}</p>}
         </div>
       </CardContent>
     </Card>
@@ -77,15 +59,12 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.Elemen
 }
 
 function AnalyticsTab() {
+  const t = useT();
   const { data: rows, isLoading } = useOnboardingAnalytics();
 
-  if (isLoading) return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-      </div>
-    </div>
-  );
+  const getRoleLabel = (role: string) => t(`admin.onboarding.role_${role}`);
+
+  if (isLoading) return (<div className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-4 gap-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div></div>);
 
   const allRows = rows ?? [];
   const metrics = computeMetrics(allRows);
@@ -97,36 +76,36 @@ function AnalyticsTab() {
   const roleBarData = ROLES.map(role => {
     const m = metrics[role]; const total = m.uniqueUsers.size;
     return {
-      role: ROLE_LABELS[role],
-      'Concluíram': total > 0 ? Math.round((m.completes.size / total) * 100) : 0,
-      'Saltaram': total > 0 ? Math.round((m.skips.size / total) * 100) : 0,
-      'Drop-off': total > 0 ? Math.round(((total - m.completes.size - m.skips.size) / total) * 100) : 0,
+      role: getRoleLabel(role),
+      [t('admin.onboarding.completed')]: total > 0 ? Math.round((m.completes.size / total) * 100) : 0,
+      [t('admin.onboarding.skipped')]: total > 0 ? Math.round((m.skips.size / total) * 100) : 0,
+      [t('admin.onboarding.dropoff')]: total > 0 ? Math.round(((total - m.completes.size - m.skips.size) / total) * 100) : 0,
     };
   });
 
-  const pieData = ROLES.map((role, i) => ({ name: ROLE_LABELS[role], value: metrics[role].uniqueUsers.size, fill: PIE_COLORS[i] })).filter(d => d.value > 0);
+  const pieData = ROLES.map((role, i) => ({ name: getRoleLabel(role), value: metrics[role].uniqueUsers.size, fill: PIE_COLORS[i] })).filter(d => d.value > 0);
 
   const funnelData = ROLES.map(role => {
     const m = metrics[role]; const totalSteps = ROLE_STEPS[role];
     const steps: { step: string; users: number }[] = [];
-    for (let i = 0; i < totalSteps; i++) steps.push({ step: `Passo ${i + 1}`, users: m.views.get(i)?.size ?? 0 });
-    return { role, label: ROLE_LABELS[role], steps, total: m.uniqueUsers.size };
+    for (let i = 0; i < totalSteps; i++) steps.push({ step: `${t('admin.onboarding.step')} ${i + 1}`, users: m.views.get(i)?.size ?? 0 });
+    return { role, label: getRoleLabel(role), steps, total: m.uniqueUsers.size };
   });
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Utilizadores únicos" value={totalUsers} />
-        <StatCard icon={CheckCircle2} label="Taxa de conclusão" value={`${completionRate}%`} color="hsl(var(--kivara-green))" />
-        <StatCard icon={SkipForward} label="Total de saltos" value={totalSkips} color="hsl(var(--kivara-gold))" />
-        <StatCard icon={TrendingDown} label="Total concluídos" value={totalCompletes} color="hsl(var(--kivara-blue))" />
+        <StatCard icon={Users} label={t('admin.onboarding.unique_users')} value={totalUsers} />
+        <StatCard icon={CheckCircle2} label={t('admin.onboarding.completion_rate')} value={`${completionRate}%`} color="hsl(var(--kivara-green))" />
+        <StatCard icon={SkipForward} label={t('admin.onboarding.total_skips')} value={totalSkips} color="hsl(var(--kivara-gold))" />
+        <StatCard icon={TrendingDown} label={t('admin.onboarding.total_completions')} value={totalCompletes} color="hsl(var(--kivara-blue))" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="lg:col-span-2 border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-display">Taxa por Papel (%)</CardTitle>
-            <CardDescription className="text-xs">Conclusão, salto e drop-off por tipo de utilizador</CardDescription>
+            <CardTitle className="text-base font-display">{t('admin.onboarding.rate_by_role')}</CardTitle>
+            <CardDescription className="text-xs">{t('admin.onboarding.rate_by_role_desc')}</CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -135,9 +114,9 @@ function AnalyticsTab() {
                 <XAxis dataKey="role" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" unit="%" />
                 <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }} />
-                <Bar dataKey="Concluíram" fill="hsl(var(--kivara-green))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Saltaram" fill="hsl(var(--kivara-gold))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="Drop-off" fill="hsl(var(--destructive) / 0.6)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey={t('admin.onboarding.completed')} fill="hsl(var(--kivara-green))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey={t('admin.onboarding.skipped')} fill="hsl(var(--kivara-gold))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey={t('admin.onboarding.dropoff')} fill="hsl(var(--destructive) / 0.6)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -145,8 +124,8 @@ function AnalyticsTab() {
 
         <Card className="border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-display">Distribuição por Papel</CardTitle>
-            <CardDescription className="text-xs">Utilizadores que viram o onboarding</CardDescription>
+            <CardTitle className="text-base font-display">{t('admin.onboarding.dist_by_role')}</CardTitle>
+            <CardDescription className="text-xs">{t('admin.onboarding.dist_by_role_desc')}</CardDescription>
           </CardHeader>
           <CardContent className="h-64">
             {pieData.length > 0 ? (
@@ -160,7 +139,7 @@ function AnalyticsTab() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Sem dados ainda</div>
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">{t('admin.onboarding.no_data_yet')}</div>
             )}
           </CardContent>
         </Card>
@@ -168,8 +147,8 @@ function AnalyticsTab() {
 
       <Card className="border-border/50">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-display">Funil de Drop-off por Papel</CardTitle>
-          <CardDescription className="text-xs">Número de utilizadores que viram cada passo do walkthrough</CardDescription>
+          <CardTitle className="text-base font-display">{t('admin.onboarding.funnel_title')}</CardTitle>
+          <CardDescription className="text-xs">{t('admin.onboarding.funnel_desc')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -177,7 +156,7 @@ function AnalyticsTab() {
               <div key={role} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-display font-bold text-foreground">{label}</h3>
-                  <Badge variant="secondary" className="text-[10px]">{total} utilizadores</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{total} {t('admin.onboarding.users')}</Badge>
                 </div>
                 <div className="space-y-1.5">
                   {steps.map((s, i) => {
@@ -206,8 +185,8 @@ function AnalyticsTab() {
         <Card className="border-border/50">
           <CardContent className="py-12 text-center">
             <Eye className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-            <h3 className="text-lg font-display font-bold text-foreground mb-1">Sem dados de onboarding</h3>
-            <p className="text-sm text-muted-foreground">Os dados aparecerão aqui à medida que os utilizadores completarem o walkthrough de boas-vindas.</p>
+            <h3 className="text-lg font-display font-bold text-foreground mb-1">{t('admin.onboarding.no_data_title')}</h3>
+            <p className="text-sm text-muted-foreground">{t('admin.onboarding.no_data_desc')}</p>
           </CardContent>
         </Card>
       )}
@@ -216,25 +195,21 @@ function AnalyticsTab() {
 }
 
 export default function AdminOnboarding() {
+  const t = useT();
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Onboarding</h1>
-        <p className="text-sm text-muted-foreground">Analytics e gestão dos splash screens de boas-vindas</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.onboarding.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('admin.onboarding.subtitle')}</p>
       </div>
-
       <Tabs defaultValue="analytics">
         <TabsList>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="gestao">Gestão</TabsTrigger>
+          <TabsTrigger value="analytics">{t('admin.onboarding.tab_analytics')}</TabsTrigger>
+          <TabsTrigger value="gestao">{t('admin.onboarding.tab_management')}</TabsTrigger>
         </TabsList>
-        <TabsContent value="analytics" className="mt-4">
-          <AnalyticsTab />
-        </TabsContent>
+        <TabsContent value="analytics" className="mt-4"><AnalyticsTab /></TabsContent>
         <TabsContent value="gestao" className="mt-4">
-          <Suspense fallback={<Skeleton className="h-64 rounded-xl" />}>
-            <OnboardingStepManager />
-          </Suspense>
+          <Suspense fallback={<Skeleton className="h-64 rounded-xl" />}><OnboardingStepManager /></Suspense>
         </TabsContent>
       </Tabs>
     </div>
