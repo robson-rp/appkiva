@@ -771,7 +771,7 @@ function GamificationSection() {
   ];
   return (
     <Section>
-      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
           <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
