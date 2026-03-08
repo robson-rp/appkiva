@@ -226,7 +226,7 @@ function Hero() {
           >
             <StaggerWords text="Pequenos hábitos." />
             <br />
-            <span className="text-primary md:bg-gradient-to-r md:from-primary md:via-secondary md:to-accent md:bg-[length:200%_auto] md:animate-[gradient-shift_4s_ease_infinite]">
+            <span className="text-secondary">
               <StaggerWords text="Grandes futuros." />
             </span>
           </motion.h1>
