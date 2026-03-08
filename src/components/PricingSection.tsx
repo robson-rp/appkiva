@@ -138,7 +138,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {displayTiers.map((tier, i) => {
             const config = TIER_CONFIG[tier.tierType];
             const isPopular = config?.popular;
@@ -148,7 +148,9 @@ export default function PricingSection() {
             return (
               <motion.div
                 key={tier.id}
-                variants={fadeUp}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -6, boxShadow: '0 20px 40px -12px hsl(var(--primary) / 0.15)' }}
                 className={cn(
                   'relative bg-card rounded-2xl border p-6 flex flex-col transition-all',
@@ -214,7 +216,7 @@ export default function PricingSection() {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </motion.section>
   );
