@@ -1030,12 +1030,13 @@ function Footer() {
           </div>
           <div>
             <h4 className="font-display text-sm font-semibold mb-3 opacity-90">Newsletter</h4>
-            <p className="text-sm.5 w-full outline-none placeholder:opacity-40 min-h-[44px]o financeira.</p>
+            <p className="text-sm opacity-60 mb-2">Receba dicas de educação financeira.</p>
             <div className="flex gap-2">
-              <div className="flex-1 flex items-center bg-background/10 rounde.5 w-full outline-none placeholder:opacity-40 min-h-[44px]ssName="w-4 h-4 opacity-40" />
-                <input type="email" placeholder="email@exemplo.com4 min-h-[44px] min-w-[44px]lassName="bg-transparent text-sm py-2 w-full outline-none placeholder:opacity-40" />
+              <div className="flex-1 flex items-center bg-background/10 rounded-xl px-3 gap-2">
+                <Mail className="w-4 h-4 opacity-40" />
+                <input type="email" placeholder="email@exemplo.com" className="bg-transparent text-sm py-2.5 w-full outline-none placeholder:opacity-40 min-h-[44px]" />
               </div>
-              <button className="bg-secondary text-secondary-foreground rounded-xl px-3.5 text-sm font-semibold hover:bg-secondary/90 transition-colors">
+              <button className="bg-secondary text-secondary-foreground rounded-xl px-4 min-h-[44px] min-w-[44px] text-sm font-semibold hover:bg-secondary/90 transition-colors">
                 →
               </button>
             </div>
