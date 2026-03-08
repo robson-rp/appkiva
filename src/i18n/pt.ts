@@ -1091,19 +1091,6 @@ const pt: Record<string, string> = {
   'parent.profile.save_error': 'Erro ao guardar',
   'parent.profile.saved': 'Perfil atualizado! ✅',
   'parent.profile.saved_desc': 'As tuas alterações foram guardadas com sucesso.',
-
-  // ─── Subscription Feature Labels ───
-  'feature.basic_wallet': 'Carteira Básica',
-  'feature.basic_tasks': 'Tarefas Básicas',
-  'feature.savings_vaults': 'Cofres de Poupança',
-  'feature.dream_vaults': 'Cofres de Sonhos',
-  'feature.custom_rewards': 'Recompensas',
-  'feature.budget_exceptions': 'Exceções de Orçamento',
-  'feature.multi_child': 'Multi-Criança',
-  'feature.advanced_analytics': 'Relatórios Avançados',
-  'feature.export_reports': 'Exportar Relatórios',
-  'feature.real_money_wallet': 'Carteira Dinheiro Real',
-  'feature.priority_support': 'Suporte Prioritário',
 };
 
 export default pt;
