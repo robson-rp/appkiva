@@ -409,7 +409,7 @@ function Hero() {
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full max-w-md md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
+                      className="w-full max-w-[200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
