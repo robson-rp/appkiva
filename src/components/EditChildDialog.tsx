@@ -11,6 +11,7 @@ import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useUpdateChild } from '@/hooks/use-children';
+import { useT } from '@/contexts/LanguageContext';
 
 const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', '👦🏻', '👧🏼', '🧒🏿', '👦🏽', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰'];
 
@@ -28,12 +29,12 @@ interface EditChildDialogProps {
 }
 
 export default function EditChildDialog({ open, onOpenChange, child }: EditChildDialogProps) {
+  const t = useT();
   const updateChild = useUpdateChild();
   const [nickname, setNickname] = useState('');
   const [avatar, setAvatar] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
 
-  // Sync state when child changes
   const [lastChildId, setLastChildId] = useState<string | null>(null);
   if (child && child.childId !== lastChildId) {
     setLastChildId(child.childId);
@@ -52,10 +53,13 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
         avatar,
         dateOfBirth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : null,
       });
-      toast({ title: 'Perfil atualizado! ✨', description: `${nickname || child.displayName} foi atualizado com sucesso.` });
+      toast({
+        title: t('dialog.edit_child.saved'),
+        description: t('dialog.edit_child.saved_desc').replace('{name}', nickname || child.displayName),
+      });
       onOpenChange(false);
     } catch {
-      toast({ title: 'Erro', description: 'Não foi possível atualizar o perfil.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('dialog.edit_child.error'), variant: 'destructive' });
     }
   };
 
@@ -67,15 +71,14 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
         <DialogHeader>
           <DialogTitle className="font-display text-xl flex items-center gap-2">
             <span className="text-3xl">{avatar}</span>
-            Editar Perfil
+            {t('dialog.edit_child.title')}
           </DialogTitle>
-          <DialogDescription>Atualiza os dados da criança.</DialogDescription>
+          <DialogDescription>{t('dialog.edit_child.subtitle')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 mt-2">
-          {/* Avatar picker */}
           <div className="space-y-2">
-            <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">Avatar</Label>
+            <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">{t('dialog.edit_child.avatar')}</Label>
             <div className="flex flex-wrap gap-2">
               {AVATAR_OPTIONS.map((emoji) => (
                 <button
@@ -95,32 +98,18 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
             </div>
           </div>
 
-          {/* Nickname */}
           <div className="space-y-2">
-            <Label htmlFor="nickname" className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">Alcunha</Label>
-            <Input
-              id="nickname"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder="Ex: Kika"
-              className="rounded-xl"
-            />
+            <Label htmlFor="nickname" className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">{t('dialog.edit_child.nickname')}</Label>
+            <Input id="nickname" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder={t('dialog.edit_child.nickname_placeholder')} className="rounded-xl" />
           </div>
 
-          {/* Date of birth */}
           <div className="space-y-2">
-            <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">Data de Nascimento</Label>
+            <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground">{t('dialog.edit_child.date_of_birth')}</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    'w-full justify-start text-left font-normal rounded-xl',
-                    !dateOfBirth && 'text-muted-foreground'
-                  )}
-                >
+                <Button variant="outline" className={cn('w-full justify-start text-left font-normal rounded-xl', !dateOfBirth && 'text-muted-foreground')}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateOfBirth ? format(dateOfBirth, 'dd/MM/yyyy') : 'Selecionar data'}
+                  {dateOfBirth ? format(dateOfBirth, 'dd/MM/yyyy') : t('dialog.edit_child.select_date')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -147,11 +136,11 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
 
         <DialogFooter className="mt-4">
           <Button variant="outline" className="rounded-xl font-display" onClick={() => onOpenChange(false)}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button className="rounded-xl font-display gap-1.5" onClick={handleSave} disabled={updateChild.isPending}>
             {updateChild.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            Guardar
+            {t('dialog.edit_child.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

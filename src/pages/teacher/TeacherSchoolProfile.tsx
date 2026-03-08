@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useClassrooms, useAllClassroomStudents } from '@/hooks/use-classrooms';
 import { School, Users, GraduationCap, BookOpen, MapPin, Calendar, Globe } from 'lucide-react';
 import { format } from 'date-fns';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -18,14 +19,12 @@ function useTeacherSchool() {
     queryKey: ['teacher_school', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      // Get teacher's school_tenant_id from profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('school_tenant_id')
         .eq('id', user!.profileId)
         .single();
       if (!profile?.school_tenant_id) return null;
-
       const { data: tenant } = await supabase
         .from('tenants')
         .select('*')
@@ -45,18 +44,7 @@ function useSchoolTeachers(schoolTenantId: string | null) {
         .from('profiles')
         .select('id, display_name, avatar')
         .eq('school_tenant_id', schoolTenantId!);
-      // Filter to teachers only via user_roles
       if (!data || data.length === 0) return [];
-      const userIds: string[] = [];
-      for (const p of data) {
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .eq('id', p.id)
-          .single();
-        if (prof) userIds.push(prof.user_id);
-      }
-      // Just return profiles linked to school - good enough
       return data;
     },
   });
@@ -77,6 +65,7 @@ function useSchoolStudentCount(schoolTenantId: string | null) {
 }
 
 export default function TeacherSchoolProfile() {
+  const t = useT();
   const { data: school, isLoading } = useTeacherSchool();
   const { data: classrooms = [] } = useClassrooms();
   const classroomIds = classrooms.map(c => c.id);
@@ -104,10 +93,8 @@ export default function TeacherSchoolProfile() {
         <Card className="border-border/50">
           <CardContent className="p-12 text-center">
             <div className="text-5xl mb-4">🏫</div>
-            <h3 className="font-display font-bold text-lg mb-2">Sem escola associada</h3>
-            <p className="text-sm text-muted-foreground">
-              O teu perfil ainda não está vinculado a nenhuma escola. Contacta o administrador para ser associado.
-            </p>
+            <h3 className="font-display font-bold text-lg mb-2">{t('teacher.school.no_school')}</h3>
+            <p className="text-sm text-muted-foreground">{t('teacher.school.no_school_hint')}</p>
           </CardContent>
         </Card>
       </div>
@@ -123,18 +110,16 @@ export default function TeacherSchoolProfile() {
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
           <CardContent className="relative z-10 p-6 sm:p-8">
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg">
-                🏫
-              </div>
+              <div className="w-16 h-16 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg">🏫</div>
               <div className="flex-1">
-                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Escola</p>
+                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">{t('teacher.school.school')}</p>
                 <h1 className="font-display text-xl sm:text-2xl font-bold text-primary-foreground mt-1">{school.name}</h1>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Badge className="bg-white/15 text-primary-foreground border-0 backdrop-blur-sm text-xs">
                     <Globe className="h-3 w-3 mr-1" /> {school.currency}
                   </Badge>
                   <Badge className={`border-0 backdrop-blur-sm text-xs ${school.is_active ? 'bg-secondary/30 text-primary-foreground' : 'bg-destructive/30 text-primary-foreground'}`}>
-                    {school.is_active ? '✅ Ativa' : '❌ Inativa'}
+                    {school.is_active ? `✅ ${t('teacher.school.active')}` : `❌ ${t('teacher.school.inactive')}`}
                   </Badge>
                 </div>
               </div>
@@ -146,10 +131,10 @@ export default function TeacherSchoolProfile() {
       {/* Stats Grid */}
       <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Turmas', value: classrooms.length, icon: GraduationCap, color: 'text-primary' },
-          { label: 'Meus Alunos', value: uniqueStudents, icon: Users, color: 'text-secondary' },
-          { label: 'Total Alunos', value: studentCount, icon: BookOpen, color: 'text-chart-3' },
-          { label: 'Professores', value: teachers.length, icon: School, color: 'text-chart-4' },
+          { label: t('teacher.school.classes'), value: classrooms.length, icon: GraduationCap, color: 'text-primary' },
+          { label: t('teacher.school.my_students'), value: uniqueStudents, icon: Users, color: 'text-secondary' },
+          { label: t('teacher.school.total_students'), value: studentCount, icon: BookOpen, color: 'text-chart-3' },
+          { label: t('teacher.school.teachers'), value: teachers.length, icon: School, color: 'text-chart-4' },
         ].map(stat => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-4 text-center">
@@ -166,30 +151,30 @@ export default function TeacherSchoolProfile() {
         <Card className="border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="font-display text-base flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" /> Detalhes da Escola
+              <MapPin className="h-4 w-4 text-primary" /> {t('teacher.school.details')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Nome</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.name')}</p>
                 <p className="text-sm font-display font-bold">{school.name}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Moeda</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.currency')}</p>
                 <p className="text-sm font-display font-bold">{school.currency}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Criada em</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.created_at')}</p>
                 <p className="text-sm font-display font-bold flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                   {format(new Date(school.created_at), 'dd/MM/yyyy')}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Estado</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.status')}</p>
                 <Badge variant={school.is_active ? 'default' : 'destructive'} className="text-xs">
-                  {school.is_active ? 'Ativa' : 'Inativa'}
+                  {school.is_active ? t('teacher.school.active') : t('teacher.school.inactive')}
                 </Badge>
               </div>
             </div>
@@ -202,23 +187,21 @@ export default function TeacherSchoolProfile() {
         <Card className="border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="font-display text-base flex items-center gap-2">
-              <GraduationCap className="h-4 w-4 text-primary" /> As Minhas Turmas
+              <GraduationCap className="h-4 w-4 text-primary" /> {t('teacher.school.my_classes')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {classrooms.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Ainda não criaste turmas.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t('teacher.school.no_classes')}</p>
             ) : classrooms.map(cls => {
               const students = allStudents.filter(s => s.classroom_id === cls.id);
               return (
                 <div key={cls.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">
-                    {cls.icon}
-                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{cls.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-display font-bold">{cls.name}</p>
                     <p className="text-[10px] text-muted-foreground">
-                      {cls.grade}{cls.subject ? ` · ${cls.subject}` : ''} · {students.length} aluno(s)
+                      {cls.grade}{cls.subject ? ` · ${cls.subject}` : ''} · {students.length} {t('teacher.school.students_count')}
                     </p>
                   </div>
                 </div>
@@ -230,3 +213,4 @@ export default function TeacherSchoolProfile() {
     </motion.div>
   );
 }
+

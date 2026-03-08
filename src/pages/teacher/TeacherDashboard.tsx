@@ -11,6 +11,7 @@ import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from '@/componen
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
+import { useT } from '@/contexts/LanguageContext';
 
 interface ClassComparison {
   name: string;
@@ -21,18 +22,17 @@ interface ClassComparison {
   alunos: number;
 }
 
-// Function to generate pedagogical tips based on class stats
-function getPedagogicalTips(cls: { name: string; icon: string; poupança: number; pontos: number; tarefas: number; alunos: number }) {
+function getPedagogicalTips(cls: ClassComparison, t: (k: string) => string) {
   const tips: { type: 'positive' | 'warning' | 'suggestion'; text: string }[] = [];
-  if (cls.poupança >= 40) tips.push({ type: 'positive', text: '🌟 Excelente taxa de poupança! Reforce este hábito com um desafio de manutenção.' });
-  else if (cls.poupança >= 25) tips.push({ type: 'suggestion', text: '💡 Poupança razoável. Experimente um desafio coletivo de poupança para elevar a média.' });
-  else tips.push({ type: 'warning', text: '⚠️ Poupança baixa. Considere atividades práticas sobre a importância de poupar.' });
-  if (cls.pontos >= 150) tips.push({ type: 'positive', text: '🏆 Alto engajamento em pontos! Os alunos estão motivados — mantenha a cadência.' });
-  else if (cls.pontos < 80) tips.push({ type: 'suggestion', text: '💡 Pontuação baixa. Introduza missões curtas e recompensas rápidas para aumentar a participação.' });
-  if (cls.tarefas >= 10) tips.push({ type: 'positive', text: '✅ Boa conclusão de tarefas! Aumente a complexidade gradualmente.' });
-  else if (cls.tarefas < 5) tips.push({ type: 'warning', text: '⚠️ Poucas tarefas concluídas. Simplifique as tarefas iniciais para criar momentum.' });
-  if (cls.alunos <= 2) tips.push({ type: 'suggestion', text: '💡 Turma pequena — ideal para atividades personalizadas e mentorias individuais.' });
-  else if (cls.alunos >= 5) tips.push({ type: 'suggestion', text: '💡 Turma grande — experimente dinâmicas de grupo e desafios por equipas.' });
+  if (cls.poupança >= 40) tips.push({ type: 'positive', text: t('teacher.dashboard.tip_savings_high') });
+  else if (cls.poupança >= 25) tips.push({ type: 'suggestion', text: t('teacher.dashboard.tip_savings_mid') });
+  else tips.push({ type: 'warning', text: t('teacher.dashboard.tip_savings_low') });
+  if (cls.pontos >= 150) tips.push({ type: 'positive', text: t('teacher.dashboard.tip_points_high') });
+  else if (cls.pontos < 80) tips.push({ type: 'suggestion', text: t('teacher.dashboard.tip_points_low') });
+  if (cls.tarefas >= 10) tips.push({ type: 'positive', text: t('teacher.dashboard.tip_tasks_high') });
+  else if (cls.tarefas < 5) tips.push({ type: 'warning', text: t('teacher.dashboard.tip_tasks_low') });
+  if (cls.alunos <= 2) tips.push({ type: 'suggestion', text: t('teacher.dashboard.tip_class_small') });
+  else if (cls.alunos >= 5) tips.push({ type: 'suggestion', text: t('teacher.dashboard.tip_class_big') });
   return tips;
 }
 
@@ -44,6 +44,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 export default function TeacherDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const t = useT();
   const activeChallenges = mockChallenges.filter(c => c.status === 'active');
   const completedChallenges = mockChallenges.filter(c => c.status === 'completed');
   const totalStudents = new Set(mockClassrooms.flatMap(c => c.studentIds)).size;
@@ -58,10 +59,10 @@ export default function TeacherDashboard() {
   });
 
   const radarData = [
-    { metric: 'Poupança', ...Object.fromEntries(classComparison.map(c => [c.name, c.poupança])) },
-    { metric: 'Pontos', ...Object.fromEntries(classComparison.map(c => [c.name, c.pontos])) },
-    { metric: 'Tarefas', ...Object.fromEntries(classComparison.map(c => [c.name, c.tarefas])) },
-    { metric: 'Alunos', ...Object.fromEntries(classComparison.map(c => [c.name, c.alunos * 10])) },
+    { metric: t('teacher.dashboard.savings'), ...Object.fromEntries(classComparison.map(c => [c.name, c.poupança])) },
+    { metric: t('teacher.dashboard.points'), ...Object.fromEntries(classComparison.map(c => [c.name, c.pontos])) },
+    { metric: t('teacher.dashboard.tasks'), ...Object.fromEntries(classComparison.map(c => [c.name, c.tarefas])) },
+    { metric: t('teacher.dashboard.students'), ...Object.fromEntries(classComparison.map(c => [c.name, c.alunos * 10])) },
   ];
 
   const radarColors = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
@@ -70,14 +71,14 @@ export default function TeacherDashboard() {
     const doc = new jsPDF();
     const today = format(new Date(), 'dd/MM/yyyy');
     doc.setFontSize(18);
-    doc.text('Relatório Comparativo entre Turmas', 14, 20);
+    doc.text(t('teacher.dashboard.report_title'), 14, 20);
     doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`Escola Sol Nascente · ${today}`, 14, 28);
+    doc.text(`Sol Nascente · ${today}`, 14, 28);
     doc.setTextColor(0);
     autoTable(doc, {
       startY: 35,
-      head: [['Turma', 'Alunos', 'Poupança (%)', 'Pontos (média)', 'Tarefas (média)']],
+      head: [[t('teacher.dashboard.classes'), t('teacher.dashboard.students'), t('teacher.dashboard.savings_pct'), t('teacher.dashboard.points_avg'), t('teacher.dashboard.tasks_avg')]],
       body: classComparison.map(c => [c.name, c.alunos, `${c.poupança}%`, c.pontos, c.tarefas]),
       styles: { fontSize: 10 },
       headStyles: { fillColor: [59, 130, 246] },
@@ -85,11 +86,11 @@ export default function TeacherDashboard() {
     const finalY = (doc as any).lastAutoTable?.finalY ?? 80;
     let y = finalY + 10;
     doc.setFontSize(13);
-    doc.text('Dicas Pedagógicas', 14, y);
+    doc.text(t('teacher.dashboard.pedagogical_tips'), 14, y);
     y += 8;
     doc.setFontSize(10);
     classComparison.forEach(cls => {
-      const tips = getPedagogicalTips(cls);
+      const tips = getPedagogicalTips(cls, t);
       doc.setFont('helvetica', 'bold');
       doc.text(`${cls.name}`, 14, y);
       y += 6;
@@ -106,10 +107,10 @@ export default function TeacherDashboard() {
   };
 
   const stats = [
-    { label: 'Turmas', value: mockClassrooms.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/teacher/classes' },
-    { label: 'Alunos', value: totalStudents, icon: GraduationCap, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary' },
-    { label: 'Desafios Activos', value: activeChallenges.length, icon: Target, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/teacher/challenges' },
-    { label: 'Concluídos', value: completedChallenges.length, icon: Trophy, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive' },
+    { label: t('teacher.dashboard.classes'), value: mockClassrooms.length, icon: Users, bg: 'bg-[hsl(var(--kivara-light-blue))]', iconColor: 'text-primary', to: '/teacher/classes' },
+    { label: t('teacher.dashboard.students'), value: totalStudents, icon: GraduationCap, bg: 'bg-[hsl(var(--kivara-light-green))]', iconColor: 'text-secondary' },
+    { label: t('teacher.dashboard.active_challenges'), value: activeChallenges.length, icon: Target, bg: 'bg-[hsl(var(--kivara-light-gold))]', iconColor: 'text-accent-foreground', to: '/teacher/challenges' },
+    { label: t('teacher.dashboard.completed'), value: completedChallenges.length, icon: Trophy, bg: 'bg-[hsl(var(--kivara-pink))]', iconColor: 'text-destructive' },
   ];
 
   return (
@@ -124,18 +125,18 @@ export default function TeacherDashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <p className="text-primary-foreground/60 text-small font-medium uppercase tracking-wider">Modo Escolar</p>
+                  <p className="text-primary-foreground/60 text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
                   <span className="text-caption bg-white/20 text-primary-foreground px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
                 </div>
                 <h1 className="font-display text-heading md:text-heading-lg font-bold text-primary-foreground">
-                  Olá, {user?.name}! 📚
+                  {t('teacher.dashboard.hello')} {user?.name}! 📚
                 </h1>
                 <p className="text-primary-foreground/60 text-base max-w-md">
-                  Acompanha o progresso financeiro das tuas turmas e lança desafios educativos.
+                  {t('teacher.dashboard.subtitle')}
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-5 text-center">
-                <p className="text-primary-foreground/60 text-caption uppercase tracking-wider font-medium">Escola</p>
+                <p className="text-primary-foreground/60 text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
                 <p className="font-display text-base font-bold text-primary-foreground mt-1">Sol Nascente</p>
               </div>
             </div>
@@ -174,15 +175,15 @@ export default function TeacherDashboard() {
                 <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
                   <Target className="h-5 w-5 text-accent-foreground" />
                 </div>
-                Desafios em Curso
+                {t('teacher.dashboard.challenges_in_progress')}
               </CardTitle>
               <button onClick={() => navigate('/teacher/challenges')} className="text-small text-primary font-semibold flex items-center gap-0.5 hover:underline min-h-[44px]">
-                Ver todos <ChevronRight className="h-4 w-4" />
+                {t('teacher.dashboard.view_all')} <ChevronRight className="h-4 w-4" />
               </button>
             </CardHeader>
             <CardContent className="space-y-3">
               {activeChallenges.length === 0 && (
-                <p className="text-base text-muted-foreground text-center py-4">Nenhum desafio activo</p>
+                <p className="text-base text-muted-foreground text-center py-4">{t('teacher.dashboard.no_active_challenges')}</p>
               )}
               {activeChallenges.map((challenge) => {
                 const classroom = mockClassrooms.find(c => c.id === challenge.classroomId);
@@ -195,11 +196,11 @@ export default function TeacherDashboard() {
                       </span>
                       <span className="font-display font-bold text-small text-primary">{pct}%</span>
                     </div>
-                    <p className="text-small text-muted-foreground">{classroom?.name} · {challenge.participants.length} participantes</p>
+                    <p className="text-small text-muted-foreground">{classroom?.name} · {challenge.participants.length} {t('teacher.dashboard.participants')}</p>
                     <Progress value={pct} className="h-3" />
                     <div className="flex justify-between text-small text-muted-foreground">
                       <span>🪙 {challenge.currentAmount} / {challenge.targetAmount}</span>
-                      <span>Até {challenge.endDate}</span>
+                      <span>{t('teacher.dashboard.until')} {challenge.endDate}</span>
                     </div>
                   </div>
                 );
@@ -217,7 +218,7 @@ export default function TeacherDashboard() {
                 <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-green))] flex items-center justify-center">
                   <TrendingUp className="h-5 w-5 text-secondary" />
                 </div>
-                Ranking dos Alunos
+                {t('teacher.dashboard.student_ranking')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -242,7 +243,7 @@ export default function TeacherDashboard() {
                         <span>💾 {student.savingsRate}%</span>
                       </div>
                     </div>
-                    <span className="text-small text-muted-foreground font-display">{student.tasksCompleted} tarefas</span>
+                    <span className="text-small text-muted-foreground font-display">{student.tasksCompleted} {t('teacher.dashboard.tasks')}</span>
                   </motion.div>
                 );
               })}
@@ -260,16 +261,16 @@ export default function TeacherDashboard() {
               <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="h-5 w-5 text-primary" />
               </div>
-              Comparativo entre Turmas
+              {t('teacher.dashboard.class_comparison')}
             </CardTitle>
             <Button variant="outline" size="sm" className="gap-1.5 text-small" onClick={exportPDF}>
-              <Download className="h-4 w-4" /> Exportar PDF
+              <Download className="h-4 w-4" /> {t('teacher.dashboard.export_pdf')}
             </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Bar Chart */}
             <div>
-              <p className="text-small font-display font-semibold text-muted-foreground mb-3">Médias por turma</p>
+              <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.averages')}</p>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={classComparison} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
@@ -285,9 +286,9 @@ export default function TeacherDashboard() {
                       }}
                     />
                     <Legend wrapperStyle={{ fontSize: '13px' }} />
-                    <Bar dataKey="poupança" name="Poupança (%)" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="pontos" name="KivaPoints (média)" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="tarefas" name="Tarefas (média)" fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="poupança" name={t('teacher.dashboard.savings_pct')} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="pontos" name={t('teacher.dashboard.points_avg')} fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="tarefas" name={t('teacher.dashboard.tasks_avg')} fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -295,7 +296,7 @@ export default function TeacherDashboard() {
 
             {/* Radar Chart */}
             <div>
-              <p className="text-small font-display font-semibold text-muted-foreground mb-3">Perfil comparativo</p>
+              <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.comparative')}</p>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
@@ -332,24 +333,24 @@ export default function TeacherDashboard() {
               <table className="w-full text-small">
                 <thead>
                   <tr className="border-b border-border/50">
-                    <th className="text-left py-3 font-display font-semibold text-muted-foreground">Turma</th>
-                    <th className="text-center py-3 font-display font-semibold text-muted-foreground">Alunos</th>
+                    <th className="text-left py-3 font-display font-semibold text-muted-foreground">{t('teacher.dashboard.classes')}</th>
+                    <th className="text-center py-3 font-display font-semibold text-muted-foreground">{t('teacher.dashboard.students')}</th>
                     <th className="text-center py-3 font-display font-semibold text-muted-foreground">
                       <UITooltip>
-                        <TooltipTrigger className="inline-flex items-center gap-1">Poupança <Info className="h-3.5 w-3.5" /></TooltipTrigger>
-                        <TooltipContent><p className="text-small max-w-48">Taxa média de poupança dos alunos. Acima de 30% é considerado saudável.</p></TooltipContent>
+                        <TooltipTrigger className="inline-flex items-center gap-1">{t('teacher.dashboard.savings')} <Info className="h-3.5 w-3.5" /></TooltipTrigger>
+                        <TooltipContent><p className="text-small max-w-48">{t('teacher.dashboard.savings_tooltip')}</p></TooltipContent>
                       </UITooltip>
                     </th>
                     <th className="text-center py-3 font-display font-semibold text-muted-foreground">
                       <UITooltip>
-                        <TooltipTrigger className="inline-flex items-center gap-1">Pontos <Info className="h-3.5 w-3.5" /></TooltipTrigger>
-                        <TooltipContent><p className="text-small max-w-48">Média de KivaPoints acumulados. Reflete o engajamento com tarefas e missões.</p></TooltipContent>
+                        <TooltipTrigger className="inline-flex items-center gap-1">{t('teacher.dashboard.points')} <Info className="h-3.5 w-3.5" /></TooltipTrigger>
+                        <TooltipContent><p className="text-small max-w-48">{t('teacher.dashboard.points_tooltip')}</p></TooltipContent>
                       </UITooltip>
                     </th>
                     <th className="text-center py-3 font-display font-semibold text-muted-foreground">
                       <UITooltip>
-                        <TooltipTrigger className="inline-flex items-center gap-1">Tarefas <Info className="h-3.5 w-3.5" /></TooltipTrigger>
-                        <TooltipContent><p className="text-small max-w-48">Média de tarefas concluídas por aluno. Indicador de consistência e participação.</p></TooltipContent>
+                        <TooltipTrigger className="inline-flex items-center gap-1">{t('teacher.dashboard.tasks')} <Info className="h-3.5 w-3.5" /></TooltipTrigger>
+                        <TooltipContent><p className="text-small max-w-48">{t('teacher.dashboard.tasks_tooltip')}</p></TooltipContent>
                       </UITooltip>
                     </th>
                   </tr>
@@ -371,10 +372,10 @@ export default function TeacherDashboard() {
             {/* Pedagogical Tips per Class */}
             <div className="space-y-3">
               <p className="text-small font-display font-semibold text-muted-foreground flex items-center gap-1.5">
-                <Lightbulb className="h-4 w-4 text-primary" /> Dicas Pedagógicas
+                <Lightbulb className="h-4 w-4 text-primary" /> {t('teacher.dashboard.pedagogical_tips')}
               </p>
               {classComparison.map(cls => {
-                const tips = getPedagogicalTips(cls);
+                const tips = getPedagogicalTips(cls, t);
                 return (
                   <div key={cls.name} className="space-y-2">
                     <p className="text-small font-display font-bold">{cls.icon} {cls.name}</p>

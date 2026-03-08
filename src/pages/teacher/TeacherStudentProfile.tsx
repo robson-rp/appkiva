@@ -8,32 +8,34 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Wallet, Target, CheckCircle2, Trophy, TrendingUp, Clock, Coins } from 'lucide-react';
 import { mockChildren, mockLeaderboard, mockTasks, mockTransactions, mockVaults, mockAchievements } from '@/data/mock-data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendente', color: 'bg-muted text-muted-foreground' },
-  in_progress: { label: 'Em curso', color: 'bg-primary/10 text-primary' },
-  completed: { label: 'Completa', color: 'bg-secondary/10 text-secondary' },
-  approved: { label: 'Aprovada', color: 'bg-secondary/10 text-secondary' },
-};
-
-const txTypeLabels: Record<string, { label: string; color: string; sign: string }> = {
-  allowance: { label: 'Mesada', color: 'text-primary', sign: '+' },
-  earned: { label: 'Ganho', color: 'text-secondary', sign: '+' },
-  saved: { label: 'Poupança', color: 'text-blue-500', sign: '→' },
-  spent: { label: 'Gasto', color: 'text-destructive', sign: '-' },
-  donated: { label: 'Doação', color: 'text-amber-500', sign: '-' },
-};
-
 export default function TeacherStudentProfile() {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
+  const t = useT();
+
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    pending: { label: t('teacher.student.status_pending'), color: 'bg-muted text-muted-foreground' },
+    in_progress: { label: t('teacher.student.status_in_progress'), color: 'bg-primary/10 text-primary' },
+    completed: { label: t('teacher.student.status_completed'), color: 'bg-secondary/10 text-secondary' },
+    approved: { label: t('teacher.student.status_approved'), color: 'bg-secondary/10 text-secondary' },
+  };
+
+  const txTypeLabels: Record<string, { label: string; color: string; sign: string }> = {
+    allowance: { label: t('teacher.student.tx_allowance'), color: 'text-primary', sign: '+' },
+    earned: { label: t('teacher.student.tx_earned'), color: 'text-secondary', sign: '+' },
+    saved: { label: t('teacher.student.tx_saved'), color: 'text-blue-500', sign: '→' },
+    spent: { label: t('teacher.student.tx_spent'), color: 'text-destructive', sign: '-' },
+    donated: { label: t('teacher.student.tx_donated'), color: 'text-amber-500', sign: '-' },
+  };
 
   const leaderboard = mockLeaderboard.find(s => s.childId === studentId);
   const child = mockChildren.find(c => c.id === studentId);
-  const studentTransactions = mockTransactions.filter(t => t.childId === studentId);
+  const studentTransactions = mockTransactions.filter(tx => tx.childId === studentId);
   const balance = child?.balance ?? 0;
   const [chartPeriod, setChartPeriod] = useState<'weekly' | 'monthly'>('weekly');
 
@@ -59,7 +61,6 @@ export default function TeacherStudentProfile() {
         saldo: Math.round(base * (0.4 + i * 0.12)),
       }));
     }
-    // monthly
     const months = ['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'];
     return months.map((m, i) => ({
       date: m,
@@ -71,25 +72,24 @@ export default function TeacherStudentProfile() {
   if (!leaderboard) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <p className="text-muted-foreground">Aluno não encontrado.</p>
+        <p className="text-muted-foreground">{t('teacher.student.not_found')}</p>
         <Button variant="outline" onClick={() => navigate('/teacher/classes')} className="rounded-xl">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Voltar às Turmas
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t('teacher.student.back')}
         </Button>
       </div>
     );
   }
   const studentVaults = mockVaults.filter(v => v.childId === studentId);
-  const studentTasks = mockTasks.filter(t => t.childId === studentId);
+  const studentTasks = mockTasks.filter(task => task.childId === studentId);
   const studentAchievements = mockAchievements.filter(a => a.childId === studentId);
   const kivaPoints = leaderboard.kivaPoints;
-  const completedTasks = studentTasks.filter(t => t.status === 'completed' || t.status === 'approved').length;
+  const completedTasks = studentTasks.filter(task => task.status === 'completed' || task.status === 'approved').length;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
-      {/* Back */}
       <motion.div variants={item}>
         <Button variant="ghost" onClick={() => navigate('/teacher/classes')} className="rounded-xl text-muted-foreground hover:text-foreground gap-2">
-          <ArrowLeft className="h-4 w-4" /> Voltar às Turmas
+          <ArrowLeft className="h-4 w-4" /> {t('teacher.student.back')}
         </Button>
       </motion.div>
 
@@ -108,7 +108,7 @@ export default function TeacherStudentProfile() {
                 <div className="flex flex-wrap items-center gap-2">
                   {child && (
                     <Badge className="bg-white/15 text-primary-foreground border-0 text-[10px] uppercase tracking-wider">
-                      Nível: {child.level}
+                      {t('teacher.student.level')}: {child.level}
                     </Badge>
                   )}
                   <span className="text-primary-foreground/60 text-xs">⭐ {kivaPoints} KivaPoints</span>
@@ -122,9 +122,9 @@ export default function TeacherStudentProfile() {
       {/* Stats */}
       <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: 'Saldo', value: `${balance}`, icon: Wallet, color: 'text-primary' },
-          { label: 'Poupança', value: `${leaderboard.savingsRate}%`, icon: TrendingUp, color: 'text-secondary' },
-          { label: 'Tarefas', value: `${completedTasks}`, icon: CheckCircle2, color: 'text-emerald-500' },
+          { label: t('teacher.student.balance'), value: `${balance}`, icon: Wallet, color: 'text-primary' },
+          { label: t('teacher.student.savings'), value: `${leaderboard.savingsRate}%`, icon: TrendingUp, color: 'text-secondary' },
+          { label: t('teacher.student.tasks'), value: `${completedTasks}`, icon: CheckCircle2, color: 'text-emerald-500' },
           { label: 'KivaPoints', value: `${kivaPoints}`, icon: Coins, color: 'text-amber-500' },
         ].map(stat => (
           <Card key={stat.label} className="border-border/50">
@@ -143,24 +143,14 @@ export default function TeacherStudentProfile() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-secondary" /> Evolução da Poupança
+                <TrendingUp className="h-4 w-4 text-secondary" /> {t('teacher.student.savings_evolution')}
               </CardTitle>
               <div className="flex gap-1">
-                <Button
-                  variant={chartPeriod === 'weekly' ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-7 text-[10px] rounded-lg px-3 font-display"
-                  onClick={() => setChartPeriod('weekly')}
-                >
-                  Semanal
+                <Button variant={chartPeriod === 'weekly' ? 'default' : 'outline'} size="sm" className="h-7 text-[10px] rounded-lg px-3 font-display" onClick={() => setChartPeriod('weekly')}>
+                  {t('teacher.student.weekly')}
                 </Button>
-                <Button
-                  variant={chartPeriod === 'monthly' ? 'default' : 'outline'}
-                  size="sm"
-                  className="h-7 text-[10px] rounded-lg px-3 font-display"
-                  onClick={() => setChartPeriod('monthly')}
-                >
-                  Mensal
+                <Button variant={chartPeriod === 'monthly' ? 'default' : 'outline'} size="sm" className="h-7 text-[10px] rounded-lg px-3 font-display" onClick={() => setChartPeriod('monthly')}>
+                  {t('teacher.student.monthly')}
                 </Button>
               </div>
             </div>
@@ -182,16 +172,9 @@ export default function TeacherStudentProfile() {
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                   <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '0.75rem',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Area type="monotone" dataKey="saldo" stroke="hsl(var(--secondary))" fill="url(#colorSaldo)" strokeWidth={2} name="Saldo" />
-                  <Area type="monotone" dataKey="poupança" stroke="hsl(var(--primary))" fill="url(#colorPoupanca)" strokeWidth={2} name="Poupança" />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '0.75rem', fontSize: '12px' }} />
+                  <Area type="monotone" dataKey="saldo" stroke="hsl(var(--secondary))" fill="url(#colorSaldo)" strokeWidth={2} name={t('teacher.student.chart_balance')} />
+                  <Area type="monotone" dataKey="poupança" stroke="hsl(var(--primary))" fill="url(#colorPoupanca)" strokeWidth={2} name={t('teacher.student.chart_savings')} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -205,12 +188,12 @@ export default function TeacherStudentProfile() {
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" /> Cofres
+                <Target className="h-4 w-4 text-primary" /> {t('teacher.student.vaults')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {studentVaults.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">Sem cofres ativos</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_vaults')}</p>
               ) : studentVaults.map(vault => {
                 const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
                 return (
@@ -220,7 +203,7 @@ export default function TeacherStudentProfile() {
                       <span className="text-xs font-bold text-primary">{pct}%</span>
                     </div>
                     <Progress value={pct} className="h-2" />
-                    <p className="text-[10px] text-muted-foreground">{vault.currentAmount} / {vault.targetAmount} moedas</p>
+                    <p className="text-[10px] text-muted-foreground">{vault.currentAmount} / {vault.targetAmount} {t('teacher.student.coins')}</p>
                   </div>
                 );
               })}
@@ -233,19 +216,19 @@ export default function TeacherStudentProfile() {
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-secondary" /> Tarefas
+                <CheckCircle2 className="h-4 w-4 text-secondary" /> {t('teacher.student.tasks')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {studentTasks.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">Sem tarefas</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_tasks')}</p>
               ) : studentTasks.map(task => {
                 const s = statusLabels[task.status] ?? statusLabels.pending;
                 return (
                   <div key={task.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
                     <div className="min-w-0">
                       <p className="text-sm font-display font-semibold truncate">{task.title}</p>
-                      <p className="text-[10px] text-muted-foreground">+{task.reward} moedas</p>
+                      <p className="text-[10px] text-muted-foreground">+{task.reward} {t('teacher.student.coins')}</p>
                     </div>
                     <Badge className={`${s.color} border-0 text-[10px] shrink-0`}>{s.label}</Badge>
                   </div>
@@ -260,12 +243,12 @@ export default function TeacherStudentProfile() {
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-amber-500" /> Conquistas
+                <Trophy className="h-4 w-4 text-amber-500" /> {t('teacher.student.achievements')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {studentAchievements.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">Sem conquistas</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_achievements')}</p>
               ) : studentAchievements.map(ach => (
                 <div key={ach.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20">
                   <span className="text-2xl">{ach.icon}</span>
@@ -284,22 +267,22 @@ export default function TeacherStudentProfile() {
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-display flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" /> Histórico
+                <Clock className="h-4 w-4 text-muted-foreground" /> {t('teacher.student.history')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {studentTransactions.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-4">Sem transações</p>
+                <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_transactions')}</p>
               ) : studentTransactions.map(tx => {
-                const t = txTypeLabels[tx.type] ?? txTypeLabels.earned;
+                const txType = txTypeLabels[tx.type] ?? txTypeLabels.earned;
                 return (
                   <div key={tx.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
                     <div className="min-w-0">
                       <p className="text-sm font-display font-medium truncate">{tx.description}</p>
                       <p className="text-[10px] text-muted-foreground">{tx.date}</p>
                     </div>
-                    <span className={`text-sm font-display font-bold shrink-0 ${t.color}`}>
-                      {t.sign}{tx.amount}
+                    <span className={`text-sm font-display font-bold shrink-0 ${txType.color}`}>
+                      {txType.sign}{tx.amount}
                     </span>
                   </div>
                 );
