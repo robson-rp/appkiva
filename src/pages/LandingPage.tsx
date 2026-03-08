@@ -487,7 +487,7 @@ function ProblemSection() {
         <SectionTitle>A maioria das pessoas aprende sobre dinheiro tarde demais</SectionTitle>
         <SectionSubtitle>Poucas crianças recebem educação financeira. Queremos mudar isso.</SectionSubtitle>
 
-        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-5">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
           {points.map((p, i) => (
             <motion.div
               key={i}
