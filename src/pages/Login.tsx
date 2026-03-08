@@ -15,26 +15,25 @@ import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
 import LoginBannerCarousel from '@/components/LoginBannerCarousel';
+import { useT } from '@/contexts/LanguageContext';
 
 type AuthMode = 'login' | 'signup';
 type ContactMethod = 'email' | 'phone';
 
-const ROLE_CONFIG: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string }> = {
-  parent: { label: 'Encarregado', description: 'Gerir tarefas, mesadas e acompanhar o progresso', icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary' },
-  teen: { label: 'Adolescente', description: 'Carteira avançada, categorias e orçamento', icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
-  child: { label: 'Criança', description: 'Missões, poupanças e ganhar moedas', icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
-  teacher: { label: 'Professor', description: 'Gerir turmas e desafios colectivos', icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
-  partner: { label: 'Parceiro', description: 'Gestão do programa de parceria institucional', icon: Building2, colorClass: 'text-chart-4', bgClass: 'bg-chart-4/10 group-hover:bg-chart-4/20 hover:border-chart-4' },
-  admin: { label: 'Administrador', description: 'Gestão global da plataforma', icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
-};
+function useRoleConfig() {
+  const t = useT();
+  const config: Record<UserRole, { label: string; description: string; icon: React.ElementType; colorClass: string; bgClass: string }> = {
+    parent: { label: t('role.parent'), description: t('role.parent.desc'), icon: Shield, colorClass: 'text-primary', bgClass: 'bg-primary/10 group-hover:bg-primary/20 hover:border-primary' },
+    teen: { label: t('role.teen'), description: t('role.teen.desc'), icon: Zap, colorClass: 'text-chart-3', bgClass: 'bg-chart-3/10 group-hover:bg-chart-3/20 hover:border-chart-3' },
+    child: { label: t('role.child'), description: t('role.child.desc'), icon: Sparkles, colorClass: 'text-secondary', bgClass: 'bg-secondary/10 group-hover:bg-secondary/20 hover:border-secondary' },
+    teacher: { label: t('role.teacher'), description: t('role.teacher.desc'), icon: GraduationCap, colorClass: 'text-accent-foreground', bgClass: 'bg-accent/10 group-hover:bg-accent/20 hover:border-accent' },
+    partner: { label: t('role.partner'), description: t('role.partner.desc'), icon: Building2, colorClass: 'text-chart-4', bgClass: 'bg-chart-4/10 group-hover:bg-chart-4/20 hover:border-chart-4' },
+    admin: { label: t('role.admin'), description: t('role.admin.desc'), icon: Shield, colorClass: 'text-destructive', bgClass: 'bg-destructive/10 group-hover:bg-destructive/20 hover:border-destructive' },
+  };
+  return config;
+}
 
 const ROLE_ORDER: UserRole[] = ['parent', 'teen', 'child', 'teacher', 'partner', 'admin'];
-
-const GENDER_OPTIONS = [
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Feminino' },
-  { value: 'other', label: 'Outro' },
-];
 
 const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
   AO: '+244', PT: '+351', BR: '+55', MZ: '+258', CV: '+238',
@@ -43,6 +42,14 @@ const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
 };
 
 export default function Login() {
+  const t = useT();
+  const ROLE_CONFIG = useRoleConfig();
+  const GENDER_OPTIONS = [
+    { value: 'male', label: t('auth.gender_male') },
+    { value: 'female', label: t('auth.gender_female') },
+    { value: 'other', label: t('auth.gender_other') },
+  ];
+
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
@@ -65,7 +72,6 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch schools for teacher/parent/child/teen signup
   useEffect(() => {
     if (['teacher', 'parent', 'child', 'teen'].includes(selectedRole ?? '') && authMode === 'signup') {
       supabase
@@ -79,7 +85,6 @@ export default function Login() {
     }
   }, [selectedRole, authMode]);
 
-  // Validate invite code for child/teen
   useEffect(() => {
     if ((selectedRole === 'child' || selectedRole === 'teen') && inviteCode.length === 6) {
       supabase.rpc('validate_invite_code', { _code: inviteCode }).then(({ data, error }) => {
@@ -115,36 +120,28 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
-        // Validate child/teen must have valid invite
         if ((selectedRole === 'child' || selectedRole === 'teen') && !inviteValid) {
-          toast({ title: 'Código inválido', description: 'Precisas de um código de convite válido do teu encarregado.', variant: 'destructive' });
+          toast({ title: t('auth.otp_invalid'), description: t('auth.invite_required'), variant: 'destructive' });
           setSubmitting(false);
           return;
         }
-
-        // Validate teacher must select school
         if (selectedRole === 'teacher' && !schoolTenantId) {
-          toast({ title: 'Escola obrigatória', description: 'Seleciona a tua escola para continuar.', variant: 'destructive' });
+          toast({ title: t('auth.school_required'), description: t('auth.school_required'), variant: 'destructive' });
           setSubmitting(false);
           return;
         }
-
-        // Validate partner must have sector
         if (selectedRole === 'partner' && !sector) {
-          toast({ title: 'Sector obrigatório', description: 'Seleciona o sector de actividade.', variant: 'destructive' });
+          toast({ title: t('auth.sector_required'), description: t('auth.sector_required'), variant: 'destructive' });
           setSubmitting(false);
           return;
         }
-
-        // Validate parent must have gender
         if (selectedRole === 'parent' && !gender) {
-          toast({ title: 'Género obrigatório', description: 'Seleciona o teu género.', variant: 'destructive' });
+          toast({ title: t('auth.gender_required'), description: t('auth.gender_required'), variant: 'destructive' });
           setSubmitting(false);
           return;
         }
 
         if (contactMethod === 'phone') {
-          // Phone signup with OTP
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({
               phone: phoneWithPrefix,
@@ -163,27 +160,25 @@ export default function Login() {
               },
             });
             if (error) {
-              toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
               setSubmitting(false);
               return;
             }
             setOtpSent(true);
-            toast({ title: 'OTP enviado! 📱', description: `Código enviado para ${phoneWithPrefix}` });
+            toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
           } else {
-            // Verify OTP
             const { error } = await supabase.auth.verifyOtp({
               phone: phoneWithPrefix,
               token: otpCode,
               type: 'sms',
             });
             if (error) {
-              toast({ title: 'Código inválido', description: error.message, variant: 'destructive' });
+              toast({ title: t('auth.otp_invalid'), description: error.message, variant: 'destructive' });
               setSubmitting(false);
               return;
             }
-            // If child/teen, claim the invite code
             if (inviteData && (selectedRole === 'child' || selectedRole === 'teen')) {
               const { data: { user } } = await supabase.auth.getUser();
               if (user) {
@@ -199,7 +194,6 @@ export default function Login() {
             }
           }
         } else {
-          // Email signup
           const { error } = await signup(
             email,
             password,
@@ -216,24 +210,23 @@ export default function Login() {
             }
           );
           if (error) {
-            toast({ title: 'Erro ao criar conta', description: error, variant: 'destructive' });
+            toast({ title: t('auth.error_signup'), description: error, variant: 'destructive' });
             setSubmitting(false);
             return;
           }
-          toast({ title: 'Conta criada!', description: 'Verifica o teu email para confirmar a conta.' });
+          toast({ title: t('auth.account_created'), description: t('auth.check_email') });
         }
       } else {
-        // Login
         if (contactMethod === 'phone') {
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({ phone: phoneWithPrefix });
             if (error) {
-              toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+              toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
               setSubmitting(false);
               return;
             }
             setOtpSent(true);
-            toast({ title: 'OTP enviado! 📱', description: `Código enviado para ${phoneWithPrefix}` });
+            toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
           } else {
@@ -243,7 +236,7 @@ export default function Login() {
               type: 'sms',
             });
             if (error) {
-              toast({ title: 'Código inválido', description: error.message, variant: 'destructive' });
+              toast({ title: t('auth.otp_invalid'), description: error.message, variant: 'destructive' });
               setSubmitting(false);
               return;
             }
@@ -251,7 +244,7 @@ export default function Login() {
         } else {
           const { error } = await login(email, password);
           if (error) {
-            toast({ title: 'Erro ao entrar', description: error, variant: 'destructive' });
+            toast({ title: t('auth.error_login'), description: error, variant: 'destructive' });
             setSubmitting(false);
             return;
           }
@@ -261,7 +254,7 @@ export default function Login() {
       const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : selectedRole === 'admin' ? '/admin' : selectedRole === 'partner' ? '/partner' : '/child';
       navigate(dest);
     } catch {
-      toast({ title: 'Erro inesperado', variant: 'destructive' });
+      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -291,15 +284,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left Hero Panel — minimal on mobile, showcase on desktop */}
+      {/* Left Hero Panel */}
       <div className="relative flex flex-col items-center justify-center px-4 py-3 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
-        {/* Soft glow orbs */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
           <div className="absolute top-[-20%] right-[-15%] w-[45%] h-[45%] rounded-full bg-white/[0.04] blur-3xl" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/[0.03] blur-3xl" />
         </div>
 
-        {/* Geometric pattern overlay */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="geo-grid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -311,13 +302,11 @@ export default function Login() {
           <rect width="100%" height="100%" fill="url(#geo-grid)" />
         </svg>
 
-        {/* Accent lines — desktop only */}
         <div className="absolute top-[15%] left-[8%] w-24 h-[1px] bg-white/10 rotate-45 hidden lg:block" />
         <div className="absolute bottom-[20%] right-[10%] w-32 h-[1px] bg-white/10 -rotate-30 hidden lg:block" />
         <div className="absolute top-[40%] right-[5%] w-16 h-[1px] bg-white/10 rotate-12 hidden lg:block" />
 
         <div className="relative z-10 flex flex-row lg:flex-col items-center gap-2 lg:gap-5 w-full">
-          {/* Logo — smaller on mobile, large on desktop */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -330,17 +319,15 @@ export default function Login() {
             />
           </motion.div>
 
-          {/* Slogan — desktop: centered below logo */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="hidden lg:block lg:-mt-6 text-white/60 lg:text-sm tracking-[0.25em] uppercase font-light"
           >
-            Pequenos hábitos. Grandes futuros
+            {t('auth.slogan')}
           </motion.p>
 
-          {/* Version badge — desktop only */}
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -351,14 +338,13 @@ export default function Login() {
           </motion.span>
         </div>
 
-        {/* Slogan — mobile: bottom-right corner */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
           className="lg:hidden absolute bottom-1.5 right-3 z-10 text-white/40 text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-light"
         >
-          Pequenos hábitos. Grandes futuros
+          {t('auth.slogan')}
         </motion.p>
       </div>
 
@@ -380,10 +366,10 @@ export default function Login() {
               >
                 <div>
                   <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                    Bem-vindo! 👋
+                    {t('auth.welcome')}
                   </h2>
                   <p className="text-muted-foreground font-body text-sm sm:text-base">
-                    Seleciona o teu perfil para continuar
+                    {t('auth.select_profile')}
                   </p>
                 </div>
 
@@ -413,7 +399,6 @@ export default function Login() {
                         <div className="flex-1 min-w-0 text-center sm:text-left">
                           <span className="font-display font-bold text-sm sm:text-base text-foreground block truncate">{cfg.label}</span>
                           <span className="text-xs text-muted-foreground hidden sm:block">{cfg.description}</span>
-                          
                         </div>
                       </motion.button>
                     );
@@ -435,28 +420,26 @@ export default function Login() {
                     className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 font-body"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Voltar
+                    {t('auth.back')}
                   </button>
                   <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">
-                    {authMode === 'signup' ? 'Criar Conta' : `Área do ${ROLE_CONFIG[selectedRole].label}`}
+                    {authMode === 'signup' ? t('auth.create_account') : `${t('auth.area_of')} ${ROLE_CONFIG[selectedRole].label}`}
                   </h2>
                   <p className="text-muted-foreground font-body">
                     {authMode === 'signup'
-                      ? `Cria a tua conta como ${ROLE_CONFIG[selectedRole].label.toLowerCase()}`
-                      : 'Insere as tuas credenciais para aceder'}
+                      ? `${t('auth.create_as')} ${ROLE_CONFIG[selectedRole].label.toLowerCase()}`
+                      : t('auth.enter_credentials')}
                   </p>
                 </div>
 
                 <form key={authMode} onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
-                  {/* ===== SIGNUP-ONLY FIELDS ===== */}
                   {authMode === 'signup' && (
                     <>
-                      {/* Child/Teen: Invite code first */}
                       {isChildOrTeen && (
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <Label className="font-semibold">Código de Convite Familiar</Label>
-                            <p className="text-xs text-muted-foreground">Pede ao teu encarregado o código de 6 caracteres.</p>
+                            <Label className="font-semibold">{t('auth.invite_code')}</Label>
+                            <p className="text-xs text-muted-foreground">{t('auth.invite_hint')}</p>
                             <div className="relative">
                               <Input
                                 placeholder="EX: A3B7K9"
@@ -471,20 +454,19 @@ export default function Login() {
                               )}
                             </div>
                             {inviteValid === false && (
-                              <p className="text-xs text-destructive">Código inválido ou expirado. Pede um novo ao teu encarregado.</p>
+                              <p className="text-xs text-destructive">{t('auth.invite_invalid')}</p>
                             )}
                             {inviteValid === true && (
-                              <p className="text-xs text-secondary">✓ Código válido! Preenche os teus dados abaixo.</p>
+                              <p className="text-xs text-secondary">{t('auth.invite_valid')}</p>
                             )}
                           </div>
 
-                          {/* School - For child/teen after invite validated */}
                           {inviteValid && schools.length > 0 && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">Escola <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                              <Label className="font-semibold">{t('auth.school')} <span className="text-muted-foreground font-normal">({t('common.optional')})</span></Label>
                               <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
                                 <SelectTrigger className="h-12 rounded-xl text-base">
-                                  <SelectValue placeholder="Selecionar escola (opcional)" />
+                                  <SelectValue placeholder={t('auth.select_school_optional')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {schools.map(s => (
@@ -497,17 +479,15 @@ export default function Login() {
                         </div>
                       )}
 
-                      {/* Show remaining fields only if not child/teen or if invite is valid */}
                       {!needsInviteFirst && (
                         <>
-                          {/* Name / Institution Name */}
                           <div className="space-y-2">
                             <Label htmlFor="displayName" className="font-semibold">
-                              {selectedRole === 'partner' ? 'Nome da Instituição' : 'Nome'}
+                              {selectedRole === 'partner' ? t('auth.institution_name') : t('auth.name')}
                             </Label>
                             <Input
                               id="displayName"
-                              placeholder={selectedRole === 'partner' ? 'Nome da instituição' : 'O teu nome'}
+                              placeholder={selectedRole === 'partner' ? t('auth.institution_name') : t('auth.name')}
                               value={displayName}
                               onChange={e => setDisplayName(e.target.value)}
                               className="h-12 rounded-xl text-base"
@@ -515,13 +495,12 @@ export default function Login() {
                             />
                           </div>
 
-                          {/* Gender - Only for parents */}
                           {selectedRole === 'parent' && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">Género</Label>
+                              <Label className="font-semibold">{t('auth.gender')}</Label>
                               <Select value={gender} onValueChange={setGender}>
                                 <SelectTrigger className="h-12 rounded-xl text-base">
-                                  <SelectValue placeholder="Selecionar género" />
+                                  <SelectValue placeholder={t('auth.gender')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {GENDER_OPTIONS.map(g => (
@@ -532,36 +511,34 @@ export default function Login() {
                             </div>
                           )}
 
-                          {/* School - For parents (optional, to link children) */}
                           {selectedRole === 'parent' && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">Escola dos filhos <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                              <Label className="font-semibold">{t('auth.school_optional')} <span className="text-muted-foreground font-normal">({t('common.optional')})</span></Label>
                               <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
                                 <SelectTrigger className="h-12 rounded-xl text-base">
-                                  <SelectValue placeholder="Selecionar escola (opcional)" />
+                                  <SelectValue placeholder={t('auth.select_school_optional')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {schools.map(s => (
                                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                                   ))}
-                                  <SelectItem value="other">Outra (editar depois)</SelectItem>
+                                  <SelectItem value="other">{t('auth.other_school')}</SelectItem>
                                 </SelectContent>
                               </Select>
                               {schoolTenantId === 'other' && (
                                 <p className="text-xs text-muted-foreground">
-                                  Podes associar a escola mais tarde no teu perfil.
+                                  {t('auth.other_school_hint')}
                                 </p>
                               )}
                             </div>
                           )}
 
-                          {/* Sector - Only for partners */}
                           {selectedRole === 'partner' && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">Sector de Actividade</Label>
+                              <Label className="font-semibold">{t('auth.sector')}</Label>
                               <Select value={sector} onValueChange={setSector}>
                                 <SelectTrigger className="h-12 rounded-xl text-base">
-                                  <SelectValue placeholder="Selecionar sector" />
+                                  <SelectValue placeholder={t('auth.select_sector')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {PARTNER_SECTORS.map(s => (
@@ -572,18 +549,17 @@ export default function Login() {
                             </div>
                           )}
 
-                          {/* School - Only for teachers */}
                           {selectedRole === 'teacher' && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">Escola</Label>
+                              <Label className="font-semibold">{t('auth.school')}</Label>
                               {schools.length === 0 ? (
                                 <p className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-xl">
-                                  Nenhuma escola registada. Contacta o administrador da plataforma.
+                                  {t('auth.no_schools')}
                                 </p>
                               ) : (
                                 <Select value={schoolTenantId} onValueChange={setSchoolTenantId}>
                                   <SelectTrigger className="h-12 rounded-xl text-base">
-                                    <SelectValue placeholder="Selecionar escola" />
+                                    <SelectValue placeholder={t('auth.select_school')} />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {schools.map(s => (
@@ -595,10 +571,9 @@ export default function Login() {
                             </div>
                           )}
 
-                          {/* Country - Not for child/teen (inherited from parent) */}
                           {!isChildOrTeen && (
                             <div className="space-y-2">
-                              <Label className="font-semibold">País</Label>
+                              <Label className="font-semibold">{t('auth.country')}</Label>
                               <Select value={country} onValueChange={setCountry}>
                                 <SelectTrigger className="h-12 rounded-xl text-base">
                                   <SelectValue />
@@ -618,10 +593,8 @@ export default function Login() {
                     </>
                   )}
 
-                  {/* ===== CONTACT METHOD TOGGLE ===== */}
                   {!needsInviteFirst && (
                     <>
-                      {/* Toggle Email/Phone - not for child/teen in signup (they just use password) */}
                       {!(isChildOrTeen && authMode === 'signup') && (
                         <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
                           <button
@@ -633,7 +606,7 @@ export default function Login() {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            <Mail className="h-4 w-4" /> Email
+                            <Mail className="h-4 w-4" /> {t('auth.email')}
                           </button>
                           <button
                             type="button"
@@ -644,15 +617,14 @@ export default function Login() {
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
-                            <Phone className="h-4 w-4" /> Telefone
+                            <Phone className="h-4 w-4" /> {t('auth.phone')}
                           </button>
                         </div>
                       )}
 
-                      {/* Email or Phone field */}
                       {contactMethod === 'email' || (isChildOrTeen && authMode === 'signup') ? (
                         <div className="space-y-2">
-                          <Label htmlFor="email" className="font-semibold">Email</Label>
+                          <Label htmlFor="email" className="font-semibold">{t('auth.email')}</Label>
                           <Input
                             id="email"
                             type="email"
@@ -665,7 +637,7 @@ export default function Login() {
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          <Label htmlFor="phone" className="font-semibold">Telefone</Label>
+                          <Label htmlFor="phone" className="font-semibold">{t('auth.phone')}</Label>
                           <div className="flex gap-2">
                             <div className="w-24 shrink-0">
                               <Input
@@ -687,10 +659,9 @@ export default function Login() {
                         </div>
                       )}
 
-                      {/* Password - Only for email auth */}
                       {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && !otpSent && (
                         <div className="space-y-2">
-                          <Label htmlFor="password" className="font-semibold">Palavra-passe</Label>
+                          <Label htmlFor="password" className="font-semibold">{t('auth.password')}</Label>
                           <Input
                             id="password"
                             type="password"
@@ -704,11 +675,10 @@ export default function Login() {
                         </div>
                       )}
 
-                      {/* OTP Code Input */}
                       {otpSent && contactMethod === 'phone' && (
                         <div className="space-y-2">
-                          <Label htmlFor="otp" className="font-semibold">Código OTP</Label>
-                          <p className="text-xs text-muted-foreground">Insere o código de 6 dígitos enviado para o teu telefone.</p>
+                          <Label htmlFor="otp" className="font-semibold">{t('auth.otp_code')}</Label>
+                          <p className="text-xs text-muted-foreground">{t('auth.otp_hint')}</p>
                           <Input
                             id="otp"
                             placeholder="000000"
@@ -730,27 +700,27 @@ export default function Login() {
                         {submitting ? (
                           <Loader2 className="h-5 w-5 animate-spin" />
                         ) : otpSent ? (
-                          'Verificar Código'
+                          t('auth.verify_code')
                         ) : contactMethod === 'phone' ? (
-                          'Enviar Código'
+                          t('common.send')
                         ) : authMode === 'signup' ? (
-                          'Criar Conta'
+                          t('auth.sign_up')
                         ) : (
-                          'Entrar'
+                          t('auth.sign_in')
                         )}
                       </Button>
 
                       <p className="text-center text-sm text-muted-foreground">
                         {authMode === 'login' ? (
-                          <>Não tens conta?{' '}
+                          <>{t('auth.no_account')}{' '}
                             <button type="button" onClick={() => { setAuthMode('signup'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
-                              Criar conta
+                              {t('auth.register')}
                             </button>
                           </>
                         ) : (
-                          <>Já tens conta?{' '}
+                          <>{t('auth.has_account')}{' '}
                             <button type="button" onClick={() => { setAuthMode('login'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
-                              Entrar
+                              {t('auth.login')}
                             </button>
                           </>
                         )}
@@ -762,7 +732,7 @@ export default function Login() {
             )}
 
           <p className="text-center text-xs text-muted-foreground mt-6 sm:mt-10 pb-4">
-            © 2026 KIVARA — Pequenos hábitos. Grandes futuros.
+            © 2026 KIVARA — {t('auth.slogan')}
           </p>
         </motion.div>
       </div>
