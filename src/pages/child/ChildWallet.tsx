@@ -234,8 +234,8 @@ export default function ChildWallet() {
       {/* Transaction History */}
       <motion.div variants={item}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-sm">📜 Histórico</h2>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} movimentos</span>
+          <h2 className="font-display font-bold text-sm">{t('child.wallet.history')}</h2>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} {t('child.wallet.movements')}</span>
         </div>
         <div className="space-y-2">
           {transactions.length === 0 ? (
