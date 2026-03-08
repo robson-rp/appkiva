@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Bell, Send, Eye, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { useT } from '@/contexts/LanguageContext';
 
 export function useNotificationStats() {
   return useQuery({
@@ -34,11 +35,13 @@ interface NotificationStatsProps {
 }
 
 export default function NotificationStats({ stats }: NotificationStatsProps) {
+  const t = useT();
+
   const cards = [
-    { label: 'Total Enviadas', value: stats?.total ?? 0, icon: Bell, color: 'text-primary' },
-    { label: 'Hoje', value: stats?.today ?? 0, icon: Send, color: 'text-accent-foreground' },
-    { label: 'Não Lidas', value: stats?.unread ?? 0, icon: Eye, color: 'text-muted-foreground' },
-    { label: 'Urgentes', value: stats?.urgent ?? 0, icon: AlertTriangle, color: 'text-destructive' },
+    { label: t('admin.notif.stat_total'), value: stats?.total ?? 0, icon: Bell, color: 'text-primary' },
+    { label: t('admin.notif.stat_today'), value: stats?.today ?? 0, icon: Send, color: 'text-accent-foreground' },
+    { label: t('admin.notif.stat_unread'), value: stats?.unread ?? 0, icon: Eye, color: 'text-muted-foreground' },
+    { label: t('admin.notif.stat_urgent'), value: stats?.urgent ?? 0, icon: AlertTriangle, color: 'text-destructive' },
   ];
 
   return (

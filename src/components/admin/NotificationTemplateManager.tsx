@@ -12,31 +12,38 @@ import { Pencil, Plus, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { useT } from '@/contexts/LanguageContext';
 
-const EVENT_LABELS: Record<string, string> = {
-  task_created: 'Tarefa criada',
-  task_completed: 'Tarefa concluída',
-  task_approved: 'Tarefa aprovada',
-  lesson_completed: 'Lição concluída',
-  donation_made: 'Doação feita',
-  reward_claimed: 'Recompensa resgatada',
-  allowance_sent: 'Mesada enviada',
-  vault_deposit: 'Depósito cofre',
-  vault_withdraw: 'Levantamento cofre',
-  vault_milestone: 'Meta cofre',
-  streak_milestone: 'Marco sequência',
-  badge_unlocked: 'Badge desbloqueado',
-  level_up: 'Subida de nível',
-  budget_warning: 'Alerta orçamento',
-  system_broadcast: 'Broadcast sistema',
-};
+function useEventLabels() {
+  const t = useT();
+  return {
+    task_created: t('admin.notif.event_task_created'),
+    task_completed: t('admin.notif.event_task_completed'),
+    task_approved: t('admin.notif.event_task_approved'),
+    lesson_completed: t('admin.notif.event_lesson_completed'),
+    donation_made: t('admin.notif.event_donation_made'),
+    reward_claimed: t('admin.notif.event_reward_claimed'),
+    allowance_sent: t('admin.notif.event_allowance_sent'),
+    vault_deposit: t('admin.notif.event_vault_deposit'),
+    vault_withdraw: t('admin.notif.event_vault_withdraw'),
+    vault_milestone: t('admin.notif.event_vault_milestone'),
+    streak_milestone: t('admin.notif.event_streak_milestone'),
+    badge_unlocked: t('admin.notif.event_badge_unlocked'),
+    level_up: t('admin.notif.event_level_up'),
+    budget_warning: t('admin.notif.event_budget_warning'),
+    system_broadcast: t('admin.notif.event_system_broadcast'),
+  } as Record<string, string>;
+}
 
-const RECIPIENT_LABELS: Record<string, string> = {
-  self: 'Próprio',
-  parent: 'Pai/Mãe',
-  child: 'Criança',
-  all: 'Todos',
-};
+function useRecipientLabels() {
+  const t = useT();
+  return {
+    self: t('admin.notif.recipient_self'),
+    parent: t('admin.notif.recipient_parent'),
+    child: t('admin.notif.recipient_child'),
+    all: t('admin.notif.recipient_all'),
+  } as Record<string, string>;
+}
 
 function useTemplates(search: string) {
   return useQuery({
@@ -76,6 +83,7 @@ function useToggleTemplate() {
 }
 
 function useUpdateTemplate() {
+  const t = useT();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { id: string; title_template: string; message_template: string; icon: string; is_urgent: boolean; cooldown_minutes: number }) => {
@@ -88,7 +96,7 @@ function useUpdateTemplate() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-notification-templates'] });
-      toast({ title: '✅ Template atualizado!' });
+      toast({ title: t('admin.notif.template_updated') });
     },
     onError: (e: any) => {
       toast({ title: 'Erro', description: e?.message, variant: 'destructive' });
@@ -97,6 +105,9 @@ function useUpdateTemplate() {
 }
 
 function EditTemplateDialog({ template, children }: { template: any; children: React.ReactNode }) {
+  const t = useT();
+  const eventLabels = useEventLabels();
+  const recipientLabels = useRecipientLabels();
   const update = useUpdateTemplate();
   const [title, setTitle] = useState(template.title_template);
   const [message, setMessage] = useState(template.message_template);
@@ -122,44 +133,44 @@ function EditTemplateDialog({ template, children }: { template: any; children: R
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display">Editar Template</DialogTitle>
+          <DialogTitle className="font-display">{t('admin.notif.edit_template')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex gap-2">
-            <Badge variant="outline">{EVENT_LABELS[template.event] ?? template.event}</Badge>
-            <Badge variant="secondary">→ {RECIPIENT_LABELS[template.recipient_role] ?? template.recipient_role}</Badge>
+            <Badge variant="outline">{eventLabels[template.event] ?? template.event}</Badge>
+            <Badge variant="secondary">→ {recipientLabels[template.recipient_role] ?? template.recipient_role}</Badge>
           </div>
           <div className="grid grid-cols-[60px_1fr] gap-2">
             <div className="space-y-1">
-              <Label className="text-xs">Ícone</Label>
+              <Label className="text-xs">{t('admin.notif.icon')}</Label>
               <Input value={icon} onChange={e => setIcon(e.target.value)} className="text-center text-lg" />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Título (com placeholders)</Label>
+              <Label className="text-xs">{t('admin.notif.title_placeholders')}</Label>
               <Input value={title} onChange={e => setTitle(e.target.value)} />
             </div>
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Mensagem (com placeholders)</Label>
+            <Label className="text-xs">{t('admin.notif.message_placeholders')}</Label>
             <Textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} />
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Switch checked={urgent} onCheckedChange={setUrgent} id="edit-urgent" />
-                <Label htmlFor="edit-urgent" className="text-xs">Urgente</Label>
+                <Label htmlFor="edit-urgent" className="text-xs">{t('admin.notif.urgent')}</Label>
               </div>
               <div className="flex items-center gap-2">
-                <Label className="text-xs whitespace-nowrap">Cooldown (min)</Label>
+                <Label className="text-xs whitespace-nowrap">{t('admin.notif.cooldown')}</Label>
                 <Input value={cooldown} onChange={e => setCooldown(e.target.value)} className="w-20" type="number" />
               </div>
             </div>
             <Button onClick={handleSave} disabled={update.isPending} size="sm">
-              Guardar
+              {t('admin.notif.save')}
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Placeholders disponíveis: {'{{child_name}}, {{parent_name}}, {{task_title}}, {{amount}}, {{vault_name}}, {{points}}, {{level}}, {{badge_name}}, {{cause_name}}, {{percent}}, {{days}}, {{score}}, {{lesson_title}}, {{reward_name}}, {{title}}, {{message}}'}
+            {t('admin.notif.placeholders_info')} {'{{child_name}}, {{parent_name}}, {{task_title}}, {{amount}}, {{vault_name}}, {{points}}, {{level}}, {{badge_name}}, {{cause_name}}, {{percent}}, {{days}}, {{score}}, {{lesson_title}}, {{reward_name}}, {{title}}, {{message}}'}
           </p>
         </div>
       </DialogContent>
@@ -168,6 +179,9 @@ function EditTemplateDialog({ template, children }: { template: any; children: R
 }
 
 export default function NotificationTemplateManager() {
+  const t = useT();
+  const eventLabels = useEventLabels();
+  const recipientLabels = useRecipientLabels();
   const [search, setSearch] = useState('');
   const { data: templates, isLoading } = useTemplates(search);
   const toggle = useToggleTemplate();
@@ -179,7 +193,7 @@ export default function NotificationTemplateManager() {
         <Input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Pesquisar templates..."
+          placeholder={t('admin.notif.search_templates')}
           className="pl-9"
         />
       </div>
@@ -187,36 +201,36 @@ export default function NotificationTemplateManager() {
       <Card className="border-border/50">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">A carregar...</div>
+            <div className="p-8 text-center text-muted-foreground">{t('admin.notif.loading')}</div>
           ) : (templates ?? []).length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">Nenhum template encontrado</div>
+            <div className="p-8 text-center text-muted-foreground">{t('admin.notif.no_templates')}</div>
           ) : (
             <div className="divide-y divide-border/30">
-              {(templates ?? []).map((t: any) => (
-                <div key={t.id} className="px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
-                  <span className="text-xl shrink-0">{t.icon}</span>
+              {(templates ?? []).map((tpl: any) => (
+                <div key={tpl.id} className="px-4 py-3 flex items-center gap-3 hover:bg-muted/30 transition-colors">
+                  <span className="text-xl shrink-0">{tpl.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-display font-bold truncate">{t.title_template}</span>
+                      <span className="text-xs font-display font-bold truncate">{tpl.title_template}</span>
                       <Badge variant="outline" className="text-[10px] shrink-0">
-                        {EVENT_LABELS[t.event] ?? t.event}
+                        {eventLabels[tpl.event] ?? tpl.event}
                       </Badge>
                       <Badge variant="secondary" className="text-[10px] shrink-0">
-                        → {RECIPIENT_LABELS[t.recipient_role] ?? t.recipient_role}
+                        → {recipientLabels[tpl.recipient_role] ?? tpl.recipient_role}
                       </Badge>
-                      {t.is_urgent && <Badge variant="destructive" className="text-[10px]">Urgente</Badge>}
-                      {t.cooldown_minutes > 0 && (
-                        <span className="text-[10px] text-muted-foreground">⏱ {t.cooldown_minutes}min</span>
+                      {tpl.is_urgent && <Badge variant="destructive" className="text-[10px]">{t('admin.notif.urgent')}</Badge>}
+                      {tpl.cooldown_minutes > 0 && (
+                        <span className="text-[10px] text-muted-foreground">⏱ {tpl.cooldown_minutes}min</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{t.message_template}</p>
+                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{tpl.message_template}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Switch
-                      checked={t.is_active}
-                      onCheckedChange={(checked) => toggle.mutate({ id: t.id, is_active: checked })}
+                      checked={tpl.is_active}
+                      onCheckedChange={(checked) => toggle.mutate({ id: tpl.id, is_active: checked })}
                     />
-                    <EditTemplateDialog template={t}>
+                    <EditTemplateDialog template={tpl}>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>

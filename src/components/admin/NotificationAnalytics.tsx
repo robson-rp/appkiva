@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useT } from '@/contexts/LanguageContext';
 
 interface AnalyticsData {
   readRate: number;
@@ -16,7 +17,6 @@ function useNotificationAnalytics() {
   return useQuery({
     queryKey: ['notification-analytics'],
     queryFn: async (): Promise<AnalyticsData> => {
-      // Get total and read counts
       const { count: totalSent } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true });
@@ -30,7 +30,6 @@ function useNotificationAnalytics() {
       const read = totalRead ?? 0;
       const readRate = sent > 0 ? Math.round((read / sent) * 100) : 0;
 
-      // Get notifications by type
       const { data: allNotifs } = await supabase
         .from('notifications')
         .select('type, created_at, read')
@@ -50,7 +49,6 @@ function useNotificationAnalytics() {
         .map(([type, count]) => ({ type, count }))
         .sort((a, b) => b.count - a.count);
 
-      // Last 30 days volume
       const today = new Date();
       const dailyVolume: Array<{ date: string; count: number }> = [];
       for (let i = 29; i >= 0; i--) {
@@ -65,19 +63,24 @@ function useNotificationAnalytics() {
   });
 }
 
-const typeLabels: Record<string, string> = {
-  task: '📋 Tarefas',
-  mission: '🎯 Missões',
-  achievement: '🏆 Conquistas',
-  savings: '🐷 Poupança',
-  streak: '🔥 Sequências',
-  class: '🏫 Turmas',
-  reward: '🎁 Recompensas',
-  vault: '💰 Cofres',
-  report: '📊 Relatórios',
-};
+function useTypeLabels() {
+  const t = useT();
+  return {
+    task: t('admin.notif.type_label_task'),
+    mission: t('admin.notif.type_label_mission'),
+    achievement: t('admin.notif.type_label_achievement'),
+    savings: t('admin.notif.type_label_savings'),
+    streak: t('admin.notif.type_label_streak'),
+    class: t('admin.notif.type_label_class'),
+    reward: t('admin.notif.type_label_reward'),
+    vault: t('admin.notif.type_label_vault'),
+    report: t('admin.notif.type_label_report'),
+  } as Record<string, string>;
+}
 
 export default function NotificationAnalytics() {
+  const t = useT();
+  const typeLabels = useTypeLabels();
   const { data, isLoading } = useNotificationAnalytics();
 
   if (isLoading) {
@@ -94,11 +97,10 @@ export default function NotificationAnalytics() {
 
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total Enviadas</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">{t('admin.notif.kpi_total_sent')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-display font-bold text-foreground">{data.totalSent}</p>
@@ -106,7 +108,7 @@ export default function NotificationAnalytics() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total Lidas</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">{t('admin.notif.kpi_total_read')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-display font-bold text-foreground">{data.totalRead}</p>
@@ -114,7 +116,7 @@ export default function NotificationAnalytics() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Taxa de Leitura</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">{t('admin.notif.kpi_read_rate')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-display font-bold text-primary">{data.readRate}%</p>
@@ -122,11 +124,10 @@ export default function NotificationAnalytics() {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Notificações por Tipo</CardTitle>
+            <CardTitle className="text-base">{t('admin.notif.chart_by_type')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
@@ -143,7 +144,7 @@ export default function NotificationAnalytics() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Volume Diário (30 dias)</CardTitle>
+            <CardTitle className="text-base">{t('admin.notif.chart_daily')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
