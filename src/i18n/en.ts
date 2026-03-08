@@ -915,14 +915,7 @@ const en: Record<string, string> = {
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Wallet',
 
-  // ─── Teen Tasks ───
-  'teen.tasks.title': 'Tasks',
-
-  // ─── Teen Vaults ───
-  'teen.vaults.title': 'Vaults',
-
-  // ─── Teen Analytics ───
-  'teen.analytics.title': 'Analytics',
+  // (teen.tasks, teen.vaults, teen.analytics expanded below)
 
   // ─── Teen Profile ───
   'teen.profile.title': 'Profile',
