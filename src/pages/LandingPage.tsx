@@ -422,20 +422,20 @@ function Hero() {
         </div>
       </div>
 
-      {/* Slide indicators with progress */}
-      <div className="relative z-10 flex items-center justify-center gap-2 pb-6 md:pb-10">
+      {/* Slide indicators — thin line style */}
+      <div className="relative z-10 flex items-center justify-center gap-1.5 pb-6 md:pb-10">
         {HERO_SLIDES.map((_, i) => (
           <button
             key={i}
             onClick={() => emblaApi?.scrollTo(i)}
-            className={`relative h-1.5 rounded-full overflow-hidden transition-all duration-300 ${
-              selectedIndex === i ? "w-10 bg-muted-foreground/20" : "w-6 bg-muted-foreground/10 hover:bg-muted-foreground/20"
+            className={`relative h-[3px] rounded-full overflow-hidden transition-all duration-500 ${
+              selectedIndex === i ? "w-12 bg-primary/20" : "w-6 bg-muted-foreground/15 hover:bg-muted-foreground/25"
             }`}
             aria-label={`Slide ${i + 1}`}
           >
             {selectedIndex === i && (
               <div
-                className="absolute inset-y-0 left-0 rounded-full bg-primary transition-none"
+                className="absolute inset-y-0 left-0 rounded-full bg-primary"
                 style={{ width: `${progress * 100}%` }}
               />
             )}
