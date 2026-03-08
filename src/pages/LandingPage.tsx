@@ -973,13 +973,15 @@ function FinalCTA() {
           alt="Kivo"
           className="w-14 h-14 md:w-18 md:h-18 mx-auto mb-6"
           animate={{ y: [0, -8, 0] }}
-          transition={{ duration: 3, repcol sm:flex-row justify-center gap-3eInOut" }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-secondary-foreground leading-[1.1col sm:flex-row justify-center gap-3 a construir o futuro financeiro do seu filho
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-secondary-foreground leading-[1.1]">
+          Comece hoje a construir o futuro financeiro do seu filho
         </h2>
-        <p className="text-secondary-foreground/70 text-lg md:text-xl mb-8 max-w-xl col sm:flex-row justify-center gap-3        Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
+        <p className="text-secondary-foreground/70 text-lg md:text-xl mb-8 max-w-xl mx-auto text-balance">
+          Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Button
             size="lg"
             className="bg-background text-foreground hover:bg-background/90 text-base px-8 shimmer transition-shadow hover:shadow-xl"
