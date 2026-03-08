@@ -404,6 +404,7 @@ function Hero() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={selectedIndex === i ? { opacity: 1, scale: 1 } : { opacity: 0.3, scale: 0.85 }}
                     transition={{ duration: 0.5 }}
+                    style={{ y: useTransform(useScroll().scrollY, [0, 600], [0, -80]) }}
                   >
                     <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
                     <img
