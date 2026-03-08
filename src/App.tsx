@@ -11,6 +11,7 @@ import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import { SplashScreen } from "./components/SplashScreen";
 import { OfflineBanner } from "./components/OfflineBanner";
 import { RewardAnimationProvider } from "./contexts/RewardAnimationContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Layouts (kept eager – small and always needed)
 import { ParentLayout } from "@/components/layouts/ParentLayout";
