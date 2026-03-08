@@ -12,15 +12,16 @@ import { useExchangeRates, formatPrice } from '@/hooks/use-exchange-rates';
 import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { cn } from '@/lib/utils';
+import { useT } from '@/contexts/LanguageContext';
 
-const FEATURE_LABELS: Record<string, string> = {
-  basic_wallet: 'Carteira Básica',
-  basic_tasks: 'Tarefas Básicas',
-  advanced_analytics: 'Relatórios Avançados',
-  export_reports: 'Exportar Relatórios',
-  custom_branding: 'Marca Personalizada',
-  api_access: 'Acesso API',
-  priority_support: 'Suporte Prioritário',
+const FEATURE_LABELS_KEYS: Record<string, string> = {
+  basic_wallet: 'feature.basic_wallet',
+  basic_tasks: 'feature.basic_tasks',
+  advanced_analytics: 'feature.advanced_analytics',
+  export_reports: 'feature.export_reports',
+  custom_branding: 'feature.custom_branding',
+  api_access: 'feature.api_access',
+  priority_support: 'feature.priority_support',
 };
 
 const TIER_ICONS: Record<string, string> = {
@@ -30,6 +31,7 @@ const TIER_ICONS: Record<string, string> = {
 };
 
 export default function PartnerSubscription() {
+  const t = useT();
   const limits = usePartnerLimits();
   const { data: allTiers = [], isLoading } = useSubscriptionTiers();
   const { upgrade, loading: upgradeLoading } = useUpgradeSubscription();
@@ -71,17 +73,17 @@ export default function PartnerSubscription() {
                   {TIER_ICONS[limits.tierName] ?? '📋'}
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest opacity-70">Plano actual</p>
+                  <p className="text-xs uppercase tracking-widest opacity-70">{t('partner.subscription.current_plan')}</p>
                   <h1 className="font-display text-2xl font-bold">{limits.tierName}</h1>
                     <p className="text-sm opacity-80 mt-0.5">
                       {limits.priceMonthly > 0
-                        ? `${localPrice(partnerTiers.find(t => t.name === limits.tierName)?.id ?? '', limits.priceMonthly)}/mês`
-                        : 'Gratuito'}
+                        ? `${localPrice(partnerTiers.find(tier => tier.name === limits.tierName)?.id ?? '', limits.priceMonthly)}/mês`
+                        : t('partner.subscription.free')}
                     </p>
                 </div>
               </div>
               <Badge className="bg-white/20 text-white border-0 font-display">
-                <Shield className="h-3 w-3 mr-1" /> Activo
+                <Shield className="h-3 w-3 mr-1" /> {t('partner.subscription.active')}
               </Badge>
             </div>
 
@@ -89,7 +91,7 @@ export default function PartnerSubscription() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div>
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="opacity-70">Programas</span>
+                  <span className="opacity-70">{t('partner.subscription.programs')}</span>
                   <span className="font-bold">
                     {limits.usedPrograms}/{limits.maxPrograms >= 99999 ? '∞' : limits.maxPrograms}
                   </span>
@@ -101,7 +103,7 @@ export default function PartnerSubscription() {
               </div>
               <div>
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="opacity-70">Crianças</span>
+                  <span className="opacity-70">{t('partner.subscription.children')}</span>
                   <span className="font-bold">
                     {limits.usedChildren}/{limits.maxChildren >= 99999 ? '∞' : limits.maxChildren}
                   </span>
@@ -119,7 +121,7 @@ export default function PartnerSubscription() {
       {/* Plans Comparison */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <h2 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" /> Comparar Planos
+          <Sparkles className="h-4 w-4 text-primary" /> {t('partner.subscription.compare_plans')}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {partnerTiers.map((tier, idx) => {
@@ -140,12 +142,12 @@ export default function PartnerSubscription() {
                     <span className="text-3xl">{TIER_ICONS[tier.name] ?? '📋'}</span>
                     <h3 className="font-display font-bold mt-2">{tier.name}</h3>
                     <p className="text-2xl font-bold text-foreground mt-1">
-                      {tier.priceMonthly > 0 ? localPrice(tier.id, tier.priceMonthly) : 'Grátis'}
+                      {tier.priceMonthly > 0 ? localPrice(tier.id, tier.priceMonthly) : t('partner.subscription.free')}
                       {tier.priceMonthly > 0 && <span className="text-xs text-muted-foreground font-normal">/mês</span>}
                     </p>
                     {isCurrent && (
                       <Badge className="mt-2 bg-primary/10 text-primary border-0 text-[10px]">
-                        <Crown className="h-3 w-3 mr-1" /> Plano Actual
+                        <Crown className="h-3 w-3 mr-1" /> {t('partner.subscription.current')}
                       </Badge>
                     )}
                   </div>
@@ -153,14 +155,13 @@ export default function PartnerSubscription() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-3.5 w-3.5 text-primary" />
-                      <span>{tier.maxChildren >= 99999 ? 'Crianças ilimitadas' : `Até ${tier.maxChildren} crianças`}</span>
+                      <span>{tier.maxChildren >= 99999 ? t('partner.subscription.unlimited_children') : t('partner.subscription.up_to_children').replace('{count}', String(tier.maxChildren))}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Zap className="h-3.5 w-3.5 text-primary" />
                       <span>
-                        {/* max_programs not in tier type yet, derive from name */}
-                        {tier.name.includes('Enterprise') ? 'Programas ilimitados' :
-                         tier.name.includes('Pro') ? 'Até 10 programas' : 'Até 2 programas'}
+                        {tier.name.includes('Enterprise') ? t('partner.subscription.unlimited_programs') :
+                         tier.name.includes('Pro') ? t('partner.subscription.up_to_programs').replace('{count}', '10') : t('partner.subscription.up_to_programs').replace('{count}', '2')}
                       </span>
                     </div>
                   </div>
@@ -169,7 +170,7 @@ export default function PartnerSubscription() {
                     {tier.features.map(f => (
                       <div key={f} className="flex items-center gap-2 text-xs">
                         <Check className="h-3 w-3 text-primary shrink-0" />
-                        <span>{FEATURE_LABELS[f] ?? f}</span>
+                        <span>{t(FEATURE_LABELS_KEYS[f] ?? f)}</span>
                       </div>
                     ))}
                   </div>
@@ -180,12 +181,12 @@ export default function PartnerSubscription() {
                       className="w-full rounded-xl font-display gap-1.5"
                       size="sm"
                     >
-                      <Crown className="h-3.5 w-3.5" /> Upgrade
+                      <Crown className="h-3.5 w-3.5" /> {t('partner.subscription.upgrade')}
                     </Button>
                   )}
                   {isCurrent && (
                     <Button disabled variant="outline" className="w-full rounded-xl" size="sm">
-                      Plano Actual
+                      {t('partner.subscription.current')}
                     </Button>
                   )}
                 </CardContent>

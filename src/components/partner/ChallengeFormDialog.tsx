@@ -17,15 +17,15 @@ import { useCreateSponsoredChallenge, useUpdateSponsoredChallenge, type Sponsore
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useT } from '@/contexts/LanguageContext';
 
 const schema = z.object({
-  title: z.string().trim().min(3, 'Mínimo 3 caracteres').max(100),
+  title: z.string().trim().min(3).max(100),
   description: z.string().trim().max(500).optional(),
-  reward_amount: z.coerce.number().min(0, 'Mínimo 0 KVC'),
-  start_date: z.date({ required_error: 'Data de início obrigatória' }),
-  end_date: z.date({ required_error: 'Data de fim obrigatória' }),
+  reward_amount: z.coerce.number().min(0),
+  start_date: z.date(),
+  end_date: z.date(),
 }).refine(d => d.end_date > d.start_date, {
-  message: 'Data de fim deve ser posterior à de início',
   path: ['end_date'],
 });
 
@@ -39,6 +39,7 @@ interface Props {
 
 export default function ChallengeFormDialog({ open, onOpenChange, challenge }: Props) {
   const { user } = useAuth();
+  const t = useT();
   const createChallenge = useCreateSponsoredChallenge();
   const updateChallenge = useUpdateSponsoredChallenge();
   const [loading, setLoading] = useState(false);
@@ -77,7 +78,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           start_date: format(values.start_date, 'yyyy-MM-dd'),
           end_date: format(values.end_date, 'yyyy-MM-dd'),
         });
-        toast.success('Desafio actualizado!');
+        toast.success(t('dialog.challenge.updated'));
       } else {
         const { data: profile } = await supabase
           .from('profiles')
@@ -86,7 +87,7 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           .single();
 
         if (!profile?.tenant_id) {
-          toast.error('Conta de parceiro sem organização associada');
+          toast.error(t('dialog.challenge.no_org'));
           setLoading(false);
           return;
         }
@@ -100,13 +101,13 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
           end_date: format(values.end_date, 'yyyy-MM-dd'),
           status: 'draft',
         });
-        toast.success('Desafio criado com sucesso!');
+        toast.success(t('dialog.challenge.created'));
       }
 
       form.reset();
       onOpenChange(false);
     } catch (err: any) {
-      toast.error(err?.message ?? 'Erro ao guardar desafio');
+      toast.error(err?.message ?? t('dialog.challenge.error'));
     } finally {
       setLoading(false);
     }
@@ -116,31 +117,31 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="font-display">{isEdit ? 'Editar Desafio' : 'Novo Desafio Patrocinado'}</DialogTitle>
-          <DialogDescription>{isEdit ? 'Altere os dados do desafio.' : 'Preencha os dados do desafio. Será criado como rascunho.'}</DialogDescription>
+          <DialogTitle className="font-display">{isEdit ? t('dialog.challenge.edit_title') : t('dialog.challenge.create_title')}</DialogTitle>
+          <DialogDescription>{isEdit ? t('dialog.challenge.edit_desc') : t('dialog.challenge.create_desc')}</DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField control={form.control} name="title" render={({ field }) => (
               <FormItem>
-                <FormLabel>Título</FormLabel>
-                <FormControl><Input placeholder="Ex: Desafio Poupança de Natal" {...field} /></FormControl>
+                <FormLabel>{t('dialog.challenge.title')}</FormLabel>
+                <FormControl><Input placeholder={t('dialog.challenge.title_placeholder')} {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
 
             <FormField control={form.control} name="description" render={({ field }) => (
               <FormItem>
-                <FormLabel>Descrição (opcional)</FormLabel>
-                <FormControl><Textarea placeholder="Descreva o objectivo do desafio..." rows={3} {...field} /></FormControl>
+                <FormLabel>{t('dialog.challenge.description')}</FormLabel>
+                <FormControl><Textarea placeholder={t('dialog.challenge.desc_placeholder')} rows={3} {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )} />
 
             <FormField control={form.control} name="reward_amount" render={({ field }) => (
               <FormItem>
-                <FormLabel>Prémio por conclusão (KVC)</FormLabel>
+                <FormLabel>{t('dialog.challenge.reward')}</FormLabel>
                 <FormControl><Input type="number" min="0" step="1" placeholder="Ex: 50" {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,12 +150,12 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
             <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="start_date" render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Início</FormLabel>
+                  <FormLabel>{t('dialog.challenge.start')}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button variant="outline" className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                          {field.value ? format(field.value, 'dd MMM yyyy', { locale: pt }) : 'Seleccionar'}
+                          {field.value ? format(field.value, 'dd MMM yyyy', { locale: pt }) : t('dialog.challenge.select_date')}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -169,12 +170,12 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
 
               <FormField control={form.control} name="end_date" render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Fim</FormLabel>
+                  <FormLabel>{t('dialog.challenge.end')}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button variant="outline" className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}>
-                          {field.value ? format(field.value, 'dd MMM yyyy', { locale: pt }) : 'Seleccionar'}
+                          {field.value ? format(field.value, 'dd MMM yyyy', { locale: pt }) : t('dialog.challenge.select_date')}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -189,10 +190,10 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('dialog.challenge.cancel')}</Button>
               <Button type="submit" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {isEdit ? 'Guardar' : 'Criar Desafio'}
+                {isEdit ? t('dialog.challenge.save') : t('dialog.challenge.create')}
               </Button>
             </DialogFooter>
           </form>

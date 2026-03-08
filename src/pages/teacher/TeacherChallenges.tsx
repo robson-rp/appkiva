@@ -14,18 +14,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { CollectiveChallenge, ChallengeStatus } from '@/types/kivara';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
-
-const statusConfig = {
-  active: { label: 'Em Curso', icon: Target, className: 'bg-primary/10 text-primary border-primary/20' },
-  upcoming: { label: 'Brevemente', icon: Clock, className: 'bg-accent/10 text-accent-foreground border-accent/20' },
-  completed: { label: 'Concluído', icon: Trophy, className: 'bg-secondary/10 text-secondary border-secondary/20' },
-};
-
-const typeLabels: Record<string, string> = { saving: 'Poupança', budgeting: 'Orçamento', teamwork: 'Trabalho em Equipa' };
-const typeIcons: Record<string, string> = { saving: '🐷', budgeting: '📊', teamwork: '🤝' };
 
 interface ChallengeFormData {
   title: string;
@@ -55,7 +47,23 @@ const emptyForm: ChallengeFormData = {
   status: 'upcoming',
 };
 
+const typeIcons: Record<string, string> = { saving: '🐷', budgeting: '📊', teamwork: '🤝' };
+
 export default function TeacherChallenges() {
+  const t = useT();
+
+  const statusConfig = {
+    active: { label: t('teacher.challenges.status_active'), icon: Target, className: 'bg-primary/10 text-primary border-primary/20' },
+    upcoming: { label: t('teacher.challenges.status_upcoming'), icon: Clock, className: 'bg-accent/10 text-accent-foreground border-accent/20' },
+    completed: { label: t('teacher.challenges.status_completed'), icon: Trophy, className: 'bg-secondary/10 text-secondary border-secondary/20' },
+  };
+
+  const typeLabels: Record<string, string> = {
+    saving: t('teacher.challenges.type_saving'),
+    budgeting: t('teacher.challenges.type_budgeting'),
+    teamwork: t('teacher.challenges.type_teamwork'),
+  };
+
   const [challenges, setChallenges] = useState<CollectiveChallenge[]>([...mockChallenges]);
   const [form, setForm] = useState<ChallengeFormData>({ ...emptyForm });
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -103,7 +111,7 @@ export default function TeacherChallenges() {
 
   const handleSave = () => {
     if (!form.title || !form.classroomId || !form.targetAmount) {
-      toast({ title: 'Campos obrigatórios', description: 'Preenche o título, turma e meta.', variant: 'destructive' });
+      toast({ title: t('teacher.challenges.required_fields'), description: t('teacher.challenges.required_hint'), variant: 'destructive' });
       return;
     }
 
@@ -124,7 +132,7 @@ export default function TeacherChallenges() {
           status: form.status,
         } : c
       ));
-      toast({ title: 'Desafio atualizado! ✏️', description: `"${form.title}" foi guardado.` });
+      toast({ title: t('teacher.challenges.updated'), description: `"${form.title}"` });
     } else {
       const newChallenge: CollectiveChallenge = {
         id: `challenge-${Date.now()}`,
@@ -143,7 +151,7 @@ export default function TeacherChallenges() {
         endDate: form.endDate,
       };
       setChallenges(prev => [newChallenge, ...prev]);
-      toast({ title: 'Desafio criado! 🎯', description: `"${form.title}" foi adicionado à turma.` });
+      toast({ title: t('teacher.challenges.created'), description: `"${form.title}"` });
     }
 
     setDialogOpen(false);
@@ -155,7 +163,7 @@ export default function TeacherChallenges() {
     const challenge = challenges.find(c => c.id === id);
     setChallenges(prev => prev.filter(c => c.id !== id));
     setDeleteDialogId(null);
-    toast({ title: 'Desafio eliminado 🗑️', description: `"${challenge?.title}" foi removido.` });
+    toast({ title: t('teacher.challenges.deleted'), description: `"${challenge?.title}"` });
   };
 
   const renderChallenge = (challenge: CollectiveChallenge) => {
@@ -211,13 +219,13 @@ export default function TeacherChallenges() {
             {challenge.status !== 'upcoming' && (
               <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <span className="text-muted-foreground">Progresso da turma</span>
+                  <span className="text-muted-foreground">{t('teacher.challenges.progress')}</span>
                   <span className="font-display font-bold text-primary">{pct}%</span>
                 </div>
                 <Progress value={pct} className="h-3" />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
                   <span>🪙 {challenge.currentAmount} / {challenge.targetAmount}</span>
-                  <span>{challenge.participants.length} participantes</span>
+                  <span>{challenge.participants.length} {t('teacher.dashboard.participants')}</span>
                 </div>
               </div>
             )}
@@ -225,7 +233,7 @@ export default function TeacherChallenges() {
             {challenge.participants.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-display font-semibold text-muted-foreground flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" /> Contribuições
+                  <Users className="h-3.5 w-3.5" /> {t('teacher.challenges.contributions')}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {challenge.participants.map((p) => (
@@ -260,23 +268,23 @@ export default function TeacherChallenges() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display">
-            {editingId ? '✏️ Editar Desafio' : '🏆 Criar Desafio Colectivo'}
+            {editingId ? t('teacher.challenges.edit_title') : t('teacher.challenges.create_title')}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           <div className="space-y-2">
-            <Label>Título *</Label>
-            <Input placeholder="Ex: Operação Mealheiro" value={form.title} onChange={e => updateForm('title', e.target.value)} />
+            <Label>{t('teacher.challenges.form_title')} *</Label>
+            <Input placeholder={t('teacher.challenges.form_title_placeholder')} value={form.title} onChange={e => updateForm('title', e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Textarea placeholder="Descreve o objectivo do desafio..." value={form.description} onChange={e => updateForm('description', e.target.value)} />
+            <Label>{t('teacher.challenges.form_desc')}</Label>
+            <Textarea placeholder={t('teacher.challenges.form_desc_placeholder')} value={form.description} onChange={e => updateForm('description', e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Turma *</Label>
+              <Label>{t('teacher.challenges.form_class')} *</Label>
               <Select value={form.classroomId} onValueChange={v => updateForm('classroomId', v)}>
-                <SelectTrigger><SelectValue placeholder="Escolhe" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('teacher.classes.select')} /></SelectTrigger>
                 <SelectContent>
                   {mockClassrooms.map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
@@ -285,50 +293,50 @@ export default function TeacherChallenges() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Tipo</Label>
+              <Label>{t('teacher.challenges.form_type')}</Label>
               <Select value={form.type} onValueChange={v => updateForm('type', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="saving">🐷 Poupança</SelectItem>
-                  <SelectItem value="budgeting">📊 Orçamento</SelectItem>
-                  <SelectItem value="teamwork">🤝 Equipa</SelectItem>
+                  <SelectItem value="saving">🐷 {t('teacher.challenges.type_saving')}</SelectItem>
+                  <SelectItem value="budgeting">📊 {t('teacher.challenges.type_budgeting')}</SelectItem>
+                  <SelectItem value="teamwork">🤝 {t('teacher.challenges.type_teamwork')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Meta (KivaCoins) *</Label>
+              <Label>{t('teacher.challenges.form_target')} *</Label>
               <Input type="number" placeholder="1000" value={form.targetAmount} onChange={e => updateForm('targetAmount', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Recompensa 🪙</Label>
+              <Label>{t('teacher.challenges.form_reward')}</Label>
               <Input type="number" placeholder="50" value={form.reward} onChange={e => updateForm('reward', e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>KivaPoints</Label>
+              <Label>{t('teacher.challenges.form_points')}</Label>
               <Input type="number" placeholder="20" value={form.kivaPointsReward} onChange={e => updateForm('kivaPointsReward', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Estado</Label>
+              <Label>{t('teacher.challenges.form_status')}</Label>
               <Select value={form.status} onValueChange={v => updateForm('status', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="upcoming">🕐 Brevemente</SelectItem>
-                  <SelectItem value="active">🎯 Em Curso</SelectItem>
+                  <SelectItem value="upcoming">🕐 {t('teacher.challenges.status_upcoming')}</SelectItem>
+                  <SelectItem value="active">🎯 {t('teacher.challenges.status_active')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label>Data Início</Label>
+              <Label>{t('teacher.challenges.form_start')}</Label>
               <Input type="date" value={form.startDate} onChange={e => updateForm('startDate', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Data Fim</Label>
+              <Label>{t('teacher.challenges.form_end')}</Label>
               <Input type="date" value={form.endDate} onChange={e => updateForm('endDate', e.target.value)} />
             </div>
           </div>
@@ -339,13 +347,13 @@ export default function TeacherChallenges() {
               {form.icon}
             </div>
             <div>
-              <p className="text-sm font-display font-bold">{form.title || 'Novo Desafio'}</p>
-              <p className="text-[11px] text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `Meta: ${form.targetAmount} 🪙` : 'Sem meta'}</p>
+              <p className="text-sm font-display font-bold">{form.title || t('teacher.challenges.new')}</p>
+              <p className="text-[11px] text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `${t('teacher.challenges.form_target').split(' ')[0]}: ${form.targetAmount} 🪙` : ''}</p>
             </div>
           </div>
 
           <Button className="w-full rounded-xl font-display" onClick={handleSave}>
-            {editingId ? '✏️ Guardar Alterações' : '🏆 Criar Desafio'}
+            {editingId ? t('teacher.challenges.save') : t('teacher.challenges.create')}
           </Button>
         </div>
       </DialogContent>
@@ -356,15 +364,15 @@ export default function TeacherChallenges() {
     <Dialog open={!!deleteDialogId} onOpenChange={open => !open && setDeleteDialogId(null)}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-display">Eliminar Desafio?</DialogTitle>
+          <DialogTitle className="font-display">{t('teacher.challenges.delete_title')}</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          Esta ação não pode ser revertida. O desafio e todo o progresso dos alunos serão removidos.
+          {t('teacher.challenges.delete_desc')}
         </p>
         <div className="flex gap-2 justify-end pt-2">
-          <Button variant="outline" className="rounded-xl" onClick={() => setDeleteDialogId(null)}>Cancelar</Button>
+          <Button variant="outline" className="rounded-xl" onClick={() => setDeleteDialogId(null)}>{t('common.cancel')}</Button>
           <Button variant="destructive" className="rounded-xl" onClick={() => deleteDialogId && handleDelete(deleteDialogId)}>
-            <Trash2 className="h-4 w-4 mr-1" /> Eliminar
+            <Trash2 className="h-4 w-4 mr-1" /> {t('common.delete')}
           </Button>
         </div>
       </DialogContent>
@@ -384,23 +392,23 @@ export default function TeacherChallenges() {
           <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-2">
-                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Educação Financeira</p>
-                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">Desafios Colectivos</h1>
-                <p className="text-primary-foreground/60 text-sm">Cria e gere desafios que envolvem toda a turma</p>
+                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">{t('teacher.challenges.fin_ed')}</p>
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">{t('teacher.challenges.title')}</h1>
+                <p className="text-primary-foreground/60 text-sm">{t('teacher.challenges.subtitle')}</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">Activos</p>
+                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.active')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{activeChallenges.length}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">Concluídos</p>
+                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.completed')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{completedChallenges.length}</p>
                 </div>
                 {urgentActive.length > 0 && (
                   <div className="bg-destructive/20 backdrop-blur-sm rounded-2xl px-4 py-2 text-center ring-1 ring-destructive/30">
                     <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider flex items-center gap-1 justify-center">
-                      <AlertTriangle className="h-3 w-3" /> Urgentes
+                      <AlertTriangle className="h-3 w-3" /> {t('teacher.challenges.urgent')}
                     </p>
                     <p className="font-display text-xl font-bold text-primary-foreground">{urgentActive.length}</p>
                   </div>
@@ -415,11 +423,11 @@ export default function TeacherChallenges() {
       <motion.div variants={item} className="flex justify-between items-center">
         <div>
           <h2 className="font-display text-lg font-bold flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" /> Desafios
+            <Trophy className="h-5 w-5 text-primary" /> {t('teacher.challenges.title')}
           </h2>
         </div>
         <Button size="sm" className="rounded-xl font-display gap-1" onClick={openCreate}>
-          <Plus className="h-4 w-4" /> Novo Desafio
+          <Plus className="h-4 w-4" /> {t('teacher.challenges.new')}
         </Button>
       </motion.div>
 
@@ -427,13 +435,13 @@ export default function TeacherChallenges() {
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="w-full grid grid-cols-3 rounded-xl h-10 sm:h-11">
           <TabsTrigger value="active" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
-            <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Em Curso</span> ({activeChallenges.length})
+            <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_active')}</span> ({activeChallenges.length})
           </TabsTrigger>
           <TabsTrigger value="upcoming" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
-            <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Brevemente</span> ({upcomingChallenges.length})
+            <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_upcoming')}</span> ({upcomingChallenges.length})
           </TabsTrigger>
           <TabsTrigger value="completed" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
-            <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">Concluídos</span> ({completedChallenges.length})
+            <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_completed')}</span> ({completedChallenges.length})
           </TabsTrigger>
         </TabsList>
 
@@ -447,25 +455,25 @@ export default function TeacherChallenges() {
                 onClick={() => setShowUrgentOnly(prev => !prev)}
               >
                 <AlertTriangle className="h-3.5 w-3.5" />
-                Próximos de terminar ({urgentActive.length})
+                {t('teacher.challenges.near_end')} ({urgentActive.length})
               </Button>
             </div>
           )}
           {displayedActive.length === 0 && (
             <p className="text-center text-muted-foreground py-8">
-              {showUrgentOnly ? 'Nenhum desafio próximo de terminar' : 'Nenhum desafio em curso'}
+              {showUrgentOnly ? t('teacher.challenges.no_near_end') : t('teacher.challenges.no_active')}
             </p>
           )}
           {displayedActive.map(renderChallenge)}
         </TabsContent>
 
         <TabsContent value="upcoming" className="mt-4 space-y-4">
-          {upcomingChallenges.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhum desafio agendado</p>}
+          {upcomingChallenges.length === 0 && <p className="text-center text-muted-foreground py-8">{t('teacher.challenges.no_upcoming')}</p>}
           {upcomingChallenges.map(renderChallenge)}
         </TabsContent>
 
         <TabsContent value="completed" className="mt-4 space-y-4">
-          {completedChallenges.length === 0 && <p className="text-center text-muted-foreground py-8">Nenhum desafio concluído</p>}
+          {completedChallenges.length === 0 && <p className="text-center text-muted-foreground py-8">{t('teacher.challenges.no_completed')}</p>}
           {completedChallenges.map(renderChallenge)}
         </TabsContent>
       </Tabs>
