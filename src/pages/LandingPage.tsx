@@ -368,14 +368,14 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-              <div className="relative px-5 sm:px-8 py-12 md:py-20">
-                <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+              <div className="relative px-5 sm:px-8 py-8 md:py-16">
+                <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={selectedIndex === i ? { opacity: 1, y: 0 } : { opacity: 0.3, y: 10 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <h1 className="font-display text-[2.5rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem] font-bold leading-[1.05] tracking-tight text-foreground">
+                    <h1 className="font-display text-[2.5rem] sm:text-[3rem] md:text-[3.5rem] lg:text-[4rem] font-bold leading-[1.05] tracking-tight text-foreground max-w-[600px]">
                       {slide.headline}
                       <br />
                       <GradientText>{slide.headlineGradient}</GradientText>
@@ -405,11 +405,11 @@ function Hero() {
                     animate={selectedIndex === i ? { opacity: 1, scale: 1 } : { opacity: 0.3, scale: 0.85 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl scale-75 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full max-w-sm md:max-w-md relative z-10 drop-shadow-2xl"
+                      className="w-full max-w-md md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
