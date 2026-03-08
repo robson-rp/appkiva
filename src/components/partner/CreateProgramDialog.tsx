@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreatePartnerProgram } from '@/hooks/use-partner-data';
 import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Loader2, Users, School, Crown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 export function CreateProgramDialog() {
   const { user } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -29,17 +31,17 @@ export function CreateProgramDialog() {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      toast.error('Introduza o nome do programa');
+      toast.error(t('dialog.program.name_required'));
       return;
     }
 
     if (atProgramLimit) {
-      toast.error('Limite de programas atingido. Faça upgrade do seu plano.');
+      toast.error(t('dialog.program.limit_reached'));
       return;
     }
 
     if (atChildrenLimit) {
-      toast.error('Limite de crianças atingido. Faça upgrade do seu plano.');
+      toast.error(t('dialog.program.children_limit'));
       return;
     }
 
@@ -50,7 +52,7 @@ export function CreateProgramDialog() {
       .single();
 
     if (!profile?.tenant_id) {
-      toast.error('Tenant não encontrado');
+      toast.error(t('dialog.program.tenant_error'));
       return;
     }
 
@@ -62,14 +64,14 @@ export function CreateProgramDialog() {
         children_count: parsedChildren,
         investment_amount: investment ? parseFloat(investment) : 0,
       });
-      toast.success('Programa criado com sucesso!');
+      toast.success(t('dialog.program.created'));
       setOpen(false);
       setName('');
       setType('family');
       setChildrenCount('');
       setInvestment('');
     } catch {
-      toast.error('Erro ao criar programa');
+      toast.error(t('dialog.program.error'));
     }
   };
 
@@ -78,12 +80,12 @@ export function CreateProgramDialog() {
       <DialogTrigger asChild>
         <Button className="gap-1.5 rounded-xl" disabled={atProgramLimit}>
           <Plus className="h-4 w-4" />
-          Novo Programa
+          {t('dialog.program.new')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="font-display">Criar Novo Programa</DialogTitle>
+          <DialogTitle className="font-display">{t('dialog.program.create_title')}</DialogTitle>
         </DialogHeader>
 
         {atProgramLimit ? (
@@ -92,24 +94,24 @@ export function CreateProgramDialog() {
               <AlertTriangle className="h-7 w-7 text-destructive" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-foreground">Limite atingido</h3>
+              <h3 className="font-display font-bold text-foreground">{t('dialog.program.limit_title')}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                O seu plano <strong>{limits.tierName}</strong> permite no máximo {limits.maxPrograms} programas.
+                {t('dialog.program.limit_desc').replace('{tier}', limits.tierName).replace('{max}', String(limits.maxPrograms))}
               </p>
             </div>
             <Button
               onClick={() => { setOpen(false); navigate('/partner/subscription'); }}
               className="rounded-xl gap-1.5"
             >
-              <Crown className="h-4 w-4" /> Fazer Upgrade
+              <Crown className="h-4 w-4" /> {t('dialog.program.upgrade')}
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Nome do programa</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('dialog.program.name')}</label>
               <Input
-                placeholder="Ex: Literacia Financeira 2026"
+                placeholder={t('dialog.program.name_placeholder')}
                 value={name}
                 onChange={e => setName(e.target.value)}
                 className="rounded-xl"
@@ -117,17 +119,17 @@ export function CreateProgramDialog() {
             </div>
 
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Tipo</label>
+              <label className="text-xs text-muted-foreground mb-1 block">{t('dialog.program.type')}</label>
               <Select value={type} onValueChange={v => setType(v as 'family' | 'school')}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="family">
-                    <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Família</span>
+                    <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> {t('dialog.program.type_family')}</span>
                   </SelectItem>
                   <SelectItem value="school">
-                    <span className="flex items-center gap-1.5"><School className="h-3.5 w-3.5" /> Escola</span>
+                    <span className="flex items-center gap-1.5"><School className="h-3.5 w-3.5" /> {t('dialog.program.type_school')}</span>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -135,7 +137,7 @@ export function CreateProgramDialog() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Nº de crianças</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t('dialog.program.children_count')}</label>
                 <Input
                   type="number"
                   min="0"
@@ -145,11 +147,11 @@ export function CreateProgramDialog() {
                   className="rounded-xl"
                 />
                 {atChildrenLimit && parsedChildren > 0 && (
-                  <p className="text-[10px] text-destructive mt-1">Excede o limite do plano ({limits.maxChildren})</p>
+                  <p className="text-[10px] text-destructive mt-1">{t('dialog.program.exceeds_limit').replace('{max}', String(limits.maxChildren))}</p>
                 )}
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Orçamento (KVC)</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t('dialog.program.budget')}</label>
                 <Input
                   type="number"
                   min="0"
@@ -168,7 +170,7 @@ export function CreateProgramDialog() {
               className="w-full rounded-xl gap-1.5"
             >
               {createProgram.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              Criar Programa
+              {t('dialog.program.create')}
             </Button>
           </div>
         )}
