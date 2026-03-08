@@ -12,8 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, Building2, Mail, Globe } from 'lucide-react';
+import { Camera, Save, Building2, Mail, Globe, Languages } from 'lucide-react';
 import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
