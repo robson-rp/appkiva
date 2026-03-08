@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import kivaraLogo from "@/assets/logo-kivara.svg";
+import kivaraLogo from "@/assets/logo-kivara-full.png";
 import kivaraLogoWhite from "@/assets/logo-kivara-white.svg";
 import kivoSvg from "@/assets/kivo.svg";
 import heroIllustration from "@/assets/landing/hero-illustration.png";
