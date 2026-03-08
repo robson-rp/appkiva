@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import kivaraLogo from "@/assets/logo-kivara.svg";
+import kivaraLogo from "@/assets/logo-kivara-full.png";
 import kivaraLogoWhite from "@/assets/logo-kivara-white.svg";
 import kivoSvg from "@/assets/kivo.svg";
 import heroIllustration from "@/assets/landing/hero-illustration.png";
@@ -207,7 +207,7 @@ function Navbar() {
     >
       <div className="mx-auto max-w-6xl flex items-center justify-between px-5 h-16">
         <Link to="/" className="flex items-center gap-2 transition-transform hover:scale-105">
-          <img src={kivaraLogo} alt="KIVARA" className="h-8" />
+          <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
@@ -302,7 +302,7 @@ function Hero() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] tracking-tight text-foreground"
+            className="font-display text-[2.5rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[4.5rem] font-bold leading-[1.08] tracking-tight text-foreground"
           >
             <StaggerWords text="Pequenos hábitos." />
             <br />
@@ -311,7 +311,7 @@ function Hero() {
             </GradientText>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mt-6 text-body md:text-body-lg text-muted-foreground max-w-lg text-balance">
+          <motion.p variants={fadeUp} className="mt-8 text-body-lg md:text-lg text-muted-foreground max-w-xl text-balance">
             KIVARA transforma educação financeira num jogo interactivo onde crianças aprendem a ganhar,
             poupar e planear o futuro — enquanto os pais acompanham cada passo.
           </motion.p>
@@ -353,12 +353,12 @@ function Hero() {
           <img
             src={heroIllustration}
             alt="Crianças a aprender sobre dinheiro"
-            className="w-full max-w-md md:max-w-lg drop-shadow-2xl relative z-10"
+            className="w-full max-w-sm md:max-w-xl drop-shadow-2xl relative z-10"
           />
           <motion.img
             src={kivoSvg}
             alt="Kivo"
-            className="absolute -top-2 -right-2 md:top-0 md:right-0 w-16 md:w-20 drop-shadow-lg z-20"
+            className="absolute -top-2 -right-2 md:top-0 md:right-0 w-20 md:w-24 drop-shadow-lg z-20"
             animate={{ y: [0, -8, 0] }}
             transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
           />
@@ -468,7 +468,7 @@ function SolutionSection() {
           <div className="relative">
             <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent opacity-20 blur-lg animate-pulse-glow" />
             <div className="gradient-border rounded-3xl overflow-hidden">
-              <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-xs md:max-w-sm rounded-3xl relative z-10" />
+              <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-sm md:max-w-md rounded-3xl relative z-10" />
             </div>
           </div>
         </motion.div>
@@ -586,7 +586,7 @@ function ParentBenefits() {
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <motion.div variants={scaleIn} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute -inset-8 rounded-full bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 blur-2xl" />
-          <img src={parentsBenefit} alt="Pai e filho a usar KIVARA" className="w-full max-w-xs md:max-w-sm relative z-10" />
+          <img src={parentsBenefit} alt="Pai e filho a usar KIVARA" className="w-full max-w-sm md:max-w-md relative z-10" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1 text-caption font-semibold mb-4">
@@ -677,7 +677,7 @@ function SchoolBenefits() {
         </div>
         <motion.div variants={scaleIn} className="flex justify-center relative">
           <div className="absolute -inset-8 rounded-full bg-gradient-to-br from-accent/10 via-transparent to-primary/10 blur-2xl" />
-          <img src={schoolBenefit} alt="Professora com alunos" className="w-full max-w-xs md:max-w-sm relative z-10" />
+          <img src={schoolBenefit} alt="Professora com alunos" className="w-full max-w-sm md:max-w-md relative z-10" />
         </motion.div>
       </div>
     </Section>
@@ -700,7 +700,7 @@ function GamificationSection() {
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <motion.div variants={scaleIn} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute -inset-8 rounded-full bg-gradient-to-br from-accent/15 via-transparent to-secondary/10 blur-2xl" />
-          <img src={gamificationImg} alt="Elementos de gamificação" className="w-full max-w-xs md:max-w-sm relative z-10" />
+          <img src={gamificationImg} alt="Elementos de gamificação" className="w-full max-w-sm md:max-w-md relative z-10" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1 text-caption font-semibold mb-4">
@@ -797,7 +797,7 @@ function TrustSection() {
         </div>
         <motion.div variants={scaleIn} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 blur-2xl animate-pulse-glow" />
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-xs md:max-w-sm opacity-90 relative z-10" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-sm md:max-w-md opacity-90 relative z-10" />
         </motion.div>
       </div>
     </Section>
@@ -925,7 +925,7 @@ function FinalCTA() {
           className="inline-flex items-center justify-center glass rounded-full p-5 mb-8"
         >
           <div className="absolute inset-0 rounded-full glow-accent animate-pulse-glow" />
-          <img src={kivoSvg} alt="Kivo" className="w-14 h-14 relative z-10" />
+          <img src={kivoSvg} alt="Kivo" className="w-16 h-16 md:w-20 md:h-20 relative z-10" />
         </motion.div>
         <h2 className="font-display text-2xl sm:text-3xl md:text-4xl font-bold mb-5">
           <GradientText>Comece hoje a construir o futuro financeiro do seu filho</GradientText>
@@ -958,7 +958,7 @@ function Footer() {
       <div className="mx-auto max-w-6xl relative z-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
-            <img src={kivaraLogoWhite} alt="KIVARA" className="h-9 opacity-90 mb-4 drop-shadow-lg" />
+            <img src={kivaraLogoWhite} alt="KIVARA" className="h-11 md:h-14 opacity-90 mb-4 drop-shadow-lg" />
             <p className="text-caption opacity-60">Educação financeira gamificada para crianças e famílias.</p>
           </div>
           <div>
