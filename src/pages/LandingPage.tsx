@@ -766,7 +766,7 @@ function GamificationSection() {
     { icon: Flame, label: "Missões diárias", bg: "bg-destructive/10", color: "text-destructive", anim: "glow" as const },
     { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
     { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
-    { icon: Medal, label: "Medalsm sm:max-w-md md:max-w-has e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const sm sm:max-w-md md:max-w-},
+    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
     { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "text-primary", anim: "spin" as const },
   ];
   return (
