@@ -10,19 +10,10 @@ import { Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-
-const NOTIF_TYPES = [
-  { value: 'task', label: 'Tarefa' },
-  { value: 'mission', label: 'Missão' },
-  { value: 'achievement', label: 'Conquista' },
-  { value: 'savings', label: 'Poupança' },
-  { value: 'streak', label: 'Sequência' },
-  { value: 'reward', label: 'Recompensa' },
-  { value: 'vault', label: 'Cofre' },
-  { value: 'system', label: 'Sistema' },
-];
+import { useT } from '@/contexts/LanguageContext';
 
 function useBroadcast() {
+  const t = useT();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { title: string; message: string; type: string; urgent: boolean; role?: string }) => {
@@ -58,15 +49,16 @@ function useBroadcast() {
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['admin-notification'] });
-      toast({ title: '📢 Notificação enviada!', description: `Enviada para ${data?.sent ?? 0} utilizadores.` });
+      toast({ title: t('admin.notif.sent_success'), description: t('admin.notif.sent_desc').replace('{count}', String(data?.sent ?? 0)) });
     },
     onError: (e: any) => {
-      toast({ title: 'Erro', description: e?.message ?? 'Falha ao enviar.', variant: 'destructive' });
+      toast({ title: 'Erro', description: e?.message ?? t('admin.notif.send_error'), variant: 'destructive' });
     },
   });
 }
 
 export default function NotificationBroadcast() {
+  const t = useT();
   const broadcast = useBroadcast();
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -74,9 +66,20 @@ export default function NotificationBroadcast() {
   const [urgent, setUrgent] = useState(false);
   const [role, setRole] = useState('all');
 
+  const NOTIF_TYPES = [
+    { value: 'task', label: t('admin.notif.type_task') },
+    { value: 'mission', label: t('admin.notif.type_mission') },
+    { value: 'achievement', label: t('admin.notif.type_achievement') },
+    { value: 'savings', label: t('admin.notif.type_savings') },
+    { value: 'streak', label: t('admin.notif.type_streak') },
+    { value: 'reward', label: t('admin.notif.type_reward') },
+    { value: 'vault', label: t('admin.notif.type_vault') },
+    { value: 'system', label: t('admin.notif.type_system') },
+  ];
+
   const handleSend = () => {
     if (!title.trim() || !message.trim()) {
-      toast({ title: 'Preencha todos os campos', variant: 'destructive' });
+      toast({ title: t('admin.notif.fill_all'), variant: 'destructive' });
       return;
     }
     broadcast.mutate({ title, message, type, urgent, role });
@@ -90,53 +93,53 @@ export default function NotificationBroadcast() {
       <CardHeader>
         <CardTitle className="text-base font-display flex items-center gap-2">
           <Send className="h-4 w-4 text-primary" />
-          Enviar Notificação
+          {t('admin.notif.send_title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Título</Label>
-            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: 🎉 Nova funcionalidade!" />
+            <Label>{t('admin.notif.field_title')}</Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder={t('admin.notif.field_title_placeholder')} />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-2">
-              <Label>Tipo</Label>
+              <Label>{t('admin.notif.field_type')}</Label>
               <Select value={type} onValueChange={setType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {NOTIF_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  {NOTIF_TYPES.map(nt => <SelectItem key={nt.value} value={nt.value}>{nt.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Destinatários</Label>
+              <Label>{t('admin.notif.field_recipients')}</Label>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="parent">Pais</SelectItem>
-                  <SelectItem value="child">Crianças</SelectItem>
-                  <SelectItem value="teen">Adolescentes</SelectItem>
-                  <SelectItem value="teacher">Professores</SelectItem>
-                  <SelectItem value="partner">Parceiros</SelectItem>
+                  <SelectItem value="all">{t('admin.notif.role_all')}</SelectItem>
+                  <SelectItem value="parent">{t('admin.notif.role_parent')}</SelectItem>
+                  <SelectItem value="child">{t('admin.notif.role_child')}</SelectItem>
+                  <SelectItem value="teen">{t('admin.notif.role_teen')}</SelectItem>
+                  <SelectItem value="teacher">{t('admin.notif.role_teacher')}</SelectItem>
+                  <SelectItem value="partner">{t('admin.notif.role_partner')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
         <div className="space-y-2">
-          <Label>Mensagem</Label>
-          <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Escreve a mensagem..." rows={3} />
+          <Label>{t('admin.notif.field_message')}</Label>
+          <Textarea value={message} onChange={e => setMessage(e.target.value)} placeholder={t('admin.notif.field_message_placeholder')} rows={3} />
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Switch checked={urgent} onCheckedChange={setUrgent} id="broadcast-urgent" />
-            <Label htmlFor="broadcast-urgent" className="text-sm">Urgente</Label>
+            <Label htmlFor="broadcast-urgent" className="text-sm">{t('admin.notif.urgent')}</Label>
           </div>
           <Button onClick={handleSend} disabled={broadcast.isPending} className="gap-2">
             <Send className="h-4 w-4" />
-            {broadcast.isPending ? 'A enviar...' : 'Enviar'}
+            {broadcast.isPending ? t('admin.notif.sending') : t('admin.notif.send_btn')}
           </Button>
         </div>
       </CardContent>
