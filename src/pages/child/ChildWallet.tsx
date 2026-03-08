@@ -69,11 +69,11 @@ export default function ChildWallet() {
   const saved = transactions.filter((t) => (t as any).type === 'saved').reduce((s, t) => s + t.amount, 0);
 
   const typeConfig: Record<string, any> = {
-    earned: { icon: ArrowUpCircle, color: 'text-secondary', label: 'Ganho', bg: 'bg-[hsl(var(--kivara-light-green))]', sign: '+' },
-    allowance: { icon: Coins, color: 'text-accent-foreground', label: 'Mesada', bg: 'bg-[hsl(var(--kivara-light-gold))]', sign: '+' },
-    spent: { icon: ArrowDownCircle, color: 'text-destructive', label: 'Gasto', bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
-    saved: { icon: PiggyBank, color: 'text-primary', label: 'Poupado', bg: 'bg-[hsl(var(--kivara-light-blue))]', sign: '-' },
-    donated: { icon: Heart, color: 'text-destructive', label: 'Doação', bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
+    earned: { icon: ArrowUpCircle, color: 'text-secondary', label: t('child.wallet.earned'), bg: 'bg-[hsl(var(--kivara-light-green))]', sign: '+' },
+    allowance: { icon: Coins, color: 'text-accent-foreground', label: t('child.wallet.allowance'), bg: 'bg-[hsl(var(--kivara-light-gold))]', sign: '+' },
+    spent: { icon: ArrowDownCircle, color: 'text-destructive', label: t('child.wallet.spent'), bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
+    saved: { icon: PiggyBank, color: 'text-primary', label: t('child.wallet.saved'), bg: 'bg-[hsl(var(--kivara-light-blue))]', sign: '-' },
+    donated: { icon: Heart, color: 'text-destructive', label: t('child.wallet.donated'), bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
   };
 
   const handleDonate = () => {
