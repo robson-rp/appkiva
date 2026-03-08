@@ -31,6 +31,38 @@ const fadeIn = {
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 const staggerFast = { visible: { transition: { staggerChildren: 0.06 } } };
 
+/* ─── Animated Icon wrapper ─── */
+function AnimatedIcon({ icon: Icon, animation, className = "" }: {
+  icon: React.ElementType;
+  animation: "spin" | "pulse" | "bounce" | "glow" | "wiggle";
+  className?: string;
+}) {
+  const variants: Record<string, object> = {
+    spin: { rotate: 360 },
+    pulse: { scale: [1, 1.15, 1] },
+    bounce: { y: [0, -6, 0] },
+    glow: { scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] },
+    wiggle: { rotate: [0, -8, 8, -4, 0] },
+  };
+  const transitions: Record<string, object> = {
+    spin: { duration: 8, repeat: Infinity, ease: "linear" },
+    pulse: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+    bounce: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+    glow: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+    wiggle: { duration: 2, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 },
+  };
+
+  return (
+    <motion.div
+      animate={variants[animation]}
+      transition={transitions[animation]}
+      className="inline-flex"
+    >
+      <Icon className={className} />
+    </motion.div>
+  );
+}
+
 /* ─── CountUp hook ─── */
 function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -104,8 +136,22 @@ function GradientText({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
+/* ─── SVG Wave Divider ─── */
+function WaveDivider({ flip = false, className = "" }: { flip?: boolean; className?: string }) {
+  return (
+    <div className={`w-full overflow-hidden leading-[0] ${flip ? "rotate-180" : ""} ${className}`}>
+      <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto" preserveAspectRatio="none">
+        <path
+          d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,50 1440,40 L1440,80 L0,80 Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════
-   1. NAVBAR — clean, minimal
+   1. NAVBAR — clean, blur on scroll
    ═══════════════════════════════════════════ */
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -128,7 +174,7 @@ function Navbar() {
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-background/90 backdrop-blur-lg border-b border-border/60"
+          ? "bg-background/80 backdrop-blur-2xl border-b border-border/60 shadow-lg shadow-foreground/[0.03]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -153,7 +199,7 @@ function Navbar() {
           <Button variant="ghost" size="sm" asChild>
             <Link to="/login">Entrar</Link>
           </Button>
-          <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+          <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shimmer" asChild>
             <Link to="/login">Criar conta</Link>
           </Button>
         </div>
@@ -171,7 +217,7 @@ function Navbar() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden bg-background border-b border-border px-5 pb-4 space-y-3"
+          className="md:hidden bg-background/95 backdrop-blur-2xl border-b border-border px-5 pb-4 space-y-3"
         >
           {navLinks.map((link) => (
             <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-base font-medium text-muted-foreground py-2">
@@ -193,12 +239,13 @@ function Navbar() {
 }
 
 /* ═══════════════════════════════════════════
-   2. HERO — massive typography, clean layout
+   2. HERO — gradient mesh, parallax, animated pills
    ═══════════════════════════════════════════ */
 function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const illustrationY = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const illustrationScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   return (
     <motion.section
@@ -207,9 +254,13 @@ function Hero() {
       whileInView="visible"
       viewport={{ once: true }}
       variants={stagger}
-      className="px-5 sm:px-8 pt-28 md:pt-40 pb-16 md:pb-28"
+      className="relative px-5 sm:px-8 pt-28 md:pt-40 pb-16 md:pb-28 overflow-hidden"
     >
-      <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-12 md:gap-20 items-center">
+      {/* Gradient mesh background */}
+      <div className="absolute inset-0 gradient-mesh opacity-60 pointer-events-none" />
+      <div className="absolute inset-0 dot-pattern opacity-30 pointer-events-none" />
+
+      <div className="relative mx-auto max-w-7xl grid md:grid-cols-2 gap-12 md:gap-20 items-center">
         <div>
           <motion.h1
             variants={fadeUp}
@@ -226,18 +277,25 @@ function Hero() {
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex flex-wrap gap-4">
-            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8" asChild>
+            <Button
+              size="lg"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
+              asChild
+            >
               <Link to="/login">
                 Criar conta familiar <ChevronRight className="ml-1" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8" asChild>
+            <Button size="lg" variant="outline" className="text-base px-8 transition-shadow hover:shadow-lg" asChild>
               <a href="#como-funciona">Explorar a plataforma</a>
             </Button>
           </motion.div>
 
-          {/* Feature pills — clean, no glass */}
-          <motion.div variants={staggerFast} className="mt-10 flex flex-wrap gap-3">
+          {/* Feature pills — spring stagger */}
+          <motion.div
+            variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.3 } } }}
+            className="mt-10 flex flex-wrap gap-3"
+          >
             {[
               { icon: ShieldCheck, label: "100% seguro", color: "text-secondary" },
               { icon: Users, label: "+500 famílias", color: "text-primary" },
@@ -246,8 +304,12 @@ function Hero() {
             ].map((pill, i) => (
               <motion.div
                 key={i}
-                variants={fadeUp}
-                className="flex items-center gap-1.5 bg-muted rounded-full px-3.5 py-2"
+                variants={{
+                  hidden: { opacity: 0, scale: 0.8, y: 10 },
+                  visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 20 } },
+                }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                className="flex items-center gap-1.5 bg-card/80 backdrop-blur-sm border border-border/50 rounded-full px-3.5 py-2 cursor-default transition-shadow hover:shadow-md"
               >
                 <pill.icon className={`w-4 h-4 ${pill.color}`} />
                 <span className="text-sm font-medium text-muted-foreground">{pill.label}</span>
@@ -256,12 +318,18 @@ function Hero() {
           </motion.div>
         </div>
 
-        {/* Illustration — clean, no floating elements */}
-        <motion.div variants={fadeUp} className="flex items-center justify-center" style={{ y: illustrationY }}>
+        {/* Illustration — parallax with scale */}
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center justify-center relative"
+          style={{ y: illustrationY, scale: illustrationScale }}
+        >
+          {/* Glow behind illustration */}
+          <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl scale-75 pointer-events-none" />
           <img
             src={heroIllustration}
-            alt="Crianças a aprender sobre dinheiro"
-            className="w-full max-w-md md:max-w-xl"
+            alt="Crianças africanas a aprender sobre dinheiro"
+            className="w-full max-w-md md:max-w-xl relative z-10 drop-shadow-2xl"
           />
         </motion.div>
       </div>
@@ -270,40 +338,44 @@ function Hero() {
 }
 
 /* ═══════════════════════════════════════════
-   3. PROBLEMA — clean cards, no decorative numbers
+   3. PROBLEMA — animated icons
    ═══════════════════════════════════════════ */
 function ProblemSection() {
   const points = [
-    { icon: AlertTriangle, text: "Crescemos sem aprender a gerir dinheiro, definir metas ou planear o futuro financeiro.", color: "text-destructive", bg: "bg-destructive/10" },
-    { icon: TrendingDown, text: "Sem orientação adequada, as decisões financeiras tornam-se difíceis na vida adulta.", color: "text-accent-foreground", bg: "bg-accent/10" },
-    { icon: Sprout, text: "KIVARA nasceu para mudar isso — começando cedo, através do jogo e da prática.", color: "text-secondary", bg: "bg-secondary/10" },
+    { icon: AlertTriangle, text: "Crescemos sem aprender a gerir dinheiro, definir metas ou planear o futuro financeiro.", color: "text-destructive", bg: "bg-destructive/10", anim: "wiggle" as const },
+    { icon: TrendingDown, text: "Sem orientação adequada, as decisões financeiras tornam-se difíceis na vida adulta.", color: "text-accent-foreground", bg: "bg-accent/10", anim: "bounce" as const },
+    { icon: Sprout, text: "KIVARA nasceu para mudar isso — começando cedo, através do jogo e da prática.", color: "text-secondary", bg: "bg-secondary/10", anim: "pulse" as const },
   ];
   return (
-    <Section className="bg-muted/40">
-      <SectionTitle>A maioria das pessoas aprende sobre dinheiro tarde demais</SectionTitle>
-      <SectionSubtitle>Poucas crianças recebem educação financeira. Queremos mudar isso.</SectionSubtitle>
+    <>
+      <WaveDivider className="text-muted/40 -mb-1" />
+      <Section className="bg-muted/40">
+        <SectionTitle>A maioria das pessoas aprende sobre dinheiro tarde demais</SectionTitle>
+        <SectionSubtitle>Poucas crianças recebem educação financeira. Queremos mudar isso.</SectionSubtitle>
 
-      <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
-        {points.map((p, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            whileHover={{ y: -4 }}
-            className="bg-card rounded-2xl border border-border p-8 text-center transition-shadow hover:shadow-lg"
-          >
-            <div className={`${p.bg} rounded-2xl p-3 w-fit mx-auto mb-5`}>
-              <p.icon className={`w-6 h-6 ${p.color}`} />
-            </div>
-            <p className="text-base text-muted-foreground leading-relaxed">{p.text}</p>
-          </motion.div>
-        ))}
-      </div>
-    </Section>
+        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-6">
+          {points.map((p, i) => (
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              whileHover={{ y: -6, boxShadow: "0 20px 40px -12px hsl(var(--primary) / 0.12)" }}
+              className="bg-card rounded-2xl border border-border p-8 text-center transition-all group"
+            >
+              <div className={`${p.bg} rounded-2xl p-3 w-fit mx-auto mb-5 transition-transform group-hover:scale-110`}>
+                <AnimatedIcon icon={p.icon} animation={p.anim} className={`w-6 h-6 ${p.color}`} />
+              </div>
+              <p className="text-base text-muted-foreground leading-relaxed">{p.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </Section>
+      <WaveDivider flip className="text-muted/40 -mt-1" />
+    </>
   );
 }
 
 /* ═══════════════════════════════════════════
-   4. SOLUÇÃO — split screen, clean
+   4. SOLUÇÃO — split screen
    ═══════════════════════════════════════════ */
 function SolutionSection() {
   const checks = [
@@ -327,7 +399,7 @@ function SolutionSection() {
           </motion.p>
           <motion.div variants={stagger} className="space-y-4">
             {checks.map((text, i) => (
-              <motion.div key={i} variants={fadeUp} className="flex items-center gap-3">
+              <motion.div key={i} variants={fadeUp} whileHover={{ x: 4 }} className="flex items-center gap-3 transition-colors">
                 <div className="bg-secondary/10 rounded-full p-1 shrink-0">
                   <Check className="w-4 h-4 text-secondary" />
                 </div>
@@ -336,8 +408,9 @@ function SolutionSection() {
             ))}
           </motion.div>
         </div>
-        <motion.div variants={fadeUp} className="flex justify-center">
-          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-md rounded-3xl" />
+        <motion.div variants={fadeUp} className="flex justify-center relative">
+          <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
+          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-md rounded-3xl relative z-10 drop-shadow-xl" />
         </motion.div>
       </div>
     </Section>
@@ -345,57 +418,71 @@ function SolutionSection() {
 }
 
 /* ═══════════════════════════════════════════
-   5. COMO FUNCIONA — clean steps
+   5. COMO FUNCIONA — animated icons, gradient border hover, scroll line
    ═══════════════════════════════════════════ */
 function HowItWorks() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end center"] });
+
   const steps = [
-    { icon: Coins, title: "Ganhar", desc: "Completar missões e tarefas para ganhar moedas virtuais.", color: "bg-accent text-accent-foreground" },
-    { icon: Target, title: "Poupar", desc: "Criar metas e aprender a guardar para o que realmente importa.", color: "bg-secondary text-secondary-foreground" },
-    { icon: TrendingUp, title: "Evoluir", desc: "Desbloquear níveis, conquistas e novas aprendizagens financeiras.", color: "bg-primary text-primary-foreground" },
+    { icon: Coins, title: "Ganhar", desc: "Completar missões e tarefas para ganhar moedas virtuais.", color: "bg-accent text-accent-foreground", anim: "spin" as const },
+    { icon: Target, title: "Poupar", desc: "Criar metas e aprender a guardar para o que realmente importa.", color: "bg-secondary text-secondary-foreground", anim: "pulse" as const },
+    { icon: TrendingUp, title: "Evoluir", desc: "Desbloquear níveis, conquistas e novas aprendizagens financeiras.", color: "bg-primary text-primary-foreground", anim: "bounce" as const },
   ];
   return (
-    <Section id="como-funciona" className="bg-muted/40">
-      <SectionTitle>Como funciona</SectionTitle>
-      <SectionSubtitle>Três passos simples para começar a jornada financeira.</SectionSubtitle>
-      <div className="relative">
-        {/* Connector line — desktop only */}
-        <div className="hidden md:block absolute top-[4.5rem] left-[17%] right-[17%] h-[2px] bg-border z-0" />
-        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-8 relative z-10">
-          {steps.map((s, i) => (
+    <>
+      <WaveDivider className="text-muted/40 -mb-1" />
+      <Section id="como-funciona" className="bg-muted/40" ref={sectionRef as any}>
+        <SectionTitle>Como funciona</SectionTitle>
+        <SectionSubtitle>Três passos simples para começar a jornada financeira.</SectionSubtitle>
+        <div className="relative" ref={sectionRef}>
+          {/* Animated scroll progress line — desktop only */}
+          <div className="hidden md:block absolute top-[4.5rem] left-[17%] right-[17%] h-[2px] bg-border z-0 overflow-hidden">
             <motion.div
-              key={i}
-              variants={fadeUp}
-              whileHover={{ y: -4 }}
-              className="bg-card rounded-2xl border border-border p-8 text-center flex flex-col items-center gap-5 transition-shadow hover:shadow-lg"
-            >
-              <div className="relative">
-                <div className={`rounded-2xl p-5 ${s.color}`}>
-                  <s.icon className="w-7 h-7" />
+              className="h-full gradient-kivara origin-left"
+              style={{ scaleX: scrollYProgress }}
+            />
+          </div>
+          <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-8 relative z-10">
+            {steps.map((s, i) => (
+              <motion.div
+                key={i}
+                variants={fadeUp}
+                whileHover={{ y: -6 }}
+                className="bg-card rounded-2xl border border-border p-8 text-center flex flex-col items-center gap-5 transition-all hover:shadow-xl hover:shadow-primary/[0.06] group relative overflow-hidden"
+              >
+                {/* Gradient border on hover */}
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none gradient-border" />
+                <div className="relative">
+                  <div className={`rounded-2xl p-5 ${s.color} transition-transform group-hover:scale-110`}>
+                    <AnimatedIcon icon={s.icon} animation={s.anim} className="w-7 h-7" />
+                  </div>
+                  <span className="absolute -top-2 -right-2 bg-foreground text-background text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    {i + 1}
+                  </span>
                 </div>
-                <span className="absolute -top-2 -right-2 bg-foreground text-background text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {i + 1}
-                </span>
-              </div>
-              <h3 className="font-display text-xl font-bold">{s.title}</h3>
-              <p className="text-base text-muted-foreground">{s.desc}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </Section>
+                <h3 className="font-display text-xl font-bold">{s.title}</h3>
+                <p className="text-base text-muted-foreground">{s.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </Section>
+      <WaveDivider flip className="text-muted/40 -mt-1" />
+    </>
   );
 }
 
 /* ═══════════════════════════════════════════
-   6. UNIVERSO — clean grid
+   6. UNIVERSO — animated icon grid
    ═══════════════════════════════════════════ */
 function UniverseSection() {
   const zones = [
-    { icon: Building2, label: "Cidade do Dinheiro", desc: "Aprende a ganhar e gerir", bg: "bg-accent/10", color: "text-accent-foreground" },
-    { icon: TreePine, label: "Vale da Poupança", desc: "Guarda e faz crescer", bg: "bg-secondary/10", color: "text-secondary" },
-    { icon: BookOpen, label: "Academia Financeira", desc: "Lições interactivas", bg: "bg-primary/10", color: "text-primary" },
-    { icon: Swords, label: "Arena dos Desafios", desc: "Compete e aprende", bg: "bg-destructive/10", color: "text-destructive" },
-    { icon: ShoppingBag, label: "Mercado dos Sonhos", desc: "Realiza objectivos", bg: "bg-accent/10", color: "text-accent-foreground" },
+    { icon: Building2, label: "Cidade do Dinheiro", desc: "Aprende a ganhar e gerir", bg: "bg-accent/10", color: "text-accent-foreground", anim: "bounce" as const },
+    { icon: TreePine, label: "Vale da Poupança", desc: "Guarda e faz crescer", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
+    { icon: BookOpen, label: "Academia Financeira", desc: "Lições interactivas", bg: "bg-primary/10", color: "text-primary", anim: "glow" as const },
+    { icon: Swords, label: "Arena dos Desafios", desc: "Compete e aprende", bg: "bg-destructive/10", color: "text-destructive", anim: "wiggle" as const },
+    { icon: ShoppingBag, label: "Mercado dos Sonhos", desc: "Realiza objectivos", bg: "bg-accent/10", color: "text-accent-foreground", anim: "spin" as const },
   ];
   return (
     <Section id="universo">
@@ -407,13 +494,13 @@ function UniverseSection() {
           <motion.div
             key={i}
             variants={fadeUp}
-            whileHover={{ y: -4 }}
-            className={`bg-card rounded-2xl border border-border p-6 text-center flex flex-col items-center gap-4 transition-shadow hover:shadow-lg ${
+            whileHover={{ y: -6, boxShadow: "0 20px 40px -12px hsl(var(--primary) / 0.1)" }}
+            className={`bg-card rounded-2xl border border-border p-6 text-center flex flex-col items-center gap-4 transition-all group ${
               i === zones.length - 1 && zones.length % 2 !== 0 ? "col-span-2 md:col-span-1 mx-auto max-w-[280px] md:max-w-none" : ""
             }`}
           >
-            <div className={`${z.bg} rounded-2xl p-4`}>
-              <z.icon className={`w-7 h-7 ${z.color}`} />
+            <div className={`${z.bg} rounded-2xl p-4 transition-transform group-hover:scale-110`}>
+              <AnimatedIcon icon={z.icon} animation={z.anim} className={`w-7 h-7 ${z.color}`} />
             </div>
             <span className="font-display text-base font-bold">{z.label}</span>
             <span className="text-sm text-muted-foreground">{z.desc}</span>
@@ -425,7 +512,7 @@ function UniverseSection() {
 }
 
 /* ═══════════════════════════════════════════
-   7. BENEFÍCIOS PAIS — clean split
+   7. BENEFÍCIOS PAIS — hover glow cards
    ═══════════════════════════════════════════ */
 function ParentBenefits() {
   const items = [
@@ -437,8 +524,9 @@ function ParentBenefits() {
   return (
     <Section id="familias">
       <div className="grid md:grid-cols-2 gap-16 items-center">
-        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1">
-          <img src={parentsBenefit} alt="Pai e filho a usar KIVARA" className="w-full max-w-md" />
+        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
+          <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
+          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-md relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
@@ -455,10 +543,10 @@ function ParentBenefits() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                whileHover={{ y: -2 }}
-                className="flex items-center gap-4 bg-card rounded-2xl border border-border p-4 transition-shadow hover:shadow-md"
+                whileHover={{ y: -2, boxShadow: "0 12px 24px -6px hsl(var(--primary) / 0.1)" }}
+                className="flex items-center gap-4 bg-card/80 backdrop-blur-sm rounded-2xl border border-border/60 p-4 transition-all group"
               >
-                <div className={`${item.bg} rounded-xl p-2.5 shrink-0`}>
+                <div className={`${item.bg} rounded-xl p-2.5 shrink-0 transition-transform group-hover:scale-110`}>
                   <item.icon className={`w-5 h-5 ${item.color}`} />
                 </div>
                 <p className="text-base text-foreground font-medium flex-1">{item.text}</p>
@@ -481,58 +569,64 @@ function SchoolBenefits() {
     { icon: Trophy, text: "Incentivar competição saudável entre turmas", bg: "bg-secondary/10", color: "text-secondary" },
   ];
   return (
-    <Section id="escolas" className="bg-muted/40">
-      <div className="grid md:grid-cols-2 gap-16 items-center">
-        <div>
-          <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
-            Para escolas
-          </motion.div>
-          <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
-            Educação financeira para a <GradientText>nova geração</GradientText>
-          </motion.h2>
-          <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-10 text-balance">
-            Professores podem transformar a sala de aula num laboratório financeiro.
-          </motion.p>
-          <motion.div variants={stagger} className="space-y-4">
-            {items.map((item, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                whileHover={{ y: -2 }}
-                className="flex items-center gap-4 bg-card rounded-2xl border border-border p-4 transition-shadow hover:shadow-md"
-              >
-                <div className={`${item.bg} rounded-xl p-2.5 shrink-0`}>
-                  <item.icon className={`w-5 h-5 ${item.color}`} />
-                </div>
-                <p className="text-base text-foreground font-medium flex-1">{item.text}</p>
-              </motion.div>
-            ))}
+    <>
+      <WaveDivider className="text-muted/40 -mb-1" />
+      <Section id="escolas" className="bg-muted/40">
+        <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
+              Para escolas
+            </motion.div>
+            <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
+              Educação financeira para a <GradientText>nova geração</GradientText>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-10 text-balance">
+              Professores podem transformar a sala de aula num laboratório financeiro.
+            </motion.p>
+            <motion.div variants={stagger} className="space-y-4">
+              {items.map((item, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  whileHover={{ y: -2, boxShadow: "0 12px 24px -6px hsl(var(--primary) / 0.1)" }}
+                  className="flex items-center gap-4 bg-card/80 backdrop-blur-sm rounded-2xl border border-border/60 p-4 transition-all group"
+                >
+                  <div className={`${item.bg} rounded-xl p-2.5 shrink-0 transition-transform group-hover:scale-110`}>
+                    <item.icon className={`w-5 h-5 ${item.color}`} />
+                  </div>
+                  <p className="text-base text-foreground font-medium flex-1">{item.text}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+          <motion.div variants={fadeUp} className="flex justify-center relative">
+            <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
+            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-md relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
-        <motion.div variants={fadeUp} className="flex justify-center">
-          <img src={schoolBenefit} alt="Professora com alunos" className="w-full max-w-md" />
-        </motion.div>
-      </div>
-    </Section>
+      </Section>
+      <WaveDivider flip className="text-muted/40 -mt-1" />
+    </>
   );
 }
 
 /* ═══════════════════════════════════════════
-   9. GAMIFICAÇÃO — static clean chips
+   9. GAMIFICAÇÃO — animated chips
    ═══════════════════════════════════════════ */
 function GamificationSection() {
   const elements = [
-    { icon: Flame, label: "Missões diárias", bg: "bg-destructive/10", color: "text-destructive" },
-    { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary" },
-    { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground" },
-    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary" },
-    { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "text-primary" },
+    { icon: Flame, label: "Missões diárias", bg: "bg-destructive/10", color: "text-destructive", anim: "glow" as const },
+    { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
+    { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
+    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
+    { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "text-primary", anim: "spin" as const },
   ];
   return (
     <Section>
       <div className="grid md:grid-cols-2 gap-16 items-center">
-        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1">
-          <img src={gamificationImg} alt="Elementos de gamificação" className="w-full max-w-md" />
+        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
+          <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
+          <img src={gamificationImg} alt="Crianças africanas a celebrar conquistas" className="w-full max-w-md relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
@@ -548,11 +642,14 @@ function GamificationSection() {
             {elements.map((el, i) => (
               <motion.div
                 key={i}
-                variants={fadeUp}
-                whileHover={{ y: -2 }}
-                className={`flex items-center gap-2.5 ${el.bg} rounded-full px-5 py-3 transition-shadow hover:shadow-md`}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.85 },
+                  visible: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 300, damping: 20 } },
+                }}
+                whileHover={{ y: -3, scale: 1.05 }}
+                className={`flex items-center gap-2.5 ${el.bg} rounded-full px-5 py-3 transition-shadow hover:shadow-md cursor-default`}
               >
-                <el.icon className={`w-5 h-5 ${el.color}`} />
+                <AnimatedIcon icon={el.icon} animation={el.anim} className={`w-5 h-5 ${el.color}`} />
                 <span className="font-display text-sm font-semibold text-foreground">{el.label}</span>
               </motion.div>
             ))}
@@ -564,14 +661,14 @@ function GamificationSection() {
 }
 
 /* ═══════════════════════════════════════════
-   10. CONFIANÇA — clean dark block
+   10. CONFIANÇA — dark block, glow shield
    ═══════════════════════════════════════════ */
 function TrustSection() {
   const points = [
-    { icon: Users, text: "Contas infantis supervisionadas" },
-    { icon: Eye, text: "Controlo parental completo" },
-    { icon: Lock, text: "Dados protegidos e encriptados" },
-    { icon: ShieldCheck, text: "Ambiente educativo seguro" },
+    { icon: Users, text: "Contas infantis supervisionadas", anim: "pulse" as const },
+    { icon: Eye, text: "Controlo parental completo", anim: "glow" as const },
+    { icon: Lock, text: "Dados protegidos e encriptados", anim: "wiggle" as const },
+    { icon: ShieldCheck, text: "Ambiente educativo seguro", anim: "glow" as const },
   ];
   return (
     <Section className="!bg-foreground !text-background">
@@ -591,19 +688,20 @@ function TrustSection() {
               <motion.div
                 key={i}
                 variants={fadeUp}
-                whileHover={{ y: -4 }}
-                className="bg-background/[0.06] rounded-2xl p-6 flex flex-col items-center text-center gap-3 transition-all border border-background/[0.08]"
+                whileHover={{ y: -4, boxShadow: "0 12px 30px -8px hsl(var(--secondary) / 0.3)" }}
+                className="bg-background/[0.06] rounded-2xl p-6 flex flex-col items-center text-center gap-3 transition-all border border-background/[0.08] group"
               >
-                <div className="rounded-full p-3 bg-background/10">
-                  <p.icon className="w-6 h-6" />
+                <div className="rounded-full p-3 bg-background/10 transition-transform group-hover:scale-110">
+                  <AnimatedIcon icon={p.icon} animation={p.anim} className="w-6 h-6" />
                 </div>
                 <span className="font-display text-sm font-semibold">{p.text}</span>
               </motion.div>
             ))}
           </motion.div>
         </div>
-        <motion.div variants={fadeUp} className="flex justify-center">
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-md opacity-90" />
+        <motion.div variants={fadeUp} className="flex justify-center relative">
+          <div className="absolute inset-0 rounded-full bg-secondary/15 blur-3xl scale-75 pointer-events-none" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-md opacity-90 relative z-10 drop-shadow-2xl" />
         </motion.div>
       </div>
     </Section>
@@ -611,7 +709,7 @@ function TrustSection() {
 }
 
 /* ═══════════════════════════════════════════
-   11. PROVA SOCIAL — clean stats + testimonials
+   11. PROVA SOCIAL — 3D testimonials
    ═══════════════════════════════════════════ */
 function SocialProof() {
   const stats = [
@@ -628,66 +726,85 @@ function SocialProof() {
   ];
 
   return (
-    <Section className="bg-muted/40">
-      {/* Stars */}
-      <motion.div variants={fadeUp} className="text-center mb-6">
-        <div className="flex items-center justify-center gap-1 mb-5">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="w-7 h-7 text-accent fill-accent" />
+    <>
+      <WaveDivider className="text-muted/40 -mb-1" />
+      <Section className="bg-muted/40">
+        {/* Stars */}
+        <motion.div variants={fadeUp} className="text-center mb-6">
+          <div className="flex items-center justify-center gap-1 mb-5">
+            {[...Array(5)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0, rotate: -30 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
+              >
+                <Star className="w-7 h-7 text-accent fill-accent" />
+              </motion.div>
+            ))}
+          </div>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-4 leading-[1.1]">
+            Mais de 500 crianças já começaram a sua jornada
+          </h2>
+          <p className="text-muted-foreground text-lg">Famílias e escolas de vários países confiam em nós.</p>
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-20 mt-12">
+          {stats.map((s, i) => (
+            <motion.div
+              key={i}
+              variants={fadeUp}
+              whileHover={{ y: -4, boxShadow: "0 16px 32px -8px hsl(var(--primary) / 0.12)" }}
+              className="bg-card rounded-2xl border border-border p-6 text-center transition-all"
+            >
+              <p className="font-display text-3xl md:text-4xl font-bold text-primary">
+                {s.display || <CountUp target={s.value} suffix={s.suffix} />}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">{s.label}</p>
+            </motion.div>
           ))}
-        </div>
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-4 leading-[1.1]">
-          Mais de 500 crianças já começaram a sua jornada
-        </h2>
-        <p className="text-muted-foreground text-lg">Famílias e escolas de vários países confiam em nós.</p>
-      </motion.div>
+        </motion.div>
 
-      {/* Stats */}
-      <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto mb-20 mt-12">
-        {stats.map((s, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            whileHover={{ y: -4 }}
-            className="bg-card rounded-2xl border border-border p-6 text-center transition-shadow hover:shadow-lg"
-          >
-            <p className="font-display text-3xl md:text-4xl font-bold text-primary">
-              {s.display || <CountUp target={s.value} suffix={s.suffix} />}
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">{s.label}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Testimonials */}
-      <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-6">
-        {testimonials.map((t, i) => (
-          <motion.div
-            key={i}
-            variants={fadeUp}
-            whileHover={{ y: -4 }}
-            className="bg-card rounded-2xl border border-border p-6 relative transition-shadow hover:shadow-lg"
-          >
-            <Quote className="w-8 h-8 text-primary/10 absolute top-4 right-4" />
-            <div className="flex gap-1 mb-4">
-              {[...Array(t.rating)].map((_, j) => (
-                <Star key={j} className="w-4 h-4 text-accent fill-accent" />
-              ))}
-            </div>
-            <p className="text-base text-foreground mb-5 italic leading-relaxed">"{t.text}"</p>
-            <div>
-              <p className="text-sm font-bold text-foreground">{t.name}</p>
-              <p className="text-sm text-muted-foreground">{t.role}</p>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-    </Section>
+        {/* Testimonials — 3D rotation on enter */}
+        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-6">
+          {testimonials.map((t, i) => (
+            <motion.div
+              key={i}
+              variants={{
+                hidden: { opacity: 0, rotateY: -15, x: -20 },
+                visible: {
+                  opacity: 1, rotateY: 0, x: 0,
+                  transition: { duration: 0.7, ease: easeOut as unknown as [number, number, number, number] }
+                },
+              }}
+              whileHover={{ y: -4, boxShadow: "0 16px 32px -8px hsl(var(--primary) / 0.1)" }}
+              className="bg-card rounded-2xl border border-border p-6 relative transition-all"
+              style={{ perspective: 1000, transformStyle: "preserve-3d" }}
+            >
+              <Quote className="w-8 h-8 text-primary/10 absolute top-4 right-4" />
+              <div className="flex gap-1 mb-4">
+                {[...Array(t.rating)].map((_, j) => (
+                  <Star key={j} className="w-4 h-4 text-accent fill-accent" />
+                ))}
+              </div>
+              <p className="text-base text-foreground mb-5 italic leading-relaxed">"{t.text}"</p>
+              <div>
+                <p className="text-sm font-bold text-foreground">{t.name}</p>
+                <p className="text-sm text-muted-foreground">{t.role}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </Section>
+      <WaveDivider flip className="text-muted/40 -mt-1" />
+    </>
   );
 }
 
 /* ═══════════════════════════════════════════
-   12. CTA FINAL — bold secondary color block
+   12. CTA FINAL — gradient shift hover
    ═══════════════════════════════════════════ */
 function FinalCTA() {
   return (
@@ -696,10 +813,20 @@ function FinalCTA() {
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
       variants={stagger}
-      className="px-5 sm:px-8 py-24 md:py-36 bg-secondary"
+      className="relative px-5 sm:px-8 py-24 md:py-36 bg-secondary overflow-hidden"
     >
-      <motion.div variants={fadeUp} className="text-center max-w-3xl mx-auto">
-        <img src={kivoSvg} alt="Kivo" className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-8" />
+      {/* Decorative glow orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-background/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/15 rounded-full blur-3xl pointer-events-none" />
+
+      <motion.div variants={fadeUp} className="relative text-center max-w-3xl mx-auto">
+        <motion.img
+          src={kivoSvg}
+          alt="Kivo"
+          className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-8"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-secondary-foreground leading-[1.1]">
           Comece hoje a construir o futuro financeiro do seu filho
         </h2>
@@ -707,7 +834,11 @@ function FinalCTA() {
           Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button size="lg" className="bg-background text-foreground hover:bg-background/90 text-base px-8" asChild>
+          <Button
+            size="lg"
+            className="bg-background text-foreground hover:bg-background/90 text-base px-8 shimmer transition-shadow hover:shadow-xl"
+            asChild
+          >
             <Link to="/login">
               Criar conta familiar <ChevronRight className="ml-1" />
             </Link>
@@ -722,11 +853,11 @@ function FinalCTA() {
 }
 
 /* ═══════════════════════════════════════════
-   13. FOOTER — clean
+   13. FOOTER — gradient dark
    ═══════════════════════════════════════════ */
 function Footer() {
   return (
-    <footer className="bg-foreground text-background px-5 sm:px-8 py-14">
+    <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-14">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div className="col-span-2 md:col-span-1">
