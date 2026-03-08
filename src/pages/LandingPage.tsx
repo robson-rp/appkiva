@@ -749,7 +749,7 @@ function SchoolBenefits() {
           </div>
           <motion.div variants={fadeUp} className="flex justify-center relative">
             <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-lg relative z-10 drop-shadow-xl" />
+            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
       </Section>
