@@ -951,7 +951,7 @@ function FinalCTA() {
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
       variants={stagger}
-      className="relative px-5 sm:px-8 py-16 md:py-24 bg-secondary overflow-hidden"
+      className="relative px-5 sm:px-8 py-12 md:py-16 bg-secondary overflow-hidden"
     >
       {/* Decorative glow orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-background/10 rounded-full blur-3xl pointer-events-none" />
