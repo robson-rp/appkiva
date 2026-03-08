@@ -106,7 +106,7 @@ export default function ChildWallet() {
                   <div className="bg-white/15 backdrop-blur-sm rounded-xl p-2">
                     <Wallet className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-white/70 text-sm font-body">A tua carteira</p>
+                   <p className="text-white/70 text-sm font-body">{t('child.wallet.your_wallet')}</p>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <motion.span
