@@ -677,7 +677,7 @@ function SchoolBenefits() {
         </div>
         <motion.div variants={scaleIn} className="flex justify-center relative">
           <div className="absolute -inset-8 rounded-full bg-gradient-to-br from-accent/10 via-transparent to-primary/10 blur-2xl" />
-          <img src={schoolBenefit} alt="Professora com alunos" className="w-full max-w-xs md:max-w-sm relative z-10" />
+          <img src={schoolBenefit} alt="Professora com alunos" className="w-full max-w-sm md:max-w-md relative z-10" />
         </motion.div>
       </div>
     </Section>
