@@ -358,7 +358,7 @@ function Hero() {
           <motion.img
             src={kivoSvg}
             alt="Kivo"
-            className="absolute -top-2 -right-2 md:top-0 md:right-0 w-16 md:w-20 drop-shadow-lg z-20"
+            className="absolute -top-2 -right-2 md:top-0 md:right-0 w-20 md:w-24 drop-shadow-lg z-20"
             animate={{ y: [0, -8, 0] }}
             transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
           />
