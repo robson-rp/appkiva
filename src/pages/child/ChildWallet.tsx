@@ -211,7 +211,7 @@ export default function ChildWallet() {
                       disabled={!selectedCause || !donateAmount || donateMutation.isPending}
                     >
                       {donateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
-                      {donateMutation.isPending ? 'A processar...' : 'Confirmar Doação'}
+                      {donateMutation.isPending ? t('child.wallet.processing') : t('child.wallet.confirm_donation')}
                     </Button>
                   </div>
                 </DialogContent>
