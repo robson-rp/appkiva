@@ -700,7 +700,7 @@ function GamificationSection() {
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <motion.div variants={scaleIn} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute -inset-8 rounded-full bg-gradient-to-br from-accent/15 via-transparent to-secondary/10 blur-2xl" />
-          <img src={gamificationImg} alt="Elementos de gamificação" className="w-full max-w-xs md:max-w-sm relative z-10" />
+          <img src={gamificationImg} alt="Elementos de gamificação" className="w-full max-w-sm md:max-w-md relative z-10" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1 text-caption font-semibold mb-4">
