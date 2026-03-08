@@ -21,6 +21,7 @@ const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯'
 export default function PartnerProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { locale, setLocale, t } = useLanguage();
   const [name, setName] = useState(user?.name || '');
   const [email] = useState(user?.email || '');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '🏦');
