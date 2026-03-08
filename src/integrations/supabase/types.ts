@@ -1324,6 +1324,7 @@ export type Database = {
           household_id: string | null
           id: string
           institution_name: string | null
+          language: string
           phone: string | null
           school_tenant_id: string | null
           sector: string | null
@@ -1341,6 +1342,7 @@ export type Database = {
           household_id?: string | null
           id?: string
           institution_name?: string | null
+          language?: string
           phone?: string | null
           school_tenant_id?: string | null
           sector?: string | null
@@ -1358,6 +1360,7 @@ export type Database = {
           household_id?: string | null
           id?: string
           institution_name?: string | null
+          language?: string
           phone?: string | null
           school_tenant_id?: string | null
           sector?: string | null
