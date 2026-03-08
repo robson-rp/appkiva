@@ -15,8 +15,10 @@ import { TeenCategoryBreakdown } from '@/components/teen/TeenCategoryBreakdown';
 import { TeenRecentTransactions } from '@/components/teen/TeenRecentTransactions';
 import { StreakWidget } from '@/components/StreakWidget';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function TeenDashboard() {
+  const { t } = useLanguage();
   const teen = mockTeens[0];
   const navigate = useNavigate();
   const { data: realBudget } = useTeenBudget();
