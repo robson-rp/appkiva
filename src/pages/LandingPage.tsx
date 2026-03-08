@@ -375,7 +375,7 @@ function Hero() {
                     animate={selectedIndex === i ? { opacity: 1, y: 0 } : { opacity: 0.3, y: 10 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <h1 className="font-display text-[2.5rem] sm:text-[3rem] md:text-[3.5rem] lg:text-[4rem] font-bold leading-[1.05] tracking-tight text-foreground max-w-[600px]">
+                    <h1 className="font-display text-[2rem] sm:text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-bold leading-[1.05] tracking-tight text-foreground max-w-[600px]">
                       {slide.headline}
                       <br />
                       <GradientText>{slide.headlineGradient}</GradientText>
