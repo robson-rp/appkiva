@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUpRight, ArrowDownRight, PiggyBank } from 'lucide-react';
 import { SPENDING_CATEGORIES } from '@/types/kivara';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -16,10 +17,11 @@ interface TeenRecentTransactionsProps {
 }
 
 export function TeenRecentTransactions({ transactions }: TeenRecentTransactionsProps) {
+  const t = useT();
   return (
     <Card className="border-border/50">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-display">Últimas Transações</CardTitle>
+        <CardTitle className="text-sm font-display">{t('teen.recent_transactions')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {transactions.map((tx) => (

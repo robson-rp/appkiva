@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ChildWithBalance } from '@/hooks/use-children';
+import { useT } from '@/contexts/LanguageContext';
 
 interface StreakInfo {
   profileId: string;
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function ParentChildrenStreaks({ children }: Props) {
+  const t = useT();
   const profileIds = children.map(c => c.profileId);
   const { data: streaks = [] } = useChildrenStreaks(profileIds);
   const streakMap = new Map(streaks.map(s => [s.profileId, s]));
@@ -53,7 +55,7 @@ export function ParentChildrenStreaks({ children }: Props) {
           <div className="w-8 h-8 rounded-xl bg-destructive/10 flex items-center justify-center">
             <Flame className="h-4 w-4 text-destructive" />
           </div>
-          Sequências dos Filhos
+          {t('parent.children_streaks')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
@@ -77,7 +79,7 @@ export function ParentChildrenStreaks({ children }: Props) {
               <div className="flex-1 min-w-0">
                 <p className="font-display font-bold text-sm truncate">{child.displayName}</p>
                 <p className="text-[10px] text-muted-foreground">
-                  Recorde: {longest} dias · {streak?.totalActiveDays ?? 0} dias activos
+                  {t('parent.streak_record').replace('{count}', String(longest)).replace('{active}', String(streak?.totalActiveDays ?? 0))}
                 </p>
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${

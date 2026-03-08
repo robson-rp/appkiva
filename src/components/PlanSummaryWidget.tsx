@@ -2,15 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Check, Lock, ChevronRight } from 'lucide-react';
 import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
-
-const FEATURE_LIST = [
-  { key: FEATURES.SAVINGS_VAULTS, label: 'Cofres de Poupança', icon: '🐷' },
-  { key: FEATURES.ADVANCED_ANALYTICS, label: 'Relatórios Avançados', icon: '📊' },
-  { key: FEATURES.CUSTOM_REWARDS, label: 'Recompensas Custom', icon: '🎁' },
-  { key: FEATURES.BUDGET_EXCEPTIONS, label: 'Excepções Orçamento', icon: '📩' },
-  { key: FEATURES.DREAM_VAULTS, label: 'Cofres de Sonhos', icon: '✨' },
-  { key: FEATURES.EXPORT_REPORTS, label: 'Exportar Dados', icon: '📥' },
-];
+import { useT } from '@/contexts/LanguageContext';
 
 interface PlanSummaryWidgetProps {
   compact?: boolean;
@@ -19,12 +11,22 @@ interface PlanSummaryWidgetProps {
 }
 
 export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: PlanSummaryWidgetProps) {
+  const t = useT();
   const { enabledFeatures, tierName, loading } = useAllFeatures();
+
+  const FEATURE_LIST = [
+    { key: FEATURES.SAVINGS_VAULTS, label: t('plan.savings_vaults'), icon: '🐷' },
+    { key: FEATURES.ADVANCED_ANALYTICS, label: t('plan.advanced_analytics'), icon: '📊' },
+    { key: FEATURES.CUSTOM_REWARDS, label: t('plan.custom_rewards'), icon: '🎁' },
+    { key: FEATURES.BUDGET_EXCEPTIONS, label: t('plan.budget_exceptions'), icon: '📩' },
+    { key: FEATURES.DREAM_VAULTS, label: t('plan.dream_vaults'), icon: '✨' },
+    { key: FEATURES.EXPORT_REPORTS, label: t('plan.export_reports'), icon: '📥' },
+  ];
 
   if (loading) return null;
 
   const isFree = tierName === 'Free' || !tierName;
-  const displayName = isFree ? 'Plano Gratuito' : tierName;
+  const displayName = isFree ? t('plan.free') : tierName;
 
   if (compact) {
     const activeCount = FEATURE_LIST.filter(f => enabledFeatures.includes(f.key)).length;
@@ -38,7 +40,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
             </div>
             <div>
               <p className="font-display font-bold text-xs">{displayName}</p>
-              <p className="text-[10px] text-muted-foreground">{activeCount}/{FEATURE_LIST.length} funcionalidades activas</p>
+              <p className="text-[10px] text-muted-foreground">{t('plan.features_active').replace('{count}', String(activeCount)).replace('{total}', String(FEATURE_LIST.length))}</p>
             </div>
           </div>
           <Badge variant={isFree ? 'secondary' : 'default'} className="font-display text-[10px] gap-0.5">
@@ -60,7 +62,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
               <Crown className="h-4 w-4 text-accent-foreground" />
             </div>
             <div>
-              <p className="font-display font-bold text-sm">Plano Familiar</p>
+              <p className="font-display font-bold text-sm">{t('plan.family_plan')}</p>
               <p className="text-[10px] text-muted-foreground">{displayName}</p>
             </div>
           </div>
@@ -92,7 +94,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
         {isFree && (
           <div className="mt-3 flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
             <p className="text-[11px] text-accent-foreground font-display font-bold">
-              {upgradeLabel || 'Pede ao teu encarregado para fazer upgrade! 🚀'}
+              {upgradeLabel || t('plan.upgrade_prompt')}
             </p>
             <ChevronRight className="h-4 w-4 text-accent-foreground" />
           </div>

@@ -2268,6 +2268,68 @@ const pt: Record<string, string> = {
   'payment.paypal_desc': 'Pagar com a sua conta PayPal',
   'payment.stripe_label': 'Stripe',
   'payment.stripe_method_desc': 'Pagamento seguro via Stripe',
+
+  // ─── StreakWidget ───
+  'streak.daily_streak': 'Sequência Diária',
+  'streak.active_days_total': '{count} dias activos no total',
+  'streak.record': 'Recorde: {count}',
+  'streak.expired': 'Expirado',
+  'streak.today': 'Hoje',
+  'streak.on_fire': '🔥 Em chamas! Continua assim!',
+  'streak.last_active': 'Último dia activo: {date}',
+  'streak.no_activity': 'Sem actividade registada',
+
+  // ─── DailyMissionCard ───
+  'mission.daily': '⚡ Diária',
+  'mission.weekly': '🗓️ Semanal',
+
+  // ─── PlayerCard ───
+  'player.player': 'Jogador',
+  'player.kivacoins': 'KivaCoins',
+  'player.to_next': '{points} para {next}',
+  'player.streak': 'Streak',
+  'player.badges': 'Badges',
+  'player.see_evolution': '✨ Ver evolução',
+
+  // ─── PlanSummaryWidget ───
+  'plan.free': 'Plano Gratuito',
+  'plan.features_active': '{count}/{total} funcionalidades activas',
+  'plan.family_plan': 'Plano Familiar',
+  'plan.savings_vaults': 'Cofres de Poupança',
+  'plan.advanced_analytics': 'Relatórios Avançados',
+  'plan.custom_rewards': 'Recompensas Custom',
+  'plan.budget_exceptions': 'Excepções Orçamento',
+  'plan.dream_vaults': 'Cofres de Sonhos',
+  'plan.export_reports': 'Exportar Dados',
+  'plan.upgrade_prompt': 'Pede ao teu encarregado para fazer upgrade! 🚀',
+
+  // ─── ParentChildrenStreaks ───
+  'parent.children_streaks': 'Sequências dos Filhos',
+  'parent.streak_record': 'Recorde: {count} dias · {active} dias activos',
+
+  // ─── TeenBudgetBar ───
+  'teen.monthly_budget': 'Orçamento Mensal',
+  'teen.spent': '{amount} gasto',
+  'teen.limit': '{amount} limite',
+  'teen.remaining': 'Resta',
+  'teen.this_month': 'este mês',
+
+  // ─── TeenCategoryBreakdown ───
+  'teen.category_breakdown': 'Gastos por Categoria',
+
+  // ─── TeenRecentTransactions ───
+  'teen.recent_transactions': 'Últimas Transações',
+
+  // ─── ChildFamilyRankings ───
+  'child.rankings.title': 'Ranking Familiar',
+  'child.rankings.saver': '🏆 Poupador',
+  'child.rankings.planner': '🎯 Planeador',
+  'child.rankings.donor': '💜 Doador',
+
+  // ─── ChildSavingsProgress ───
+  'child.savings.title': 'Poupanças',
+  'child.savings.view_vaults': 'Ver cofres',
+  'child.savings.per_month': '/mês',
 };
 
 export default pt;
