@@ -131,9 +131,9 @@ export default function ChildWallet() {
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-3 mt-5">
               {[
-                { label: 'Ganho', value: earned, icon: TrendingUp },
-                { label: 'Gasto', value: spent, icon: TrendingDown },
-                { label: 'Poupado', value: saved, icon: PiggyBank },
+                { label: t('child.wallet.earned'), value: earned, icon: TrendingUp },
+                { label: t('child.wallet.spent'), value: spent, icon: TrendingDown },
+                { label: t('child.wallet.saved'), value: saved, icon: PiggyBank },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
