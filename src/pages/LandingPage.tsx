@@ -405,11 +405,11 @@ function Hero() {
                     animate={selectedIndex === i ? { opacity: 1, scale: 1 } : { opacity: 0.3, scale: 0.85 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl scale-75 pointer-events-none" />
+                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full max-w-sm md:max-w-md relative z-10 drop-shadow-2xl"
+                      className="w-full max-w-md md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
