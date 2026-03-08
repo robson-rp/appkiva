@@ -2268,6 +2268,68 @@ const en: Record<string, string> = {
   'payment.paypal_desc': 'Pay with your PayPal account',
   'payment.stripe_label': 'Stripe',
   'payment.stripe_method_desc': 'Secure payment via Stripe',
+
+  // ─── StreakWidget ───
+  'streak.daily_streak': 'Daily Streak',
+  'streak.active_days_total': '{count} total active days',
+  'streak.record': 'Record: {count}',
+  'streak.expired': 'Expired',
+  'streak.today': 'Today',
+  'streak.on_fire': '🔥 On fire! Keep it up!',
+  'streak.last_active': 'Last active day: {date}',
+  'streak.no_activity': 'No activity recorded',
+
+  // ─── DailyMissionCard ───
+  'mission.daily': '⚡ Daily',
+  'mission.weekly': '🗓️ Weekly',
+
+  // ─── PlayerCard ───
+  'player.player': 'Player',
+  'player.kivacoins': 'KivaCoins',
+  'player.to_next': '{points} to {next}',
+  'player.streak': 'Streak',
+  'player.badges': 'Badges',
+  'player.see_evolution': '✨ See evolution',
+
+  // ─── PlanSummaryWidget ───
+  'plan.free': 'Free Plan',
+  'plan.features_active': '{count}/{total} features active',
+  'plan.family_plan': 'Family Plan',
+  'plan.savings_vaults': 'Savings Vaults',
+  'plan.advanced_analytics': 'Advanced Reports',
+  'plan.custom_rewards': 'Custom Rewards',
+  'plan.budget_exceptions': 'Budget Exceptions',
+  'plan.dream_vaults': 'Dream Vaults',
+  'plan.export_reports': 'Export Data',
+  'plan.upgrade_prompt': 'Ask your parent to upgrade! 🚀',
+
+  // ─── ParentChildrenStreaks ───
+  'parent.children_streaks': "Children's Streaks",
+  'parent.streak_record': 'Record: {count} days · {active} active days',
+
+  // ─── TeenBudgetBar ───
+  'teen.monthly_budget': 'Monthly Budget',
+  'teen.spent': '{amount} spent',
+  'teen.limit': '{amount} limit',
+  'teen.remaining': 'Remaining',
+  'teen.this_month': 'this month',
+
+  // ─── TeenCategoryBreakdown ───
+  'teen.category_breakdown': 'Spending by Category',
+
+  // ─── TeenRecentTransactions ───
+  'teen.recent_transactions': 'Recent Transactions',
+
+  // ─── ChildFamilyRankings ───
+  'child.rankings.title': 'Family Rankings',
+  'child.rankings.saver': '🏆 Saver',
+  'child.rankings.planner': '🎯 Planner',
+  'child.rankings.donor': '💜 Donor',
+
+  // ─── ChildSavingsProgress ───
+  'child.savings.title': 'Savings',
+  'child.savings.view_vaults': 'View vaults',
+  'child.savings.per_month': '/mo',
 };
 
 export default en;
