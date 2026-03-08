@@ -15,22 +15,24 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function PartnerPrograms() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const t = useT();
   const [search, setSearch] = useState('');
   const limits = usePartnerLimits();
   const { data: programs, isLoading } = usePartnerPrograms();
   const deleteProgram = useDeletePartnerProgram();
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Eliminar o programa "${name}"?`)) return;
+    if (!confirm(t('partner.programs.delete_confirm').replace('{name}', name))) return;
     try {
       await deleteProgram.mutateAsync(id);
-      toast.success('Programa eliminado');
+      toast.success(t('partner.programs.deleted'));
     } catch {
-      toast.error('Erro ao eliminar programa');
+      toast.error(t('common.error'));
     }
   };
 
@@ -73,14 +75,14 @@ export default function PartnerPrograms() {
                   className="rounded-xl text-xs gap-1 border-primary/30 text-primary"
                   onClick={() => navigate('/partner/subscription')}
                 >
-                  <Crown className="h-3 w-3" /> Upgrade
+                  <Crown className="h-3 w-3" /> {t('partner.subscription.upgrade')}
                 </Button>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>Programas</span>
+                  <span>{t('partner.subscription.programs')}</span>
                   <span className="font-semibold text-foreground">
                     {limits.usedPrograms}/{limits.maxPrograms >= 99999 ? '∞' : limits.maxPrograms}
                   </span>
@@ -89,7 +91,7 @@ export default function PartnerPrograms() {
               </div>
               <div>
                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>Crianças</span>
+                  <span>{t('partner.subscription.children')}</span>
                   <span className="font-semibold text-foreground">
                     {limits.usedChildren}/{limits.maxChildren >= 99999 ? '∞' : limits.maxChildren}
                   </span>
@@ -103,8 +105,8 @@ export default function PartnerPrograms() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-heading md:text-heading-lg text-foreground">Programas 📋</h1>
-          <p className="text-small text-muted-foreground font-body">Famílias e escolas associadas ao programa de parceria</p>
+          <h1 className="font-display text-heading md:text-heading-lg text-foreground">{t('partner.programs.title')}</h1>
+          <p className="text-small text-muted-foreground font-body">{t('partner.programs.subtitle')}</p>
         </div>
         <CreateProgramDialog />
       </div>
@@ -112,7 +114,7 @@ export default function PartnerPrograms() {
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Pesquisar programa..."
+          placeholder={t('partner.programs.search')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="pl-9 rounded-xl"
@@ -132,20 +134,20 @@ export default function PartnerPrograms() {
                   )}
                 </div>
                 <Badge variant={prog.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
-                  {prog.status === 'active' ? 'Activo' : prog.status === 'pending' ? 'Pendente' : 'Inactivo'}
+                  {prog.status === 'active' ? t('partner.programs.status_active') : prog.status === 'pending' ? t('partner.programs.status_pending') : t('partner.programs.status_inactive')}
                 </Badge>
               </div>
               <h3 className="font-display font-bold text-foreground">{prog.program_name}</h3>
               <p className="text-xs text-muted-foreground mt-1">
-                {prog.children_count} crianças • Desde {format(new Date(prog.started_at), 'MMM yyyy', { locale: pt })}
+                {prog.children_count} {t('partner.programs.children')} • {t('partner.programs.since')} {format(new Date(prog.started_at), 'MMM yyyy', { locale: pt })}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-xs text-muted-foreground">
-                  Orçamento: <span className="font-semibold text-foreground">{Number(prog.investment_amount).toLocaleString()} KVC</span>
+                  {t('partner.programs.budget')}: <span className="font-semibold text-foreground">{Number(prog.investment_amount).toLocaleString()} KVC</span>
                 </p>
                 {Number(prog.budget_spent) > 0 && (
                   <p className="text-xs text-muted-foreground">
-                    • Gasto: <span className="font-semibold text-foreground">{Number(prog.budget_spent).toLocaleString()} KVC</span>
+                    • {t('partner.programs.spent')}: <span className="font-semibold text-foreground">{Number(prog.budget_spent).toLocaleString()} KVC</span>
                   </p>
                 )}
               </div>
@@ -172,27 +174,27 @@ export default function PartnerPrograms() {
           </Card>
         ))}
         {filtered.length === 0 && (
-          <p className="text-sm text-muted-foreground col-span-3 text-center py-8">Nenhum programa encontrado</p>
+          <p className="text-sm text-muted-foreground col-span-3 text-center py-8">{t('partner.programs.no_programs')}</p>
         )}
       </div>
 
       <Card className="rounded-2xl border-border/50">
         <CardHeader>
-          <CardTitle className="font-display text-lg">Resumo</CardTitle>
+          <CardTitle className="font-display text-lg">{t('partner.programs.summary')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="font-display text-2xl font-bold text-foreground">{schools.length}</p>
-              <p className="text-xs text-muted-foreground">Escolas</p>
+              <p className="text-xs text-muted-foreground">{t('partner.programs.schools')}</p>
             </div>
             <div>
               <p className="font-display text-2xl font-bold text-foreground">{families.length}</p>
-              <p className="text-xs text-muted-foreground">Famílias</p>
+              <p className="text-xs text-muted-foreground">{t('partner.programs.families')}</p>
             </div>
             <div>
               <p className="font-display text-2xl font-bold text-foreground">{totalChildren}</p>
-              <p className="text-xs text-muted-foreground">Total Crianças</p>
+              <p className="text-xs text-muted-foreground">{t('partner.programs.total_children')}</p>
             </div>
           </div>
         </CardContent>

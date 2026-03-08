@@ -10,20 +10,23 @@ import ChallengeFormDialog from '@/components/partner/ChallengeFormDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
-  active: { label: 'Activo', variant: 'default' },
-  draft: { label: 'Rascunho', variant: 'secondary' },
-  completed: { label: 'Concluído', variant: 'outline' },
-};
-
-const statusFlow: Record<string, string[]> = {
-  draft: ['active'],
-  active: ['completed'],
-  completed: [],
-};
+import { useT } from '@/contexts/LanguageContext';
 
 export default function PartnerChallenges() {
+  const t = useT();
+
+  const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+    active: { label: t('partner.challenges.status_active'), variant: 'default' },
+    draft: { label: t('partner.challenges.status_draft'), variant: 'secondary' },
+    completed: { label: t('partner.challenges.status_completed'), variant: 'outline' },
+  };
+
+  const statusFlow: Record<string, string[]> = {
+    draft: ['active'],
+    active: ['completed'],
+    completed: [],
+  };
+
   const { data: challenges, isLoading } = useSponsoredChallenges();
   const deleteChallenge = useDeleteSponsoredChallenge();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,9 +48,9 @@ export default function PartnerChallenges() {
     if (!deleteId) return;
     try {
       await deleteChallenge.mutateAsync(deleteId);
-      toast.success('Desafio eliminado');
+      toast.success(t('partner.challenges.deleted'));
     } catch {
-      toast.error('Erro ao eliminar desafio');
+      toast.error(t('common.error'));
     }
     setDeleteId(null);
   }
@@ -55,9 +58,9 @@ export default function PartnerChallenges() {
   async function handleStatusChange(id: string, newStatus: string) {
     try {
       await updateChallenge.mutateAsync({ id, status: newStatus });
-      toast.success(`Status alterado para ${statusConfig[newStatus]?.label ?? newStatus}`);
+      toast.success(`${t('partner.challenges.status_changed')} ${statusConfig[newStatus]?.label ?? newStatus}`);
     } catch {
-      toast.error('Erro ao alterar status');
+      toast.error(t('common.error'));
     }
   }
 
@@ -73,12 +76,12 @@ export default function PartnerChallenges() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-heading md:text-heading-lg text-foreground">Desafios Patrocinados 🏆</h1>
-          <p className="text-small text-muted-foreground font-body">Crie e gira desafios para as escolas e famílias do programa</p>
+          <h1 className="font-display text-heading md:text-heading-lg text-foreground">{t('partner.challenges.title')}</h1>
+          <p className="text-small text-muted-foreground font-body">{t('partner.challenges.subtitle')}</p>
         </div>
         <Button className="rounded-xl gap-2 w-full sm:w-auto" onClick={handleCreate}>
           <Plus className="h-4 w-4" />
-          Novo Desafio
+          {t('partner.challenges.new')}
         </Button>
       </div>
 
@@ -87,13 +90,13 @@ export default function PartnerChallenges() {
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar desafio?</AlertDialogTitle>
-            <AlertDialogDescription>Esta acção é irreversível. O desafio será permanentemente removido.</AlertDialogDescription>
+            <AlertDialogTitle>{t('partner.challenges.delete_title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('partner.challenges.delete_desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -106,9 +109,7 @@ export default function PartnerChallenges() {
           return (
             <Card key={ch.id} className="rounded-2xl border-border/50">
               <CardContent className="p-4 sm:p-5">
-                {/* Mobile: stack vertically / Desktop: side-by-side */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  {/* Left block: icon + text */}
                   <div className="flex items-start gap-3 sm:gap-4 min-w-0">
                     <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
                       <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
@@ -129,7 +130,7 @@ export default function PartnerChallenges() {
                             <DropdownMenuContent align="start">
                               {nextStatuses.map(ns => (
                                 <DropdownMenuItem key={ns} onClick={() => handleStatusChange(ch.id, ns)}>
-                                  Mover para {statusConfig[ns]?.label ?? ns}
+                                  {t('partner.challenges.move_to')} {statusConfig[ns]?.label ?? ns}
                                 </DropdownMenuItem>
                               ))}
                             </DropdownMenuContent>
@@ -150,7 +151,7 @@ export default function PartnerChallenges() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Users className="h-3.5 w-3.5" />
-                          {ch.participants_count} participantes
+                          {ch.participants_count} {t('partner.challenges.participants')}
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
@@ -160,19 +161,18 @@ export default function PartnerChallenges() {
                     </div>
                   </div>
 
-                  {/* Right block: completion rate + actions */}
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 border-t sm:border-t-0 border-border/30 pt-3 sm:pt-0">
                     {ch.status !== 'draft' && (
                       <div className="sm:text-right mr-1">
                         <p className="font-display text-xl sm:text-2xl font-bold text-foreground">{Number(ch.completion_rate)}%</p>
-                        <p className="text-caption text-muted-foreground">conclusão</p>
+                        <p className="text-caption text-muted-foreground">{t('partner.challenges.completion')}</p>
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={() => handleEdit(ch)} aria-label="Editar desafio">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" onClick={() => handleEdit(ch)} aria-label={t('common.edit')}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-destructive hover:text-destructive" onClick={() => setDeleteId(ch.id)} aria-label="Eliminar desafio">
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-destructive hover:text-destructive" onClick={() => setDeleteId(ch.id)} aria-label={t('common.delete')}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -186,10 +186,10 @@ export default function PartnerChallenges() {
           <Card className="rounded-2xl border-border/50 border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Trophy className="h-10 w-10 text-muted-foreground/40 mb-3" />
-              <p className="text-small text-muted-foreground">Nenhum desafio criado</p>
+              <p className="text-small text-muted-foreground">{t('partner.challenges.no_challenges')}</p>
               <Button variant="outline" size="sm" className="mt-4 rounded-xl gap-2" onClick={handleCreate}>
                 <Plus className="h-4 w-4" />
-                Criar primeiro desafio
+                {t('partner.challenges.create_first')}
               </Button>
             </CardContent>
           </Card>
