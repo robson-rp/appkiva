@@ -223,7 +223,7 @@ export default function ChildWallet() {
                 <CurrencyDisplay amount={totalDonated} size="lg" className="font-display font-bold text-lg" />
               </div>
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Causas apoiadas</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.causes_supported')}</p>
                 <p className="font-display font-bold text-lg">💜 {uniqueCauses}</p>
               </div>
             </div>
