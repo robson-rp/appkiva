@@ -196,7 +196,7 @@ export default function ChildWallet() {
                       </div>
                     )}
                     <div className="space-y-2">
-                      <p className="text-xs font-medium">Quanto queres doar? (KivaCoins)</p>
+                      <p className="text-xs font-medium">{t('child.wallet.how_much_donate')}</p>
                       <Input
                         type="number"
                         placeholder="Ex: 10"
