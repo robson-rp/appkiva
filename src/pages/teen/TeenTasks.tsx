@@ -6,25 +6,27 @@ import { ListTodo, CheckCircle2, Clock, Zap, Trophy, Loader2, Award } from 'luci
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
-
-const taskStatusConfig = {
-  pending: { label: 'Pendente', icon: Clock, bg: 'bg-muted', badgeCls: 'bg-muted text-muted-foreground border-0' },
-  in_progress: { label: 'Em Curso', icon: Zap, bg: 'bg-primary/10', badgeCls: 'bg-primary/10 text-primary border-0' },
-  completed: { label: 'A Aprovar', icon: CheckCircle2, bg: 'bg-accent/20', badgeCls: 'bg-accent/20 text-accent-foreground border-0' },
-  approved: { label: 'Aprovada ✅', icon: Award, bg: 'bg-secondary/10', badgeCls: 'bg-secondary/10 text-secondary border-0' },
-};
 
 const categoryEmoji: Record<string, string> = { cleaning: '🧹', studying: '📚', helping: '🤝', other: '📌' };
 
 type FilterType = 'all' | 'pending' | 'completed' | 'approved';
 
 export default function TeenTasks() {
+  const t = useT();
   const { data: tasks = [], isLoading } = useChildTasks();
   const completeTask = useCompleteTask();
   const [filter, setFilter] = useState<FilterType>('all');
+
+  const taskStatusConfig = {
+    pending: { label: t('teen.tasks.pending'), icon: Clock, bg: 'bg-muted', badgeCls: 'bg-muted text-muted-foreground border-0' },
+    in_progress: { label: t('teen.tasks.in_progress'), icon: Zap, bg: 'bg-primary/10', badgeCls: 'bg-primary/10 text-primary border-0' },
+    completed: { label: t('teen.tasks.awaiting'), icon: CheckCircle2, bg: 'bg-accent/20', badgeCls: 'bg-accent/20 text-accent-foreground border-0' },
+    approved: { label: `${t('teen.tasks.approved')} ✅`, icon: Award, bg: 'bg-secondary/10', badgeCls: 'bg-secondary/10 text-secondary border-0' },
+  };
 
   const pendingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
   const completedTasks = tasks.filter(t => t.status === 'completed');
@@ -37,10 +39,10 @@ export default function TeenTasks() {
     : approvedTasks;
 
   const filters: { id: FilterType; label: string; count: number }[] = [
-    { id: 'all', label: 'Todas', count: tasks.length },
-    { id: 'pending', label: 'Por Fazer', count: pendingTasks.length },
-    { id: 'completed', label: 'A Aprovar', count: completedTasks.length },
-    { id: 'approved', label: 'Aprovadas', count: approvedTasks.length },
+    { id: 'all', label: t('teen.tasks.all'), count: tasks.length },
+    { id: 'pending', label: t('teen.tasks.todo'), count: pendingTasks.length },
+    { id: 'completed', label: t('teen.tasks.awaiting'), count: completedTasks.length },
+    { id: 'approved', label: t('teen.tasks.approved'), count: approvedTasks.length },
   ];
 
   return (
@@ -56,16 +58,16 @@ export default function TeenTasks() {
                 <ListTodo className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold text-white">As Minhas Tarefas</h1>
-                <p className="text-sm text-white/60">Gere as tuas tarefas e ganha recompensas</p>
+                <h1 className="font-display text-xl font-bold text-white">{t('teen.tasks.title')}</h1>
+                <p className="text-sm text-white/60">{t('teen.tasks.subtitle')}</p>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[
-                { label: 'Por Fazer', value: pendingTasks.length, icon: Clock },
-                { label: 'A Aprovar', value: completedTasks.length, icon: CheckCircle2 },
-                { label: 'Aprovadas', value: approvedTasks.length, icon: Trophy },
-                { label: 'Ganhas', value: `${totalReward}🪙`, icon: Award },
+                { label: t('teen.tasks.todo'), value: pendingTasks.length, icon: Clock },
+                { label: t('teen.tasks.awaiting'), value: completedTasks.length, icon: CheckCircle2 },
+                { label: t('teen.tasks.approved'), value: approvedTasks.length, icon: Trophy },
+                { label: t('teen.tasks.earned'), value: `${totalReward}🪙`, icon: Award },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
@@ -91,9 +93,7 @@ export default function TeenTasks() {
             }`}
           >
             {f.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-              filter === f.id ? 'bg-white/20' : 'bg-background'
-            }`}>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${filter === f.id ? 'bg-white/20' : 'bg-background'}`}>
               {f.count}
             </span>
           </button>
@@ -115,10 +115,10 @@ export default function TeenTasks() {
                 {filter === 'all' ? '🎯' : filter === 'pending' ? '✨' : filter === 'completed' ? '⏳' : '🏆'}
               </div>
               <p className="font-display font-bold text-sm">
-                {filter === 'all' ? 'Sem tarefas por agora' : `Nenhuma tarefa ${filters.find(f => f.id === filter)?.label.toLowerCase()}`}
+                {filter === 'all' ? t('teen.tasks.no_tasks') : `${t('teen.tasks.no_filter')} ${filters.find(f => f.id === filter)?.label.toLowerCase()}`}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {filter === 'all' ? 'O teu encarregado pode criar novas tarefas para ti!' : 'Continua assim! 💪'}
+                {filter === 'all' ? t('teen.tasks.no_tasks_hint') : t('teen.tasks.keep_going')}
               </p>
             </CardContent>
           </Card>
@@ -153,10 +153,10 @@ export default function TeenTasks() {
                         <div className="flex items-center gap-2 mt-2">
                           <span className="font-display font-bold text-sm">🪙 {task.reward}</span>
                           {task.status === 'completed' && (
-                            <span className="text-[10px] text-muted-foreground">À espera de aprovação</span>
+                            <span className="text-[10px] text-muted-foreground">{t('teen.tasks.waiting_approval')}</span>
                           )}
                           {task.status === 'approved' && (
-                            <span className="text-[10px] text-secondary font-semibold">Recompensa recebida!</span>
+                            <span className="text-[10px] text-secondary font-semibold">{t('teen.tasks.reward_received')}</span>
                           )}
                         </div>
                       </div>
@@ -173,7 +173,7 @@ export default function TeenTasks() {
                         ) : (
                           <CheckCircle2 className="h-3.5 w-3.5" />
                         )}
-                        Marcar como Concluída
+                        {t('teen.tasks.mark_done')}
                       </Button>
                     )}
                   </CardContent>

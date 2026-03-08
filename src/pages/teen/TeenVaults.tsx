@@ -17,6 +17,7 @@ import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 import { ConfettiCelebration } from '@/components/ConfettiCelebration';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
 import { FeatureGateWrapper } from '@/components/UpgradePrompt';
+import { useT } from '@/contexts/LanguageContext';
 
 const calcMonthlyInterest = (amount: number, rate: number) =>
   Math.round(amount * (rate / 100));
@@ -31,6 +32,7 @@ const teenVaultsFallback = [
 ];
 
 export default function TeenVaults() {
+  const t = useT();
   const { user } = useAuth();
   const { allowed: vaultsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.SAVINGS_VAULTS);
   const { data: dbVaults, isLoading } = useSavingsVaults(user?.profileId);
@@ -43,18 +45,12 @@ export default function TeenVaults() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTarget, setNewTarget] = useState('');
-
-  // Deposit dialog
   const [depositDialogOpen, setDepositDialogOpen] = useState(false);
   const [depositVault, setDepositVault] = useState<{ id: string; name: string; icon: string; currentAmount: number; targetAmount: number } | null>(null);
   const [depositAmount, setDepositAmount] = useState('');
-
-  // Withdraw dialog
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
   const [withdrawVault, setWithdrawVault] = useState<{ id: string; name: string; icon: string; currentAmount: number } | null>(null);
   const [withdrawAmount, setWithdrawAmount] = useState('');
-
-  // Confetti
   const [confettiActive, setConfettiActive] = useState(false);
   const [confettiVault, setConfettiVault] = useState<{ name: string; icon: string } | null>(null);
 
@@ -65,65 +61,45 @@ export default function TeenVaults() {
     if (!newName || !newTarget) return;
     try {
       await createVault.mutateAsync({ name: newName, targetAmount: Number(newTarget) });
-      toast.success('Cofre criado!');
+      toast.success(t('teen.vaults.created'));
       setNewName(''); setNewTarget(''); setDialogOpen(false);
-    } catch { toast.error('Erro ao criar cofre'); }
+    } catch { toast.error(t('teen.vaults.create_error')); }
   };
 
   const openDepositDialog = (vault: typeof depositVault) => {
-    setDepositVault(vault);
-    setDepositAmount('');
-    setDepositDialogOpen(true);
+    setDepositVault(vault); setDepositAmount(''); setDepositDialogOpen(true);
   };
 
   const handleDeposit = () => {
     if (!depositVault || !depositAmount) return;
     const amount = Number(depositAmount);
     if (amount <= 0) return;
-
     const willReachTarget = depositVault.targetAmount > 0 &&
       depositVault.currentAmount < depositVault.targetAmount &&
       (depositVault.currentAmount + amount) >= depositVault.targetAmount;
-
-    depositToVault.mutate(
-      { vaultId: depositVault.id, amount },
-      {
-        onSuccess: () => {
-          setDepositDialogOpen(false);
-          setDepositAmount('');
-          if (willReachTarget) {
-            setConfettiVault({ name: depositVault.name, icon: depositVault.icon });
-            setConfettiActive(true);
-          }
-          setDepositVault(null);
-        },
-      }
-    );
+    depositToVault.mutate({ vaultId: depositVault.id, amount }, {
+      onSuccess: () => {
+        setDepositDialogOpen(false); setDepositAmount('');
+        if (willReachTarget) { setConfettiVault({ name: depositVault.name, icon: depositVault.icon }); setConfettiActive(true); }
+        setDepositVault(null);
+      },
+    });
   };
 
   const remaining = depositVault ? Math.max(0, depositVault.targetAmount - depositVault.currentAmount) : 0;
   const maxDeposit = Math.min(balance, remaining > 0 ? remaining : balance);
 
   const openWithdrawDialog = (vault: typeof withdrawVault) => {
-    setWithdrawVault(vault);
-    setWithdrawAmount('');
-    setWithdrawDialogOpen(true);
+    setWithdrawVault(vault); setWithdrawAmount(''); setWithdrawDialogOpen(true);
   };
 
   const handleWithdraw = () => {
     if (!withdrawVault || !withdrawAmount) return;
     const amount = Number(withdrawAmount);
     if (amount <= 0) return;
-    withdrawFromVault.mutate(
-      { vaultId: withdrawVault.id, amount },
-      {
-        onSuccess: () => {
-          setWithdrawDialogOpen(false);
-          setWithdrawVault(null);
-          setWithdrawAmount('');
-        },
-      }
-    );
+    withdrawFromVault.mutate({ vaultId: withdrawVault.id, amount }, {
+      onSuccess: () => { setWithdrawDialogOpen(false); setWithdrawVault(null); setWithdrawAmount(''); },
+    });
   };
 
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
@@ -131,41 +107,39 @@ export default function TeenVaults() {
   return (
     <FeatureGateWrapper
       allowed={vaultsAllowed || gateLoading}
-      featureName="Cofres de Poupança"
-      description="Cria cofres para poupar para os teus objectivos com juros mensais. Disponível no plano Família Premium."
+      featureName={t('teen.vaults.feature_name')}
+      description={t('teen.vaults.feature_desc')}
       tierName={tierName}
     >
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Cofres</h1>
-          <p className="text-muted-foreground text-sm">Poupa para os teus objectivos • Carteira: {balance} 🪙</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t('teen.vaults.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('teen.vaults.subtitle')} • {t('teen.vaults.wallet_balance')}: {balance} 🪙</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="rounded-xl gap-1"><Plus className="h-4 w-4" /> Novo</Button>
+            <Button size="sm" className="rounded-xl gap-1"><Plus className="h-4 w-4" /> {t('teen.vaults.new')}</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle className="font-display">Criar Novo Cofre</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle className="font-display">{t('teen.vaults.create_title')}</DialogTitle></DialogHeader>
             <div className="space-y-4">
-              <div className="space-y-2"><Label>Nome</Label><Input placeholder="Ex: Portátil novo" value={newName} onChange={e => setNewName(e.target.value)} /></div>
-              <div className="space-y-2"><Label>Meta (KivaCoins)</Label><Input type="number" placeholder="1000" value={newTarget} onChange={e => setNewTarget(e.target.value)} /></div>
+              <div className="space-y-2"><Label>{t('teen.vaults.name')}</Label><Input placeholder={t('teen.vaults.name_placeholder')} value={newName} onChange={e => setNewName(e.target.value)} /></div>
+              <div className="space-y-2"><Label>{t('teen.vaults.goal')}</Label><Input type="number" placeholder="1000" value={newTarget} onChange={e => setNewTarget(e.target.value)} /></div>
               <Button className="w-full rounded-xl font-display" onClick={handleCreate} disabled={createVault.isPending}>
-                {createVault.isPending ? 'A criar...' : 'Criar Cofre'}
+                {createVault.isPending ? t('teen.vaults.creating') : t('teen.vaults.create')}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
       </motion.div>
 
-      {/* Growth Chart */}
       {!isLoading && vaults.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <VaultGrowthChart vaults={vaults} />
         </motion.div>
       )}
 
-      {/* Interest History */}
       {!isLoading && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <VaultInterestHistory profileId={user?.profileId} />
@@ -173,7 +147,7 @@ export default function TeenVaults() {
       )}
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">A carregar cofres...</div>
+        <div className="text-center py-8 text-muted-foreground">{t('teen.vaults.loading')}</div>
       ) : (
         <div className="space-y-3">
           {vaults.map((vault, i) => {
@@ -187,13 +161,10 @@ export default function TeenVaults() {
                 <Card className={`border-border/50 ${goalReached ? 'ring-2 ring-secondary/50 border-secondary/30' : ''}`}>
                   <CardContent className="p-4">
                     {goalReached && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mb-3 flex items-center gap-2 bg-secondary/15 text-secondary rounded-xl px-3 py-1.5 border border-secondary/25 w-fit"
-                      >
+                      <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+                        className="mb-3 flex items-center gap-2 bg-secondary/15 text-secondary rounded-xl px-3 py-1.5 border border-secondary/25 w-fit">
                         <span className="text-base">✅</span>
-                        <span className="text-xs font-display font-bold">Meta atingida!</span>
+                        <span className="text-xs font-display font-bold">{t('teen.tasks.goal_reached')}</span>
                         <span className="text-base">🏆</span>
                       </motion.div>
                     )}
@@ -202,91 +173,70 @@ export default function TeenVaults() {
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{vault.icon}</div>
                         <div>
                           <h3 className="font-display font-bold text-foreground">{vault.name}</h3>
-                          <p className="text-[10px] text-muted-foreground">📈 {vault.interestRate}% juros/mês</p>
+                          <p className="text-[10px] text-muted-foreground">📈 {vault.interestRate}% {t('teen.vaults.interest')}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-display font-bold text-foreground">{vault.currentAmount} 🪙</p>
-                        <p className="text-[10px] text-muted-foreground">de {vault.targetAmount}</p>
+                        <p className="text-[10px] text-muted-foreground">{t('teen.vaults.of')} {vault.targetAmount}</p>
                       </div>
                     </div>
                     <Progress value={pct} className="h-2" />
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[10px] text-muted-foreground">{Math.round(pct)}% concluído</p>
+                      <p className="text-[10px] text-muted-foreground">{Math.round(pct)}% {t('teen.vaults.completed')}</p>
                       <div className="flex gap-1.5">
                         {vault.currentAmount === 0 && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-                              >
-                                <Trash2 className="h-3 w-3" /> Eliminar
+                              <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors">
+                                <Trash2 className="h-3 w-3" /> {t('teen.vaults.delete')}
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle className="font-display">Eliminar cofre?</AlertDialogTitle>
+                                <AlertDialogTitle className="font-display">{t('teen.vaults.delete_title')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Tens a certeza que queres eliminar o cofre "{vault.name}"? Esta acção não pode ser revertida.
+                                  {t('teen.vaults.delete_desc_pre')}{vault.name}{t('teen.vaults.delete_desc_post')}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel className="rounded-xl font-display">Cancelar</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => deleteVault.mutate(vault.id)}
-                                >
-                                  Eliminar
+                                <AlertDialogCancel className="rounded-xl font-display">{t('teen.vaults.cancel')}</AlertDialogCancel>
+                                <AlertDialogAction className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteVault.mutate(vault.id)}>
+                                  {t('teen.vaults.delete')}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
                         )}
                         {vault.currentAmount > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
-                            onClick={() => openWithdrawDialog({
-                              id: vault.id, name: vault.name, icon: vault.icon, currentAmount: vault.currentAmount,
-                            })}
-                          >
-                            <ArrowUpFromLine className="h-3 w-3" /> Levantar
+                          <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-colors"
+                            onClick={() => openWithdrawDialog({ id: vault.id, name: vault.name, icon: vault.icon, currentAmount: vault.currentAmount })}>
+                            <ArrowUpFromLine className="h-3 w-3" /> {t('teen.vaults.withdraw')}
                           </Button>
                         )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-primary hover:text-primary-foreground transition-colors"
-                          onClick={() => openDepositDialog({
-                            id: vault.id, name: vault.name, icon: vault.icon,
-                            currentAmount: vault.currentAmount, targetAmount: vault.targetAmount,
-                          })}
-                        >
-                          <ArrowDownToLine className="h-3 w-3" /> Depositar
+                        <Button variant="outline" size="sm" className="rounded-xl text-xs font-display h-7 gap-1 px-2 hover:bg-primary hover:text-primary-foreground transition-colors"
+                          onClick={() => openDepositDialog({ id: vault.id, name: vault.name, icon: vault.icon, currentAmount: vault.currentAmount, targetAmount: vault.targetAmount })}>
+                          <ArrowDownToLine className="h-3 w-3" /> {t('teen.vaults.deposit')}
                         </Button>
                       </div>
                     </div>
 
-                    {/* Interest projections */}
                     <div className="mt-3 space-y-2">
                       <div className="flex items-center gap-1.5">
                         <Sparkles className="h-3.5 w-3.5 text-secondary" />
-                        <span className="text-xs font-display font-bold text-secondary">Projeção de juros</span>
+                        <span className="text-xs font-display font-bold text-secondary">{t('teen.vaults.interest_projection')}</span>
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Este mês</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.this_month')}</p>
                           <p className="font-display font-bold text-sm text-secondary">+{monthlyInterest} 🪙</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 3 meses</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_3_months')}</p>
                           <p className="font-display font-bold text-sm text-primary">{projection3m} 🪙</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Em 6 meses</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_6_months')}</p>
                           <p className="font-display font-bold text-sm text-accent-foreground">{projection6m} 🪙</p>
                         </div>
                       </div>
@@ -305,52 +255,46 @@ export default function TeenVaults() {
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <span className="text-2xl">{depositVault?.icon}</span>
-              Depositar em {depositVault?.name}
+              {t('teen.vaults.deposit_to')} {depositVault?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-muted/50 rounded-xl p-3 text-sm space-y-1">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Saldo da carteira</span>
+                <span className="text-muted-foreground">{t('teen.vaults.wallet_label')}</span>
                 <span className="font-display font-bold">🪙 {balance}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">No cofre</span>
+                <span className="text-muted-foreground">{t('teen.vaults.in_vault')}</span>
                 <span className="font-display font-bold">🪙 {depositVault?.currentAmount ?? 0}</span>
               </div>
               {remaining > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Falta para a meta</span>
+                  <span className="text-muted-foreground">{t('teen.vaults.remaining')}</span>
                   <span className="font-display font-bold text-primary">🪙 {remaining}</span>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label>Montante a depositar</Label>
+              <Label>{t('teen.vaults.deposit_amount')}</Label>
               <Input type="number" placeholder="Ex: 10" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} max={maxDeposit} min={1} />
               {maxDeposit > 0 && (
                 <div className="flex gap-2">
                   {[5, 10, 25, 50].filter(v => v <= maxDeposit).map(v => (
-                    <Button key={v} variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setDepositAmount(String(v))}>
-                      {v} KVC
-                    </Button>
+                    <Button key={v} variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setDepositAmount(String(v))}>{v} KVC</Button>
                   ))}
                   {maxDeposit > 50 && (
                     <Button variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setDepositAmount(String(maxDeposit))}>
-                      Máx ({maxDeposit})
+                      {t('teen.vaults.max')} ({maxDeposit})
                     </Button>
                   )}
                 </div>
               )}
             </div>
-            <Button
-              className="w-full rounded-xl font-display gap-2"
-              disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending}
-              onClick={handleDeposit}
-            >
-              {depositToVault.isPending ? 'A depositar...' : (<><ArrowDownToLine className="h-4 w-4" /> Depositar {depositAmount ? `${depositAmount} KVC` : ''}</>)}
+            <Button className="w-full rounded-xl font-display gap-2" disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending} onClick={handleDeposit}>
+              {depositToVault.isPending ? t('teen.vaults.depositing') : (<><ArrowDownToLine className="h-4 w-4" /> {t('teen.vaults.deposit')} {depositAmount ? `${depositAmount} KVC` : ''}</>)}
             </Button>
-            {Number(depositAmount) > balance && <p className="text-xs text-destructive text-center">Saldo insuficiente!</p>}
+            {Number(depositAmount) > balance && <p className="text-xs text-destructive text-center">{t('teen.vaults.insufficient')}</p>}
           </div>
         </DialogContent>
       </Dialog>
@@ -361,56 +305,46 @@ export default function TeenVaults() {
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <span className="text-2xl">{withdrawVault?.icon}</span>
-              Levantar de {withdrawVault?.name}
+              {t('teen.vaults.withdraw_from')} {withdrawVault?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="bg-muted/50 rounded-xl p-3 text-sm space-y-1">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Saldo da carteira</span>
+                <span className="text-muted-foreground">{t('teen.vaults.wallet_label')}</span>
                 <span className="font-display font-bold">🪙 {balance}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">No cofre</span>
+                <span className="text-muted-foreground">{t('teen.vaults.in_vault')}</span>
                 <span className="font-display font-bold text-primary">🪙 {withdrawVault?.currentAmount ?? 0}</span>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Montante a levantar</Label>
+              <Label>{t('teen.vaults.withdraw_amount')}</Label>
               <Input type="number" placeholder="Ex: 10" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} max={maxWithdraw} min={1} />
               {maxWithdraw > 0 && (
                 <div className="flex gap-2">
                   {[5, 10, 25, 50].filter(v => v <= maxWithdraw).map(v => (
-                    <Button key={v} variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setWithdrawAmount(String(v))}>
-                      {v} KVC
-                    </Button>
+                    <Button key={v} variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setWithdrawAmount(String(v))}>{v} KVC</Button>
                   ))}
                   <Button variant="outline" size="sm" className="rounded-lg text-xs font-display h-7" onClick={() => setWithdrawAmount(String(maxWithdraw))}>
-                    Tudo ({maxWithdraw})
+                    {t('teen.vaults.all')} ({maxWithdraw})
                   </Button>
                 </div>
               )}
             </div>
-            <Button
-              className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending}
-              onClick={handleWithdraw}
-            >
-              {withdrawFromVault.isPending ? 'A levantar...' : (<><ArrowUpFromLine className="h-4 w-4" /> Levantar {withdrawAmount ? `${withdrawAmount} KVC` : ''}</>)}
+            <Button className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending} onClick={handleWithdraw}>
+              {withdrawFromVault.isPending ? t('teen.vaults.withdrawing') : (<><ArrowUpFromLine className="h-4 w-4" /> {t('teen.vaults.withdraw')} {withdrawAmount ? `${withdrawAmount} KVC` : ''}</>)}
             </Button>
             {Number(withdrawAmount) > maxWithdraw && maxWithdraw > 0 && (
-              <p className="text-xs text-destructive text-center">Montante excede o saldo do cofre!</p>
+              <p className="text-xs text-destructive text-center">{t('teen.vaults.exceeds')}</p>
             )}
           </div>
         </DialogContent>
       </Dialog>
 
-      <ConfettiCelebration
-        active={confettiActive}
-        onComplete={() => setConfettiActive(false)}
-        vaultName={confettiVault?.name}
-        vaultIcon={confettiVault?.icon}
-      />
+      <ConfettiCelebration active={confettiActive} onComplete={() => setConfettiActive(false)} vaultName={confettiVault?.name} vaultIcon={confettiVault?.icon} />
     </div>
     </FeatureGateWrapper>
   );
