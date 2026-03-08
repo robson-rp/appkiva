@@ -1,128 +1,72 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Landing Page Premium Redesign
 
-## Current State Assessment
+## Current State
+The page has 11 sections with decent structure but feels uniform — every section uses the same `fadeUp` animation, similar card styles, and repetitive layouts. The "Grandes futuros" gradient text was removed due to mobile issues. The overall feel is "good template" rather than "premium fintech".
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+## Plan
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+### 1. Hero — Maximum Visual Impact
+- Replace `dot-pattern` background with animated gradient orbs (radial gradients that slowly drift)
+- Fix the "Grandes futuros" text: use a proper CSS gradient text technique with inline styles (`WebkitBackgroundClip` + `WebkitTextFillColor`) instead of Tailwind classes that fail on mobile
+- Increase headline size: `text-4xl sm:text-5xl md:text-6xl` for stronger first impression
+- Add a subtle parallax effect on the hero illustration using `useScroll` + `useTransform`
+- Replace floating icon boxes with a more polished "feature pill" strip below the CTA
 
-## What Lovable Can and Cannot Build
+### 2. Problem Section — Editorial Style
+- Switch from vertical cards to a horizontal timeline layout on desktop
+- Add large decorative numbers (oversized, semi-transparent) behind each point
+- More dramatic spacing and typography contrast
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+### 3. Solution Section — Split Screen Polish
+- Add a subtle gradient overlay on the image side
+- Use a `gradient-border` card wrapper for the text content
+- Add animated checkmarks that appear sequentially
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+### 4. How It Works — Connected Steps
+- Replace the dashed SVG line with a solid gradient line that animates on scroll
+- Larger step icons with animated gradient backgrounds
+- Add a subtle "glow" effect on the active/hovered step
 
-## Implementation Plan (4 Phases)
+### 5. Universe Section — Card Grid Premium
+- Switch from 5-column flat grid to a staggered/masonry-style layout
+- Add a hover "flip" or "lift" effect with gradient border reveal
+- Center the last item when odd count on mobile
 
-### Phase 1 — Multi-Tenant Foundation
+### 6. Benefits (Parents + Schools) — Asymmetric Layouts
+- Add image masks/clip-paths for a more editorial feel
+- Animated progress indicators next to each benefit item
+- Subtle background texture variation between sections
 
-**Database migrations:**
+### 7. Gamification — Floating Tags
+- Add orbital/floating animation to the tags instead of static flex wrap
+- Subtle rotation on hover for playfulness
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+### 8. Trust Section — Glass Cards Enhancement
+- Add a subtle animated grid/mesh background
+- Larger icons with ring pulse animation
+- Stats counter integration into this section
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+### 9. Social Proof — Testimonial Cards
+- Add 2-3 fake testimonial quotes in glass cards
+- Horizontal auto-scroll carousel effect
+- Better star rating presentation
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+### 10. Final CTA — Full-Width Gradient
+- Full-bleed gradient background (not contained in max-w-6xl)
+- Larger Kivo mascot with glow
+- Animated particles/sparkles background
 
-4. Expand `app_role` enum to include `admin`
+### 11. Global Improvements
+- **Typography**: Increase section title sizes, add `text-balance` for better line breaks
+- **Spacing**: More generous `py-20 md:py-32` for premium breathing room
+- **Animations**: Vary entrance animations per section (scale, slide-in, blur-in) instead of uniform fadeUp
+- **CSS**: Add new keyframes for `gradient-shift`, `float-slow`, `pulse-glow` in `index.css`
+- **Gradient text fix**: Use inline React styles for `WebkitBackgroundClip: 'text'` and `WebkitTextFillColor: 'transparent'` which works reliably across all browsers including mobile Safari
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
-
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
-
-### Phase 2 — Currency Localization & Real Money Domain Separation
-
-**Database:**
-
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+### Files to Modify
+- `src/pages/LandingPage.tsx` — Main restructure of all sections
+- `src/index.css` — New keyframes and utility classes
+- `tailwind.config.ts` — Additional animation definitions if needed
 
