@@ -214,7 +214,7 @@ export default function PricingSection() {
               </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </motion.section>
   );
