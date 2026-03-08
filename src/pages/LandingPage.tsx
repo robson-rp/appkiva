@@ -377,8 +377,8 @@ function Hero() {
       <div ref={emblaRef} className="overflow-hidden relative">
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
-            <div key={i} className="min-w-0 shrink100 gro10-0 ba10is-fu10l">
- 10     10     10<div 10lassN10me="r10lativ10 px-510sm:px108 py-8 md:py-16">
+            <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
+              <div className="relative px-5 sm:px-8 py-10 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
