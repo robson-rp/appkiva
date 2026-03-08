@@ -148,7 +148,9 @@ export default function PricingSection() {
             return (
               <motion.div
                 key={tier.id}
-                variants={fadeUp}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -6, boxShadow: '0 20px 40px -12px hsl(var(--primary) / 0.15)' }}
                 className={cn(
                   'relative bg-card rounded-2xl border p-6 flex flex-col transition-all',
