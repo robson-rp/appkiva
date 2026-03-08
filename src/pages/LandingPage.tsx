@@ -520,7 +520,7 @@ function SolutionSection() {
   ];
   return (
     <Section>
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-secondary/10 text-secondary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
             A solução
