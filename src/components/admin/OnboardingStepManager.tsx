@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SplashIllustration } from '@/components/SplashIllustration';
@@ -18,19 +18,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, EyeOff, ChevronRight, Copy, CalendarIcon, Clock } from 'lucide-react';
+import { ArrowUp, ArrowDown, Pencil, Trash2, Plus, Eye, Copy, CalendarIcon, Clock, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { useT } from '@/contexts/LanguageContext';
 
 const ROLES = ['parent', 'child', 'teen', 'teacher', 'admin', 'partner'] as const;
-
-const ROLE_LABELS: Record<string, string> = {
-  parent: 'Encarregado',
-  child: 'Criança',
-  teen: 'Adolescente',
-  teacher: 'Professor',
-  admin: 'Admin',
-  partner: 'Parceiro',
-};
 
 const ILLUSTRATION_KEYS = [
   'parent-welcome', 'parent-tasks', 'parent-dashboard', 'parent-savings',
@@ -42,26 +34,14 @@ const ILLUSTRATION_KEYS = [
 ];
 
 interface StepRow {
-  id: string;
-  role: string;
-  step_index: number;
-  title: string;
-  description: string;
-  illustration_key: string;
-  cta: string | null;
-  is_active: boolean;
-  visible_from: string | null;
-  visible_until: string | null;
+  id: string; role: string; step_index: number; title: string; description: string;
+  illustration_key: string; cta: string | null; is_active: boolean;
+  visible_from: string | null; visible_until: string | null;
 }
 
 type FormData = {
-  title: string;
-  description: string;
-  illustration_key: string;
-  cta: string;
-  is_active: boolean;
-  visible_from: Date | null;
-  visible_until: Date | null;
+  title: string; description: string; illustration_key: string; cta: string;
+  is_active: boolean; visible_from: Date | null; visible_until: Date | null;
 };
 
 function getVisibilityStatus(step: StepRow): 'active' | 'scheduled' | 'expired' | 'inactive' {
@@ -72,14 +52,8 @@ function getVisibilityStatus(step: StepRow): 'active' | 'scheduled' | 'expired' 
   return 'active';
 }
 
-const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  active: { label: 'Ativo agora', className: 'bg-green-500/10 text-green-600' },
-  scheduled: { label: 'Agendado', className: 'bg-chart-4/10 text-chart-4' },
-  expired: { label: 'Expirado', className: 'bg-destructive/10 text-destructive' },
-  inactive: { label: 'Inativo', className: 'bg-muted text-muted-foreground' },
-};
-
 function DatePickerField({ label, value, onChange }: { label: string; value: Date | null; onChange: (d: Date | null) => void }) {
+  const t = useT();
   return (
     <div>
       <Label>{label}</Label>
@@ -88,24 +62,30 @@ function DatePickerField({ label, value, onChange }: { label: string; value: Dat
           <PopoverTrigger asChild>
             <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !value && "text-muted-foreground")}>
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {value ? format(value, "dd/MM/yyyy HH:mm") : "Sem limite"}
+              {value ? format(value, "dd/MM/yyyy HH:mm") : t('admin.onboarding.no_limit')}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar mode="single" selected={value ?? undefined} onSelect={(d) => onChange(d ?? null)} className={cn("p-3 pointer-events-auto")} />
           </PopoverContent>
         </Popover>
-        {value && (
-          <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => onChange(null)}>
-            ✕
-          </Button>
-        )}
+        {value && (<Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => onChange(null)}>✕</Button>)}
       </div>
     </div>
   );
 }
 
 export default function OnboardingStepManager() {
+  const t = useT();
+  const getRoleLabel = (role: string) => t(`admin.onboarding.role_${role}`);
+
+  const STATUS_BADGES: Record<string, { label: string; className: string }> = {
+    active: { label: t('admin.onboarding.status_active'), className: 'bg-green-500/10 text-green-600' },
+    scheduled: { label: t('admin.onboarding.status_scheduled'), className: 'bg-chart-4/10 text-chart-4' },
+    expired: { label: t('admin.onboarding.status_expired'), className: 'bg-destructive/10 text-destructive' },
+    inactive: { label: t('admin.onboarding.status_inactive'), className: 'bg-muted text-muted-foreground' },
+  };
+
   const [selectedRole, setSelectedRole] = useState<string>('parent');
   const [editingStep, setEditingStep] = useState<StepRow | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -117,58 +97,32 @@ export default function OnboardingStepManager() {
 
   const { data: steps = [], isLoading } = useQuery({
     queryKey: ['admin-onboarding-steps', selectedRole],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('onboarding_steps')
-        .select('*')
-        .eq('role', selectedRole)
-        .order('step_index', { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as StepRow[];
-    },
+    queryFn: async () => { const { data, error } = await supabase.from('onboarding_steps').select('*').eq('role', selectedRole).order('step_index', { ascending: true }); if (error) throw error; return (data ?? []) as StepRow[]; },
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-onboarding-steps', selectedRole] });
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, values }: { id?: string; values: Partial<StepRow> }) => {
-      if (id) {
-        const { error } = await supabase.from('onboarding_steps').update(values).eq('id', id);
-        if (error) throw error;
-      } else {
-        const newIndex = steps.length;
-        const { error } = await supabase.from('onboarding_steps').insert([{
-          ...values,
-          role: selectedRole,
-          step_index: newIndex,
-          title: values.title ?? '',
-        }]);
-        if (error) throw error;
-      }
+      if (id) { const { error } = await supabase.from('onboarding_steps').update(values).eq('id', id); if (error) throw error; }
+      else { const newIndex = steps.length; const { error } = await supabase.from('onboarding_steps').insert([{ ...values, role: selectedRole, step_index: newIndex, title: values.title ?? '' }]); if (error) throw error; }
     },
-    onSuccess: () => { invalidate(); toast.success('Passo guardado'); },
+    onSuccess: () => { invalidate(); toast.success(t('admin.onboarding.step_saved')); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('onboarding_steps').delete().eq('id', id);
-      if (error) throw error;
-      // Re-index remaining steps
+      const { error } = await supabase.from('onboarding_steps').delete().eq('id', id); if (error) throw error;
       const remaining = steps.filter(s => s.id !== id).sort((a, b) => a.step_index - b.step_index);
-      for (let i = 0; i < remaining.length; i++) {
-        if (remaining[i].step_index !== i) {
-          await supabase.from('onboarding_steps').update({ step_index: i }).eq('id', remaining[i].id);
-        }
-      }
+      for (let i = 0; i < remaining.length; i++) { if (remaining[i].step_index !== i) await supabase.from('onboarding_steps').update({ step_index: i }).eq('id', remaining[i].id); }
     },
-    onSuccess: () => { invalidate(); toast.success('Passo eliminado'); },
+    onSuccess: () => { invalidate(); toast.success(t('admin.onboarding.step_deleted')); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const swapMutation = useMutation({
     mutationFn: async ({ a, b }: { a: StepRow; b: StepRow }) => {
-      // Use a temporary index to avoid unique constraint violation
       const tempIndex = 9999;
       await supabase.from('onboarding_steps').update({ step_index: tempIndex }).eq('id', a.id);
       await supabase.from('onboarding_steps').update({ step_index: a.step_index }).eq('id', b.id);
@@ -177,157 +131,74 @@ export default function OnboardingStepManager() {
     onSuccess: () => invalidate(),
     onError: (e: any) => toast.error(e.message),
   });
+
   const duplicateMutation = useMutation({
     mutationFn: async ({ step, targetRoles }: { step: StepRow; targetRoles: string[] }) => {
       for (const role of targetRoles) {
-        // Get current max step_index for target role
-        const { data: existing } = await supabase
-          .from('onboarding_steps')
-          .select('step_index')
-          .eq('role', role)
-          .order('step_index', { ascending: false })
-          .limit(1);
+        const { data: existing } = await supabase.from('onboarding_steps').select('step_index').eq('role', role).order('step_index', { ascending: false }).limit(1);
         const nextIndex = (existing && existing.length > 0 ? existing[0].step_index + 1 : 0);
-        const { error } = await supabase.from('onboarding_steps').insert([{
-          role,
-          step_index: nextIndex,
-          title: step.title,
-          description: step.description,
-          illustration_key: step.illustration_key,
-          cta: step.cta,
-          is_active: step.is_active,
-        }]);
+        const { error } = await supabase.from('onboarding_steps').insert([{ role, step_index: nextIndex, title: step.title, description: step.description, illustration_key: step.illustration_key, cta: step.cta, is_active: step.is_active }]);
         if (error) throw error;
       }
     },
     onSuccess: (_, { targetRoles }) => {
       queryClient.invalidateQueries({ queryKey: ['admin-onboarding-steps'] });
-      toast.success(`Passo duplicado para ${targetRoles.length} papel(éis)`);
-      setDuplicatingStep(null);
-      setDupTargetRoles([]);
+      toast.success(t('admin.onboarding.step_duplicated').replace('{count}', String(targetRoles.length)));
+      setDuplicatingStep(null); setDupTargetRoles([]);
     },
     onError: (e: any) => toast.error(e.message),
   });
-  const openEdit = (step: StepRow) => {
-    setEditingStep(step);
-    setForm({
-      title: step.title,
-      description: step.description,
-      illustration_key: step.illustration_key,
-      cta: step.cta ?? '',
-      is_active: step.is_active,
-      visible_from: step.visible_from ? new Date(step.visible_from) : null,
-      visible_until: step.visible_until ? new Date(step.visible_until) : null,
-    });
-  };
 
-  const openCreate = () => {
-    setIsCreating(true);
-    setEditingStep(null);
-    setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true, visible_from: null, visible_until: null });
-  };
-
+  const openEdit = (step: StepRow) => { setEditingStep(step); setForm({ title: step.title, description: step.description, illustration_key: step.illustration_key, cta: step.cta ?? '', is_active: step.is_active, visible_from: step.visible_from ? new Date(step.visible_from) : null, visible_until: step.visible_until ? new Date(step.visible_until) : null }); };
+  const openCreate = () => { setIsCreating(true); setEditingStep(null); setForm({ title: '', description: '', illustration_key: ILLUSTRATION_KEYS[0], cta: '', is_active: true, visible_from: null, visible_until: null }); };
   const handleSave = () => {
-    const values = {
-      title: form.title,
-      description: form.description,
-      illustration_key: form.illustration_key,
-      cta: form.cta || null,
-      is_active: form.is_active,
-      visible_from: form.visible_from?.toISOString() ?? null,
-      visible_until: form.visible_until?.toISOString() ?? null,
-    };
-    saveMutation.mutate(
-      { id: editingStep?.id, values },
-      { onSuccess: () => { setEditingStep(null); setIsCreating(false); } }
-    );
+    const values = { title: form.title, description: form.description, illustration_key: form.illustration_key, cta: form.cta || null, is_active: form.is_active, visible_from: form.visible_from?.toISOString() ?? null, visible_until: form.visible_until?.toISOString() ?? null };
+    saveMutation.mutate({ id: editingStep?.id, values }, { onSuccess: () => { setEditingStep(null); setIsCreating(false); } });
   };
 
   const dialogOpen = !!editingStep || isCreating;
 
   return (
     <div className="space-y-4">
-      {/* Role selector */}
       <Tabs value={selectedRole} onValueChange={setSelectedRole}>
         <TabsList className="flex-wrap h-auto gap-1">
-          {ROLES.map(r => (
-            <TabsTrigger key={r} value={r} className="text-xs">{ROLE_LABELS[r]}</TabsTrigger>
-          ))}
+          {ROLES.map(r => <TabsTrigger key={r} value={r} className="text-xs">{getRoleLabel(r)}</TabsTrigger>)}
         </TabsList>
       </Tabs>
 
-      {/* Add button */}
       <div className="flex justify-end">
-        <Button size="sm" onClick={openCreate} className="gap-1.5">
-          <Plus className="h-4 w-4" /> Novo Passo
-        </Button>
+        <Button size="sm" onClick={openCreate} className="gap-1.5"><Plus className="h-4 w-4" /> {t('admin.onboarding.new_step')}</Button>
       </div>
 
-      {/* Step cards */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
-        </div>
+        <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}</div>
       ) : steps.length === 0 ? (
-        <Card className="border-border/50">
-          <CardContent className="py-12 text-center text-muted-foreground text-sm">
-            Nenhum passo configurado para este papel.
-          </CardContent>
-        </Card>
+        <Card className="border-border/50"><CardContent className="py-12 text-center text-muted-foreground text-sm">{t('admin.onboarding.no_steps')}</CardContent></Card>
       ) : (
         <div className="space-y-3">
           {steps.map((step, i) => (
             <Card key={step.id} className={`border-border/50 transition-opacity ${!step.is_active ? 'opacity-50' : ''}`}>
               <CardContent className="p-4 flex gap-4 items-start">
-                {/* Mini preview */}
                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0 relative">
-                  <div className="scale-[0.25] origin-top-left w-[320px] h-[320px]">
-                    <SplashIllustration illustrationKey={step.illustration_key} />
-                  </div>
+                  <div className="scale-[0.25] origin-top-left w-[320px] h-[320px]"><SplashIllustration illustrationKey={step.illustration_key} /></div>
                 </div>
-
-                {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <Badge variant="outline" className="text-[10px]">Passo {step.step_index + 1}</Badge>
-                    {(() => {
-                      const status = getVisibilityStatus(step);
-                      const badge = STATUS_BADGES[status];
-                      return <Badge className={cn("text-[10px]", badge.className)}>{status === 'scheduled' && <Clock className="h-3 w-3 mr-1" />}{badge.label}</Badge>;
-                    })()}
+                    <Badge variant="outline" className="text-[10px]">{t('admin.onboarding.step')} {step.step_index + 1}</Badge>
+                    {(() => { const status = getVisibilityStatus(step); const badge = STATUS_BADGES[status]; return <Badge className={cn("text-[10px]", badge.className)}>{status === 'scheduled' && <Clock className="h-3 w-3 mr-1" />}{badge.label}</Badge>; })()}
                     {step.cta && <Badge className="text-[10px] bg-primary/10 text-primary">CTA: {step.cta}</Badge>}
-                    {(step.visible_from || step.visible_until) && (
-                      <span className="text-[9px] text-muted-foreground">
-                        {step.visible_from ? format(new Date(step.visible_from), 'dd/MM/yy') : '∞'}
-                        {' → '}
-                        {step.visible_until ? format(new Date(step.visible_until), 'dd/MM/yy') : '∞'}
-                      </span>
-                    )}
+                    {(step.visible_from || step.visible_until) && (<span className="text-[9px] text-muted-foreground">{step.visible_from ? format(new Date(step.visible_from), 'dd/MM/yy') : '∞'}{' → '}{step.visible_until ? format(new Date(step.visible_until), 'dd/MM/yy') : '∞'}</span>)}
                   </div>
                   <h4 className="text-sm font-display font-bold text-foreground truncate">{step.title}</h4>
                   <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{step.description}</p>
                 </div>
-
-                {/* Actions */}
                 <div className="flex flex-col gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" disabled={i === 0} onClick={() => swapMutation.mutate({ a: step, b: steps[i - 1] })}>
-                    <ArrowUp className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" disabled={i === steps.length - 1} onClick={() => swapMutation.mutate({ a: step, b: steps[i + 1] })}>
-                    <ArrowDown className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(step)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm('Eliminar este passo?')) deleteMutation.mutate(step.id); }}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreviewKey(step.illustration_key)}>
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setDuplicatingStep(step); setDupTargetRoles([]); }}>
-                    <Copy className="h-3.5 w-3.5" />
-                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" disabled={i === 0} onClick={() => swapMutation.mutate({ a: step, b: steps[i - 1] })}><ArrowUp className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" disabled={i === steps.length - 1} onClick={() => swapMutation.mutate({ a: step, b: steps[i + 1] })}><ArrowDown className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(step)}><Pencil className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => { if (confirm(t('admin.onboarding.delete_confirm'))) deleteMutation.mutate(step.id); }}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setPreviewKey(step.illustration_key)}><Eye className="h-3.5 w-3.5" /></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setDuplicatingStep(step); setDupTargetRoles([]); }}><Copy className="h-3.5 w-3.5" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -335,84 +206,35 @@ export default function OnboardingStepManager() {
         </div>
       )}
 
-      {/* Edit / Create Dialog with live preview */}
+      {/* Edit / Create Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) { setEditingStep(null); setIsCreating(false); } }}>
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
-            {/* Left: Form */}
             <div className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
-              <DialogHeader>
-                <DialogTitle className="font-display">{editingStep ? 'Editar Passo' : 'Novo Passo'}</DialogTitle>
-              </DialogHeader>
-              <div>
-                <Label>Título</Label>
-                <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Descrição</Label>
-                <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
-              </div>
-              <div>
-                <Label>Ilustração</Label>
-                <Select value={form.illustration_key} onValueChange={v => setForm(f => ({ ...f, illustration_key: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ILLUSTRATION_KEYS.map(k => (
-                      <SelectItem key={k} value={k}>{k}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>CTA (botão, opcional)</Label>
-                <Input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder="Ex: Começar" />
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} />
-                <Label>Ativo</Label>
-              </div>
-              <DatePickerField label="Visível a partir de (opcional)" value={form.visible_from} onChange={d => setForm(f => ({ ...f, visible_from: d }))} />
-              <DatePickerField label="Visível até (opcional)" value={form.visible_until} onChange={d => setForm(f => ({ ...f, visible_until: d }))} />
+              <DialogHeader><DialogTitle className="font-display">{editingStep ? t('admin.onboarding.edit_step') : t('admin.onboarding.new_step_dialog')}</DialogTitle></DialogHeader>
+              <div><Label>{t('admin.onboarding.label_title')}</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} /></div>
+              <div><Label>{t('admin.onboarding.label_description')}</Label><Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} /></div>
+              <div><Label>{t('admin.onboarding.label_illustration')}</Label><Select value={form.illustration_key} onValueChange={v => setForm(f => ({ ...f, illustration_key: v }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{ILLUSTRATION_KEYS.map(k => <SelectItem key={k} value={k}>{k}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>{t('admin.onboarding.label_cta')}</Label><Input value={form.cta} onChange={e => setForm(f => ({ ...f, cta: e.target.value }))} placeholder={t('admin.onboarding.cta_placeholder')} /></div>
+              <div className="flex items-center gap-3"><Switch checked={form.is_active} onCheckedChange={v => setForm(f => ({ ...f, is_active: v }))} /><Label>{t('admin.onboarding.label_active')}</Label></div>
+              <DatePickerField label={t('admin.onboarding.visible_from')} value={form.visible_from} onChange={d => setForm(f => ({ ...f, visible_from: d }))} />
+              <DatePickerField label={t('admin.onboarding.visible_until')} value={form.visible_until} onChange={d => setForm(f => ({ ...f, visible_until: d }))} />
               <DialogFooter className="pt-2">
-                <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>Cancelar</Button>
-                <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>
-                  {saveMutation.isPending ? 'A guardar...' : 'Guardar'}
-                </Button>
+                <Button variant="outline" onClick={() => { setEditingStep(null); setIsCreating(false); }}>{t('admin.onboarding.cancel')}</Button>
+                <Button onClick={handleSave} disabled={!form.title || !form.illustration_key || saveMutation.isPending}>{saveMutation.isPending ? t('admin.onboarding.saving') : t('admin.onboarding.save')}</Button>
               </DialogFooter>
             </div>
-
-            {/* Right: Live preview mimicking the actual walkthrough */}
             <div className="hidden lg:flex items-center justify-center bg-background/80 backdrop-blur-sm p-6 border-l border-border/50">
               <div className="w-full max-w-sm bg-card border border-border/50 rounded-3xl shadow-2xl overflow-hidden">
-                {/* Top accent */}
                 <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
-                {/* Illustration */}
-                {form.illustration_key && (
-                  <div className="relative overflow-hidden">
-                    <SplashIllustration illustrationKey={form.illustration_key} />
-                  </div>
-                )}
-                {/* Content */}
+                {form.illustration_key && (<div className="relative overflow-hidden"><SplashIllustration illustrationKey={form.illustration_key} /></div>)}
                 <div className="px-6 pb-6 pt-2 text-center">
-                  <h2 className="text-lg font-display font-bold text-foreground mb-2">
-                    {form.title || 'Título do passo'}
-                  </h2>
-                  <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                    {form.description || 'Descrição do passo aparecerá aqui...'}
-                  </p>
-                  {/* Dots */}
-                  <div className="flex justify-center gap-1.5 mt-4 mb-4">
-                    <div className="h-1.5 w-6 rounded-full bg-primary" />
-                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" />
-                    <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" />
-                  </div>
-                  {/* Actions */}
+                  <h2 className="text-lg font-display font-bold text-foreground mb-2">{form.title || t('admin.onboarding.label_title')}</h2>
+                  <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">{form.description || t('admin.onboarding.label_description')}</p>
+                  <div className="flex justify-center gap-1.5 mt-4 mb-4"><div className="h-1.5 w-6 rounded-full bg-primary" /><div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" /><div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/20" /></div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground px-3 py-2">Saltar</span>
-                    <Button size="sm" className="rounded-xl px-5 gap-1.5 font-display font-semibold shadow-md shadow-primary/20">
-                      {form.cta || 'Seguinte'}
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Button>
+                    <span className="text-xs text-muted-foreground px-3 py-2">{t('admin.onboarding.skipped')}</span>
+                    <Button size="sm" className="rounded-xl px-5 gap-1.5 font-display font-semibold shadow-md shadow-primary/20">{form.cta || t('admin.onboarding.save')}<ChevronRight className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
               </div>
@@ -428,12 +250,8 @@ export default function OnboardingStepManager() {
             <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
             {previewKey && <SplashIllustration illustrationKey={previewKey} />}
             <div className="px-6 pb-6 pt-2 text-center">
-              <h2 className="text-lg font-display font-bold text-foreground mb-2">
-                {steps.find(s => s.illustration_key === previewKey)?.title}
-              </h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {steps.find(s => s.illustration_key === previewKey)?.description}
-              </p>
+              <h2 className="text-lg font-display font-bold text-foreground mb-2">{steps.find(s => s.illustration_key === previewKey)?.title}</h2>
+              <p className="text-xs text-muted-foreground leading-relaxed">{steps.find(s => s.illustration_key === previewKey)?.description}</p>
             </div>
           </div>
         </DialogContent>
@@ -443,33 +261,21 @@ export default function OnboardingStepManager() {
       <Dialog open={!!duplicatingStep} onOpenChange={(open) => { if (!open) { setDuplicatingStep(null); setDupTargetRoles([]); } }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-display">Duplicar Passo</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Selecione os papéis para onde duplicar "<span className="font-medium text-foreground">{duplicatingStep?.title}</span>"
-            </DialogDescription>
+            <DialogTitle className="font-display">{t('admin.onboarding.dup_title')}</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">{t('admin.onboarding.dup_desc')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             {ROLES.filter(r => r !== duplicatingStep?.role).map(r => (
               <label key={r} className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={dupTargetRoles.includes(r)}
-                  onCheckedChange={(checked) => {
-                    setDupTargetRoles(prev =>
-                      checked ? [...prev, r] : prev.filter(x => x !== r)
-                    );
-                  }}
-                />
-                <span className="text-sm">{ROLE_LABELS[r]}</span>
+                <Checkbox checked={dupTargetRoles.includes(r)} onCheckedChange={(checked) => { setDupTargetRoles(prev => checked ? [...prev, r] : prev.filter(x => x !== r)); }} />
+                <span className="text-sm">{getRoleLabel(r)}</span>
               </label>
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDuplicatingStep(null); setDupTargetRoles([]); }}>Cancelar</Button>
-            <Button
-              disabled={dupTargetRoles.length === 0 || duplicateMutation.isPending}
-              onClick={() => duplicatingStep && duplicateMutation.mutate({ step: duplicatingStep, targetRoles: dupTargetRoles })}
-            >
-              {duplicateMutation.isPending ? 'A duplicar...' : `Duplicar (${dupTargetRoles.length})`}
+            <Button variant="outline" onClick={() => { setDuplicatingStep(null); setDupTargetRoles([]); }}>{t('admin.onboarding.cancel')}</Button>
+            <Button disabled={dupTargetRoles.length === 0 || duplicateMutation.isPending} onClick={() => duplicatingStep && duplicateMutation.mutate({ step: duplicatingStep, targetRoles: dupTargetRoles })}>
+              {duplicateMutation.isPending ? t('admin.onboarding.dup_duplicating') : `${t('admin.onboarding.dup_btn')} (${dupTargetRoles.length})`}
             </Button>
           </DialogFooter>
         </DialogContent>
