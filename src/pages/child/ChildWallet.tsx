@@ -12,6 +12,7 @@ import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { useDonationCauses, useMyDonations, useDonate } from '@/hooks/use-donations';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
