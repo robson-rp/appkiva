@@ -353,7 +353,7 @@ function Hero() {
           <img
             src={heroIllustration}
             alt="Crianças a aprender sobre dinheiro"
-            className="w-full max-w-md md:max-w-lg drop-shadow-2xl relative z-10"
+            className="w-full max-w-sm md:max-w-xl drop-shadow-2xl relative z-10"
           />
           <motion.img
             src={kivoSvg}
