@@ -1069,6 +1069,7 @@ export default function LandingPage() {
         <GamificationSection />
         <TrustSection />
         <SocialProof />
+        <PricingSection />
         <FinalCTA />
       </main>
       <Footer />
