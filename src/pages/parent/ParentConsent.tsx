@@ -14,15 +14,12 @@ import { Shield, ShieldCheck, ShieldOff, FileDown, Trash2, AlertTriangle, Eye, P
 import { format } from 'date-fns';
 import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useT } from '@/contexts/LanguageContext';
 
-const CONSENT_TYPES = [
-  { key: 'platform_usage', label: 'Utilização da Plataforma', desc: 'Permite que a criança utilize todas as funcionalidades da KIVARA.' },
-  { key: 'data_collection', label: 'Recolha de Dados', desc: 'Autoriza a recolha de dados de actividade para relatórios e gamificação.' },
-  { key: 'financial_education', label: 'Educação Financeira', desc: 'Permite que a criança participe em desafios e lições de educação financeira.' },
-  { key: 'teacher_access', label: 'Acesso do Professor', desc: 'Permite que professores da escola associada vejam o progresso da criança.' },
-];
+const CONSENT_KEYS = ['platform_usage', 'data_collection', 'financial_education', 'teacher_access'] as const;
 
 export default function ParentConsent() {
+  const t = useT();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [revokeDialog, setRevokeDialog] = useState<{ open: boolean; id: string; childName: string; type: string }>({ open: false, id: '', childName: '', type: '' });
@@ -32,6 +29,12 @@ export default function ParentConsent() {
   const [exportingChild, setExportingChild] = useState<string | null>(null);
   const { hasFeature } = useAllFeatures();
   const canExport = hasFeature(FEATURES.EXPORT_REPORTS);
+
+  const consentTypes = CONSENT_KEYS.map(key => ({
+    key,
+    label: t(`parent.consent.type.${key}`),
+    desc: t(`parent.consent.type.${key}_desc`),
+  }));
 
   // Fetch children profiles
   const { data: children = [] } = useQuery({
@@ -74,9 +77,9 @@ export default function ParentConsent() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['parent-consent-records'] });
-      toast({ title: 'Consentimento concedido ✅' });
+      toast({ title: t('parent.consent.granted_toast') });
     },
-    onError: (err: any) => toast({ title: 'Erro', description: err.message, variant: 'destructive' }),
+    onError: (err: any) => toast({ title: t('common.error'), description: err.message, variant: 'destructive' }),
   });
 
   const revokeMutation = useMutation({
@@ -91,9 +94,9 @@ export default function ParentConsent() {
       qc.invalidateQueries({ queryKey: ['parent-consent-records'] });
       setRevokeDialog({ open: false, id: '', childName: '', type: '' });
       setRevokeReason('');
-      toast({ title: 'Consentimento revogado ✅' });
+      toast({ title: t('parent.consent.revoked_toast') });
     },
-    onError: (err: any) => toast({ title: 'Erro', description: err.message, variant: 'destructive' }),
+    onError: (err: any) => toast({ title: t('common.error'), description: err.message, variant: 'destructive' }),
   });
 
   const handleExportData = async (childProfileId: string) => {
@@ -103,8 +106,6 @@ export default function ParentConsent() {
         body: { profile_id: childProfileId },
       });
       if (error) throw error;
-
-      // Download as JSON
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -112,9 +113,9 @@ export default function ParentConsent() {
       a.download = `kivara-data-${childProfileId.slice(0, 8)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      toast({ title: 'Dados exportados ✅' });
+      toast({ title: t('parent.consent.exported_toast') });
     } catch (err: any) {
-      toast({ title: 'Erro na exportação', description: err.message, variant: 'destructive' });
+      toast({ title: t('parent.consent.export_error'), description: err.message, variant: 'destructive' });
     } finally {
       setExportingChild(null);
     }
@@ -144,19 +145,19 @@ export default function ParentConsent() {
         <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground overflow-hidden relative">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
           <CardContent className="p-5 sm:p-6 relative z-10">
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Privacidade & Consentimento</p>
-            <h1 className="font-display text-xl sm:text-2xl font-bold mt-1">Gestão de Consentimento</h1>
-            <p className="text-xs sm:text-sm text-primary-foreground/70 mt-1">Controla as autorizações dos teus filhos na plataforma</p>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.consent.privacy')}</p>
+            <h1 className="font-display text-xl sm:text-2xl font-bold mt-1">{t('parent.consent.title')}</h1>
+            <p className="text-xs sm:text-sm text-primary-foreground/70 mt-1">{t('parent.consent.subtitle')}</p>
             <div className="flex flex-wrap gap-3 mt-4">
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
                 <ShieldCheck className="h-4 w-4" />
                 <span className="font-display font-bold text-lg">{activeConsents.length}</span>
-                <span className="text-xs text-primary-foreground/60">activos</span>
+                <span className="text-xs text-primary-foreground/60">{t('parent.consent.active')}</span>
               </div>
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
                 <ShieldOff className="h-4 w-4" />
                 <span className="font-display font-bold text-lg">{revokedConsents.length}</span>
-                <span className="text-xs text-primary-foreground/60">revogados</span>
+                <span className="text-xs text-primary-foreground/60">{t('parent.consent.revoked')}</span>
               </div>
             </div>
           </CardContent>
@@ -174,8 +175,8 @@ export default function ParentConsent() {
         <Card className="border-border/50">
           <CardContent className="p-12 text-center">
             <div className="text-5xl mb-4">🔒</div>
-            <h3 className="font-display font-bold text-lg mb-2">Sem crianças registadas</h3>
-            <p className="text-sm text-muted-foreground">Adiciona crianças para gerir os seus consentimentos.</p>
+            <h3 className="font-display font-bold text-lg mb-2">{t('parent.consent.no_children')}</h3>
+            <p className="text-sm text-muted-foreground">{t('parent.consent.no_children_desc')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -191,7 +192,7 @@ export default function ParentConsent() {
                        </div>
                        <div>
                          <CardTitle className="text-base font-display">{child.name}</CardTitle>
-                         <p className="text-xs text-muted-foreground">{child.consents.length} consentimento(s) activo(s)</p>
+                         <p className="text-xs text-muted-foreground">{child.consents.length} {t('parent.consent.active_count')}</p>
                        </div>
                      </div>
                      <div className="flex gap-2 w-full sm:w-auto">
@@ -201,7 +202,7 @@ export default function ParentConsent() {
                          className="rounded-xl text-xs gap-1.5 flex-1 sm:flex-none"
                          onClick={() => setGrantDialog({ open: true, childId: profileId, childName: child.name })}
                        >
-                         <Plus className="h-3.5 w-3.5" /> Conceder
+                         <Plus className="h-3.5 w-3.5" /> {t('parent.consent.grant')}
                        </Button>
                        <TooltipProvider>
                          <Tooltip>
@@ -215,13 +216,13 @@ export default function ParentConsent() {
                                  onClick={() => handleExportData(profileId)}
                                >
                                  {canExport ? <FileDown className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                                 {exportingChild === profileId ? 'A exportar...' : 'Exportar'}
+                                 {exportingChild === profileId ? t('parent.consent.exporting') : t('parent.consent.export')}
                                </Button>
                              </span>
                            </TooltipTrigger>
                            {!canExport && (
                              <TooltipContent>
-                               <p className="text-xs">Requer upgrade para exportar dados</p>
+                               <p className="text-xs">{t('parent.consent.export_upgrade')}</p>
                              </TooltipContent>
                            )}
                          </Tooltip>
@@ -230,7 +231,7 @@ export default function ParentConsent() {
                    </div>
                 </CardHeader>
                 <CardContent className="space-y-2 px-4 sm:px-6">
-                  {CONSENT_TYPES.map(ct => {
+                  {consentTypes.map(ct => {
                     const existing = child.consents.find((c: any) => c.consent_type === ct.key);
                     return (
                       <div key={ct.key} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 p-3 rounded-xl ${existing ? 'bg-secondary/5' : 'bg-muted/30'}`}>
@@ -261,7 +262,7 @@ export default function ParentConsent() {
                           </div>
                         ) : (
                           <div className="ml-7 sm:ml-0">
-                            <Badge variant="outline" className="text-[10px] text-muted-foreground">Não concedido</Badge>
+                            <Badge variant="outline" className="text-[10px] text-muted-foreground">{t('parent.consent.not_granted')}</Badge>
                           </div>
                         )}
                       </div>
@@ -279,7 +280,7 @@ export default function ParentConsent() {
         <Card className="border-border/50">
           <CardHeader>
             <CardTitle className="text-sm font-display flex items-center gap-2 text-muted-foreground">
-              <ShieldOff className="h-4 w-4" /> Histórico de Revogações ({revokedConsents.length})
+              <ShieldOff className="h-4 w-4" /> {t('parent.consent.revocation_history')} ({revokedConsents.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
@@ -308,12 +309,12 @@ export default function ParentConsent() {
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display text-lg flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-secondary shrink-0" /> Conceder Consentimento
+              <ShieldCheck className="h-5 w-5 text-secondary shrink-0" /> {t('parent.consent.grant_title')}
             </DialogTitle>
-            <DialogDescription>Seleciona o tipo de consentimento para {grantDialog.childName}.</DialogDescription>
+            <DialogDescription>{t('parent.consent.grant_desc')} {grantDialog.childName}.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 mt-2">
-            {CONSENT_TYPES.map(ct => {
+            {consentTypes.map(ct => {
               const alreadyGranted = consents.some((c: any) =>
                 c.child_profile_id === grantDialog.childId && c.consent_type === ct.key && !c.revoked_at
               );
@@ -333,7 +334,7 @@ export default function ParentConsent() {
                     <p className="text-sm font-medium">{ct.label}</p>
                     <p className="text-xs text-muted-foreground whitespace-normal">{ct.desc}</p>
                   </div>
-                  {alreadyGranted && <Badge className="ml-auto text-[10px] bg-secondary/20 text-secondary shrink-0">Activo</Badge>}
+                  {alreadyGranted && <Badge className="ml-auto text-[10px] bg-secondary/20 text-secondary shrink-0">{t('parent.consent.active_badge')}</Badge>}
                 </Button>
               );
             })}
@@ -343,17 +344,17 @@ export default function ParentConsent() {
 
       {/* Revoke Consent Dialog */}
       <Dialog open={revokeDialog.open} onOpenChange={(o) => !o && setRevokeDialog({ open: false, id: '', childName: '', type: '' })}>
-        <DialogContent className="max-w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-2xl">
+        <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" /> Revogar Consentimento
+              <AlertTriangle className="h-5 w-5 text-destructive" /> {t('parent.consent.revoke_title')}
             </DialogTitle>
             <DialogDescription>
-              Estás a revogar o consentimento de <strong>{revokeDialog.type}</strong> para <strong>{revokeDialog.childName}</strong>.
+              {t('parent.consent.revoke_desc_pre')} <strong>{revokeDialog.type}</strong> {t('parent.consent.revoke_desc_mid')} <strong>{revokeDialog.childName}</strong>.
             </DialogDescription>
           </DialogHeader>
           <Textarea
-            placeholder="Motivo da revogação (opcional)"
+            placeholder={t('parent.consent.revoke_reason')}
             value={revokeReason}
             onChange={e => setRevokeReason(e.target.value)}
             className="rounded-xl"
@@ -361,7 +362,7 @@ export default function ParentConsent() {
           />
           <DialogFooter className="gap-2">
             <Button variant="outline" className="rounded-xl" onClick={() => setRevokeDialog({ open: false, id: '', childName: '', type: '' })}>
-              Cancelar
+              {t('parent.consent.cancel')}
             </Button>
             <Button
               variant="destructive"
@@ -369,7 +370,7 @@ export default function ParentConsent() {
               disabled={revokeMutation.isPending}
               onClick={() => revokeMutation.mutate({ id: revokeDialog.id, reason: revokeReason })}
             >
-              {revokeMutation.isPending ? 'A processar...' : 'Revogar'}
+              {revokeMutation.isPending ? t('parent.consent.processing') : t('parent.consent.revoke')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -379,32 +380,32 @@ export default function ParentConsent() {
       <Dialog open={detailDialog.open} onOpenChange={(o) => !o && setDetailDialog({ open: false, record: null })}>
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display">Detalhe do Consentimento</DialogTitle>
+            <DialogTitle className="font-display">{t('parent.consent.detail_title')}</DialogTitle>
           </DialogHeader>
           {detailDialog.record && (
             <div className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-muted-foreground text-xs">Criança</p>
+                  <p className="text-muted-foreground text-xs">{t('parent.consent.child')}</p>
                   <p className="font-medium">{detailDialog.record.child?.display_name ?? '—'}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">Tipo</p>
+                  <p className="text-muted-foreground text-xs">{t('parent.consent.type')}</p>
                   <p className="font-medium">{detailDialog.record.consent_type}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">Concedido em</p>
+                  <p className="text-muted-foreground text-xs">{t('parent.consent.granted_at')}</p>
                   <p className="font-medium">{format(new Date(detailDialog.record.granted_at), 'dd/MM/yyyy HH:mm')}</p>
                 </div>
                 {detailDialog.record.revoked_at && (
                   <>
                     <div>
-                      <p className="text-muted-foreground text-xs">Revogado em</p>
+                      <p className="text-muted-foreground text-xs">{t('parent.consent.revoked_at')}</p>
                       <p className="font-medium text-destructive">{format(new Date(detailDialog.record.revoked_at), 'dd/MM/yyyy HH:mm')}</p>
                     </div>
                     {detailDialog.record.revocation_reason && (
                       <div className="col-span-2">
-                        <p className="text-muted-foreground text-xs">Motivo</p>
+                        <p className="text-muted-foreground text-xs">{t('parent.consent.reason')}</p>
                         <p className="font-medium">{detailDialog.record.revocation_reason}</p>
                       </div>
                     )}
