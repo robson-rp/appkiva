@@ -767,14 +767,14 @@ function GamificationSection() {
     { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
     { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
     { icon: Medal, label: "Medalsm sm:max-w-md md:max-w-has e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const sm sm:max-w-md md:max-w-},
-    { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "tesm sm:max-w-md md:max-w-xt-primary", anim: "spin" as const },
+    { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "text-primary", anim: "spin" as const },
   ];
   return (
     <Section>
-      <div className="sm sm:max-w-md md:max-w-grid md:grid-cols-2 gap-10 md:gap-16 items-center">
-        <motion.div variants={fadeUp} sm sm:max-w-md md:max-w-className="flex justify-center order-2 md:order-1 relative">
-          <div className="abssm sm:max-w-md md:max-w-olute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-         sm sm:max-w-md md:max-w- <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
+          <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
+          <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
