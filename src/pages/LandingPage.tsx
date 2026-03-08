@@ -671,10 +671,10 @@ function ParentBenefits() {
   ];
   return (
     <Section id="familias">
-    sm sm:max-w-md md:max-w-  <div className="grid md:grid-cols-2 gap-sm sm:max-w-md md:max-w-10 md:gap-16 items-center">
-        <motiosm sm:max-w-md md:max-w-n.div variants={fadeUp} className="flex jusm sm:max-w-md md:max-w-stify-center order-2 md:order-1 relative">sm sm:max-w-md md:max-w-
-          <div className="absolute inset-sm sm:max-w-md md:max-w-0 rounded-full bg-primary/8 blur-3xl scalesm sm:max-w-md md:max-w--75 pointer-events-none" />
-          <imgsm sm:max-w-md md:max-w- src={parentsBenefit} alt="Família africasm sm:max-w-md md:max-w-na a usar KIVARA" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
+          <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
+          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
