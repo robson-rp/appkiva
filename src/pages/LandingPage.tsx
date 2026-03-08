@@ -100,7 +100,7 @@ function Section({ children, className = "", id }: { children: React.ReactNode; 
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className={`px-5 sm:px-8 py-12 md:py-16 ${className}`}
+      className={`px-5 sm:px-8 lg:px-12 py-16 md:py-24 ${className}`}
     >
       <div className="mx-auto max-w-7xl">{children}</div>
     </motion.section>
@@ -671,7 +671,7 @@ function ParentBenefits() {
   ];
   return (
     <Section id="familias">
-      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
           <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
@@ -720,7 +720,7 @@ function SchoolBenefits() {
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section id="escolas" className="bg-muted/40">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
           <div>
             <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
               Para escolas
@@ -771,7 +771,7 @@ function GamificationSection() {
   ];
   return (
     <Section>
-      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
           <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
@@ -820,7 +820,7 @@ function TrustSection() {
   ];
   return (
     <Section className="!bg-foreground !text-background">
-      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
             Segurança
