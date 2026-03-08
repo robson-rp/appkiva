@@ -577,7 +577,7 @@ function HowItWorks() {
               style={{ scaleX: scrollYProgress }}
             />
           </div>
-          <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-6 relative z-10">
+          <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-4 relative z-10">
             {steps.map((s, i) => (
               <motion.div
                 key={i}
