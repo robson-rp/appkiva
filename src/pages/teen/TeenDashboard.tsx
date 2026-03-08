@@ -57,7 +57,7 @@ export default function TeenDashboard() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-heading md:text-heading-lg font-display font-bold text-foreground">
-          Olá, {teen.name}! 💪
+          {t('parent.dashboard.hello')} {teen.name}! 💪
         </h1>
         <p className="text-muted-foreground text-base mt-1">
           {levelConfig.avatar} {levelConfig.label} • {teen.kivaPoints} KivaPoints
