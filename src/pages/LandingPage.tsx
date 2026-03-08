@@ -422,20 +422,17 @@ function Hero() {
         </div>
       </div>
 
-      {/* Slide indicators — dot style */}
-      <div className="relative z-10 flex items-center justify-center gap-2.5 pb-2 md:pb-3">
-        {HERO_SLIDES.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => emblaApi?.scrollTo(i)}
-            className={`rounded-full transition-all duration-400 ${
-              selectedIndex === i
-                ? "w-2.5 h-2.5 bg-primary shadow-sm shadow-primary/30"
-                : "w-2 h-2 bg-muted-foreground/20 hover:bg-muted-foreground/40"
-            }`}
-            aria-label={`Slide ${i + 1}`}
+      {/* Slide indicators — sliding line */}
+      <div className="relative z-10 pb-2 md:pb-3 px-5 sm:px-8">
+        <div className="relative h-[1.5px] mx-12 rounded-full bg-muted-foreground/8">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
+            style={{
+              width: `${100 / HERO_SLIDES.length}%`,
+              left: `${(selectedIndex / HERO_SLIDES.length) * 100}%`,
+            }}
           />
-        ))}
+        </div>
       </div>
 
       {/* Feature pills below carousel */}
