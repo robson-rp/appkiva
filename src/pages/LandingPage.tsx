@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -378,7 +378,7 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-             10<div 10lassN10me="r10lativ10 px-510sm:px108 py-8 md:py-16">
+       10     10<div 10lassN10me="r10lativ10 px-510sm:px108 py-8 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -393,7 +393,7 @@ function Hero() {
                     <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
                       {slide.subtitle}
                     </p>
-         col sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
+  col sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
                       <Button
                         size="lg"
                         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
@@ -418,7 +418,7 @@ function Hero() {
                   >
                     <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
                     <img
-                      src={slide.ima80px] sm:max-w-sm 80px] sm:max-w-sme80px] sm:max-w-sm 80px] sm:max-w-smm80px] sm:max-w-sm200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
+                  80px] sm:max-w-sma80px] sm:max-w-sm 80px] sm:max-w-sme80px] sm:max-w-sm 80px] sm:max-w-smm80px] sm:max-w-sm200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
@@ -634,7 +634,7 @@ function UniverseSection() {
       <div className="relative">
         {/* Central illustration behind grid on desktop */}
         <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
-          <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
+          <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3x1 min-[420px]:grid-cols-l" />
         </di1 min-[420px]:grid-cols-v>
         <motion1 min-[420px]:grid-cols-.div variants={sta1 min-[420px]:grid-cols-ggerFast} classNam1 min-[420px]:grid-cols-e="grid grid-cols-2 md:grid-cols-5 gap-3">
           {zones.map((z, i) => (
@@ -671,7 +671,7 @@ function ParentBenefits() {
     <Section id="familias">
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
-          <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scalesm sm:max-w-md md:max-w--75 pointer-events-none" />
+          <div className="absolute inset-sm sm:max-w-md md:max-w-0 rounded-full bg-primary/8 blur-3xl scalesm sm:max-w-md md:max-w--75 pointer-events-none" />
           <imgsm sm:max-w-md md:max-w- src={parentsBenefit} alt="Família africasm sm:max-w-md md:max-w-na a usar KIVARA" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
@@ -746,7 +746,7 @@ function SchoolBenefits() {
             </motion.div>
           </div>
           <motion.div variants={fadeUp} className="flex justify-center relative">
-            <div className="absolute inset-0 rounded-full bg-accent/8sm sm:max-w-md md:max-w- blur-3xl scale-75 pointer-events-none" />
+   sm sm:max-w-md md:max-w-         <div className="absolute inset-0 rounded-full bg-accent/8sm sm:max-w-md md:max-w- blur-3xl scale-75 pointer-events-none" />
             <img src={ssm sm:max-w-md md:max-w-choolBenefit} alt="Sala de aula africana" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
@@ -771,7 +771,7 @@ function GamificationSection() {
     <Section>
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
-          <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
+          <div className="abssm sm:max-w-md md:max-w-olute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
          sm sm:max-w-md md:max-w- <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
@@ -827,7 +827,7 @@ function TrustSection() {
             Criado para ser seguro
           </motion.h2>
           <motion.p variants={fadeUp} className="opacity-60 mb-8 text-lg text-balance">
-            KIVARA foi concebida com segurança e privacidade como prioridade máxima.
+            KIVARA foi concebida com segurança e privacidade como1 min-[420px]:grid-cols- prioridade máxima.
           </motion.p>
           <motion.div variants={staggerFast} className="grid grid-cols-2 gap-3">
             {points.map((p, i) => (
