@@ -12,11 +12,13 @@ import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { useDonationCauses, useMyDonations, useDonate } from '@/hooks/use-donations';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
 export default function ChildWallet() {
+  const t = useT();
   const child = mockChildren[0];
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTx } = useWalletTransactions();
@@ -52,9 +54,9 @@ export default function ChildWallet() {
           id: tx.id,
           childId: child.id,
           description: tx.entry_type === 'vault_deposit'
-            ? `Poupança: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            ? `${t('child.wallet.saving_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.entry_type === 'vault_withdraw'
-            ? `Levantamento: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            ? `${t('child.wallet.withdrawal_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.description,
           amount: tx.amount,
           type: mapTxType(tx) as 'earned' | 'spent' | 'saved' | 'allowance' | 'donated',
@@ -67,11 +69,11 @@ export default function ChildWallet() {
   const saved = transactions.filter((t) => (t as any).type === 'saved').reduce((s, t) => s + t.amount, 0);
 
   const typeConfig: Record<string, any> = {
-    earned: { icon: ArrowUpCircle, color: 'text-secondary', label: 'Ganho', bg: 'bg-[hsl(var(--kivara-light-green))]', sign: '+' },
-    allowance: { icon: Coins, color: 'text-accent-foreground', label: 'Mesada', bg: 'bg-[hsl(var(--kivara-light-gold))]', sign: '+' },
-    spent: { icon: ArrowDownCircle, color: 'text-destructive', label: 'Gasto', bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
-    saved: { icon: PiggyBank, color: 'text-primary', label: 'Poupado', bg: 'bg-[hsl(var(--kivara-light-blue))]', sign: '-' },
-    donated: { icon: Heart, color: 'text-destructive', label: 'Doação', bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
+    earned: { icon: ArrowUpCircle, color: 'text-secondary', label: t('child.wallet.earned'), bg: 'bg-[hsl(var(--kivara-light-green))]', sign: '+' },
+    allowance: { icon: Coins, color: 'text-accent-foreground', label: t('child.wallet.allowance'), bg: 'bg-[hsl(var(--kivara-light-gold))]', sign: '+' },
+    spent: { icon: ArrowDownCircle, color: 'text-destructive', label: t('child.wallet.spent'), bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
+    saved: { icon: PiggyBank, color: 'text-primary', label: t('child.wallet.saved'), bg: 'bg-[hsl(var(--kivara-light-blue))]', sign: '-' },
+    donated: { icon: Heart, color: 'text-destructive', label: t('child.wallet.donated'), bg: 'bg-[hsl(var(--kivara-pink))]', sign: '-' },
   };
 
   const handleDonate = () => {
@@ -104,7 +106,7 @@ export default function ChildWallet() {
                   <div className="bg-white/15 backdrop-blur-sm rounded-xl p-2">
                     <Wallet className="h-4 w-4 text-white" />
                   </div>
-                  <p className="text-white/70 text-sm font-body">A tua carteira</p>
+                   <p className="text-white/70 text-sm font-body">{t('child.wallet.your_wallet')}</p>
                 </div>
                 <div className="flex items-baseline gap-2">
                   <motion.span
@@ -129,9 +131,9 @@ export default function ChildWallet() {
             {/* Stats Row */}
             <div className="grid grid-cols-3 gap-3 mt-5">
               {[
-                { label: 'Ganho', value: earned, icon: TrendingUp },
-                { label: 'Gasto', value: spent, icon: TrendingDown },
-                { label: 'Poupado', value: saved, icon: PiggyBank },
+                { label: t('child.wallet.earned'), value: earned, icon: TrendingUp },
+                { label: t('child.wallet.spent'), value: spent, icon: TrendingDown },
+                { label: t('child.wallet.saved'), value: saved, icon: PiggyBank },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
@@ -156,23 +158,23 @@ export default function ChildWallet() {
                 <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-pink))]/20 flex items-center justify-center">
                   <HandHeart className="h-4 w-4 text-destructive" />
                 </div>
-                <h2 className="font-display font-bold text-sm">Impacto Solidário</h2>
+                <h2 className="font-display font-bold text-sm">{t('child.wallet.solidarity_impact')}</h2>
               </div>
               <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="rounded-xl font-display gap-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white border-0">
-                    <Heart className="h-3.5 w-3.5" /> Doar
+                    <Heart className="h-3.5 w-3.5" /> {t('child.wallet.donate')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle className="font-display flex items-center gap-2">
-                      <Heart className="h-5 w-5 text-destructive" /> Fazer uma Doação
+                      <Heart className="h-5 w-5 text-destructive" /> {t('child.wallet.make_donation')}
                     </DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     {causes.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">Sem causas disponíveis de momento.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">{t('child.wallet.no_causes')}</p>
                     ) : (
                       <div className="grid grid-cols-2 gap-2">
                         {causes.map((cause) => (
@@ -194,7 +196,7 @@ export default function ChildWallet() {
                       </div>
                     )}
                     <div className="space-y-2">
-                      <p className="text-xs font-medium">Quanto queres doar? (KivaCoins)</p>
+                      <p className="text-xs font-medium">{t('child.wallet.how_much_donate')}</p>
                       <Input
                         type="number"
                         placeholder="Ex: 10"
@@ -209,7 +211,7 @@ export default function ChildWallet() {
                       disabled={!selectedCause || !donateAmount || donateMutation.isPending}
                     >
                       {donateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
-                      {donateMutation.isPending ? 'A processar...' : 'Confirmar Doação'}
+                      {donateMutation.isPending ? t('child.wallet.processing') : t('child.wallet.confirm_donation')}
                     </Button>
                   </div>
                 </DialogContent>
@@ -217,11 +219,11 @@ export default function ChildWallet() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total doado</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.total_donated')}</p>
                 <CurrencyDisplay amount={totalDonated} size="lg" className="font-display font-bold text-lg" />
               </div>
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Causas apoiadas</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.causes_supported')}</p>
                 <p className="font-display font-bold text-lg">💜 {uniqueCauses}</p>
               </div>
             </div>
@@ -232,14 +234,14 @@ export default function ChildWallet() {
       {/* Transaction History */}
       <motion.div variants={item}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-sm">📜 Histórico</h2>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} movimentos</span>
+          <h2 className="font-display font-bold text-sm">{t('child.wallet.history')}</h2>
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} {t('child.wallet.movements')}</span>
         </div>
         <div className="space-y-2">
           {transactions.length === 0 ? (
             <Card className="border-border/50">
               <CardContent className="py-8 text-center">
-                <p className="text-sm text-muted-foreground">Sem movimentos ainda</p>
+                <p className="text-sm text-muted-foreground">{t('child.wallet.no_movements')}</p>
               </CardContent>
             </Card>
           ) : transactions.map((tx) => {
