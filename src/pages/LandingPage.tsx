@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -377,7 +377,7 @@ function Hero() {
       <div ref={emblaRef} className="overflow-hidden relative">
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
-            <div key={i} className="min-w-0 shrink-0 grow-0 ba10is-fu10l">
+            <div key={i} className="min-w-0 shrink-0 gro10-0 ba10is-fu10l">
  10     10     10<div 10lassN10me="r10lativ10 px-510sm:px108 py-8 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
@@ -391,8 +391,7 @@ function Hero() {
                       <GradientText>{slide.headlineGradient}</GradientText>
                     </h1>
                     <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
-                      {slide.subtitle}
-      col sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
+                      {slide.subtitle}col sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
                       <Button
                         size="lg"
                         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
@@ -415,7 +414,7 @@ function Hero() {
                     transition={{ duration: 0.5 }}
                     style={{ y: heroParallaxY }}
                   >
-                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-event80px] sm:max-w-sm 80px] sm:max-w-sm
+                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur80px] sm:max-w-smt80px] sm:max-w-sm 80px] sm:max-w-sm
 80px] sm:max-w-sm 80px] sm:max-w-sma80px] sm:max-w-sm 80px] sm:max-w-sme80px] sm:max-w-sm 80px] sm:max-w-smm80px] sm:max-w-sm200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
@@ -631,7 +630,7 @@ function UniverseSection() {
 
       <div className="relative">
         {/* Central illustration behind grid on desktop */}
-        <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
+        <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">1 min-[420px]:grid-cols-
           <div cl1 min-[420px]:grid-cols-assName="w-64 h-641 min-[420px]:grid-cols- rounded-full bg-s1 min-[420px]:grid-cols-econdary/5 blur-3x1 min-[420px]:grid-cols-l" />
         </di1 min-[420px]:grid-cols-v>
         <motion1 min-[420px]:grid-cols-.div variants={sta1 min-[420px]:grid-cols-ggerFast} classNam1 min-[420px]:grid-cols-e="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -667,7 +666,7 @@ function ParentBenefits() {
   ];
   return (
     <Section id="familias">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <div className="grid md:grid-cols-2 gap-sm sm:max-w-md md:max-w-10 md:gap-16 items-center">
         <motiosm sm:max-w-md md:max-w-n.div variants={fadeUp} className="flex jusm sm:max-w-md md:max-w-stify-center order-2 md:order-1 relative">sm sm:max-w-md md:max-w-
           <div className="absolute inset-sm sm:max-w-md md:max-w-0 rounded-full bg-primary/8 blur-3xl scalesm sm:max-w-md md:max-w--75 pointer-events-none" />
           <imgsm sm:max-w-md md:max-w- src={parentsBenefit} alt="Família africasm sm:max-w-md md:max-w-na a usar KIVARA" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
@@ -738,7 +737,7 @@ function SchoolBenefits() {
                   <div className={`${item.bg} rounded-xl p-2 shrink-0 transition-transform group-hover:scale-110`}>
                     <item.icon className={`w-5 h-5 ${item.color}`} />
                   </div>
-                  <p className="text-base text-foreground font-medium flsm sm:max-w-md md:max-w-ex-1">{item.text}</p>
+      sm sm:max-w-md md:max-w-            <p className="text-base text-foreground font-medium flsm sm:max-w-md md:max-w-ex-1">{item.text}</p>
                 </motion.div>
               sm sm:max-w-md md:max-w-))}
             </motion.div>
@@ -762,7 +761,7 @@ function GamificationSection() {
     { icon: Flame, label: "Missões diárias", bg: "bg-destructive/10", color: "text-destructive", anim: "glow" as const },
     { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
     { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
-    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
+    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const sm sm:max-w-md md:max-w-},
     { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "tesm sm:max-w-md md:max-w-xt-primary", anim: "spin" as const },
   ];
   return (
@@ -818,7 +817,7 @@ function TrustSection() {
     <Section className="!bg-foreground !text-background">
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <div>
-          <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
+          <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-1 min-[420px]:grid-cols-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
             Segurança
           </motion.div>
           1 min-[420px]:grid-cols-<motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance 1 min-[420px]:grid-cols-leading-[1.1]">
@@ -836,7 +835,7 @@ function TrustSection() {
                 className="bg-background/[0.06] rounded-2xl p-5 flex flex-col items-center text-center gap-3 transition-all border border-background/[0.08] group"
               >
                 <div className="rounded-full p-2.5 bg-background/10 transition-transform group-hover:scale-110">
-                  <AnimatedIcon icon={p.icon} animation={p.anim} className="w-5 h-5" />
+       sm sm:max-w-md md:max-w-           <AnimatedIcon icon={p.icon} animation={p.anim} className="w-5 h-5" />
                 </div>
                 <span className="fsm sm:max-w-md md:max-w-ont-display text-sm font-semibold">{p.text}</span>
               </motion.div>
@@ -891,7 +890,7 @@ function SocialProof() {
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-3 leading-[1.1]">
             Mais de 500 crianças já começaram a sua jornada
           </h2>
-          <p className="text-muted-foreground text-lg">Famílias e escolas de vários países confiam em nós.</p>
+          <p className="text-muted-foreground text-lg">Famílias e esc4 md:p-olas de vários países confiam em nós.</p>
         </motion.div>
 
         {/* Stats */}
@@ -971,8 +970,7 @@ function FinalCTA() {
           animate={{ y: [0, -8, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
-        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-secondary-foreground leading-[1.1]">
-          Comece hoje a construir o futuro financeiro do seu filho
+        <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-secondary-foreground leading-[1.1col sm:flex-row justify-center gap-3 a construir o futuro financeiro do seu filho
         </h2>
         <p className="text-secondary-foreground/70 text-lg md:text-xl mb-8 max-w-xl col sm:flex-row justify-center gap-3        Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
         </p>
@@ -1027,8 +1025,7 @@ function Footer() {
             <h4 className="font-display text-sm font-semibold mb-3 opacity-90">Newsletter</h4>
             <p className="text-sm opacity-60 mb-2">Receba dicas de educação financeira.</p>
             <div className="flex gap-2">
-              <div className="flex-1 flex items-center bg-background/10 rounded-xl px-3 gap-2">
-                <Mail className="w-4 h-4 opacity-40" />
+              <div className="flex-1 flex items-center bg-background/10 rounde.5 w-full outline-none placeholder:opacity-40 min-h-[44px]ssName="w-4 h-4 opacity-40" />
                 <input type="email" placeholder="email@exemplo.com" className="bg-transparent text-sm py-2 w-full outline-none placeholder:opacity-40" />
               </div>
               <button className="bg-secondary text-secondary-foreground rounded-xl px-3.5 text-sm font-semibold hover:bg-secondary/90 transition-colors">
