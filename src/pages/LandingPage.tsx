@@ -628,7 +628,7 @@ function UniverseSection() {
         <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
           <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
         </div>
-        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {zones.map((z, i) => (
             <motion.div
               key={i}
