@@ -158,7 +158,7 @@ export default function ChildWallet() {
                 <div className="w-8 h-8 rounded-xl bg-[hsl(var(--kivara-pink))]/20 flex items-center justify-center">
                   <HandHeart className="h-4 w-4 text-destructive" />
                 </div>
-                <h2 className="font-display font-bold text-sm">Impacto Solidário</h2>
+                <h2 className="font-display font-bold text-sm">{t('child.wallet.solidarity_impact')}</h2>
               </div>
               <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
                 <DialogTrigger asChild>
