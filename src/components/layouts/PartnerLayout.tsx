@@ -14,32 +14,40 @@ import {
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useT } from '@/contexts/LanguageContext';
 
-const navItems = [
-  { title: 'Dashboard', url: '/partner', icon: LayoutDashboard },
-  { title: 'Programas', url: '/partner/programs', icon: Users },
-  { title: 'Desafios', url: '/partner/challenges', icon: Trophy },
-  { title: 'Relatórios', url: '/partner/reports', icon: BarChart3 },
-  { title: 'Subscrição', url: '/partner/subscription', icon: Crown },
-  { title: 'Perfil', url: '/partner/profile', icon: Settings },
-];
+function usePartnerNav() {
+  const t = useT();
+  const navItems = [
+    { title: t('nav.partner.dashboard'), url: '/partner', icon: LayoutDashboard },
+    { title: t('nav.partner.programs'), url: '/partner/programs', icon: Users },
+    { title: t('nav.partner.challenges'), url: '/partner/challenges', icon: Trophy },
+    { title: t('nav.partner.reports'), url: '/partner/reports', icon: BarChart3 },
+    { title: t('nav.partner.subscription'), url: '/partner/subscription', icon: Crown },
+    { title: t('nav.partner.profile'), url: '/partner/profile', icon: Settings },
+  ];
 
-const mobileFixedItems = [
-  { title: 'Dashboard', url: '/partner', icon: LayoutDashboard },
-  { title: 'Programas', url: '/partner/programs', icon: Users },
-  { title: 'Desafios', url: '/partner/challenges', icon: Trophy },
-  { title: 'Relatórios', url: '/partner/reports', icon: BarChart3 },
-];
+  const mobileFixedItems = [
+    { title: t('nav.partner.dashboard'), url: '/partner', icon: LayoutDashboard },
+    { title: t('nav.partner.programs'), url: '/partner/programs', icon: Users },
+    { title: t('nav.partner.challenges'), url: '/partner/challenges', icon: Trophy },
+    { title: t('nav.partner.reports'), url: '/partner/reports', icon: BarChart3 },
+  ];
 
-const mobileMoreItems = [
-  { title: 'Subscrição', url: '/partner/subscription', icon: Crown },
-  { title: 'Perfil', url: '/partner/profile', icon: Settings },
-];
+  const mobileMoreItems = [
+    { title: t('nav.partner.subscription'), url: '/partner/subscription', icon: Crown },
+    { title: t('nav.partner.profile'), url: '/partner/profile', icon: Settings },
+  ];
+
+  return { navItems, mobileFixedItems, mobileMoreItems };
+}
 
 function PartnerSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { logout, user } = useAuth();
+  const t = useT();
+  const { navItems } = usePartnerNav();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -48,18 +56,18 @@ function PartnerSidebar() {
           {!collapsed && (
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
-              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Parceiro Institucional</p>
+              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">{t('nav.partner.slogan')}</p>
             </div>
           )}
           {collapsed && <span className="text-xl font-display font-bold text-sidebar-primary">K</span>}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">Gestão</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">{t('nav.partner.menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
@@ -85,7 +93,7 @@ function PartnerSidebar() {
               </div>
               <div>
                 <p className="text-sm font-display font-bold text-sidebar-foreground">{user.name}</p>
-                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">Parceiro</p>
+                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">{t('nav.partner.role')}</p>
               </div>
             </div>
           )}
@@ -94,10 +102,10 @@ function PartnerSidebar() {
             size={collapsed ? 'icon' : 'default'}
             className="w-full text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-destructive/10 rounded-xl transition-all duration-200"
             onClick={logout}
-            aria-label="Sair"
+            aria-label={t('common.logout')}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="ml-2">Sair</span>}
+            {!collapsed && <span className="ml-2">{t('common.logout')}</span>}
           </Button>
         </div>
       </SidebarContent>
@@ -111,6 +119,8 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const { logout } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
+  const t = useT();
+  const { mobileFixedItems, mobileMoreItems } = usePartnerNav();
 
   const isMoreRouteActive = mobileMoreItems.some((item) =>
     location.pathname === item.url || location.pathname.startsWith(item.url + '/')
@@ -131,7 +141,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 {isMobile && (
-                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label="Sair">
+                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label={t('common.logout')}>
                     <LogOut className="h-5 w-5" />
                   </Button>
                 )}
@@ -153,9 +163,8 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
             </motion.main>
           </AnimatePresence>
 
-          {/* Mobile Bottom Navigation */}
           {isMobile && (
-            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
+            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label={t('common.more_options')}>
               <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
               <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
                 {mobileFixedItems.map((item) => {
@@ -165,7 +174,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <NavLink
-                      key={item.title}
+                      key={item.url}
                       to={item.url}
                       end={item.url === '/partner'}
                       className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
@@ -188,16 +197,15 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
                   );
                 })}
 
-                {/* More button */}
                 <button
                   onClick={() => setMoreOpen(true)}
                   className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
-                  aria-label="Mais opções"
+                  aria-label={t('common.more_options')}
                 >
                   <div className={`relative p-2 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
                     <MoreHorizontal className="h-6 w-6 relative z-10" />
                   </div>
-                  <span className="text-caption mt-0.5 font-semibold">Mais</span>
+                  <span className="text-caption mt-0.5 font-semibold">{t('common.more')}</span>
                   {isMoreRouteActive && (
                     <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
@@ -206,11 +214,10 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
             </nav>
           )}
 
-          {/* More Menu Sheet */}
           <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
             <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
               <SheetHeader className="pb-2">
-                <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+                <SheetTitle className="text-center text-lg font-display">{t('common.more_features')}</SheetTitle>
               </SheetHeader>
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -223,7 +230,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <button
-                      key={item.title}
+                      key={item.url}
                       onClick={() => {
                         setMoreOpen(false);
                         navigate(item.url);

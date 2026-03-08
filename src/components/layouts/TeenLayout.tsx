@@ -12,21 +12,27 @@ import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 import { XPProgressBar } from '@/components/XPProgressBar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useT } from '@/contexts/LanguageContext';
 
-const bottomNavItems: { title: string; url: string; icon: any }[] = [
-  { title: 'Início', url: '/teen', icon: Home },
-  { title: 'Carteira', url: '/teen/wallet', icon: Wallet },
-  { title: 'Tarefas', url: '/teen/tasks', icon: Target },
-  { title: 'Aprender', url: '/teen/learn', icon: BookOpen },
-];
+function useTeenNav() {
+  const t = useT();
+  const bottomNavItems: { title: string; url: string; icon: any }[] = [
+    { title: t('nav.teen.home'), url: '/teen', icon: Home },
+    { title: t('nav.teen.wallet'), url: '/teen/wallet', icon: Wallet },
+    { title: t('nav.teen.tasks'), url: '/teen/tasks', icon: Target },
+    { title: t('nav.teen.learn'), url: '/teen/learn', icon: BookOpen },
+  ];
 
-const moreMenuItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
-  { title: 'Cofres', url: '/teen/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
-  { title: 'Missões', url: '/teen/missions', icon: Target },
-  { title: 'Analytics', url: '/teen/analytics', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
-  { title: 'Badges', url: '/teen/badges', icon: Award },
-  { title: 'Streaks', url: '/teen/streaks', icon: Flame },
-];
+  const moreMenuItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+    { title: t('nav.teen.vaults'), url: '/teen/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.teen.missions'), url: '/teen/missions', icon: Target },
+    { title: t('nav.teen.analytics'), url: '/teen/analytics', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
+    { title: t('nav.teen.badges'), url: '/teen/badges', icon: Award },
+    { title: t('nav.teen.streaks'), url: '/teen/streaks', icon: Flame },
+  ];
+
+  return { bottomNavItems, moreMenuItems };
+}
 
 export function TeenLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -34,6 +40,8 @@ export function TeenLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { hasFeature } = useAllFeatures();
   const [moreOpen, setMoreOpen] = useState(false);
+  const t = useT();
+  const { bottomNavItems, moreMenuItems } = useTeenNav();
 
   const isMoreRouteActive = moreMenuItems.some((item) =>
     location.pathname === item.url || location.pathname.startsWith(item.url + '/')
@@ -57,11 +65,11 @@ export function TeenLayout({ children }: { children: ReactNode }) {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <NavLink to="/teen/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Perfil">
+            <NavLink to="/teen/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label={t('nav.teen.profile')}>
               <UserCircle className="h-5 w-5 text-muted-foreground" />
             </NavLink>
             <NotificationDropdown />
-            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label="Sair">
+            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label={t('common.logout')}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
@@ -85,7 +93,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
         </motion.main>
       </AnimatePresence>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
+      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label={t('common.more_options')}>
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
         <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
@@ -95,7 +103,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
 
             return (
               <NavLink
-                key={item.title}
+                key={item.url}
                 to={item.url}
                 end={item.url === '/teen'}
                 className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
@@ -134,16 +142,15 @@ export function TeenLayout({ children }: { children: ReactNode }) {
             );
           })}
 
-          {/* More button */}
           <button
             onClick={() => setMoreOpen(true)}
             className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
-            aria-label="Mais opções"
+            aria-label={t('common.more_options')}
           >
             <div className={`relative p-2 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
               <MoreHorizontal className="h-6 w-6 relative z-10" />
             </div>
-            <span className="text-caption mt-0.5 font-semibold">Mais</span>
+            <span className="text-caption mt-0.5 font-semibold">{t('common.more')}</span>
             {isMoreRouteActive && (
               <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
             )}
@@ -151,11 +158,10 @@ export function TeenLayout({ children }: { children: ReactNode }) {
         </div>
       </nav>
 
-      {/* More Menu Sheet */}
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
           <SheetHeader className="pb-2">
-            <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+            <SheetTitle className="text-center text-lg font-display">{t('common.more_features')}</SheetTitle>
           </SheetHeader>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -170,9 +176,9 @@ export function TeenLayout({ children }: { children: ReactNode }) {
               if (locked) {
                 return (
                   <div
-                    key={item.title}
+                    key={item.url}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
-                    title="Requer upgrade"
+                    title={t('common.requires_upgrade')}
                   >
                     <div className="relative w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center">
                       <item.icon className="h-6 w-6" />
@@ -185,7 +191,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
 
               return (
                 <button
-                  key={item.title}
+                  key={item.url}
                   onClick={() => {
                     setMoreOpen(false);
                     navigate(item.url);

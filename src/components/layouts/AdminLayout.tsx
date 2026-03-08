@@ -13,36 +13,44 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
+import { useT } from '@/contexts/LanguageContext';
 
-const navItems = [
-  { title: 'Painel Global', url: '/admin', icon: LayoutDashboard },
-  { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
-  { title: 'Escolas', url: '/admin/schools', icon: School },
-  { title: 'Utilizadores', url: '/admin/users', icon: Users },
-  { title: 'Subscrições', url: '/admin/subscriptions', icon: CreditCard },
-  { title: 'Finanças', url: '/admin/finance', icon: DollarSign },
-  { title: 'Moedas', url: '/admin/currencies', icon: Globe },
-  { title: 'Auditoria', url: '/admin/audit', icon: ScrollText },
-  { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
-  { title: 'Compliance', url: '/admin/compliance', icon: Shield },
-  { title: 'Lições', url: '/admin/lessons', icon: BookOpen },
-  { title: 'Onboarding', url: '/admin/onboarding', icon: Sparkles },
-  { title: 'Notificações', url: '/admin/notifications', icon: Bell },
-  { title: 'Banners', url: '/admin/banners', icon: Image },
-];
+function useAdminNav() {
+  const t = useT();
+  const navItems = [
+    { title: t('nav.admin.panel'), url: '/admin', icon: LayoutDashboard },
+    { title: t('nav.admin.tenants'), url: '/admin/tenants', icon: Building2 },
+    { title: t('nav.admin.schools'), url: '/admin/schools', icon: School },
+    { title: t('nav.admin.users'), url: '/admin/users', icon: Users },
+    { title: t('nav.admin.subscriptions'), url: '/admin/subscriptions', icon: CreditCard },
+    { title: t('nav.admin.finance'), url: '/admin/finance', icon: DollarSign },
+    { title: t('nav.admin.currencies'), url: '/admin/currencies', icon: Globe },
+    { title: t('nav.admin.audit'), url: '/admin/audit', icon: ScrollText },
+    { title: t('nav.admin.risk'), url: '/admin/risk', icon: AlertTriangle },
+    { title: t('nav.admin.compliance'), url: '/admin/compliance', icon: Shield },
+    { title: t('nav.admin.lessons'), url: '/admin/lessons', icon: BookOpen },
+    { title: t('nav.admin.onboarding'), url: '/admin/onboarding', icon: Sparkles },
+    { title: t('nav.admin.notifications'), url: '/admin/notifications', icon: Bell },
+    { title: t('nav.admin.banners'), url: '/admin/banners', icon: Image },
+  ];
 
-const mobileNavItems = [
-  { title: 'Painel', url: '/admin', icon: LayoutDashboard },
-  { title: 'Tenants', url: '/admin/tenants', icon: Building2 },
-  { title: 'Utilizadores', url: '/admin/users', icon: Users },
-  { title: 'Finanças', url: '/admin/finance', icon: DollarSign },
-  { title: 'Risco', url: '/admin/risk', icon: AlertTriangle },
-];
+  const mobileNavItems = [
+    { title: t('nav.parent.panel'), url: '/admin', icon: LayoutDashboard },
+    { title: t('nav.admin.tenants'), url: '/admin/tenants', icon: Building2 },
+    { title: t('nav.admin.users'), url: '/admin/users', icon: Users },
+    { title: t('nav.admin.finance'), url: '/admin/finance', icon: DollarSign },
+    { title: t('nav.admin.risk'), url: '/admin/risk', icon: AlertTriangle },
+  ];
+
+  return { navItems, mobileNavItems };
+}
 
 function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { logout, user } = useAuth();
+  const t = useT();
+  const { navItems } = useAdminNav();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -51,18 +59,18 @@ function AdminSidebar() {
           {!collapsed && (
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
-              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Administração Global</p>
+              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">{t('nav.admin.slogan')}</p>
             </div>
           )}
           {collapsed && <span className="text-xl font-display font-bold text-sidebar-primary">K</span>}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">Gestão</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">{t('nav.admin.menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
@@ -88,7 +96,7 @@ function AdminSidebar() {
               </div>
               <div>
                 <p className="text-sm font-display font-bold text-sidebar-foreground">{user.name}</p>
-                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">Admin</p>
+                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">{t('nav.admin.role')}</p>
               </div>
             </div>
           )}
@@ -97,10 +105,10 @@ function AdminSidebar() {
             size={collapsed ? 'icon' : 'default'}
             className="w-full text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-destructive/10 rounded-xl transition-all duration-200"
             onClick={logout}
-            aria-label="Sair"
+            aria-label={t('common.logout')}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="ml-2">Sair</span>}
+            {!collapsed && <span className="ml-2">{t('common.logout')}</span>}
           </Button>
         </div>
       </SidebarContent>
@@ -112,6 +120,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { logout } = useAuth();
+  const t = useT();
+  const { mobileNavItems } = useAdminNav();
 
   return (
     <SidebarProvider>
@@ -128,7 +138,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-2">
                 <ThemeToggle />
                 {isMobile && (
-                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label="Sair">
+                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label={t('common.logout')}>
                     <LogOut className="h-5 w-5" />
                   </Button>
                 )}
@@ -150,9 +160,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             </motion.main>
           </AnimatePresence>
 
-          {/* Mobile Bottom Navigation */}
           {isMobile && (
-            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
+            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label={t('common.more_options')}>
               <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
               <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
                 {mobileNavItems.map((item) => {
@@ -162,7 +171,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <NavLink
-                      key={item.title}
+                      key={item.url}
                       to={item.url}
                       end={item.url === '/admin'}
                       className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
