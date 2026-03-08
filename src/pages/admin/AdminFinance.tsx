@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion } from 'framer-motion';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { useMoneySupply } from '@/hooks/use-money-supply';
+import { useT } from '@/contexts/LanguageContext';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -36,6 +37,7 @@ function useTenantsByTier() {
 }
 
 export default function AdminFinance() {
+  const t = useT();
   const { data, isLoading } = useTenantsByTier();
   const { data: moneySupply, isLoading: moneyLoading } = useMoneySupply();
   const tenants = data?.tenants ?? [];
@@ -45,12 +47,11 @@ export default function AdminFinance() {
   const [simCount, setSimCount] = useState('10');
   const [simPeriod, setSimPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
-  // Revenue grouped by currency
   const revenueByCurrency = useMemo(() => {
     const map = new Map<string, { symbol: string; monthly: number; yearly: number; tenantCount: number }>();
-    tenants.forEach(t => {
-      const currency = t.currency || 'AOA';
-      const tier = tiers.find(ti => ti.id === t.subscription_tier_id);
+    tenants.forEach(tn => {
+      const currency = tn.currency || 'AOA';
+      const tier = tiers.find(ti => ti.id === tn.subscription_tier_id);
       const monthly = tier ? Number(tier.price_monthly) : 0;
       const yearly = tier ? Number(tier.price_yearly) : 0;
       const existing = map.get(currency) || { symbol: getCurrencySymbol(currency), monthly: 0, yearly: 0, tenantCount: 0 };
@@ -62,37 +63,30 @@ export default function AdminFinance() {
     return map;
   }, [tenants, tiers]);
 
-  // Revenue by tier+currency for table
   const revenueByTierCurrency = useMemo(() => {
-    const rows: { tierName: string; currency: string; symbol: string; count: number; monthly: number; yearly: number }[] = [];
-    const grouped = new Map<string, typeof rows[0]>();
-
-    tenants.forEach(t => {
-      const currency = t.currency || 'AOA';
-      const tier = tiers.find(ti => ti.id === t.subscription_tier_id);
-      const tierName = tier?.name ?? 'Sem plano';
+    const grouped = new Map<string, { tierName: string; currency: string; symbol: string; count: number; monthly: number; yearly: number }>();
+    tenants.forEach(tn => {
+      const currency = tn.currency || 'AOA';
+      const tier = tiers.find(ti => ti.id === tn.subscription_tier_id);
+      const tierName = tier?.name ?? t('admin.finance.no_plan');
       const key = `${tierName}__${currency}`;
-      const existing = grouped.get(key) || {
-        tierName, currency, symbol: getCurrencySymbol(currency), count: 0, monthly: 0, yearly: 0,
-      };
+      const existing = grouped.get(key) || { tierName, currency, symbol: getCurrencySymbol(currency), count: 0, monthly: 0, yearly: 0 };
       existing.count += 1;
       existing.monthly += tier ? Number(tier.price_monthly) : 0;
       existing.yearly += tier ? Number(tier.price_yearly) : 0;
       grouped.set(key, existing);
     });
-
     return Array.from(grouped.values()).sort((a, b) => a.currency.localeCompare(b.currency));
-  }, [tenants, tiers]);
+  }, [tenants, tiers, t]);
 
   const totalTenants = tenants.length;
 
-  // Chart data grouped by currency
   const barData = useMemo(() => {
     return Array.from(revenueByCurrency.entries()).map(([currency, d]) => ({
       name: `${d.symbol} (${currency})`,
-      Receita: d.monthly,
+      [t('admin.finance.revenue')]: d.monthly,
     }));
-  }, [revenueByCurrency]);
+  }, [revenueByCurrency, t]);
 
   const pieData = useMemo(() => {
     return Array.from(revenueByCurrency.entries())
@@ -100,8 +94,7 @@ export default function AdminFinance() {
       .map(([currency, d]) => ({ name: currency, value: d.monthly }));
   }, [revenueByCurrency]);
 
-  // Simulator
-  const simTierData = tiers.find(t => t.id === simTier);
+  const simTierData = tiers.find(ti => ti.id === simTier);
   const simRevenue = simTierData
     ? Number(simCount) * (simPeriod === 'monthly' ? Number(simTierData.price_monthly) : Number(simTierData.price_yearly))
     : 0;
@@ -109,57 +102,57 @@ export default function AdminFinance() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Módulo Financeiro</h1>
-        <p className="text-sm text-muted-foreground">Receitas por moeda, simulações e projecções de subscrições</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.finance.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('admin.finance.subtitle')}</p>
       </div>
 
       {/* Money Supply Audit */}
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-display flex items-center gap-2">
-            <Vault className="h-4 w-4 text-primary" /> Auditoria da Massa Monetária (KVC)
+            <Vault className="h-4 w-4 text-primary" /> {t('admin.finance.money_audit')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {moneyLoading ? (
-            <p className="text-sm text-muted-foreground">A carregar...</p>
+            <p className="text-sm text-muted-foreground">{t('admin.finance.loading')}</p>
           ) : moneySupply?.error ? (
             <p className="text-sm text-destructive">{moneySupply.error}</p>
           ) : moneySupply ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ArrowUpFromLine className="h-3.5 w-3.5 text-emerald-500" /> Emitidos
+                  <ArrowUpFromLine className="h-3.5 w-3.5 text-emerald-500" /> {t('admin.finance.emitted')}
                 </div>
                 <p className="text-lg font-display font-bold text-emerald-600">{Number(moneySupply.total_emitted).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <ArrowDownToLine className="h-3.5 w-3.5 text-red-500" /> Queimados
+                  <ArrowDownToLine className="h-3.5 w-3.5 text-red-500" /> {t('admin.finance.burned')}
                 </div>
                 <p className="text-lg font-display font-bold text-red-600">{Number(moneySupply.total_burned).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Coins className="h-3.5 w-3.5 text-primary" /> Em Circulação
+                  <Coins className="h-3.5 w-3.5 text-primary" /> {t('admin.finance.circulation')}
                 </div>
                 <p className="text-lg font-display font-bold text-primary">{Number(moneySupply.total_in_circulation).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Wallet className="h-3.5 w-3.5 text-chart-3" /> Em Carteiras
+                  <Wallet className="h-3.5 w-3.5 text-chart-3" /> {t('admin.finance.in_wallets')}
                 </div>
                 <p className="text-lg font-display font-bold">{Number(moneySupply.total_in_wallets).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <PiggyBank className="h-3.5 w-3.5 text-chart-4" /> Em Cofres
+                  <PiggyBank className="h-3.5 w-3.5 text-chart-4" /> {t('admin.finance.in_vaults')}
                 </div>
                 <p className="text-lg font-display font-bold">{Number(moneySupply.total_in_vaults).toLocaleString()} <span className="text-xs font-normal">KVC</span></p>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <BarChart3 className="h-3.5 w-3.5" /> Carteiras Activas
+                  <BarChart3 className="h-3.5 w-3.5" /> {t('admin.finance.active_wallets')}
                 </div>
                 <p className="text-lg font-display font-bold">{moneySupply.wallet_count}</p>
               </div>
@@ -167,20 +160,20 @@ export default function AdminFinance() {
           ) : null}
           {moneySupply && !moneySupply.error && (
             <p className="text-[10px] text-muted-foreground mt-3">
-              Última auditoria: {new Date(moneySupply.audit_timestamp).toLocaleString('pt-PT')}
+              {t('admin.finance.last_audit')} {new Date(moneySupply.audit_timestamp).toLocaleString('pt-PT')}
             </p>
           )}
         </CardContent>
       </Card>
 
-      {/* Stats — per currency */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border/50">
           <CardContent className="flex items-center gap-3 p-4">
             <BarChart3 className="h-5 w-5 text-chart-3" />
             <div>
               <p className="text-xl font-display font-bold">{totalTenants}</p>
-              <p className="text-xs text-muted-foreground">Tenants Activos</p>
+              <p className="text-xs text-muted-foreground">{t('admin.finance.active_tenants')}</p>
             </div>
           </CardContent>
         </Card>
@@ -189,7 +182,7 @@ export default function AdminFinance() {
             <Calculator className="h-5 w-5 text-chart-4" />
             <div>
               <p className="text-xl font-display font-bold">{tiers.length}</p>
-              <p className="text-xs text-muted-foreground">Planos</p>
+              <p className="text-xs text-muted-foreground">{t('admin.finance.plans')}</p>
             </div>
           </CardContent>
         </Card>
@@ -198,7 +191,7 @@ export default function AdminFinance() {
             <Globe className="h-5 w-5 text-primary" />
             <div>
               <p className="text-xl font-display font-bold">{revenueByCurrency.size}</p>
-              <p className="text-xs text-muted-foreground">Moedas Activas</p>
+              <p className="text-xs text-muted-foreground">{t('admin.finance.active_currencies')}</p>
             </div>
           </CardContent>
         </Card>
@@ -218,11 +211,11 @@ export default function AdminFinance() {
                   <div className="flex items-baseline gap-2">
                     <DollarSign className="h-4 w-4 text-primary" />
                     <p className="text-lg font-display font-bold">{d.symbol} {d.monthly.toLocaleString()}</p>
-                    <span className="text-xs text-muted-foreground">/ mês</span>
+                    <span className="text-xs text-muted-foreground">/ {t('admin.finance.month')}</span>
                   </div>
                   <div className="flex items-baseline gap-2">
                     <TrendingUp className="h-4 w-4 text-secondary" />
-                    <p className="text-sm font-mono text-muted-foreground">{d.symbol} {d.yearly.toLocaleString()} / ano</p>
+                    <p className="text-sm font-mono text-muted-foreground">{d.symbol} {d.yearly.toLocaleString()} / {t('admin.finance.year')}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -236,7 +229,7 @@ export default function AdminFinance() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display">Receita Mensal por Moeda</CardTitle>
+              <CardTitle className="text-sm font-display">{t('admin.finance.monthly_revenue_currency')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -246,7 +239,7 @@ export default function AdminFinance() {
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
-                    <Bar dataKey="Receita" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey={t('admin.finance.revenue')} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -257,7 +250,7 @@ export default function AdminFinance() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="border-border/50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-display">Distribuição de Receita por Moeda</CardTitle>
+              <CardTitle className="text-sm font-display">{t('admin.finance.revenue_distribution')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -275,27 +268,27 @@ export default function AdminFinance() {
         </motion.div>
       </div>
 
-      {/* Revenue Table with currency subtotals */}
+      {/* Revenue Table */}
       <Card className="border-border/50">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-display">Detalhe por Plano e Moeda</CardTitle>
+          <CardTitle className="text-sm font-display">{t('admin.finance.detail_plan_currency')}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Plano</TableHead>
-                <TableHead>Moeda</TableHead>
-                <TableHead className="text-center">Tenants</TableHead>
-                <TableHead className="text-right">Receita Mensal</TableHead>
-                <TableHead className="text-right">Receita Anual</TableHead>
+                <TableHead>{t('admin.finance.col_plan')}</TableHead>
+                <TableHead>{t('admin.finance.col_currency')}</TableHead>
+                <TableHead className="text-center">{t('admin.finance.col_tenants')}</TableHead>
+                <TableHead className="text-right">{t('admin.finance.col_monthly')}</TableHead>
+                <TableHead className="text-right">{t('admin.finance.col_yearly')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">A carregar...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('admin.finance.loading')}</TableCell></TableRow>
               ) : revenueByTierCurrency.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Sem dados</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{t('admin.finance.no_data')}</TableCell></TableRow>
               ) : (
                 <>
                   {revenueByTierCurrency.map((r, i) => (
@@ -309,10 +302,9 @@ export default function AdminFinance() {
                       <TableCell className="text-right font-mono">{r.symbol} {r.yearly.toLocaleString()}</TableCell>
                     </TableRow>
                   ))}
-                  {/* Subtotals per currency */}
                   {Array.from(revenueByCurrency.entries()).map(([currency, d]) => (
                     <TableRow key={`total-${currency}`} className="font-bold border-t-2 bg-muted/30">
-                      <TableCell>Subtotal</TableCell>
+                      <TableCell>{t('admin.finance.subtotal')}</TableCell>
                       <TableCell><Badge className="font-mono text-xs">{currency}</Badge></TableCell>
                       <TableCell className="text-center">{d.tenantCount}</TableCell>
                       <TableCell className="text-right font-mono">{d.symbol} {d.monthly.toLocaleString()}</TableCell>
@@ -330,44 +322,44 @@ export default function AdminFinance() {
       <Card className="border-border/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-display flex items-center gap-2">
-            <Calculator className="h-4 w-4 text-primary" /> Simulador de Receita
+            <Calculator className="h-4 w-4 text-primary" /> {t('admin.finance.simulator')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-xs text-muted-foreground">Simula a receita projectada com novos tenants.</p>
+          <p className="text-xs text-muted-foreground">{t('admin.finance.sim_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <Label className="text-xs">Plano</Label>
+              <Label className="text-xs">{t('admin.finance.sim_plan')}</Label>
               <Select value={simTier} onValueChange={setSimTier}>
-                <SelectTrigger><SelectValue placeholder="Selecionar plano" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t('admin.finance.sim_plan_placeholder')} /></SelectTrigger>
                 <SelectContent>
-                  {tiers.filter(t => Number(t.price_monthly) > 0).map(t => (
-                    <SelectItem key={t.id} value={t.id}>{t.name} ({t.currency} {t.price_monthly}/mês)</SelectItem>
+                  {tiers.filter(ti => Number(ti.price_monthly) > 0).map(ti => (
+                    <SelectItem key={ti.id} value={ti.id}>{ti.name} ({ti.currency} {ti.price_monthly}/{t('admin.finance.month')})</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-xs">Nº de novos tenants</Label>
+              <Label className="text-xs">{t('admin.finance.sim_count')}</Label>
               <Input type="number" min={1} value={simCount} onChange={e => setSimCount(e.target.value)} />
             </div>
             <div>
-              <Label className="text-xs">Período</Label>
+              <Label className="text-xs">{t('admin.finance.sim_period')}</Label>
               <Select value={simPeriod} onValueChange={v => setSimPeriod(v as 'monthly' | 'yearly')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Mensal</SelectItem>
-                  <SelectItem value="yearly">Anual</SelectItem>
+                  <SelectItem value="monthly">{t('admin.finance.sim_monthly')}</SelectItem>
+                  <SelectItem value="yearly">{t('admin.finance.sim_yearly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           {simTierData && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
-              <p className="text-xs text-muted-foreground">Receita projectada adicional:</p>
+              <p className="text-xs text-muted-foreground">{t('admin.finance.sim_result')}</p>
               <p className="text-2xl font-display font-bold text-primary mt-1">
                 {getCurrencySymbol(simTierData.currency)} {simRevenue.toLocaleString()}
-                <span className="text-sm font-normal text-muted-foreground ml-2">/ {simPeriod === 'monthly' ? 'mês' : 'ano'}</span>
+                <span className="text-sm font-normal text-muted-foreground ml-2">/ {simPeriod === 'monthly' ? t('admin.finance.month') : t('admin.finance.year')}</span>
               </p>
             </div>
           )}

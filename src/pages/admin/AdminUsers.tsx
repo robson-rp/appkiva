@@ -8,16 +8,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Users, Search, ChevronDown, ChevronRight, Home, School, Building2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useT } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const roleLabels: Record<string, string> = {
-  parent: 'Encarregado',
-  child: 'Criança',
-  teen: 'Adolescente',
-  teacher: 'Professor',
-  admin: 'Admin',
-  partner: 'Parceiro',
-};
+function useRoleLabels() {
+  const t = useT();
+  return {
+    parent: t('admin.users.role_parent'),
+    child: t('admin.users.role_child'),
+    teen: t('admin.users.role_teen'),
+    teacher: t('admin.users.role_teacher'),
+    admin: t('admin.users.role_admin'),
+    partner: t('admin.users.role_partner'),
+  } as Record<string, string>;
+}
 
 function useAllUsers() {
   return useQuery({
@@ -58,6 +62,8 @@ function useAllUsers() {
 }
 
 export default function AdminUsers() {
+  const t = useT();
+  const roleLabels = useRoleLabels();
   const { data: users = [], isLoading } = useAllUsers();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -80,11 +86,10 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Utilizadores e Vínculos</h1>
-        <p className="text-sm text-muted-foreground">Contas registadas, famílias, escolas e parcerias</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.users.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('admin.users.subtitle')}</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
         {Object.entries(roleLabels).map(([key, label]) => (
           <Card key={key} className="border-border/50">
@@ -96,22 +101,21 @@ export default function AdminUsers() {
         ))}
       </div>
 
-      {/* Filters */}
       <Card className="border-border/50">
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
           <div className="flex-1 min-w-[180px]">
-            <Label className="text-xs text-muted-foreground mb-1 block">Pesquisar</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">{t('admin.users.search')}</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Nome..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              <Input placeholder={t('admin.users.search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
           </div>
           <div className="min-w-[160px]">
-            <Label className="text-xs text-muted-foreground mb-1 block">Papel</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">{t('admin.users.role_filter')}</Label>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="all">{t('admin.users.all')}</SelectItem>
                 {Object.entries(roleLabels).map(([k, v]) => (
                   <SelectItem key={k} value={k}>{v}</SelectItem>
                 ))}
@@ -121,9 +125,8 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      {/* Users Table */}
       {isLoading ? (
-        <p className="text-center text-muted-foreground py-8">A carregar...</p>
+        <p className="text-center text-muted-foreground py-8">{t('admin.users.loading')}</p>
       ) : (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">
@@ -132,16 +135,16 @@ export default function AdminUsers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8"></TableHead>
-                    <TableHead>Utilizador</TableHead>
-                    <TableHead>Papel</TableHead>
-                    <TableHead>Família</TableHead>
-                    <TableHead>Escola</TableHead>
-                    <TableHead>Tenant</TableHead>
+                    <TableHead>{t('admin.users.col_user')}</TableHead>
+                    <TableHead>{t('admin.users.col_role')}</TableHead>
+                    <TableHead>{t('admin.users.col_family')}</TableHead>
+                    <TableHead>{t('admin.users.col_school')}</TableHead>
+                    <TableHead>{t('admin.users.col_tenant')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum utilizador encontrado</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">{t('admin.users.no_users')}</TableCell></TableRow>
                   ) : filtered.map(u => (
                     <>
                       <TableRow key={u.id} className="cursor-pointer hover:bg-muted/30" onClick={() => setExpanded(expanded === u.id ? null : u.id)}>
@@ -187,20 +190,19 @@ export default function AdminUsers() {
                           ) : <span className="text-xs text-muted-foreground">—</span>}
                         </TableCell>
                       </TableRow>
-                      {/* Expanded children */}
                       <AnimatePresence>
                         {expanded === u.id && u.childrenOf.length > 0 && (
                           <TableRow key={`${u.id}-children`}>
                             <TableCell colSpan={6} className="bg-muted/20 p-0">
                               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                                 <div className="p-3 space-y-1">
-                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">Filhos/Dependentes</p>
+                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">{t('admin.users.dependents')}</p>
                                   {u.childrenOf.map(child => {
                                     const childProfile = users.find(up => up.id === child.profile_id);
                                     return (
                                       <div key={child.profile_id} className="flex items-center gap-2 p-2 rounded-lg bg-background/60">
                                         <span className="text-base">{childProfile?.avatar ?? '👤'}</span>
-                                        <span className="text-sm font-medium">{childProfile?.display_name ?? child.nickname ?? 'Criança'}</span>
+                                        <span className="text-sm font-medium">{childProfile?.display_name ?? child.nickname ?? t('admin.users.role_child')}</span>
                                         <Badge variant="outline" className="text-[9px]">{roleLabels[childProfile?.role ?? 'child']}</Badge>
                                       </div>
                                     );

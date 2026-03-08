@@ -9,10 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Building2 } from 'lucide-react';
 import { useTenants, useSubscriptionTiers, useCreateTenant, useUpdateTenant } from '@/hooks/use-tenants';
 import { useToast } from '@/hooks/use-toast';
+import { useT } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 
 export default function AdminTenants() {
+  const t = useT();
   const { data: tenants, isLoading } = useTenants();
   const { data: tiers } = useSubscriptionTiers();
   const createTenant = useCreateTenant();
@@ -40,7 +42,7 @@ export default function AdminTenants() {
         currency,
         subscription_tier_id: tierId || undefined,
       });
-      toast({ title: 'Tenant criado com sucesso' });
+      toast({ title: t('admin.tenants.created') });
       setOpen(false);
       setName('');
     } catch (e: any) {
@@ -51,19 +53,18 @@ export default function AdminTenants() {
   const toggleActive = async (id: string, isActive: boolean) => {
     try {
       await updateTenant.mutateAsync({ id, is_active: !isActive });
-      toast({ title: isActive ? 'Tenant desactivado' : 'Tenant activado' });
+      toast({ title: isActive ? t('admin.tenants.deactivated') : t('admin.tenants.activated') });
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
     }
   };
 
   const typeLabels: Record<string, string> = {
-    family: 'Família',
-    school: 'Escola',
-    institutional_partner: 'Parceiro',
+    family: t('admin.tenants.type_family'),
+    school: t('admin.tenants.type_school'),
+    institutional_partner: t('admin.tenants.type_partner'),
   };
 
-  // Unique currencies for manual override
   const uniqueCurrencies = Array.from(
     new Map(COUNTRY_CURRENCIES.map(c => [c.currency, c])).values()
   );
@@ -72,29 +73,29 @@ export default function AdminTenants() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Gestão de Tenants</h1>
-          <p className="text-sm text-muted-foreground">Gerir organizações na plataforma</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.tenants.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('admin.tenants.subtitle')}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Novo Tenant</Button>
+            <Button><Plus className="h-4 w-4 mr-2" />{t('admin.tenants.new')}</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Criar Tenant</DialogTitle>
+              <DialogTitle>{t('admin.tenants.create_title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-2">
-              <Input placeholder="Nome da organização" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input placeholder={t('admin.tenants.org_name')} value={name} onChange={(e) => setName(e.target.value)} />
               <Select value={tenantType} onValueChange={setTenantType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="family">Família</SelectItem>
-                  <SelectItem value="school">Escola</SelectItem>
-                  <SelectItem value="institutional_partner">Parceiro Institucional</SelectItem>
+                  <SelectItem value="family">{t('admin.tenants.type_family')}</SelectItem>
+                  <SelectItem value="school">{t('admin.tenants.type_school')}</SelectItem>
+                  <SelectItem value="institutional_partner">{t('admin.tenants.type_partner')}</SelectItem>
                 </SelectContent>
               </Select>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">País</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t('admin.tenants.country')}</label>
                 <Select value={country} onValueChange={handleCountryChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -107,7 +108,7 @@ export default function AdminTenants() {
                 </Select>
               </div>
               <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Moeda</label>
+                <label className="text-xs text-muted-foreground mb-1 block">{t('admin.tenants.currency')}</label>
                 <Select value={currency} onValueChange={setCurrency}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -121,16 +122,16 @@ export default function AdminTenants() {
               </div>
               {tiers && (
                 <Select value={tierId} onValueChange={setTierId}>
-                  <SelectTrigger><SelectValue placeholder="Subscrição" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('admin.tenants.subscription')} /></SelectTrigger>
                   <SelectContent>
-                    {tiers.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                    {tiers.map((tier) => (
+                      <SelectItem key={tier.id} value={tier.id}>{tier.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
               <Button className="w-full" onClick={handleCreate} disabled={createTenant.isPending}>
-                {createTenant.isPending ? 'A criar...' : 'Criar Tenant'}
+                {createTenant.isPending ? t('admin.tenants.creating') : t('admin.tenants.create_btn')}
               </Button>
             </div>
           </DialogContent>
@@ -147,38 +148,38 @@ export default function AdminTenants() {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">A carregar...</p>
+              <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.tenants.loading')}</p>
             ) : !tenants?.length ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">Nenhum tenant criado ainda.</p>
+              <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.tenants.no_tenants')}</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Moeda</TableHead>
-                    <TableHead>Subscrição</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Acções</TableHead>
+                    <TableHead>{t('admin.tenants.col_name')}</TableHead>
+                    <TableHead>{t('admin.tenants.col_type')}</TableHead>
+                    <TableHead>{t('admin.tenants.col_currency')}</TableHead>
+                    <TableHead>{t('admin.tenants.col_subscription')}</TableHead>
+                    <TableHead>{t('admin.tenants.col_status')}</TableHead>
+                    <TableHead>{t('admin.tenants.col_actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tenants.map((t: any) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium">{t.name}</TableCell>
-                      <TableCell>{typeLabels[t.tenant_type] ?? t.tenant_type}</TableCell>
-                      <TableCell>{t.currency}</TableCell>
+                  {tenants.map((tenant: any) => (
+                    <TableRow key={tenant.id}>
+                      <TableCell className="font-medium">{tenant.name}</TableCell>
+                      <TableCell>{typeLabels[tenant.tenant_type] ?? tenant.tenant_type}</TableCell>
+                      <TableCell>{tenant.currency}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{t.subscription_tiers?.name ?? 'Sem plano'}</Badge>
+                        <Badge variant="secondary">{tenant.subscription_tiers?.name ?? t('admin.tenants.no_plan')}</Badge>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={t.is_active ? 'default' : 'outline'}>
-                          {t.is_active ? 'Activo' : 'Inactivo'}
+                        <Badge variant={tenant.is_active ? 'default' : 'outline'}>
+                          {tenant.is_active ? t('admin.tenants.active') : t('admin.tenants.inactive')}
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <Button size="sm" variant="ghost" onClick={() => toggleActive(t.id, t.is_active)}>
-                          {t.is_active ? 'Desactivar' : 'Activar'}
+                        <Button size="sm" variant="ghost" onClick={() => toggleActive(tenant.id, tenant.is_active)}>
+                          {tenant.is_active ? t('admin.tenants.deactivate') : t('admin.tenants.activate')}
                         </Button>
                       </TableCell>
                     </TableRow>
