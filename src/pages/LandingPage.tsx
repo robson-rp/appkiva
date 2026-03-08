@@ -302,7 +302,7 @@ function Hero() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] tracking-tight text-foreground"
+            className="font-display text-[2.5rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[4.5rem] font-bold leading-[1.08] tracking-tight text-foreground"
           >
             <StaggerWords text="Pequenos hábitos." />
             <br />
