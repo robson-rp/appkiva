@@ -313,6 +313,8 @@ function Hero() {
   const [progress, setProgress] = useState(0);
   const isPaused = useRef(false);
   const rafRef = useRef<number | null>(null);
+  const { scrollY } = useScroll();
+  const heroParallaxY = useTransform(scrollY, [0, 600], [0, -80]);
   const startTimeRef = useRef(Date.now());
 
   const onSelect = useCallback(() => {
