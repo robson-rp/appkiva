@@ -39,7 +39,7 @@ export default function TeenProfile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ avatar })
+      .update({ avatar, language: locale })
       .eq('id', user.profileId);
     setSaving(false);
     if (error) {
