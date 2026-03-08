@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem] md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -378,7 +378,7 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-              <div className="relative px-5 sm:px-8 py-8 md:py-16">
+              <div className="relative px-5 sm:px108 py-8 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
