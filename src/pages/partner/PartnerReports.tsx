@@ -5,8 +5,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
 import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function PartnerReports() {
+  const t = useT();
   const { data: programs, isLoading: loadingP } = usePartnerPrograms();
   const { data: challenges, isLoading: loadingC } = useSponsoredChallenges();
 
@@ -28,14 +30,12 @@ export default function PartnerReports() {
     : 0;
   const avgSavingsPerChild = totalChildren > 0 ? Math.round(totalInvestment / totalChildren) : 0;
 
-  // Build chart from programs by grouping by month of started_at
   const chartData = (() => {
     if (!programs) return [];
     const months: Record<string, { families: number; children: number }> = {};
     programs.forEach(p => {
       const d = new Date(p.started_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString('pt', { month: 'short' }).replace('.', '');
       if (!months[key]) months[key] = { families: 0, children: 0 };
       months[key].families += 1;
       months[key].children += p.children_count;
@@ -49,10 +49,10 @@ export default function PartnerReports() {
   })();
 
   const impactMetrics = [
-    { label: 'Total Participantes', value: totalParticipants.toLocaleString(), icon: BookOpen, color: 'text-primary' },
-    { label: 'Desafios Concluídos', value: String(completedChallenges), icon: Trophy, color: 'text-chart-3' },
-    { label: 'Investimento/Criança', value: fmtP(avgSavingsPerChild), icon: TrendingUp, color: 'text-secondary' },
-    { label: 'Taxa Média Conclusão', value: `${avgCompletion}%`, icon: BarChart3, color: 'text-accent-foreground' },
+    { label: t('partner.reports.total_participants'), value: totalParticipants.toLocaleString(), icon: BookOpen, color: 'text-primary' },
+    { label: t('partner.reports.completed_challenges'), value: String(completedChallenges), icon: Trophy, color: 'text-chart-3' },
+    { label: t('partner.reports.investment_per_child'), value: fmtP(avgSavingsPerChild), icon: TrendingUp, color: 'text-secondary' },
+    { label: t('partner.reports.avg_completion'), value: `${avgCompletion}%`, icon: BarChart3, color: 'text-accent-foreground' },
   ];
 
   if (isLoading) {
@@ -67,12 +67,12 @@ export default function PartnerReports() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-heading md:text-heading-lg text-foreground">Relatórios de Impacto 📊</h1>
-          <p className="text-small text-muted-foreground font-body">Métricas e evolução do programa de parceria</p>
+          <h1 className="font-display text-heading md:text-heading-lg text-foreground">{t('partner.reports.title')}</h1>
+          <p className="text-small text-muted-foreground font-body">{t('partner.reports.subtitle')}</p>
         </div>
         <Button variant="outline" className="rounded-xl gap-2 w-full sm:w-auto">
           <Download className="h-4 w-4" />
-          Exportar PDF
+          {t('partner.reports.export')}
         </Button>
       </div>
 
@@ -95,7 +95,7 @@ export default function PartnerReports() {
           <CardHeader>
             <CardTitle className="font-display text-lg flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Programas por Mês
+              {t('partner.reports.programs_by_month')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -105,16 +105,9 @@ export default function PartnerReports() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                   <XAxis dataKey="month" className="text-xs" />
                   <YAxis className="text-xs" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="families" name="Programas" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="children" name="Crianças" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
+                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '12px' }} />
+                  <Bar dataKey="families" name={t('partner.reports.chart_programs')} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="children" name={t('partner.reports.chart_children')} fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -124,21 +117,21 @@ export default function PartnerReports() {
 
       <Card className="rounded-2xl border-border/50">
         <CardHeader>
-          <CardTitle className="font-display text-lg">Resumo Geral</CardTitle>
+          <CardTitle className="font-display text-lg">{t('partner.reports.general_summary')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 rounded-xl bg-muted/50">
               <p className="font-display text-3xl font-bold text-foreground">{programs?.length ?? 0}</p>
-              <p className="text-sm text-muted-foreground mt-1">Programas activos</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('partner.reports.active_programs')}</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
               <p className="font-display text-3xl font-bold text-foreground">{totalChildren}</p>
-              <p className="text-sm text-muted-foreground mt-1">Crianças impactadas</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('partner.reports.children_impacted')}</p>
             </div>
             <div className="text-center p-4 rounded-xl bg-muted/50">
               <p className="font-display text-3xl font-bold text-foreground">{fmtP(totalInvestment)}</p>
-              <p className="text-sm text-muted-foreground mt-1">Investimento total</p>
+              <p className="text-sm text-muted-foreground mt-1">{t('partner.reports.total_investment')}</p>
             </div>
           </div>
         </CardContent>
