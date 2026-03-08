@@ -15,6 +15,7 @@ const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', 
 
 export default function ChildProfile() {
   const { user } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const [avatar, setAvatar] = useState(user?.avatar || '🦊');
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
