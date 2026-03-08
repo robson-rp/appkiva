@@ -120,7 +120,7 @@ function SectionTitle({ children, className = "" }: { children: React.ReactNode;
 
 function SectionSubtitle({ children }: { children: React.ReactNode }) {
   return (
-    <motion.p variants={fadeUp} className="text-muted-foreground text-lg md:text-xl text-center max-w-3xl mx-auto mb-12 text-balance">
+    <motion.p variants={fadeUp} className="text-muted-foreground text-lg md:text-xl text-center max-w-3xl mx-auto mb-8 text-balance">
       {children}
     </motion.p>
   );
