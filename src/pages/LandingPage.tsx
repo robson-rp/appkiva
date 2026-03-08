@@ -635,10 +635,10 @@ function UniverseSection() {
 
       <div className="relative">
         {/* Central illustration behind grid on desktop */}
-        <div className="hidden md:flex absolute inset-0 items-center justify-center poi1 min-[420px]:grid-cols-nter-events-none">1 min-[420px]:grid-cols-
-          <div cl1 min-[420px]:grid-cols-assName="w-64 h-641 min-[420px]:grid-cols- rounded-full bg-s1 min-[420px]:grid-cols-econdary/5 blur-3x1 min-[420px]:grid-cols-l" />
-        </di1 min-[420px]:grid-cols-v>
-        <motion1 min-[420px]:grid-cols-.div variants={sta1 min-[420px]:grid-cols-ggerFast} classNam1 min-[420px]:grid-cols-e="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
+          <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
+        </div>
+        <motion.div variants={staggerFast} className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-5 gap-3">
           {zones.map((z, i) => (
             <motion.div
               key={i}
