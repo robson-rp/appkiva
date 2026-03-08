@@ -50,6 +50,7 @@ export default function PartnerProfile() {
         display_name: name.trim() || user.name,
         avatar: selectedAvatar,
         country,
+        language: locale,
       })
       .eq('id', user.profileId);
 
