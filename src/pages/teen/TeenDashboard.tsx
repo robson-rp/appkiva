@@ -64,7 +64,7 @@ export default function TeenDashboard() {
         </p>
         <Progress value={progressToNext} className="mt-3 h-3" />
         <p className="text-small text-muted-foreground mt-1.5">
-          {nextLevel ? `${nextLevel[1].minPoints - teen.kivaPoints} pontos para ${nextLevel[1].label}` : 'Nível máximo!'}
+          {nextLevel ? `${nextLevel[1].minPoints - teen.kivaPoints} ${t('teen.dashboard.points_to_next')} ${nextLevel[1].label}` : t('teen.dashboard.max_level')}
         </p>
       </motion.div>
 
