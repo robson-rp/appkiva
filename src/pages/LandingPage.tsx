@@ -100,7 +100,7 @@ function Section({ children, className = "", id }: { children: React.ReactNode; 
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className={`px-5 sm:px-8 py-16 md:py-24 ${className}`}
+      className={`px-5 sm:px-8 py-12 md:py-16 ${className}`}
     >
       <div className="mx-auto max-w-7xl">{children}</div>
     </motion.section>
@@ -120,7 +120,7 @@ function SectionTitle({ children, className = "" }: { children: React.ReactNode;
 
 function SectionSubtitle({ children }: { children: React.ReactNode }) {
   return (
-    <motion.p variants={fadeUp} className="text-muted-foreground text-lg md:text-xl text-center max-w-3xl mx-auto mb-12 text-balance">
+    <motion.p variants={fadeUp} className="text-muted-foreground text-lg md:text-xl text-center max-w-3xl mx-auto mb-8 text-balance">
       {children}
     </motion.p>
   );
@@ -487,7 +487,7 @@ function ProblemSection() {
         <SectionTitle>A maioria das pessoas aprende sobre dinheiro tarde demais</SectionTitle>
         <SectionSubtitle>Poucas crianças recebem educação financeira. Queremos mudar isso.</SectionSubtitle>
 
-        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-5">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
           {points.map((p, i) => (
             <motion.div
               key={i}
@@ -520,7 +520,7 @@ function SolutionSection() {
   ];
   return (
     <Section>
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-secondary/10 text-secondary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
             A solução
@@ -544,7 +544,7 @@ function SolutionSection() {
         </div>
         <motion.div variants={fadeUp} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-md rounded-3xl relative z-10 drop-shadow-xl" />
+          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-lg rounded-3xl relative z-10 drop-shadow-xl" />
         </motion.div>
       </div>
     </Section>
@@ -577,7 +577,7 @@ function HowItWorks() {
               style={{ scaleX: scrollYProgress }}
             />
           </div>
-          <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-6 relative z-10">
+          <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-4 relative z-10">
             {steps.map((s, i) => (
               <motion.div
                 key={i}
@@ -628,13 +628,13 @@ function UniverseSection() {
         <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
           <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
         </div>
-        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {zones.map((z, i) => (
             <motion.div
               key={i}
               variants={fadeUp}
               whileHover={{ y: -6, boxShadow: "0 20px 40px -12px hsl(var(--primary) / 0.1)" }}
-              className="bg-card rounded-2xl border border-border p-5 text-center flex flex-col items-center gap-3 transition-all group"
+              className="bg-card rounded-2xl border border-border p-4 text-center flex flex-col items-center gap-2 transition-all group"
             >
               <div className={`${z.bg} rounded-2xl p-3 transition-transform group-hover:scale-110`}>
                 <AnimatedIcon icon={z.icon} animation={z.anim} className={`w-6 h-6 ${z.color}`} />
@@ -661,10 +661,10 @@ function ParentBenefits() {
   ];
   return (
     <Section id="familias">
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-md relative z-10 drop-shadow-xl" />
+          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-lg relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
@@ -710,7 +710,7 @@ function SchoolBenefits() {
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section id="escolas" className="bg-muted/40">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div>
             <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
               Para escolas
@@ -739,7 +739,7 @@ function SchoolBenefits() {
           </div>
           <motion.div variants={fadeUp} className="flex justify-center relative">
             <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-md relative z-10 drop-shadow-xl" />
+            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-lg relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
       </Section>
@@ -761,10 +761,10 @@ function GamificationSection() {
   ];
   return (
     <Section>
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-sm relative z-10 drop-shadow-xl" />
+          <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-md relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
@@ -810,7 +810,7 @@ function TrustSection() {
   ];
   return (
     <Section className="!bg-foreground !text-background">
-      <div className="grid md:grid-cols-2 gap-12 items-center">
+      <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
             Segurança
@@ -839,7 +839,7 @@ function TrustSection() {
         </div>
         <motion.div variants={fadeUp} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-full bg-secondary/15 blur-3xl scale-75 pointer-events-none" />
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-sm opacity-90 relative z-10 drop-shadow-2xl" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-md opacity-90 relative z-10 drop-shadow-2xl" />
         </motion.div>
       </div>
     </Section>
@@ -889,7 +889,7 @@ function SocialProof() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-12 mt-8">
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 mt-6">
           {stats.map((s, i) => (
             <motion.div
               key={i}
@@ -906,7 +906,7 @@ function SocialProof() {
         </motion.div>
 
         {/* Testimonials — 3D rotation on enter */}
-        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-5">
+        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-4">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
@@ -951,7 +951,7 @@ function FinalCTA() {
       whileInView="visible"
       viewport={{ once: true, margin: "-60px" }}
       variants={stagger}
-      className="relative px-5 sm:px-8 py-16 md:py-24 bg-secondary overflow-hidden"
+      className="relative px-5 sm:px-8 py-12 md:py-16 bg-secondary overflow-hidden"
     >
       {/* Decorative glow orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-background/10 rounded-full blur-3xl pointer-events-none" />
@@ -995,7 +995,7 @@ function FinalCTA() {
    ═══════════════════════════════════════════ */
 function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-10">
+    <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="col-span-2 md:col-span-1">
