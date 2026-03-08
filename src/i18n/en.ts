@@ -1,5 +1,5 @@
 const en: Record<string, string> = {
-  // Navbar
+  // ─── Navbar (Landing) ───
   'nav.how': 'How it works',
   'nav.universe': 'Universe',
   'nav.families': 'Families',
@@ -7,8 +7,137 @@ const en: Record<string, string> = {
   'nav.pricing': 'Pricing',
   'nav.login': 'Sign in',
   'nav.start': 'Start for free',
+  'nav.create_account': 'Create account',
+  'nav.open_menu': 'Open menu',
+  'nav.close_menu': 'Close menu',
 
-  // Pricing
+  // ─── Hero Slides ───
+  'hero.slide1.headline': 'Small habits.',
+  'hero.slide1.gradient': 'Big futures.',
+  'hero.slide1.subtitle': 'KIVARA turns financial education into an interactive game where kids learn to earn, save and plan their future.',
+  'hero.slide1.cta': 'Create family account',
+  'hero.slide1.cta2': 'Explore the platform',
+  'hero.slide2.headline': 'Learn through',
+  'hero.slide2.gradient': 'missions.',
+  'hero.slide2.subtitle': 'Daily and weekly missions that teach financial concepts in a practical and fun way.',
+  'hero.slide2.cta': 'Start missions',
+  'hero.slide2.cta2': 'See how it works',
+  'hero.slide3.headline': 'Save for your',
+  'hero.slide3.gradient': 'dreams.',
+  'hero.slide3.subtitle': 'Set savings goals, track progress and learn the value of saving for what truly matters.',
+  'hero.slide3.cta': 'Start saving',
+  'hero.slide3.cta2': 'See vaults',
+  'hero.slide4.headline': 'The whole family learns',
+  'hero.slide4.gradient': 'together.',
+  'hero.slide4.subtitle': 'Parents follow, guide and participate in their children\'s financial journey — all on one platform.',
+  'hero.slide4.cta': 'Create family account',
+  'hero.slide4.cta2': 'For families',
+  'hero.slide5.headline': 'Bring KIVARA to',
+  'hero.slide5.gradient': 'school.',
+  'hero.slide5.subtitle': 'Teachers can integrate financial challenges into classes and track student progress.',
+  'hero.slide5.cta': 'Register school',
+  'hero.slide5.cta2': 'For schools',
+  'hero.slide6.headline': 'Safe and',
+  'hero.slide6.gradient': 'supervised.',
+  'hero.slide6.subtitle': 'Protected data, full parental control and an educational environment designed for children\'s safety.',
+  'hero.slide6.cta': 'Learn more',
+  'hero.slide6.cta2': 'Security',
+
+  // ─── Hero Pills ───
+  'hero.pill.secure': '100% secure',
+  'hero.pill.families': '+500 families',
+  'hero.pill.free': 'Free',
+  'hero.pill.gamified': 'Gamified',
+
+  // ─── Problem Section ───
+  'problem.title': 'Most people learn about money too late',
+  'problem.subtitle': 'Few children receive financial education. We want to change that.',
+  'problem.point1': 'We grow up without learning how to manage money, set goals or plan our financial future.',
+  'problem.point2': 'Without proper guidance, financial decisions become difficult in adulthood.',
+  'problem.point3': 'KIVARA was born to change that — starting early, through games and practice.',
+
+  // ─── Solution Section ───
+  'solution.badge': 'The solution',
+  'solution.title_before': 'Learning finance through ',
+  'solution.title_gradient': 'experience',
+  'solution.subtitle': 'Instead of theory, KIVARA teaches through practice. Every action becomes a lesson that builds positive financial habits.',
+  'solution.check1': 'Practical missions to learn how to earn',
+  'solution.check2': 'Savings goals with visual progress',
+  'solution.check3': 'Financial decisions in a safe environment',
+  'solution.check4': 'Full monitoring by parents',
+
+  // ─── How It Works ───
+  'how.title': 'How it works',
+  'how.subtitle': 'Three simple steps to start the financial journey.',
+  'how.step1.title': 'Earn',
+  'how.step1.desc': 'Complete missions and tasks to earn virtual coins.',
+  'how.step2.title': 'Save',
+  'how.step2.desc': 'Set goals and learn to save for what truly matters.',
+  'how.step3.title': 'Level up',
+  'how.step3.desc': 'Unlock levels, achievements and new financial learnings.',
+
+  // ─── Universe Section ───
+  'universe.title': 'A world where learning about money becomes an adventure',
+  'universe.subtitle': 'Each zone represents a stage of financial learning.',
+  'universe.zone1.label': 'Money City',
+  'universe.zone1.desc': 'Learn to earn and manage',
+  'universe.zone2.label': 'Savings Valley',
+  'universe.zone2.desc': 'Save and grow',
+  'universe.zone3.label': 'Financial Academy',
+  'universe.zone3.desc': 'Interactive lessons',
+  'universe.zone4.label': 'Challenge Arena',
+  'universe.zone4.desc': 'Compete and learn',
+  'universe.zone5.label': 'Dream Market',
+  'universe.zone5.desc': 'Achieve goals',
+
+  // ─── Parent Benefits ───
+  'parents.badge': 'For families',
+  'parents.title_before': 'A powerful tool for ',
+  'parents.title_gradient': 'families',
+  'parents.subtitle': 'With KIVARA parents can follow, teach and motivate their children on the financial journey.',
+  'parents.benefit1': 'Track children\'s financial progress',
+  'parents.benefit2': 'Encourage healthy saving habits',
+  'parents.benefit3': 'Create educational tasks and rewards',
+  'parents.benefit4': 'Teach financial responsibility in practice',
+
+  // ─── School Benefits ───
+  'schools.badge': 'For schools',
+  'schools.title_before': 'Financial education for the ',
+  'schools.title_gradient': 'next generation',
+  'schools.subtitle': 'Teachers can turn the classroom into a financial laboratory.',
+  'schools.benefit1': 'Integrate financial challenges in classes',
+  'schools.benefit2': 'Track student progress',
+  'schools.benefit3': 'Encourage healthy competition between classes',
+
+  // ─── Gamification Section ───
+  'gamification.badge': 'Gamification',
+  'gamification.title_before': 'Learn like you ',
+  'gamification.title_gradient': 'play',
+  'gamification.subtitle': 'A progression system that motivates continuous learning.',
+  'gamification.item1': 'Level up by completing challenges',
+  'gamification.item2': 'Earn exclusive badges and trophies',
+  'gamification.item3': 'Compete in weekly rankings',
+  'gamification.item4': 'Unlock new universe areas',
+
+  // ─── Trust Section ───
+  'trust.badge': 'Security',
+  'trust.title_before': 'Built for ',
+  'trust.title_gradient': 'trust',
+  'trust.subtitle': 'Children\'s safety is our absolute priority.',
+  'trust.item1.title': 'Encrypted data',
+  'trust.item1.desc': 'All information is protected with end-to-end encryption.',
+  'trust.item2.title': 'Parental control',
+  'trust.item2.desc': 'Parents have full visibility and control over all activity.',
+  'trust.item3.title': 'No real money',
+  'trust.item3.desc': 'Children learn with virtual currency — zero financial risk.',
+  'trust.item4.title': 'GDPR compliance',
+  'trust.item4.desc': 'We comply with all data protection regulations.',
+
+  // ─── Social Proof ───
+  'social.title': 'Families who already trust us',
+  'social.subtitle': 'Discover what families who are already part of KIVARA say.',
+
+  // ─── Pricing ───
   'pricing.title': 'Plans & Pricing',
   'pricing.subtitle': 'Choose the ideal plan for your family, school or organization.',
   'pricing.monthly': 'Monthly',
@@ -24,7 +153,28 @@ const en: Record<string, string> = {
   'pricing.children': 'children',
   'pricing.up_to': 'Up to',
 
-  // Features labels
+  // ─── CTA Section ───
+  'cta.title': "Start building your child's financial future today",
+  'cta.subtitle': 'Join the families transforming their children\'s financial education.',
+  'cta.family': 'Create family account',
+  'cta.school': 'Bring KIVARA to your school',
+
+  // ─── Footer ───
+  'footer.tagline': 'Small habits. Big futures.',
+  'footer.product': 'Product',
+  'footer.company': 'Company',
+  'footer.legal': 'Legal',
+  'footer.about': 'About us',
+  'footer.contact': 'Contact',
+  'footer.careers': 'Careers',
+  'footer.privacy': 'Privacy',
+  'footer.terms': 'Terms',
+  'footer.cookies': 'Cookies',
+  'footer.rights': 'All rights reserved.',
+  'footer.made_with': 'Made with',
+  'footer.for_children': 'for the children of Africa',
+
+  // ─── Features labels ───
   'feature.basic_wallet': 'Digital wallet',
   'feature.basic_tasks': 'Tasks & allowance',
   'feature.savings_vaults': 'Savings vaults',
@@ -41,7 +191,75 @@ const en: Record<string, string> = {
   'feature.custom_branding': 'Custom branding',
   'feature.api_access': 'API access',
 
-  // Profile
+  // ─── Auth / Login ───
+  'auth.welcome': 'Welcome! 👋',
+  'auth.select_profile': 'Select your profile to continue',
+  'auth.back': 'Back',
+  'auth.create_account': 'Create Account',
+  'auth.area_of': 'Area of',
+  'auth.create_as': 'Create your account as',
+  'auth.enter_credentials': 'Enter your credentials to access',
+  'auth.email': 'Email',
+  'auth.phone': 'Phone',
+  'auth.password': 'Password',
+  'auth.name': 'Name',
+  'auth.institution_name': 'Institution Name',
+  'auth.gender': 'Gender',
+  'auth.gender_male': 'Male',
+  'auth.gender_female': 'Female',
+  'auth.gender_other': 'Other',
+  'auth.country': 'Country',
+  'auth.school': 'School',
+  'auth.school_optional': 'Children\'s school',
+  'auth.select_school': 'Select school',
+  'auth.select_school_optional': 'Select school (optional)',
+  'auth.other_school': 'Other (edit later)',
+  'auth.other_school_hint': 'You can link the school later in your profile.',
+  'auth.no_schools': 'No schools registered. Contact the platform administrator.',
+  'auth.sector': 'Business Sector',
+  'auth.select_sector': 'Select sector',
+  'auth.invite_code': 'Family Invite Code',
+  'auth.invite_hint': 'Ask your guardian for the 6-character code.',
+  'auth.invite_valid': '✓ Valid code! Fill in your details below.',
+  'auth.invite_invalid': 'Invalid or expired code. Ask your guardian for a new one.',
+  'auth.invite_required': 'You need a valid invite code from your guardian.',
+  'auth.school_required': 'Select your school to continue.',
+  'auth.sector_required': 'Select the business sector.',
+  'auth.gender_required': 'Select your gender.',
+  'auth.otp_sent': 'OTP sent! 📱',
+  'auth.otp_sent_desc': 'Code sent to',
+  'auth.otp_code': 'OTP Code',
+  'auth.otp_hint': 'Enter the 6-digit code sent to your phone.',
+  'auth.otp_invalid': 'Invalid code',
+  'auth.verify_code': 'Verify Code',
+  'auth.sign_in': 'Sign in',
+  'auth.sign_up': 'Create Account',
+  'auth.no_account': "Don't have an account?",
+  'auth.has_account': 'Already have an account?',
+  'auth.register': 'Register',
+  'auth.login': 'Sign in',
+  'auth.account_created': 'Account created!',
+  'auth.check_email': 'Check your email to confirm your account.',
+  'auth.error_login': 'Login error',
+  'auth.error_signup': 'Signup error',
+  'auth.error_unexpected': 'Unexpected error',
+  'auth.slogan': 'Small habits. Big futures',
+
+  // ─── Roles ───
+  'role.parent': 'Parent',
+  'role.parent.desc': 'Manage tasks, allowance and track progress',
+  'role.teen': 'Teenager',
+  'role.teen.desc': 'Advanced wallet, categories and budget',
+  'role.child': 'Child',
+  'role.child.desc': 'Missions, savings and earn coins',
+  'role.teacher': 'Teacher',
+  'role.teacher.desc': 'Manage classes and group challenges',
+  'role.partner': 'Partner',
+  'role.partner.desc': 'Institutional partnership program management',
+  'role.admin': 'Administrator',
+  'role.admin.desc': 'Global platform management',
+
+  // ─── Profile / Preferences ───
   'profile.language': 'Language',
   'profile.currency': 'Currency',
   'profile.preferences': 'Preferences',
@@ -50,12 +268,469 @@ const en: Record<string, string> = {
   'profile.save_avatar': 'Save Avatar',
   'profile.updated': 'Profile updated!',
   'profile.error': 'Error saving',
+  'profile.choose_avatar': 'Choose your avatar',
+  'profile.child_hint': 'Your name and other data are managed by your guardian. Here you can customise your avatar!',
 
-  // Landing CTA
-  'cta.title': "Start building your child's financial future today",
-  'cta.subtitle': 'Join the families transforming their children\'s financial education.',
-  'cta.family': 'Create family account',
-  'cta.school': 'Bring KIVARA to your school',
+  // ─── Common / Shared ───
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.delete': 'Delete',
+  'common.edit': 'Edit',
+  'common.create': 'Create',
+  'common.close': 'Close',
+  'common.back': 'Back',
+  'common.next': 'Next',
+  'common.confirm': 'Confirm',
+  'common.loading': 'Loading...',
+  'common.error': 'Error',
+  'common.success': 'Success',
+  'common.yes': 'Yes',
+  'common.no': 'No',
+  'common.search': 'Search',
+  'common.filter': 'Filter',
+  'common.more': 'More',
+  'common.more_features': 'More features',
+  'common.view_all': 'View all',
+  'common.logout': 'Sign out',
+  'common.more_options': 'More options',
+  'common.requires_upgrade': 'Requires upgrade',
+  'common.copied': 'Copied! 📋',
+  'common.share': 'Share',
+  'common.approve': 'Approve',
+  'common.reject': 'Reject',
+  'common.remove': 'Remove',
+  'common.add': 'Add',
+  'common.invite': 'Invite',
+  'common.send': 'Send',
+  'common.sending': 'Sending...',
+  'common.creating': 'Creating...',
+  'common.optional': 'optional',
+  'common.years': 'years',
+  'common.coins': 'coins',
+  'common.points': 'points',
+  'common.total_balance': 'Total Balance',
+  'common.balance': 'Balance',
+  'common.no_data': 'No data',
+
+  // ─── Navigation Labels (Layouts) ───
+  'nav.parent.panel': 'Dashboard',
+  'nav.parent.children': 'Children',
+  'nav.parent.tasks': 'Tasks',
+  'nav.parent.allowance': 'Allowance',
+  'nav.parent.vaults': 'Vaults',
+  'nav.parent.rewards': 'Rewards',
+  'nav.parent.reports': 'Reports',
+  'nav.parent.profile': 'Profile',
+  'nav.parent.consent': 'Consent',
+  'nav.parent.subscription': 'Subscription',
+  'nav.parent.support': 'Support',
+  'nav.parent.menu': 'Menu',
+  'nav.parent.slogan': 'Small habits. Big futures.',
+  'nav.parent.role': 'Parent',
+
+  'nav.child.home': 'Home',
+  'nav.child.wallet': 'Wallet',
+  'nav.child.tasks': 'Tasks',
+  'nav.child.learn': 'Learn',
+  'nav.child.vaults': 'Vaults',
+  'nav.child.dreams': 'Dreams',
+  'nav.child.missions': 'Missions',
+  'nav.child.store': 'Store',
+  'nav.child.achievements': 'Achievements',
+  'nav.child.badges': 'Badges',
+  'nav.child.streaks': 'Streaks',
+  'nav.child.diary': 'Diary',
+  'nav.child.profile': 'Profile',
+  'nav.child.hello': 'Hi,',
+
+  'nav.teen.home': 'Home',
+  'nav.teen.wallet': 'Wallet',
+  'nav.teen.tasks': 'Tasks',
+  'nav.teen.learn': 'Learn',
+  'nav.teen.vaults': 'Vaults',
+  'nav.teen.missions': 'Missions',
+  'nav.teen.analytics': 'Analytics',
+  'nav.teen.badges': 'Badges',
+  'nav.teen.streaks': 'Streaks',
+  'nav.teen.profile': 'Profile',
+
+  'nav.teacher.panel': 'Dashboard',
+  'nav.teacher.classes': 'Classes',
+  'nav.teacher.challenges': 'Challenges',
+  'nav.teacher.school': 'School',
+  'nav.teacher.slogan': 'School Mode',
+  'nav.teacher.role': 'Teacher',
+  'nav.teacher.badge': 'SCHOOL',
+  'nav.teacher.challenges_ending': 'Challenges about to end',
+
+  'nav.partner.dashboard': 'Dashboard',
+  'nav.partner.programs': 'Programs',
+  'nav.partner.challenges': 'Challenges',
+  'nav.partner.reports': 'Reports',
+  'nav.partner.subscription': 'Subscription',
+  'nav.partner.profile': 'Profile',
+  'nav.partner.slogan': 'Institutional Partner',
+  'nav.partner.role': 'Partner',
+  'nav.partner.menu': 'Management',
+
+  'nav.admin.panel': 'Global Dashboard',
+  'nav.admin.tenants': 'Tenants',
+  'nav.admin.schools': 'Schools',
+  'nav.admin.users': 'Users',
+  'nav.admin.subscriptions': 'Subscriptions',
+  'nav.admin.finance': 'Finance',
+  'nav.admin.currencies': 'Currencies',
+  'nav.admin.audit': 'Audit',
+  'nav.admin.risk': 'Risk',
+  'nav.admin.compliance': 'Compliance',
+  'nav.admin.lessons': 'Lessons',
+  'nav.admin.onboarding': 'Onboarding',
+  'nav.admin.notifications': 'Notifications',
+  'nav.admin.banners': 'Banners',
+  'nav.admin.slogan': 'Global Administration',
+  'nav.admin.role': 'Admin',
+  'nav.admin.menu': 'Management',
+
+  // ─── Parent Dashboard ───
+  'parent.dashboard.family_panel': 'Family Dashboard',
+  'parent.dashboard.hello': 'Hello,',
+  'parent.dashboard.subtitle': 'Track your children\'s financial progress. Small habits, big futures.',
+  'parent.dashboard.total_balance': 'Total Balance',
+  'parent.dashboard.children': 'Children',
+  'parent.dashboard.distributed': 'Distributed',
+  'parent.dashboard.transactions': 'Transactions',
+  'parent.dashboard.send_allowance': 'Send Allowance',
+  'parent.dashboard.send_now': 'Send Now',
+  'parent.dashboard.emission_limit': 'Monthly Emission Limit',
+  'parent.dashboard.inflation_control': 'KVC inflation control',
+  'parent.dashboard.remaining': 'Remaining',
+  'parent.dashboard.limit_warning': 'Warning: {pct}% of limit used.',
+  'parent.dashboard.limit_reached': 'Limit reached! You cannot emit more KVC this month.',
+  'parent.dashboard.upgrade_hint': 'Upgrade to unlock everything! 🚀',
+  'parent.dashboard.recent_activity': 'Recent Activity',
+  'parent.dashboard.no_children': 'No children linked.',
+  'parent.dashboard.add_children_hint': 'Add children in the Children section.',
+  'parent.dashboard.no_transactions': 'No transactions yet.',
+  'parent.dashboard.send_to_start': 'Send an allowance to get started!',
+
+  // ─── Transaction Types ───
+  'tx.allowance': 'Allowance',
+  'tx.task_reward': 'Task',
+  'tx.mission_reward': 'Mission',
+  'tx.purchase': 'Purchase',
+  'tx.donation': 'Donation',
+  'tx.vault_deposit': 'Vault ↓',
+  'tx.vault_withdraw': 'Vault ↑',
+  'tx.transfer': 'Transfer',
+  'tx.adjustment': 'Adjustment',
+  'tx.refund': 'Refund',
+
+  // ─── Parent Children ───
+  'parent.children.title': 'Children',
+  'parent.children.subtitle': 'Manage your children\'s profiles',
+  'parent.children.management': 'Management',
+  'parent.children.invite': 'Invite',
+  'parent.children.add': 'Add',
+  'parent.children.total_balance': 'total balance',
+  'parent.children.max_children': 'children',
+  'parent.children.upgrade_more': 'Upgrade for more children',
+  'parent.children.no_children': 'No children yet',
+  'parent.children.add_hint': 'Add or invite a child to get started.',
+  'parent.children.invite_child': 'Invite Child',
+  'parent.children.nickname': 'Nickname',
+  'parent.children.balance': 'Balance',
+  'parent.children.monthly_limit': 'Monthly Limit',
+  'parent.children.set_limit': 'Set',
+  'parent.children.budget_exceptions': 'Exception Requests',
+  'parent.children.pending_requests': 'pending request(s)',
+  'parent.children.removed': 'Child removed',
+  'parent.children.removed_desc': 'Profile successfully removed.',
+  'parent.children.remove_error': 'Could not remove the child.',
+  'parent.children.limits_updated': 'Limits updated! 💰',
+  'parent.children.limits_error': 'Could not update limits.',
+  'parent.children.code_copied': 'Code copied to clipboard.',
+  'parent.children.link_copied': 'Link copied to clipboard.',
+  'parent.children.code_error': 'Could not generate code.',
+
+  // ─── Parent Tasks ───
+  'parent.tasks.title': 'Tasks',
+  'parent.tasks.subtitle': 'Create and approve tasks for children',
+  'parent.tasks.management': 'Management',
+  'parent.tasks.suggest_ai': 'Suggest',
+  'parent.tasks.new_task': 'New Task',
+  'parent.tasks.create_task': 'Create Task',
+  'parent.tasks.edit_task': 'Edit Task',
+  'parent.tasks.title_label': 'Title',
+  'parent.tasks.title_placeholder': 'E.g.: Tidy the room',
+  'parent.tasks.description': 'Description',
+  'parent.tasks.desc_placeholder': 'Describe the task...',
+  'parent.tasks.reward': 'Reward (KVC)',
+  'parent.tasks.category': 'Category',
+  'parent.tasks.child': 'Child',
+  'parent.tasks.select_child': 'Select...',
+  'parent.tasks.recurrence': 'Recurrence',
+  'parent.tasks.once': 'Once',
+  'parent.tasks.daily': 'Daily',
+  'parent.tasks.weekly': 'Weekly',
+  'parent.tasks.monthly': 'Monthly',
+  'parent.tasks.creating': 'Creating...',
+  'parent.tasks.create_btn': '✅ Create Task',
+  'parent.tasks.total': 'Total',
+  'parent.tasks.pending': 'Pending',
+  'parent.tasks.to_approve': 'To Approve',
+  'parent.tasks.approved': 'Approved',
+  'parent.tasks.no_tasks': 'No tasks yet',
+  'parent.tasks.no_tasks_hint': 'Click "New Task" to get started!',
+  'parent.tasks.status.pending': 'Pending',
+  'parent.tasks.status.in_progress': 'In Progress',
+  'parent.tasks.status.completed': 'To Approve',
+  'parent.tasks.status.approved': 'Approved',
+  'parent.tasks.cat.cleaning': '🧹 Cleaning',
+  'parent.tasks.cat.studying': '📚 Studying',
+  'parent.tasks.cat.helping': '🤝 Helping',
+  'parent.tasks.cat.other': '📌 Other',
+
+  // ─── Parent Allowance ───
+  'parent.allowance.title': 'Smart Allowance',
+  'parent.allowance.subtitle': 'Base + bonus for tasks and missions',
+  'parent.allowance.management': 'Management',
+  'parent.allowance.automatic': 'Automatic',
+  'parent.allowance.base_week': 'base/wk',
+  'parent.allowance.in_circulation': 'in circulation',
+  'parent.allowance.no_children': 'No children registered',
+  'parent.allowance.no_children_hint': 'Add a child to set up allowance.',
+  'parent.allowance.current_balance': 'Current balance',
+  'parent.allowance.composition': 'Allowance composition',
+  'parent.allowance.base': 'Base',
+  'parent.allowance.weekly': 'weekly',
+  'parent.allowance.monthly_freq': 'monthly',
+  'parent.allowance.task_bonus': 'Task bonus',
+  'parent.allowance.mission_bonus': 'Mission bonus',
+  'parent.allowance.total_this_week': 'Total this week',
+  'parent.allowance.send': 'Send Allowance',
+  'parent.allowance.sending': 'Sending...',
+  'parent.allowance.sent': 'Allowance sent! 💰',
+  'parent.allowance.last_sent': 'Last allowance',
+  'parent.allowance.never_sent': 'No allowance sent yet',
+  'parent.allowance.configure': 'Configure Allowance',
+  'parent.allowance.frequency': 'Frequency',
+  'parent.allowance.base_amount': 'Base amount',
+  'parent.allowance.task_bonus_per': 'Bonus per task',
+  'parent.allowance.mission_bonus_per': 'Bonus per mission',
+  'parent.allowance.save_config': '✅ Save Configuration',
+  'parent.allowance.vault_rates': 'Vault Interest Rates',
+  'parent.allowance.monthly_rate': 'Monthly interest rate',
+  'parent.allowance.send_error': 'Error sending allowance',
+
+  // ─── Parent Vaults ───
+  'parent.vaults.title': "Children's Vaults",
+  'parent.vaults.subtitle': 'Manage your children\'s savings. Adjust interest rates and create new vaults.',
+  'parent.vaults.management': 'Management',
+  'parent.vaults.create': 'Create Vault',
+  'parent.vaults.total_saved': 'Total Saved',
+  'parent.vaults.vault_count': 'Vaults',
+  'parent.vaults.total_progress': 'Total progress',
+  'parent.vaults.no_vaults': 'No vaults',
+  'parent.vaults.no_vaults_hint': 'Your children haven\'t created savings vaults yet.',
+  'parent.vaults.total_label': 'total',
+  'parent.vaults.created_on': 'Created on',
+  'parent.vaults.completed': 'completed',
+  'parent.vaults.goal_reached': '✅ Goal reached!',
+  'parent.vaults.per_month': '/month',
+  'parent.vaults.interest': 'Interest',
+  'parent.vaults.delete': 'Delete',
+  'parent.vaults.delete_vault': 'Delete vault?',
+  'parent.vaults.delete_vault_desc': 'Are you sure you want to delete the vault "{name}" of {child}? This action cannot be undone.',
+  'parent.vaults.adjust_interest': 'Adjust Interest',
+  'parent.vaults.interest_rate': 'Monthly Interest Rate',
+  'parent.vaults.rate_updated': 'Rate updated! 📊',
+  'parent.vaults.rate_desc': 'Interest rate changed to {rate}%/month.',
+  'parent.vaults.vault_created': 'Vault created! 🐷',
+  'parent.vaults.vault_created_desc': 'Vault "{name}" created successfully.',
+  'parent.vaults.create_error': 'Could not create the vault.',
+  'parent.vaults.vault_name': 'Vault name',
+  'parent.vaults.target_amount': 'Target',
+  'parent.vaults.icon': 'Icon',
+  'parent.vaults.interest_monthly': 'Monthly interest rate',
+  'parent.vaults.for_child': 'For the child',
+  'parent.vaults.select_child': 'Select child',
+
+  // ─── Parent Rewards ───
+  'parent.rewards.title': 'Family Rewards',
+  'parent.rewards.subtitle': 'Create custom rewards to motivate children',
+  'parent.rewards.management': 'Management',
+  'parent.rewards.active': 'Active',
+  'parent.rewards.claimed': 'Claimed',
+  'parent.rewards.new_reward': 'New Reward',
+  'parent.rewards.create_reward': 'Create Reward',
+  'parent.rewards.icon': 'Icon',
+  'parent.rewards.name': 'Name',
+  'parent.rewards.name_placeholder': 'E.g.: Movie night',
+  'parent.rewards.description': 'Description',
+  'parent.rewards.desc_placeholder': 'Describe the reward...',
+  'parent.rewards.price': 'Price (KVC)',
+  'parent.rewards.category': 'Category',
+  'parent.rewards.cat.experience': 'Experience',
+  'parent.rewards.cat.privilege': 'Privilege',
+  'parent.rewards.cat.physical': 'Physical',
+  'parent.rewards.cat.digital': 'Digital',
+  'parent.rewards.creating': 'Creating...',
+  'parent.rewards.create_btn': '🎁 Create Reward',
+  'parent.rewards.no_rewards': 'No rewards yet',
+  'parent.rewards.no_rewards_hint': 'Click "New Reward" to get started!',
+  'parent.rewards.remove': 'Remove',
+  'parent.rewards.count': 'rewards created',
+
+  // ─── Parent Reports ───
+  'parent.reports.title': 'Reports',
+  'parent.reports.subtitle': 'Detailed analysis of family financial activity',
+
+  // ─── Parent Consent ───
+  'parent.consent.title': 'Consent',
+  'parent.consent.subtitle': 'Parental consent management',
+
+  // ─── Parent Support ───
+  'parent.support.title': 'Support',
+  'parent.support.subtitle': 'We\'re here to help',
+
+  // ─── Parent Subscription ───
+  'parent.subscription.title': 'Subscription',
+  'parent.subscription.subtitle': 'Manage your plan and features',
+
+  // ─── Send Allowance Dialog ───
+  'dialog.send_allowance.title': 'Send Allowance',
+  'dialog.send_allowance.child': 'Child',
+  'dialog.send_allowance.select_child': 'Select a child',
+  'dialog.send_allowance.amount': 'Amount (KVC)',
+  'dialog.send_allowance.amount_placeholder': 'E.g.: 50',
+  'dialog.send_allowance.description': 'Description',
+  'dialog.send_allowance.desc_placeholder': 'E.g.: Weekly allowance',
+  'dialog.send_allowance.default_desc': 'Weekly allowance',
+  'dialog.send_allowance.summary': 'Summary',
+  'dialog.send_allowance.will_receive': 'will receive',
+  'dialog.send_allowance.current_balance': 'Current balance',
+  'dialog.send_allowance.new_balance': 'New balance',
+  'dialog.send_allowance.confirm': 'Confirm Send',
+  'dialog.send_allowance.sending': 'Sending...',
+  'dialog.send_allowance.sent': 'Allowance sent! 💰',
+  'dialog.send_allowance.error': 'Error sending allowance',
+  'dialog.send_allowance.error_validation': 'Select a child and a valid amount.',
+
+  // ─── Child Dashboard ───
+  'child.dashboard.hello': 'Hi,',
+  'child.dashboard.your_wallet': 'Your wallet',
+  'child.dashboard.missions': 'Missions',
+  'child.dashboard.savings': 'Savings',
+
+  // ─── Child Tasks ───
+  'child.tasks.title': 'My tasks',
+  'child.tasks.subtitle': 'Complete tasks to earn coins',
+
+  // ─── Child Missions ───
+  'child.missions.title': 'Missions',
+  'child.missions.subtitle': 'Financial challenges to level up',
+
+  // ─── Child Wallet ───
+  'child.wallet.title': 'Wallet',
+  'child.wallet.balance': 'Available balance',
+
+  // ─── Child Vaults ───
+  'child.vaults.title': 'Savings Vaults',
+  'child.vaults.subtitle': 'Save towards your goals',
+
+  // ─── Child Dreams ───
+  'child.dreams.title': 'Dreams',
+  'child.dreams.subtitle': 'Set and track your dreams',
+
+  // ─── Child Store ───
+  'child.store.title': 'Rewards Store',
+  'child.store.subtitle': 'Trade your coins for rewards',
+
+  // ─── Child Diary ───
+  'child.diary.title': 'Financial Diary',
+  'child.diary.subtitle': 'Record your thoughts about money',
+
+  // ─── Child Achievements ───
+  'child.achievements.title': 'Achievements',
+  'child.achievements.subtitle': 'Your medals and trophies',
+
+  // ─── Child Profile ───
+  'child.profile.role': '🧒 Child',
+
+  // ─── Teen Dashboard ───
+  'teen.dashboard.title': 'Dashboard',
+
+  // ─── Teen Missions ───
+  'teen.missions.title': 'Missions',
+  'teen.missions.subtitle': 'Financial challenges to level up',
+  'teen.missions.tab.missions': 'Missions',
+  'teen.missions.tab.challenges': 'Weekly Challenges',
+  'teen.missions.status.completed': 'Completed',
+  'teen.missions.status.in_progress': 'In progress',
+  'teen.missions.status.available': 'Available',
+
+  // ─── Teen Wallet ───
+  'teen.wallet.title': 'Wallet',
+
+  // ─── Teen Tasks ───
+  'teen.tasks.title': 'Tasks',
+
+  // ─── Teen Vaults ───
+  'teen.vaults.title': 'Vaults',
+
+  // ─── Teen Analytics ───
+  'teen.analytics.title': 'Analytics',
+
+  // ─── Teen Profile ───
+  'teen.profile.title': 'Profile',
+
+  // ─── Teacher Dashboard ───
+  'teacher.dashboard.title': 'Dashboard',
+
+  // ─── Teacher Classes ───
+  'teacher.classes.title': 'Classes',
+
+  // ─── Teacher Challenges ───
+  'teacher.challenges.title': 'Challenges',
+
+  // ─── Teacher School ───
+  'teacher.school.title': 'School',
+
+  // ─── Partner Dashboard ───
+  'partner.dashboard.title': 'Dashboard',
+
+  // ─── Partner Programs ───
+  'partner.programs.title': 'Programs',
+
+  // ─── Partner Challenges ───
+  'partner.challenges.title': 'Challenges',
+
+  // ─── Partner Reports ───
+  'partner.reports.title': 'Reports',
+
+  // ─── Learn Page ───
+  'learn.title': 'Learn',
+  'learn.subtitle': 'Interactive lessons on financial education',
+
+  // ─── Badges Page ───
+  'badges.title': 'Badges',
+  'badges.subtitle': 'Your achievements',
+
+  // ─── Streaks Page ───
+  'streaks.title': 'Streaks',
+  'streaks.subtitle': 'Keep your streak alive',
+
+  // ─── Install Page ───
+  'install.title': 'Install KIVARA',
+
+  // ─── Not Found ───
+  'notfound.title': 'Page not found',
+  'notfound.back': 'Back to home',
+
+  // ─── Notifications ───
+  'notifications.title': 'Notifications',
+  'notifications.empty': 'No notifications',
+  'notifications.mark_read': 'Mark as read',
 };
 
 export default en;

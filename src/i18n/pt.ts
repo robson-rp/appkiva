@@ -1,5 +1,5 @@
 const pt: Record<string, string> = {
-  // Navbar
+  // ─── Navbar (Landing) ───
   'nav.how': 'Como funciona',
   'nav.universe': 'Universo',
   'nav.families': 'Famílias',
@@ -7,8 +7,137 @@ const pt: Record<string, string> = {
   'nav.pricing': 'Preços',
   'nav.login': 'Entrar',
   'nav.start': 'Começar grátis',
+  'nav.create_account': 'Criar conta',
+  'nav.open_menu': 'Abrir menu',
+  'nav.close_menu': 'Fechar menu',
 
-  // Pricing
+  // ─── Hero Slides ───
+  'hero.slide1.headline': 'Pequenos hábitos.',
+  'hero.slide1.gradient': 'Grandes futuros.',
+  'hero.slide1.subtitle': 'KIVARA transforma educação financeira num jogo interactivo onde crianças aprendem a ganhar, poupar e planear o futuro.',
+  'hero.slide1.cta': 'Criar conta familiar',
+  'hero.slide1.cta2': 'Explorar a plataforma',
+  'hero.slide2.headline': 'Aprende através de',
+  'hero.slide2.gradient': 'missões.',
+  'hero.slide2.subtitle': 'Missões diárias e semanais que ensinam conceitos financeiros de forma prática e divertida.',
+  'hero.slide2.cta': 'Começar missões',
+  'hero.slide2.cta2': 'Ver como funciona',
+  'hero.slide3.headline': 'Poupa para os teus',
+  'hero.slide3.gradient': 'sonhos.',
+  'hero.slide3.subtitle': 'Cria metas de poupança, acompanha o progresso e aprende o valor de guardar para o que realmente importa.',
+  'hero.slide3.cta': 'Começar a poupar',
+  'hero.slide3.cta2': 'Ver cofres',
+  'hero.slide4.headline': 'Toda a família aprende',
+  'hero.slide4.gradient': 'junta.',
+  'hero.slide4.subtitle': 'Pais acompanham, orientam e participam na jornada financeira dos filhos — tudo numa única plataforma.',
+  'hero.slide4.cta': 'Criar conta familiar',
+  'hero.slide4.cta2': 'Para famílias',
+  'hero.slide5.headline': 'Leva KIVARA para a',
+  'hero.slide5.gradient': 'escola.',
+  'hero.slide5.subtitle': 'Professores podem integrar desafios financeiros nas aulas e acompanhar a evolução dos estudantes.',
+  'hero.slide5.cta': 'Registar escola',
+  'hero.slide5.cta2': 'Para escolas',
+  'hero.slide6.headline': 'Seguro e',
+  'hero.slide6.gradient': 'supervisionado.',
+  'hero.slide6.subtitle': 'Dados protegidos, controlo parental total e um ambiente educativo concebido para a segurança das crianças.',
+  'hero.slide6.cta': 'Saber mais',
+  'hero.slide6.cta2': 'Segurança',
+
+  // ─── Hero Pills ───
+  'hero.pill.secure': '100% seguro',
+  'hero.pill.families': '+500 famílias',
+  'hero.pill.free': 'Gratuito',
+  'hero.pill.gamified': 'Gamificado',
+
+  // ─── Problem Section ───
+  'problem.title': 'A maioria das pessoas aprende sobre dinheiro tarde demais',
+  'problem.subtitle': 'Poucas crianças recebem educação financeira. Queremos mudar isso.',
+  'problem.point1': 'Crescemos sem aprender a gerir dinheiro, definir metas ou planear o futuro financeiro.',
+  'problem.point2': 'Sem orientação adequada, as decisões financeiras tornam-se difíceis na vida adulta.',
+  'problem.point3': 'KIVARA nasceu para mudar isso — começando cedo, através do jogo e da prática.',
+
+  // ─── Solution Section ───
+  'solution.badge': 'A solução',
+  'solution.title_before': 'Aprender finanças através da ',
+  'solution.title_gradient': 'experiência',
+  'solution.subtitle': 'Em vez de teoria, KIVARA ensina através da prática. Cada acção transforma-se numa lição que constrói hábitos financeiros positivos.',
+  'solution.check1': 'Missões práticas para aprender a ganhar',
+  'solution.check2': 'Metas de poupança com progresso visual',
+  'solution.check3': 'Decisões financeiras num ambiente seguro',
+  'solution.check4': 'Acompanhamento total pelos pais',
+
+  // ─── How It Works ───
+  'how.title': 'Como funciona',
+  'how.subtitle': 'Três passos simples para começar a jornada financeira.',
+  'how.step1.title': 'Ganhar',
+  'how.step1.desc': 'Completar missões e tarefas para ganhar moedas virtuais.',
+  'how.step2.title': 'Poupar',
+  'how.step2.desc': 'Criar metas e aprender a guardar para o que realmente importa.',
+  'how.step3.title': 'Evoluir',
+  'how.step3.desc': 'Desbloquear níveis, conquistas e novas aprendizagens financeiras.',
+
+  // ─── Universe Section ───
+  'universe.title': 'Um mundo onde aprender sobre dinheiro se torna uma aventura',
+  'universe.subtitle': 'Cada zona representa um estágio da aprendizagem financeira.',
+  'universe.zone1.label': 'Cidade do Dinheiro',
+  'universe.zone1.desc': 'Aprende a ganhar e gerir',
+  'universe.zone2.label': 'Vale da Poupança',
+  'universe.zone2.desc': 'Guarda e faz crescer',
+  'universe.zone3.label': 'Academia Financeira',
+  'universe.zone3.desc': 'Lições interactivas',
+  'universe.zone4.label': 'Arena dos Desafios',
+  'universe.zone4.desc': 'Compete e aprende',
+  'universe.zone5.label': 'Mercado dos Sonhos',
+  'universe.zone5.desc': 'Realiza objectivos',
+
+  // ─── Parent Benefits ───
+  'parents.badge': 'Para famílias',
+  'parents.title_before': 'Uma ferramenta poderosa para ',
+  'parents.title_gradient': 'famílias',
+  'parents.subtitle': 'Com KIVARA os pais podem acompanhar, ensinar e motivar os filhos na jornada financeira.',
+  'parents.benefit1': 'Acompanhar o progresso financeiro dos filhos',
+  'parents.benefit2': 'Incentivar hábitos saudáveis de poupança',
+  'parents.benefit3': 'Criar tarefas e recompensas educativas',
+  'parents.benefit4': 'Ensinar responsabilidade financeira na prática',
+
+  // ─── School Benefits ───
+  'schools.badge': 'Para escolas',
+  'schools.title_before': 'Educação financeira para a ',
+  'schools.title_gradient': 'nova geração',
+  'schools.subtitle': 'Professores podem transformar a sala de aula num laboratório financeiro.',
+  'schools.benefit1': 'Integrar desafios financeiros nas aulas',
+  'schools.benefit2': 'Acompanhar a evolução dos estudantes',
+  'schools.benefit3': 'Incentivar competição saudável entre turmas',
+
+  // ─── Gamification Section ───
+  'gamification.badge': 'Gamificação',
+  'gamification.title_before': 'Aprende como se ',
+  'gamification.title_gradient': 'joga',
+  'gamification.subtitle': 'Um sistema de progressão que motiva a aprendizagem contínua.',
+  'gamification.item1': 'Sobe de nível ao completar desafios',
+  'gamification.item2': 'Ganha badges e troféus exclusivos',
+  'gamification.item3': 'Compete em rankings semanais',
+  'gamification.item4': 'Desbloqueia novas áreas do universo',
+
+  // ─── Trust Section ───
+  'trust.badge': 'Segurança',
+  'trust.title_before': 'Construído para a ',
+  'trust.title_gradient': 'confiança',
+  'trust.subtitle': 'A segurança das crianças é a nossa prioridade absoluta.',
+  'trust.item1.title': 'Dados encriptados',
+  'trust.item1.desc': 'Toda a informação é protegida com encriptação de ponta.',
+  'trust.item2.title': 'Controlo parental',
+  'trust.item2.desc': 'Os pais têm visibilidade e controlo total sobre a actividade.',
+  'trust.item3.title': 'Sem dinheiro real',
+  'trust.item3.desc': 'As crianças aprendem com moeda virtual — zero risco financeiro.',
+  'trust.item4.title': 'Conformidade RGPD',
+  'trust.item4.desc': 'Cumprimos todas as regulamentações de protecção de dados.',
+
+  // ─── Social Proof ───
+  'social.title': 'Famílias que já confiam em nós',
+  'social.subtitle': 'Descobre o que dizem as famílias que já fazem parte do KIVARA.',
+
+  // ─── Pricing ───
   'pricing.title': 'Planos e Preços',
   'pricing.subtitle': 'Escolha o plano ideal para a sua família, escola ou organização.',
   'pricing.monthly': 'Mensal',
@@ -24,7 +153,28 @@ const pt: Record<string, string> = {
   'pricing.children': 'crianças',
   'pricing.up_to': 'Até',
 
-  // Features labels
+  // ─── CTA Section ───
+  'cta.title': 'Comece hoje a construir o futuro financeiro do seu filho',
+  'cta.subtitle': 'Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.',
+  'cta.family': 'Criar conta familiar',
+  'cta.school': 'Levar KIVARA para a escola',
+
+  // ─── Footer ───
+  'footer.tagline': 'Pequenos hábitos. Grandes futuros.',
+  'footer.product': 'Produto',
+  'footer.company': 'Empresa',
+  'footer.legal': 'Legal',
+  'footer.about': 'Sobre nós',
+  'footer.contact': 'Contacto',
+  'footer.careers': 'Carreiras',
+  'footer.privacy': 'Privacidade',
+  'footer.terms': 'Termos',
+  'footer.cookies': 'Cookies',
+  'footer.rights': 'Todos os direitos reservados.',
+  'footer.made_with': 'Feito com',
+  'footer.for_children': 'para as crianças de África',
+
+  // ─── Features labels ───
   'feature.basic_wallet': 'Carteira digital',
   'feature.basic_tasks': 'Tarefas e mesada',
   'feature.savings_vaults': 'Cofres de poupança',
@@ -41,7 +191,75 @@ const pt: Record<string, string> = {
   'feature.custom_branding': 'Marca personalizada',
   'feature.api_access': 'Acesso à API',
 
-  // Profile
+  // ─── Auth / Login ───
+  'auth.welcome': 'Bem-vindo! 👋',
+  'auth.select_profile': 'Seleciona o teu perfil para continuar',
+  'auth.back': 'Voltar',
+  'auth.create_account': 'Criar Conta',
+  'auth.area_of': 'Área do',
+  'auth.create_as': 'Cria a tua conta como',
+  'auth.enter_credentials': 'Insere as tuas credenciais para aceder',
+  'auth.email': 'Email',
+  'auth.phone': 'Telefone',
+  'auth.password': 'Palavra-passe',
+  'auth.name': 'Nome',
+  'auth.institution_name': 'Nome da Instituição',
+  'auth.gender': 'Género',
+  'auth.gender_male': 'Masculino',
+  'auth.gender_female': 'Feminino',
+  'auth.gender_other': 'Outro',
+  'auth.country': 'País',
+  'auth.school': 'Escola',
+  'auth.school_optional': 'Escola dos filhos',
+  'auth.select_school': 'Selecionar escola',
+  'auth.select_school_optional': 'Selecionar escola (opcional)',
+  'auth.other_school': 'Outra (editar depois)',
+  'auth.other_school_hint': 'Podes associar a escola mais tarde no teu perfil.',
+  'auth.no_schools': 'Nenhuma escola registada. Contacta o administrador da plataforma.',
+  'auth.sector': 'Sector de Actividade',
+  'auth.select_sector': 'Selecionar sector',
+  'auth.invite_code': 'Código de Convite Familiar',
+  'auth.invite_hint': 'Pede ao teu encarregado o código de 6 caracteres.',
+  'auth.invite_valid': '✓ Código válido! Preenche os teus dados abaixo.',
+  'auth.invite_invalid': 'Código inválido ou expirado. Pede um novo ao teu encarregado.',
+  'auth.invite_required': 'Precisas de um código de convite válido do teu encarregado.',
+  'auth.school_required': 'Seleciona a tua escola para continuar.',
+  'auth.sector_required': 'Seleciona o sector de actividade.',
+  'auth.gender_required': 'Seleciona o teu género.',
+  'auth.otp_sent': 'OTP enviado! 📱',
+  'auth.otp_sent_desc': 'Código enviado para',
+  'auth.otp_code': 'Código OTP',
+  'auth.otp_hint': 'Insere o código de 6 dígitos enviado para o teu telefone.',
+  'auth.otp_invalid': 'Código inválido',
+  'auth.verify_code': 'Verificar Código',
+  'auth.sign_in': 'Entrar',
+  'auth.sign_up': 'Criar Conta',
+  'auth.no_account': 'Não tens conta?',
+  'auth.has_account': 'Já tens conta?',
+  'auth.register': 'Registar',
+  'auth.login': 'Entrar',
+  'auth.account_created': 'Conta criada!',
+  'auth.check_email': 'Verifica o teu email para confirmar a conta.',
+  'auth.error_login': 'Erro ao entrar',
+  'auth.error_signup': 'Erro ao criar conta',
+  'auth.error_unexpected': 'Erro inesperado',
+  'auth.slogan': 'Pequenos hábitos. Grandes futuros',
+
+  // ─── Roles ───
+  'role.parent': 'Encarregado',
+  'role.parent.desc': 'Gerir tarefas, mesadas e acompanhar o progresso',
+  'role.teen': 'Adolescente',
+  'role.teen.desc': 'Carteira avançada, categorias e orçamento',
+  'role.child': 'Criança',
+  'role.child.desc': 'Missões, poupanças e ganhar moedas',
+  'role.teacher': 'Professor',
+  'role.teacher.desc': 'Gerir turmas e desafios colectivos',
+  'role.partner': 'Parceiro',
+  'role.partner.desc': 'Gestão do programa de parceria institucional',
+  'role.admin': 'Administrador',
+  'role.admin.desc': 'Gestão global da plataforma',
+
+  // ─── Profile / Preferences ───
   'profile.language': 'Idioma',
   'profile.currency': 'Moeda',
   'profile.preferences': 'Preferências',
@@ -50,12 +268,469 @@ const pt: Record<string, string> = {
   'profile.save_avatar': 'Guardar Avatar',
   'profile.updated': 'Perfil atualizado!',
   'profile.error': 'Erro ao guardar',
+  'profile.choose_avatar': 'Escolhe o teu avatar',
+  'profile.child_hint': 'O teu nome e outros dados são geridos pelo teu encarregado. Aqui podes personalizar o teu avatar!',
 
-  // Landing CTA
-  'cta.title': 'Comece hoje a construir o futuro financeiro do seu filho',
-  'cta.subtitle': 'Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.',
-  'cta.family': 'Criar conta familiar',
-  'cta.school': 'Levar KIVARA para a escola',
+  // ─── Common / Shared ───
+  'common.save': 'Guardar',
+  'common.cancel': 'Cancelar',
+  'common.delete': 'Eliminar',
+  'common.edit': 'Editar',
+  'common.create': 'Criar',
+  'common.close': 'Fechar',
+  'common.back': 'Voltar',
+  'common.next': 'Seguinte',
+  'common.confirm': 'Confirmar',
+  'common.loading': 'A carregar...',
+  'common.error': 'Erro',
+  'common.success': 'Sucesso',
+  'common.yes': 'Sim',
+  'common.no': 'Não',
+  'common.search': 'Pesquisar',
+  'common.filter': 'Filtrar',
+  'common.more': 'Mais',
+  'common.more_features': 'Mais funcionalidades',
+  'common.view_all': 'Ver todas',
+  'common.logout': 'Sair',
+  'common.more_options': 'Mais opções',
+  'common.requires_upgrade': 'Requer upgrade',
+  'common.copied': 'Copiado! 📋',
+  'common.share': 'Partilhar',
+  'common.approve': 'Aprovar',
+  'common.reject': 'Rejeitar',
+  'common.remove': 'Remover',
+  'common.add': 'Adicionar',
+  'common.invite': 'Convidar',
+  'common.send': 'Enviar',
+  'common.sending': 'A enviar...',
+  'common.creating': 'A criar...',
+  'common.optional': 'opcional',
+  'common.years': 'anos',
+  'common.coins': 'moedas',
+  'common.points': 'pontos',
+  'common.total_balance': 'Saldo Total',
+  'common.balance': 'Saldo',
+  'common.no_data': 'Sem dados',
+
+  // ─── Navigation Labels (Layouts) ───
+  'nav.parent.panel': 'Painel',
+  'nav.parent.children': 'Crianças',
+  'nav.parent.tasks': 'Tarefas',
+  'nav.parent.allowance': 'Mesada',
+  'nav.parent.vaults': 'Cofres',
+  'nav.parent.rewards': 'Recompensas',
+  'nav.parent.reports': 'Relatórios',
+  'nav.parent.profile': 'Perfil',
+  'nav.parent.consent': 'Consentimento',
+  'nav.parent.subscription': 'Subscrição',
+  'nav.parent.support': 'Suporte',
+  'nav.parent.menu': 'Menu',
+  'nav.parent.slogan': 'Pequenos hábitos. Grandes futuros.',
+  'nav.parent.role': 'Encarregado',
+
+  'nav.child.home': 'Início',
+  'nav.child.wallet': 'Carteira',
+  'nav.child.tasks': 'Tarefas',
+  'nav.child.learn': 'Aprender',
+  'nav.child.vaults': 'Cofres',
+  'nav.child.dreams': 'Sonhos',
+  'nav.child.missions': 'Missões',
+  'nav.child.store': 'Loja',
+  'nav.child.achievements': 'Conquistas',
+  'nav.child.badges': 'Badges',
+  'nav.child.streaks': 'Streaks',
+  'nav.child.diary': 'Diário',
+  'nav.child.profile': 'Perfil',
+  'nav.child.hello': 'Olá,',
+
+  'nav.teen.home': 'Início',
+  'nav.teen.wallet': 'Carteira',
+  'nav.teen.tasks': 'Tarefas',
+  'nav.teen.learn': 'Aprender',
+  'nav.teen.vaults': 'Cofres',
+  'nav.teen.missions': 'Missões',
+  'nav.teen.analytics': 'Analytics',
+  'nav.teen.badges': 'Badges',
+  'nav.teen.streaks': 'Streaks',
+  'nav.teen.profile': 'Perfil',
+
+  'nav.teacher.panel': 'Painel',
+  'nav.teacher.classes': 'Turmas',
+  'nav.teacher.challenges': 'Desafios',
+  'nav.teacher.school': 'Escola',
+  'nav.teacher.slogan': 'Modo Escolar',
+  'nav.teacher.role': 'Professor',
+  'nav.teacher.badge': 'ESCOLA',
+  'nav.teacher.challenges_ending': 'Desafios próximos de terminar',
+
+  'nav.partner.dashboard': 'Dashboard',
+  'nav.partner.programs': 'Programas',
+  'nav.partner.challenges': 'Desafios',
+  'nav.partner.reports': 'Relatórios',
+  'nav.partner.subscription': 'Subscrição',
+  'nav.partner.profile': 'Perfil',
+  'nav.partner.slogan': 'Parceiro Institucional',
+  'nav.partner.role': 'Parceiro',
+  'nav.partner.menu': 'Gestão',
+
+  'nav.admin.panel': 'Painel Global',
+  'nav.admin.tenants': 'Tenants',
+  'nav.admin.schools': 'Escolas',
+  'nav.admin.users': 'Utilizadores',
+  'nav.admin.subscriptions': 'Subscrições',
+  'nav.admin.finance': 'Finanças',
+  'nav.admin.currencies': 'Moedas',
+  'nav.admin.audit': 'Auditoria',
+  'nav.admin.risk': 'Risco',
+  'nav.admin.compliance': 'Compliance',
+  'nav.admin.lessons': 'Lições',
+  'nav.admin.onboarding': 'Onboarding',
+  'nav.admin.notifications': 'Notificações',
+  'nav.admin.banners': 'Banners',
+  'nav.admin.slogan': 'Administração Global',
+  'nav.admin.role': 'Admin',
+  'nav.admin.menu': 'Gestão',
+
+  // ─── Parent Dashboard ───
+  'parent.dashboard.family_panel': 'Painel Familiar',
+  'parent.dashboard.hello': 'Olá,',
+  'parent.dashboard.subtitle': 'Acompanha a evolução financeira dos teus filhos. Pequenos hábitos, grandes futuros.',
+  'parent.dashboard.total_balance': 'Saldo Total',
+  'parent.dashboard.children': 'Crianças',
+  'parent.dashboard.distributed': 'Distribuído',
+  'parent.dashboard.transactions': 'Transacções',
+  'parent.dashboard.send_allowance': 'Enviar Mesada',
+  'parent.dashboard.send_now': 'Enviar Agora',
+  'parent.dashboard.emission_limit': 'Limite de Emissão Mensal',
+  'parent.dashboard.inflation_control': 'Controlo de inflação KVC',
+  'parent.dashboard.remaining': 'Restante',
+  'parent.dashboard.limit_warning': 'Atenção: {pct}% do limite utilizado.',
+  'parent.dashboard.limit_reached': 'Limite atingido! Não podes emitir mais KVC este mês.',
+  'parent.dashboard.upgrade_hint': 'Faz upgrade para desbloquear tudo! 🚀',
+  'parent.dashboard.recent_activity': 'Actividade Recente',
+  'parent.dashboard.no_children': 'Nenhuma criança associada.',
+  'parent.dashboard.add_children_hint': 'Adiciona crianças na secção Crianças.',
+  'parent.dashboard.no_transactions': 'Ainda sem transacções.',
+  'parent.dashboard.send_to_start': 'Envia uma mesada para começar!',
+
+  // ─── Transaction Types ───
+  'tx.allowance': 'Mesada',
+  'tx.task_reward': 'Tarefa',
+  'tx.mission_reward': 'Missão',
+  'tx.purchase': 'Compra',
+  'tx.donation': 'Doação',
+  'tx.vault_deposit': 'Cofre ↓',
+  'tx.vault_withdraw': 'Cofre ↑',
+  'tx.transfer': 'Transferência',
+  'tx.adjustment': 'Ajuste',
+  'tx.refund': 'Reembolso',
+
+  // ─── Parent Children ───
+  'parent.children.title': 'Crianças',
+  'parent.children.subtitle': 'Gere os perfis das tuas crianças',
+  'parent.children.management': 'Gestão',
+  'parent.children.invite': 'Convidar',
+  'parent.children.add': 'Adicionar',
+  'parent.children.total_balance': 'saldo total',
+  'parent.children.max_children': 'crianças',
+  'parent.children.upgrade_more': 'Upgrade para mais crianças',
+  'parent.children.no_children': 'Ainda sem crianças',
+  'parent.children.add_hint': 'Adiciona ou convida uma criança para começar.',
+  'parent.children.invite_child': 'Convidar Criança',
+  'parent.children.nickname': 'Alcunha',
+  'parent.children.balance': 'Saldo',
+  'parent.children.monthly_limit': 'Limite Mensal',
+  'parent.children.set_limit': 'Definir',
+  'parent.children.budget_exceptions': 'Pedidos de Exceção',
+  'parent.children.pending_requests': 'pedido(s) pendente(s)',
+  'parent.children.removed': 'Criança removida',
+  'parent.children.removed_desc': 'O perfil foi removido com sucesso.',
+  'parent.children.remove_error': 'Não foi possível remover a criança.',
+  'parent.children.limits_updated': 'Limites atualizados! 💰',
+  'parent.children.limits_error': 'Não foi possível atualizar os limites.',
+  'parent.children.code_copied': 'Código copiado para a área de transferência.',
+  'parent.children.link_copied': 'Link copiado para a área de transferência.',
+  'parent.children.code_error': 'Não foi possível gerar o código.',
+
+  // ─── Parent Tasks ───
+  'parent.tasks.title': 'Tarefas',
+  'parent.tasks.subtitle': 'Cria e aprova tarefas para as crianças',
+  'parent.tasks.management': 'Gestão',
+  'parent.tasks.suggest_ai': 'Sugerir',
+  'parent.tasks.new_task': 'Nova Tarefa',
+  'parent.tasks.create_task': 'Criar Tarefa',
+  'parent.tasks.edit_task': 'Editar Tarefa',
+  'parent.tasks.title_label': 'Título',
+  'parent.tasks.title_placeholder': 'Ex: Arrumar o quarto',
+  'parent.tasks.description': 'Descrição',
+  'parent.tasks.desc_placeholder': 'Descreve a tarefa...',
+  'parent.tasks.reward': 'Recompensa (KVC)',
+  'parent.tasks.category': 'Categoria',
+  'parent.tasks.child': 'Criança',
+  'parent.tasks.select_child': 'Selecciona...',
+  'parent.tasks.recurrence': 'Recorrência',
+  'parent.tasks.once': 'Única vez',
+  'parent.tasks.daily': 'Diária',
+  'parent.tasks.weekly': 'Semanal',
+  'parent.tasks.monthly': 'Mensal',
+  'parent.tasks.creating': 'A criar...',
+  'parent.tasks.create_btn': '✅ Criar Tarefa',
+  'parent.tasks.total': 'Total',
+  'parent.tasks.pending': 'Pendentes',
+  'parent.tasks.to_approve': 'A Aprovar',
+  'parent.tasks.approved': 'Aprovadas',
+  'parent.tasks.no_tasks': 'Sem tarefas ainda',
+  'parent.tasks.no_tasks_hint': 'Clica em "Nova Tarefa" para começar!',
+  'parent.tasks.status.pending': 'Pendente',
+  'parent.tasks.status.in_progress': 'Em Progresso',
+  'parent.tasks.status.completed': 'A Aprovar',
+  'parent.tasks.status.approved': 'Aprovada',
+  'parent.tasks.cat.cleaning': '🧹 Limpeza',
+  'parent.tasks.cat.studying': '📚 Estudo',
+  'parent.tasks.cat.helping': '🤝 Ajuda',
+  'parent.tasks.cat.other': '📌 Outro',
+
+  // ─── Parent Allowance ───
+  'parent.allowance.title': 'Mesada Inteligente',
+  'parent.allowance.subtitle': 'Base + bónus por tarefas e missões',
+  'parent.allowance.management': 'Gestão',
+  'parent.allowance.automatic': 'Automático',
+  'parent.allowance.base_week': 'base/sem',
+  'parent.allowance.in_circulation': 'em circulação',
+  'parent.allowance.no_children': 'Sem crianças registadas',
+  'parent.allowance.no_children_hint': 'Adiciona uma criança para configurar a mesada.',
+  'parent.allowance.current_balance': 'Saldo actual',
+  'parent.allowance.composition': 'Composição da mesada',
+  'parent.allowance.base': 'Base',
+  'parent.allowance.weekly': 'semanal',
+  'parent.allowance.monthly_freq': 'mensal',
+  'parent.allowance.task_bonus': 'Bónus tarefas',
+  'parent.allowance.mission_bonus': 'Bónus missões',
+  'parent.allowance.total_this_week': 'Total esta semana',
+  'parent.allowance.send': 'Enviar Mesada',
+  'parent.allowance.sending': 'A enviar...',
+  'parent.allowance.sent': 'Mesada enviada! 💰',
+  'parent.allowance.last_sent': 'Última mesada',
+  'parent.allowance.never_sent': 'Nenhuma mesada enviada ainda',
+  'parent.allowance.configure': 'Configurar Mesada',
+  'parent.allowance.frequency': 'Frequência',
+  'parent.allowance.base_amount': 'Montante base',
+  'parent.allowance.task_bonus_per': 'Bónus por tarefa',
+  'parent.allowance.mission_bonus_per': 'Bónus por missão',
+  'parent.allowance.save_config': '✅ Guardar Configuração',
+  'parent.allowance.vault_rates': 'Taxas de Juro dos Cofres',
+  'parent.allowance.monthly_rate': 'Taxa de juro mensal',
+  'parent.allowance.send_error': 'Erro ao enviar mesada',
+
+  // ─── Parent Vaults ───
+  'parent.vaults.title': 'Cofres dos Filhos',
+  'parent.vaults.subtitle': 'Acompanha e gere as poupanças dos teus filhos. Ajusta taxas de juro e cria novos cofres.',
+  'parent.vaults.management': 'Gestão',
+  'parent.vaults.create': 'Criar Cofre',
+  'parent.vaults.total_saved': 'Total Poupado',
+  'parent.vaults.vault_count': 'Cofres',
+  'parent.vaults.total_progress': 'Progresso total',
+  'parent.vaults.no_vaults': 'Sem cofres',
+  'parent.vaults.no_vaults_hint': 'Os teus filhos ainda não criaram cofres de poupança.',
+  'parent.vaults.total_label': 'total',
+  'parent.vaults.created_on': 'Criado em',
+  'parent.vaults.completed': 'concluído',
+  'parent.vaults.goal_reached': '✅ Meta atingida!',
+  'parent.vaults.per_month': '/mês',
+  'parent.vaults.interest': 'Juros',
+  'parent.vaults.delete': 'Eliminar',
+  'parent.vaults.delete_vault': 'Eliminar cofre?',
+  'parent.vaults.delete_vault_desc': 'Tens a certeza que queres eliminar o cofre "{name}" de {child}? Esta acção não pode ser revertida.',
+  'parent.vaults.adjust_interest': 'Ajustar Juros',
+  'parent.vaults.interest_rate': 'Taxa de Juro Mensal',
+  'parent.vaults.rate_updated': 'Taxa atualizada! 📊',
+  'parent.vaults.rate_desc': 'Taxa de juro alterada para {rate}%/mês.',
+  'parent.vaults.vault_created': 'Cofre criado! 🐷',
+  'parent.vaults.vault_created_desc': 'Cofre "{name}" criado com sucesso.',
+  'parent.vaults.create_error': 'Não foi possível criar o cofre.',
+  'parent.vaults.vault_name': 'Nome do cofre',
+  'parent.vaults.target_amount': 'Meta',
+  'parent.vaults.icon': 'Ícone',
+  'parent.vaults.interest_monthly': 'Taxa de juro mensal',
+  'parent.vaults.for_child': 'Para a criança',
+  'parent.vaults.select_child': 'Seleccionar criança',
+
+  // ─── Parent Rewards ───
+  'parent.rewards.title': 'Recompensas Familiares',
+  'parent.rewards.subtitle': 'Cria recompensas personalizadas para motivar as crianças',
+  'parent.rewards.management': 'Gestão',
+  'parent.rewards.active': 'Activas',
+  'parent.rewards.claimed': 'Resgatadas',
+  'parent.rewards.new_reward': 'Nova Recompensa',
+  'parent.rewards.create_reward': 'Criar Recompensa',
+  'parent.rewards.icon': 'Ícone',
+  'parent.rewards.name': 'Nome',
+  'parent.rewards.name_placeholder': 'Ex: Noite de cinema',
+  'parent.rewards.description': 'Descrição',
+  'parent.rewards.desc_placeholder': 'Descreve a recompensa...',
+  'parent.rewards.price': 'Preço (KVC)',
+  'parent.rewards.category': 'Categoria',
+  'parent.rewards.cat.experience': 'Experiência',
+  'parent.rewards.cat.privilege': 'Privilégio',
+  'parent.rewards.cat.physical': 'Físico',
+  'parent.rewards.cat.digital': 'Digital',
+  'parent.rewards.creating': 'A criar...',
+  'parent.rewards.create_btn': '🎁 Criar Recompensa',
+  'parent.rewards.no_rewards': 'Sem recompensas ainda',
+  'parent.rewards.no_rewards_hint': 'Clica em "Nova Recompensa" para começar!',
+  'parent.rewards.remove': 'Remover',
+  'parent.rewards.count': 'recompensas criadas',
+
+  // ─── Parent Reports ───
+  'parent.reports.title': 'Relatórios',
+  'parent.reports.subtitle': 'Análises detalhadas da actividade financeira familiar',
+
+  // ─── Parent Consent ───
+  'parent.consent.title': 'Consentimento',
+  'parent.consent.subtitle': 'Gestão do consentimento parental',
+
+  // ─── Parent Support ───
+  'parent.support.title': 'Suporte',
+  'parent.support.subtitle': 'Estamos aqui para ajudar',
+
+  // ─── Parent Subscription ───
+  'parent.subscription.title': 'Subscrição',
+  'parent.subscription.subtitle': 'Gere o teu plano e funcionalidades',
+
+  // ─── Send Allowance Dialog ───
+  'dialog.send_allowance.title': 'Enviar Mesada',
+  'dialog.send_allowance.child': 'Criança',
+  'dialog.send_allowance.select_child': 'Selecciona uma criança',
+  'dialog.send_allowance.amount': 'Montante (KVC)',
+  'dialog.send_allowance.amount_placeholder': 'Ex: 50',
+  'dialog.send_allowance.description': 'Descrição',
+  'dialog.send_allowance.desc_placeholder': 'Ex: Mesada semanal',
+  'dialog.send_allowance.default_desc': 'Mesada semanal',
+  'dialog.send_allowance.summary': 'Resumo',
+  'dialog.send_allowance.will_receive': 'receberá',
+  'dialog.send_allowance.current_balance': 'Saldo actual',
+  'dialog.send_allowance.new_balance': 'Novo saldo',
+  'dialog.send_allowance.confirm': 'Confirmar Envio',
+  'dialog.send_allowance.sending': 'A enviar...',
+  'dialog.send_allowance.sent': 'Mesada enviada! 💰',
+  'dialog.send_allowance.error': 'Erro ao enviar mesada',
+  'dialog.send_allowance.error_validation': 'Selecciona uma criança e um montante válido.',
+
+  // ─── Child Dashboard ───
+  'child.dashboard.hello': 'Olá,',
+  'child.dashboard.your_wallet': 'A tua carteira',
+  'child.dashboard.missions': 'Missões',
+  'child.dashboard.savings': 'Poupanças',
+
+  // ─── Child Tasks ───
+  'child.tasks.title': 'As minhas tarefas',
+  'child.tasks.subtitle': 'Completa tarefas para ganhar moedas',
+
+  // ─── Child Missions ───
+  'child.missions.title': 'Missões',
+  'child.missions.subtitle': 'Desafios financeiros para subires de nível',
+
+  // ─── Child Wallet ───
+  'child.wallet.title': 'Carteira',
+  'child.wallet.balance': 'Saldo disponível',
+
+  // ─── Child Vaults ───
+  'child.vaults.title': 'Cofres de Poupança',
+  'child.vaults.subtitle': 'Poupa para os teus objectivos',
+
+  // ─── Child Dreams ───
+  'child.dreams.title': 'Sonhos',
+  'child.dreams.subtitle': 'Define e acompanha os teus sonhos',
+
+  // ─── Child Store ───
+  'child.store.title': 'Loja de Recompensas',
+  'child.store.subtitle': 'Troca as tuas moedas por recompensas',
+
+  // ─── Child Diary ───
+  'child.diary.title': 'Diário Financeiro',
+  'child.diary.subtitle': 'Regista as tuas reflexões sobre dinheiro',
+
+  // ─── Child Achievements ───
+  'child.achievements.title': 'Conquistas',
+  'child.achievements.subtitle': 'As tuas medalhas e troféus',
+
+  // ─── Child Profile ───
+  'child.profile.role': '🧒 Criança',
+
+  // ─── Teen Dashboard ───
+  'teen.dashboard.title': 'Dashboard',
+
+  // ─── Teen Missions ───
+  'teen.missions.title': 'Missões',
+  'teen.missions.subtitle': 'Desafios financeiros para subires de nível',
+  'teen.missions.tab.missions': 'Missões',
+  'teen.missions.tab.challenges': 'Desafios Semanais',
+  'teen.missions.status.completed': 'Completa',
+  'teen.missions.status.in_progress': 'Em curso',
+  'teen.missions.status.available': 'Disponível',
+
+  // ─── Teen Wallet ───
+  'teen.wallet.title': 'Carteira',
+
+  // ─── Teen Tasks ───
+  'teen.tasks.title': 'Tarefas',
+
+  // ─── Teen Vaults ───
+  'teen.vaults.title': 'Cofres',
+
+  // ─── Teen Analytics ───
+  'teen.analytics.title': 'Analytics',
+
+  // ─── Teen Profile ───
+  'teen.profile.title': 'Perfil',
+
+  // ─── Teacher Dashboard ───
+  'teacher.dashboard.title': 'Painel',
+
+  // ─── Teacher Classes ───
+  'teacher.classes.title': 'Turmas',
+
+  // ─── Teacher Challenges ───
+  'teacher.challenges.title': 'Desafios',
+
+  // ─── Teacher School ───
+  'teacher.school.title': 'Escola',
+
+  // ─── Partner Dashboard ───
+  'partner.dashboard.title': 'Dashboard',
+
+  // ─── Partner Programs ───
+  'partner.programs.title': 'Programas',
+
+  // ─── Partner Challenges ───
+  'partner.challenges.title': 'Desafios',
+
+  // ─── Partner Reports ───
+  'partner.reports.title': 'Relatórios',
+
+  // ─── Learn Page ───
+  'learn.title': 'Aprender',
+  'learn.subtitle': 'Lições interactivas sobre educação financeira',
+
+  // ─── Badges Page ───
+  'badges.title': 'Badges',
+  'badges.subtitle': 'As tuas conquistas',
+
+  // ─── Streaks Page ───
+  'streaks.title': 'Streaks',
+  'streaks.subtitle': 'Mantém a tua sequência activa',
+
+  // ─── Install Page ───
+  'install.title': 'Instalar KIVARA',
+
+  // ─── Not Found ───
+  'notfound.title': 'Página não encontrada',
+  'notfound.back': 'Voltar ao início',
+
+  // ─── Notifications ───
+  'notifications.title': 'Notificações',
+  'notifications.empty': 'Sem notificações',
+  'notifications.mark_read': 'Marcar como lida',
 };
 
 export default pt;
