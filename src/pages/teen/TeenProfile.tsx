@@ -43,9 +43,9 @@ export default function TeenProfile() {
       .eq('id', user.profileId);
     setSaving(false);
     if (error) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: 'Perfil atualizado! 🎉' });
+      toast({ title: t('profile.updated') + ' 🎉' });
     }
   };
 
@@ -69,7 +69,7 @@ export default function TeenProfile() {
             </div>
             <h1 className="font-display text-2xl font-bold">{displayName}</h1>
             <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1">
-              <span className="text-xs font-medium">🧑‍💻 Adolescente</span>
+              <span className="text-xs font-medium">🧑‍💻 {t('role.teen')}</span>
             </div>
           </CardContent>
         </Card>
@@ -80,7 +80,7 @@ export default function TeenProfile() {
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardContent className="p-4">
-              <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-3 block">Escolhe o teu avatar</Label>
+              <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground mb-3 block">{t('profile.choose_avatar')}</Label>
               <div className="flex flex-wrap gap-2">
                 {AVATAR_OPTIONS.map((emoji) => (
                   <button
@@ -125,7 +125,7 @@ export default function TeenProfile() {
                 </SelectContent>
               </Select>
             </div>
-            <p className="text-sm text-muted-foreground">Os teus dados pessoais são geridos pelo teu encarregado. Aqui podes escolher o avatar que te representa!</p>
+            <p className="text-sm text-muted-foreground">{t('profile.child_hint')}</p>
           </CardContent>
         </Card>
       </motion.div>
@@ -134,7 +134,7 @@ export default function TeenProfile() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saving ? 'A guardar...' : 'Guardar Avatar'}
+          {saving ? t('profile.saving') : t('profile.save_avatar')}
         </Button>
       </motion.div>
     </div>
