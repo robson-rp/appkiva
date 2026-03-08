@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,52 +25,29 @@ import {
   useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier, useDeleteSubscriptionTier,
 } from '@/hooks/use-tenants';
 import { useRegionalPrices, useUpsertRegionalPrice, useDeleteRegionalPrice, type RegionalPrice } from '@/hooks/use-regional-prices';
+import { useT } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-const tierTypeLabels: Record<string, string> = {
-  free: 'Gratuito',
-  family_premium: 'Família Premium',
-  school_institutional: 'Escolar',
-  partner_program: 'Parceiro',
-};
-
-const tierSchema = z.object({
-  name: z.string().trim().min(1, 'Nome obrigatório').max(100),
-  tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program']),
-  price_monthly: z.number().min(0, 'Deve ser ≥ 0'),
-  price_yearly: z.number().min(0, 'Deve ser ≥ 0'),
-  max_children: z.number().int().min(0),
-  max_classrooms: z.number().int().min(0),
-  extra_child_price: z.number().min(0, 'Deve ser ≥ 0'),
-  currency: z.string().trim().min(1).max(10),
-  is_active: z.boolean(),
-  features: z.array(z.string()),
-});
-
-type TierForm = z.infer<typeof tierSchema>;
-
-const emptyForm: TierForm = {
-  name: '',
-  tier_type: 'free',
-  price_monthly: 0,
-  price_yearly: 0,
-  max_children: 5,
-  max_classrooms: 0,
-  extra_child_price: 0,
-  currency: 'AOA',
-  is_active: true,
-  features: [],
-};
+function useTierTypeLabels() {
+  const t = useT();
+  return {
+    free: t('admin.subs.type_free'),
+    family_premium: t('admin.subs.type_family'),
+    school_institutional: t('admin.subs.type_school'),
+    partner_program: t('admin.subs.type_partner'),
+  } as Record<string, string>;
+}
 
 export default function AdminSubscriptions() {
+  const t = useT();
+  const tierTypeLabels = useTierTypeLabels();
   const { data: tiers, isLoading } = useSubscriptionTiers(true);
   const createTier = useCreateSubscriptionTier();
   const updateTier = useUpdateSubscriptionTier();
   const deleteTier = useDeleteSubscriptionTier();
 
-  // Regional prices
   const { data: allRegionalPrices = [] } = useRegionalPrices();
   const upsertRegional = useUpsertRegionalPrice();
   const deleteRegional = useDeleteRegionalPrice();
@@ -88,6 +65,28 @@ export default function AdminSubscriptions() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+
+  const tierSchema = useMemo(() => z.object({
+    name: z.string().trim().min(1, t('admin.subs.name_required')).max(100),
+    tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program']),
+    price_monthly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
+    price_yearly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
+    max_children: z.number().int().min(0),
+    max_classrooms: z.number().int().min(0),
+    extra_child_price: z.number().min(0, t('admin.subs.must_be_gte_zero')),
+    currency: z.string().trim().min(1).max(10),
+    is_active: z.boolean(),
+    features: z.array(z.string()),
+  }), [t]);
+
+  type TierForm = z.infer<typeof tierSchema>;
+
+  const emptyForm: TierForm = {
+    name: '', tier_type: 'free', price_monthly: 0, price_yearly: 0,
+    max_children: 5, max_classrooms: 0, extra_child_price: 0,
+    currency: 'AOA', is_active: true, features: [],
+  };
+
   const [form, setForm] = useState<TierForm>(emptyForm);
   const [featuresText, setFeaturesText] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -99,11 +98,11 @@ export default function AdminSubscriptions() {
 
   const filtered = useMemo(() => {
     if (!tiers) return [];
-    return tiers.filter((t: any) => {
-      if (typeFilter !== 'all' && t.tier_type !== typeFilter) return false;
-      if (statusFilter === 'active' && !t.is_active) return false;
-      if (statusFilter === 'inactive' && t.is_active) return false;
-      if (search && !t.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return tiers.filter((tier: any) => {
+      if (typeFilter !== 'all' && tier.tier_type !== typeFilter) return false;
+      if (statusFilter === 'active' && !tier.is_active) return false;
+      if (statusFilter === 'inactive' && tier.is_active) return false;
+      if (search && !tier.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
   }, [tiers, search, typeFilter, statusFilter]);
@@ -112,8 +111,8 @@ export default function AdminSubscriptions() {
     if (!tiers) return { total: 0, active: 0, inactive: 0 };
     return {
       total: tiers.length,
-      active: tiers.filter((t: any) => t.is_active).length,
-      inactive: tiers.filter((t: any) => !t.is_active).length,
+      active: tiers.filter((tier: any) => tier.is_active).length,
+      inactive: tiers.filter((tier: any) => !tier.is_active).length,
     };
   }, [tiers]);
 
@@ -129,16 +128,11 @@ export default function AdminSubscriptions() {
     setEditId(tier.id);
     const features = Array.isArray(tier.features) ? tier.features : [];
     setForm({
-      name: tier.name,
-      tier_type: tier.tier_type,
-      price_monthly: Number(tier.price_monthly),
-      price_yearly: Number(tier.price_yearly),
-      max_children: tier.max_children,
-      max_classrooms: tier.max_classrooms,
+      name: tier.name, tier_type: tier.tier_type,
+      price_monthly: Number(tier.price_monthly), price_yearly: Number(tier.price_yearly),
+      max_children: tier.max_children, max_classrooms: tier.max_classrooms,
       extra_child_price: Number(tier.extra_child_price ?? 0),
-      currency: tier.currency,
-      is_active: tier.is_active,
-      features,
+      currency: tier.currency, is_active: tier.is_active, features,
     });
     setFeaturesText(features.join('\n'));
     setErrors({});
@@ -161,25 +155,20 @@ export default function AdminSubscriptions() {
     try {
       if (editId) {
         await updateTier.mutateAsync({ id: editId, ...validData });
-        toast.success('Plano atualizado');
+        toast.success(t('admin.subs.plan_updated'));
       } else {
         await createTier.mutateAsync({
-          name: validData.name,
-          tier_type: validData.tier_type,
-          price_monthly: validData.price_monthly,
-          price_yearly: validData.price_yearly,
-          max_children: validData.max_children,
-          max_classrooms: validData.max_classrooms,
-          extra_child_price: validData.extra_child_price,
-          currency: validData.currency,
-          is_active: validData.is_active,
-          features: validData.features,
+          name: validData.name, tier_type: validData.tier_type,
+          price_monthly: validData.price_monthly, price_yearly: validData.price_yearly,
+          max_children: validData.max_children, max_classrooms: validData.max_classrooms,
+          extra_child_price: validData.extra_child_price, currency: validData.currency,
+          is_active: validData.is_active, features: validData.features,
         });
-        toast.success('Plano criado');
+        toast.success(t('admin.subs.plan_created'));
       }
       setDialogOpen(false);
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao guardar');
+      toast.error(err.message || t('admin.subs.save_error'));
     }
   }
 
@@ -191,9 +180,9 @@ export default function AdminSubscriptions() {
     if (!deleteTarget) return;
     try {
       await deleteTier.mutateAsync(deleteTarget.id);
-      toast.success(`Plano "${deleteTarget.name}" eliminado`);
+      toast.success(t('admin.subs.deleted').replace('{name}', deleteTarget.name));
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao eliminar');
+      toast.error(err.message || t('admin.subs.delete_error'));
     } finally {
       setDeleteTarget(null);
     }
@@ -204,16 +193,16 @@ export default function AdminSubscriptions() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Planos de Subscrição</h1>
-        <p className="text-sm text-muted-foreground">Gestão completa dos tiers de subscrição da plataforma</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.subs.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('admin.subs.subtitle')}</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Total de Planos', value: stats.total, icon: Package, color: 'text-primary' },
-          { label: 'Activos', value: stats.active, icon: CheckCircle, color: 'text-secondary' },
-          { label: 'Inactivos', value: stats.inactive, icon: XCircle, color: 'text-muted-foreground' },
+          { label: t('admin.subs.total_plans'), value: stats.total, icon: Package, color: 'text-primary' },
+          { label: t('admin.subs.active'), value: stats.active, icon: CheckCircle, color: 'text-secondary' },
+          { label: t('admin.subs.inactive'), value: stats.inactive, icon: XCircle, color: 'text-muted-foreground' },
         ].map(s => (
           <Card key={s.label} className="border-border/50">
             <CardContent className="flex items-center gap-3 p-4">
@@ -231,50 +220,45 @@ export default function AdminSubscriptions() {
       <Card className="border-border/50">
         <CardContent className="flex flex-wrap items-end gap-3 p-4">
           <div className="flex-1 min-w-[180px]">
-            <Label className="text-xs text-muted-foreground mb-1 block">Pesquisar</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">{t('admin.subs.search')}</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Nome do plano..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-9"
-              />
+              <Input placeholder={t('admin.subs.search_placeholder')} value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
           </div>
           <div className="min-w-[160px]">
-            <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">{t('admin.subs.type_filter')}</Label>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="free">Gratuito</SelectItem>
-                <SelectItem value="family_premium">Família Premium</SelectItem>
-                <SelectItem value="school_institutional">Escolar</SelectItem>
-                <SelectItem value="partner_program">Parceiro</SelectItem>
+                <SelectItem value="all">{t('admin.subs.all')}</SelectItem>
+                <SelectItem value="free">{t('admin.subs.type_free')}</SelectItem>
+                <SelectItem value="family_premium">{t('admin.subs.type_family')}</SelectItem>
+                <SelectItem value="school_institutional">{t('admin.subs.type_school')}</SelectItem>
+                <SelectItem value="partner_program">{t('admin.subs.type_partner')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="min-w-[140px]">
-            <Label className="text-xs text-muted-foreground mb-1 block">Estado</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">{t('admin.subs.status_filter')}</Label>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="active">Activo</SelectItem>
-                <SelectItem value="inactive">Inactivo</SelectItem>
+                <SelectItem value="all">{t('admin.subs.all')}</SelectItem>
+                <SelectItem value="active">{t('admin.subs.status_active')}</SelectItem>
+                <SelectItem value="inactive">{t('admin.subs.status_inactive')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <Button onClick={openCreate} className="gap-1.5">
-            <Plus className="h-4 w-4" /> Novo Plano
+            <Plus className="h-4 w-4" /> {t('admin.subs.new_plan')}
           </Button>
         </CardContent>
       </Card>
 
       {/* Table */}
       {isLoading ? (
-        <p className="text-center text-muted-foreground py-8">A carregar...</p>
+        <p className="text-center text-muted-foreground py-8">{t('admin.subs.loading')}</p>
       ) : (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">
@@ -282,33 +266,29 @@ export default function AdminSubscriptions() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead className="text-right">Mensal</TableHead>
-                    <TableHead className="text-right">Anual</TableHead>
-                    <TableHead className="text-center">Crianças</TableHead>
-                    <TableHead className="text-center">Turmas</TableHead>
-                    <TableHead>Moeda</TableHead>
-                    <TableHead className="text-center">Tenants</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acções</TableHead>
+                    <TableHead>{t('admin.subs.col_name')}</TableHead>
+                    <TableHead>{t('admin.subs.col_type')}</TableHead>
+                    <TableHead className="text-right">{t('admin.subs.col_monthly')}</TableHead>
+                    <TableHead className="text-right">{t('admin.subs.col_yearly')}</TableHead>
+                    <TableHead className="text-center">{t('admin.subs.col_children')}</TableHead>
+                    <TableHead className="text-center">{t('admin.subs.col_classrooms')}</TableHead>
+                    <TableHead>{t('admin.subs.col_currency')}</TableHead>
+                    <TableHead className="text-center">{t('admin.subs.col_tenants')}</TableHead>
+                    <TableHead>{t('admin.subs.col_status')}</TableHead>
+                    <TableHead className="text-right">{t('admin.subs.col_actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
-                        Nenhum plano encontrado
-                      </TableCell>
+                      <TableCell colSpan={10} className="text-center text-muted-foreground py-8">{t('admin.subs.no_plans')}</TableCell>
                     </TableRow>
                   ) : (
                     filtered.map((tier: any) => (
                       <TableRow key={tier.id}>
                         <TableCell className="font-medium">{tier.name}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="text-xs">
-                            {tierTypeLabels[tier.tier_type] ?? tier.tier_type}
-                          </Badge>
+                          <Badge variant="secondary" className="text-xs">{tierTypeLabels[tier.tier_type] ?? tier.tier_type}</Badge>
                         </TableCell>
                         <TableCell className="text-right font-mono">{tier.currency} {tier.price_monthly}</TableCell>
                         <TableCell className="text-right font-mono">{tier.currency} {tier.price_yearly}</TableCell>
@@ -325,7 +305,7 @@ export default function AdminSubscriptions() {
                         </TableCell>
                         <TableCell>
                           <Badge variant={tier.is_active ? 'default' : 'outline'} className="text-xs">
-                            {tier.is_active ? 'Activo' : 'Inactivo'}
+                            {tier.is_active ? t('admin.subs.status_active') : t('admin.subs.status_inactive')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right space-x-1">
@@ -333,10 +313,8 @@ export default function AdminSubscriptions() {
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={!canDelete(tier)}
-                            title={canDelete(tier) ? 'Eliminar plano' : 'Apenas planos inactivos sem tenants podem ser eliminados'}
+                            variant="ghost" size="icon" disabled={!canDelete(tier)}
+                            title={canDelete(tier) ? t('admin.subs.delete_btn') : t('admin.subs.delete_only_inactive')}
                             onClick={() => setDeleteTarget({ id: tier.id, name: tier.name })}
                           >
                             <Trash2 className={`h-4 w-4 ${canDelete(tier) ? 'text-destructive' : 'text-muted-foreground'}`} />
@@ -356,62 +334,62 @@ export default function AdminSubscriptions() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editId ? 'Editar Plano' : 'Novo Plano'}</DialogTitle>
+            <DialogTitle>{editId ? t('admin.subs.edit_title') : t('admin.subs.create_title')}</DialogTitle>
             <DialogDescription>
-              {editId ? 'Altere os detalhes do plano de subscrição.' : 'Preencha os dados para criar um novo plano.'}
+              {editId ? t('admin.subs.edit_desc') : t('admin.subs.create_desc')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div>
-              <Label>Nome</Label>
+              <Label>{t('admin.subs.field_name')}</Label>
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
             </div>
 
             <div>
-              <Label>Tipo</Label>
+              <Label>{t('admin.subs.field_type')}</Label>
               <Select value={form.tier_type} onValueChange={v => setForm(f => ({ ...f, tier_type: v as any }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="free">Gratuito</SelectItem>
-                  <SelectItem value="family_premium">Família Premium</SelectItem>
-                  <SelectItem value="school_institutional">Escolar</SelectItem>
-                  <SelectItem value="partner_program">Parceiro</SelectItem>
+                  <SelectItem value="free">{t('admin.subs.type_free')}</SelectItem>
+                  <SelectItem value="family_premium">{t('admin.subs.type_family')}</SelectItem>
+                  <SelectItem value="school_institutional">{t('admin.subs.type_school')}</SelectItem>
+                  <SelectItem value="partner_program">{t('admin.subs.type_partner')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Preço Mensal</Label>
+                <Label>{t('admin.subs.field_monthly')}</Label>
                 <Input type="number" min={0} step={0.01} value={form.price_monthly} onChange={e => setForm(f => ({ ...f, price_monthly: parseFloat(e.target.value) || 0 }))} />
                 {errors.price_monthly && <p className="text-xs text-destructive mt-1">{errors.price_monthly}</p>}
               </div>
               <div>
-                <Label>Preço Anual</Label>
+                <Label>{t('admin.subs.field_yearly')}</Label>
                 <Input type="number" min={0} step={0.01} value={form.price_yearly} onChange={e => setForm(f => ({ ...f, price_yearly: parseFloat(e.target.value) || 0 }))} />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label>Máx. Crianças</Label>
+                <Label>{t('admin.subs.field_max_children')}</Label>
                 <Input type="number" min={0} value={form.max_children} onChange={e => setForm(f => ({ ...f, max_children: parseInt(e.target.value) || 0 }))} />
               </div>
               <div>
-                <Label>Máx. Turmas</Label>
+                <Label>{t('admin.subs.field_max_classrooms')}</Label>
                 <Input type="number" min={0} value={form.max_classrooms} onChange={e => setForm(f => ({ ...f, max_classrooms: parseInt(e.target.value) || 0 }))} />
               </div>
               <div>
-                <Label>Preço Extra/Criança</Label>
+                <Label>{t('admin.subs.field_extra_child')}</Label>
                 <Input type="number" min={0} step={0.01} value={form.extra_child_price} onChange={e => setForm(f => ({ ...f, extra_child_price: parseFloat(e.target.value) || 0 }))} />
                 {errors.extra_child_price && <p className="text-xs text-destructive mt-1">{errors.extra_child_price}</p>}
               </div>
             </div>
 
             <div>
-              <Label>Moeda</Label>
+              <Label>{t('admin.subs.field_currency')}</Label>
               <Input value={form.currency} onChange={e => setForm(f => ({ ...f, currency: e.target.value }))} maxLength={10} />
             </div>
 
@@ -420,7 +398,7 @@ export default function AdminSubscriptions() {
                 checked={form.is_active}
                 onCheckedChange={v => {
                   if (!v && editId) {
-                    const currentTier = tiers?.find((t: any) => t.id === editId);
+                    const currentTier = tiers?.find((ti: any) => ti.id === editId);
                     if (currentTier && (currentTier.tenant_count ?? 0) > 0 && currentTier.is_active) {
                       setDeactivateConfirmOpen(true);
                       return;
@@ -429,36 +407,34 @@ export default function AdminSubscriptions() {
                   setForm(f => ({ ...f, is_active: v }));
                 }}
               />
-              <Label>Plano activo</Label>
+              <Label>{t('admin.subs.field_active')}</Label>
             </div>
 
             <div>
-              <Label>Funcionalidades (uma por linha)</Label>
+              <Label>{t('admin.subs.field_features')}</Label>
               <Textarea rows={4} value={featuresText} onChange={e => setFeaturesText(e.target.value)} placeholder="savings_vaults&#10;dream_vaults&#10;advanced_reports" />
             </div>
           </div>
 
-          {/* Regional Prices Section — only in edit mode */}
+          {/* Regional Prices Section */}
           {editId && (
             <>
               <Separator className="my-2" />
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-primary" />
-                  <Label className="font-semibold text-sm">Preços Regionais (override)</Label>
+                  <Label className="font-semibold text-sm">{t('admin.subs.regional_prices')}</Label>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Define preços fixos por moeda. Quando definidos, substituem a conversão dinâmica USD→local.
-                </p>
+                <p className="text-xs text-muted-foreground">{t('admin.subs.regional_desc')}</p>
 
                 {tierRegionalPrices.length > 0 && (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-xs">Moeda</TableHead>
-                        <TableHead className="text-xs text-right">Mensal</TableHead>
-                        <TableHead className="text-xs text-right">Anual</TableHead>
-                        <TableHead className="text-xs text-right">Extra/Criança</TableHead>
+                        <TableHead className="text-xs">{t('admin.subs.rp_currency')}</TableHead>
+                        <TableHead className="text-xs text-right">{t('admin.subs.rp_monthly')}</TableHead>
+                        <TableHead className="text-xs text-right">{t('admin.subs.rp_yearly')}</TableHead>
+                        <TableHead className="text-xs text-right">{t('admin.subs.rp_extra')}</TableHead>
                         <TableHead className="w-10" />
                       </TableRow>
                     </TableHeader>
@@ -471,16 +447,12 @@ export default function AdminSubscriptions() {
                           <TableCell className="text-right font-mono text-xs">{rp.extra_child_price}</TableCell>
                           <TableCell>
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
+                              variant="ghost" size="icon" className="h-7 w-7"
                               onClick={async () => {
                                 try {
                                   await deleteRegional.mutateAsync(rp.id);
-                                  toast.success(`Preço regional ${rp.currency_code} removido`);
-                                } catch (e: any) {
-                                  toast.error(e.message);
-                                }
+                                  toast.success(t('admin.subs.rp_removed').replace('{currency}', rp.currency_code));
+                                } catch (e: any) { toast.error(e.message); }
                               }}
                             >
                               <Trash2 className="h-3.5 w-3.5 text-destructive" />
@@ -494,58 +466,32 @@ export default function AdminSubscriptions() {
 
                 <div className="grid grid-cols-4 gap-2 items-end">
                   <div>
-                    <Label className="text-[10px]">Moeda</Label>
-                    <Input
-                      placeholder="AOA"
-                      value={rpCurrency}
-                      onChange={(e) => setRpCurrency(e.target.value.toUpperCase())}
-                      maxLength={5}
-                      className="font-mono"
-                    />
+                    <Label className="text-[10px]">{t('admin.subs.rp_currency')}</Label>
+                    <Input placeholder="AOA" value={rpCurrency} onChange={(e) => setRpCurrency(e.target.value.toUpperCase())} maxLength={5} className="font-mono" />
                   </div>
                   <div>
-                    <Label className="text-[10px]">Mensal</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={rpMonthly}
-                      onChange={(e) => setRpMonthly(parseFloat(e.target.value) || 0)}
-                    />
+                    <Label className="text-[10px]">{t('admin.subs.rp_monthly')}</Label>
+                    <Input type="number" min={0} value={rpMonthly} onChange={(e) => setRpMonthly(parseFloat(e.target.value) || 0)} />
                   </div>
                   <div>
-                    <Label className="text-[10px]">Anual</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={rpYearly}
-                      onChange={(e) => setRpYearly(parseFloat(e.target.value) || 0)}
-                    />
+                    <Label className="text-[10px]">{t('admin.subs.rp_yearly')}</Label>
+                    <Input type="number" min={0} value={rpYearly} onChange={(e) => setRpYearly(parseFloat(e.target.value) || 0)} />
                   </div>
                   <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={!rpCurrency || upsertRegional.isPending}
+                    size="sm" variant="outline" disabled={!rpCurrency || upsertRegional.isPending}
                     onClick={async () => {
                       try {
                         await upsertRegional.mutateAsync({
-                          tier_id: editId,
-                          currency_code: rpCurrency,
-                          price_monthly: rpMonthly,
-                          price_yearly: rpYearly,
-                          extra_child_price: rpExtra,
+                          tier_id: editId, currency_code: rpCurrency,
+                          price_monthly: rpMonthly, price_yearly: rpYearly, extra_child_price: rpExtra,
                         });
-                        toast.success(`Preço ${rpCurrency} guardado`);
-                        setRpCurrency('');
-                        setRpMonthly(0);
-                        setRpYearly(0);
-                        setRpExtra(0);
-                      } catch (e: any) {
-                        toast.error(e.message);
-                      }
+                        toast.success(t('admin.subs.rp_saved').replace('{currency}', rpCurrency));
+                        setRpCurrency(''); setRpMonthly(0); setRpYearly(0); setRpExtra(0);
+                      } catch (e: any) { toast.error(e.message); }
                     }}
                   >
                     <Plus className="h-3.5 w-3.5 mr-1" />
-                    Adicionar
+                    {t('admin.subs.rp_add')}
                   </Button>
                 </div>
               </div>
@@ -553,9 +499,9 @@ export default function AdminSubscriptions() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('admin.subs.cancel')}</Button>
             <Button onClick={handleSubmit} disabled={isSaving}>
-              {isSaving ? 'A guardar...' : editId ? 'Guardar' : 'Criar'}
+              {isSaving ? t('admin.subs.saving') : editId ? t('admin.subs.save') : t('admin.subs.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -565,34 +511,31 @@ export default function AdminSubscriptions() {
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Eliminar plano "{deleteTarget?.name}"?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Esta acção é irreversível. O plano será permanentemente removido da plataforma.
-            </AlertDialogDescription>
+            <AlertDialogTitle>{t('admin.subs.delete_title').replace('{name}', deleteTarget?.name ?? '')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('admin.subs.delete_desc')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin.subs.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Eliminar
+              {t('admin.subs.delete_btn')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Deactivate confirmation for tiers with tenants */}
+      {/* Deactivate confirmation */}
       <AlertDialog open={deactivateConfirmOpen} onOpenChange={setDeactivateConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Desactivar plano com tenants associados?</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.subs.deactivate_title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Este plano tem {editId ? (tiers?.find((t: any) => t.id === editId)?.tenant_count ?? 0) : 0} tenant(s) associado(s).
-              Ao desactivá-lo, esses tenants permanecerão vinculados mas o plano deixará de estar visível para novos utilizadores.
+              {t('admin.subs.deactivate_desc').replace('{count}', String(editId ? (tiers?.find((ti: any) => ti.id === editId)?.tenant_count ?? 0) : 0))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin.subs.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { setForm(f => ({ ...f, is_active: false })); setDeactivateConfirmOpen(false); }}>
-              Desactivar
+              {t('admin.subs.deactivate_btn')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
