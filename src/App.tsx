@@ -11,6 +11,7 @@ import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import { SplashScreen } from "./components/SplashScreen";
 import { OfflineBanner } from "./components/OfflineBanner";
 import { RewardAnimationProvider } from "./contexts/RewardAnimationContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Layouts (kept eager – small and always needed)
 import { ParentLayout } from "@/components/layouts/ParentLayout";
@@ -281,6 +282,7 @@ const App = () => {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -296,6 +298,7 @@ const App = () => {
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
+        </LanguageProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

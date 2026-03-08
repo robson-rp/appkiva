@@ -13,16 +13,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { getCurrencyByCountry } from '@/data/countries-currencies';
-import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe, GraduationCap } from 'lucide-react';
+import { Camera, Save, User, Mail, Phone, Shield, Users, Crown, Globe, GraduationCap, Languages } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
 export default function ParentProfile() {
   const { tierName } = useAllFeatures();
   const { user } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -78,6 +80,7 @@ export default function ParentProfile() {
         country,
         gender: gender || null,
         school_tenant_id: updatedSchool,
+        language: locale,
       })
       .eq('id', user.profileId);
 
@@ -236,6 +239,23 @@ export default function ParentProfile() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Separator />

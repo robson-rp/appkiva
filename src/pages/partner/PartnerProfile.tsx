@@ -12,14 +12,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, Building2, Mail, Globe } from 'lucide-react';
+import { Camera, Save, Building2, Mail, Globe, Languages } from 'lucide-react';
 import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
 export default function PartnerProfile() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { locale, setLocale, t } = useLanguage();
   const [name, setName] = useState(user?.name || '');
   const [email] = useState(user?.email || '');
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '🏦');
@@ -48,6 +50,7 @@ export default function PartnerProfile() {
         display_name: name.trim() || user.name,
         avatar: selectedAvatar,
         country,
+        language: locale,
       })
       .eq('id', user.profileId);
 
@@ -176,6 +179,23 @@ export default function PartnerProfile() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">A moeda dos relatórios e investimentos será ajustada automaticamente.</p>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>

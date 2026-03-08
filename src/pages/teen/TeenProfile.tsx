@@ -3,16 +3,19 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, Loader2 } from 'lucide-react';
+import { Camera, Save, Loader2, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const AVATAR_OPTIONS = ['🧑‍💻', '👩‍💻', '🧑', '👩', '👨', '🧑🏽', '👩🏾', '👨🏻', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰', '🎮', '🎧'];
 
 export default function TeenProfile() {
   const { user } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const [avatar, setAvatar] = useState(user?.avatar || '🧑‍💻');
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -36,7 +39,7 @@ export default function TeenProfile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ avatar })
+      .update({ avatar, language: locale })
       .eq('id', user.profileId);
     setSaving(false);
     if (error) {
@@ -100,10 +103,28 @@ export default function TeenProfile() {
         </motion.div>
       )}
 
-      {/* Info */}
+      {/* Preferences */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardContent className="p-5 space-y-3">
+          <CardContent className="p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Languages className="h-4 w-4 text-primary" />
+              <h2 className="font-display font-semibold">{t('profile.preferences')}</h2>
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-sm text-muted-foreground">Os teus dados pessoais são geridos pelo teu encarregado. Aqui podes escolher o avatar que te representa!</p>
           </CardContent>
         </Card>
