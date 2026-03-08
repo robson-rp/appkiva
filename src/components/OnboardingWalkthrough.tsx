@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, RotateCcw } from 'lucide-react';
 import { SplashIllustration } from '@/components/SplashIllustration';
+import { useT } from '@/contexts/LanguageContext';
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0 }),
@@ -12,10 +13,10 @@ const slideVariants = {
 };
 
 export function OnboardingWalkthrough() {
+  const t = useT();
   const { showOnboarding, currentStep, totalSteps, steps, nextStep, prevStep, skipWalkthrough, trackView } = useOnboarding();
   const [direction, setDirection] = useState(1);
 
-  // Track each step view
   useEffect(() => {
     if (showOnboarding && steps.length > 0) {
       trackView(currentStep);
@@ -56,80 +57,39 @@ export function OnboardingWalkthrough() {
         onDragEnd={(_, info) => {
           const swipe = info.offset.x;
           const velocity = info.velocity.x;
-          if (swipe < -50 || velocity < -300) {
-            handleNext();
-          } else if ((swipe > 50 || velocity > 300) && currentStep > 0) {
-            handlePrev();
-          }
+          if (swipe < -50 || velocity < -300) handleNext();
+          else if ((swipe > 50 || velocity > 300) && currentStep > 0) handlePrev();
         }}
       >
-        {/* Top accent */}
         <div className="h-1 bg-gradient-to-r from-primary via-chart-3 to-chart-4" />
         <div className="relative overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={currentStep}
-              custom={direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-            >
+            <motion.div key={currentStep} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3, ease: 'easeInOut' }}>
               <SplashIllustration illustrationKey={step.illustrationKey} />
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Content */}
         <div className="px-6 pb-6 pt-2">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.25 }}
-              className="text-center"
-            >
-              <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-2">
-                {step.title}
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                {step.description}
-              </p>
+            <motion.div key={currentStep} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25 }} className="text-center">
+              <h2 className="text-xl sm:text-2xl font-display font-bold text-foreground mb-2">{step.title}</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">{step.description}</p>
             </motion.div>
           </AnimatePresence>
 
-          {/* Dots */}
           <div className="flex justify-center gap-1.5 mt-5 mb-5">
             {steps.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === currentStep
-                    ? 'w-6 bg-primary'
-                    : i < currentStep
-                    ? 'w-1.5 bg-primary/40'
-                    : 'w-1.5 bg-muted-foreground/20'
-                }`}
-              />
+              <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === currentStep ? 'w-6 bg-primary' : i < currentStep ? 'w-1.5 bg-primary/40' : 'w-1.5 bg-muted-foreground/20'}`} />
             ))}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center justify-between">
-            <button
-              onClick={skipWalkthrough}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
-            >
-              Saltar
+            <button onClick={skipWalkthrough} className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2">
+              {t('onboarding.skip')}
             </button>
-            <Button
-              onClick={handleNext}
-              className="rounded-xl px-6 gap-2 font-display font-semibold shadow-md shadow-primary/20"
-            >
-              {isFirst && step.cta ? step.cta : isLast ? 'Começar a usar' : 'Seguinte'}
+            <Button onClick={handleNext} className="rounded-xl px-6 gap-2 font-display font-semibold shadow-md shadow-primary/20">
+              {isFirst && step.cta ? step.cta : isLast ? t('onboarding.start') : t('onboarding.next')}
               {!isLast && <ChevronRight className="h-4 w-4" />}
             </Button>
           </div>
@@ -139,19 +99,14 @@ export function OnboardingWalkthrough() {
   );
 }
 
-/** Button to re-trigger the walkthrough from help menus */
 export function RestartOnboardingButton() {
+  const t = useT();
   const { resetWalkthrough } = useOnboarding();
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={resetWalkthrough}
-      className="gap-1.5 text-muted-foreground hover:text-foreground rounded-xl text-xs"
-    >
+    <Button variant="ghost" size="sm" onClick={resetWalkthrough} className="gap-1.5 text-muted-foreground hover:text-foreground rounded-xl text-xs">
       <RotateCcw className="h-3.5 w-3.5" />
-      Rever tutorial
+      {t('onboarding.restart')}
     </Button>
   );
 }
