@@ -37,13 +37,13 @@ function AnimatedIcon({ icon: Icon, animation, className = "" }: {
   animation: "spin" | "pulse" | "bounce" | "glow" | "wiggle";
   className?: string;
 }) {
-  const animVariants = {
+  const animVariants: Record<string, any> = {
     spin: { rotate: 360 },
     pulse: { scale: [1, 1.15, 1] },
     bounce: { y: [0, -6, 0] },
     glow: { scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] },
     wiggle: { rotate: [0, -8, 8, -4, 0] },
-  } as const;
+  };
   const transitions: Record<string, object> = {
     spin: { duration: 8, repeat: Infinity, ease: "linear" },
     pulse: { duration: 2, repeat: Infinity, ease: "easeInOut" },
