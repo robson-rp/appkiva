@@ -634,7 +634,7 @@ function UniverseSection() {
               key={i}
               variants={fadeUp}
               whileHover={{ y: -6, boxShadow: "0 20px 40px -12px hsl(var(--primary) / 0.1)" }}
-              className="bg-card rounded-2xl border border-border p-5 text-center flex flex-col items-center gap-3 transition-all group"
+              className="bg-card rounded-2xl border border-border p-4 text-center flex flex-col items-center gap-2 transition-all group"
             >
               <div className={`${z.bg} rounded-2xl p-3 transition-transform group-hover:scale-110`}>
                 <AnimatedIcon icon={z.icon} animation={z.anim} className={`w-6 h-6 ${z.color}`} />
