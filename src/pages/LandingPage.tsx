@@ -432,7 +432,7 @@ function HowItWorks() {
   return (
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
-      <Section id="como-funciona" className="bg-muted/40" ref={sectionRef as any}>
+      <Section id="como-funciona" className="bg-muted/40">
         <SectionTitle>Como funciona</SectionTitle>
         <SectionSubtitle>Três passos simples para começar a jornada financeira.</SectionSubtitle>
         <div className="relative" ref={sectionRef}>
