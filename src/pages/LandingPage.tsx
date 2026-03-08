@@ -544,7 +544,7 @@ function SolutionSection() {
         </div>
         <motion.div variants={fadeUp} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-md rounded-3xl relative z-10 drop-shadow-xl" />
+          <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-lg rounded-3xl relative z-10 drop-shadow-xl" />
         </motion.div>
       </div>
     </Section>
