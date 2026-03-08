@@ -37,6 +37,7 @@ export default function ParentProfile() {
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
 
+  // Load current country, gender and school from profile
   useEffect(() => {
     if (!user?.id) return;
     supabase
@@ -54,6 +55,7 @@ export default function ParentProfile() {
       });
   }, [user?.id]);
 
+  // Load available schools
   useEffect(() => {
     supabase
       .from('tenants')
@@ -82,6 +84,7 @@ export default function ParentProfile() {
       })
       .eq('id', user.profileId);
 
+    // Also update the tenant's currency to keep household in sync
     if (!error) {
       const { data: profile } = await supabase
         .from('profiles')
@@ -99,10 +102,10 @@ export default function ParentProfile() {
 
     setSaving(false);
     if (error) {
-      toast({ title: t('profile.error'), description: error.message, variant: 'destructive' });
+      toast({ title: 'Erro ao guardar', description: error.message, variant: 'destructive' });
     } else {
       queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
-      toast({ title: t('profile.updated') + ' ✅' });
+      toast({ title: 'Perfil atualizado! ✅', description: 'As tuas alterações foram guardadas com sucesso.' });
     }
   };
 
@@ -133,11 +136,11 @@ export default function ParentProfile() {
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1">
                   <Shield className="h-3 w-3" />
-                  <span className="text-xs font-medium">{t('role.parent')}</span>
+                  <span className="text-xs font-medium">Encarregado</span>
                 </div>
                 <Link to="/parent/subscription" className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 rounded-full px-3 py-1 transition-colors">
                   <Crown className="h-3 w-3" />
-                  <span className="text-xs font-medium">{tierName ?? t('pricing.free')}</span>
+                  <span className="text-xs font-medium">{tierName ?? 'Gratuito'}</span>
                 </Link>
               </div>
             </div>
@@ -150,7 +153,7 @@ export default function ParentProfile() {
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
             <CardContent className="p-4">
-              <p className="text-sm font-display font-semibold mb-3">{t('profile.choose_avatar')}</p>
+              <p className="text-sm font-display font-semibold mb-3">Escolhe o teu avatar</p>
               <div className="flex flex-wrap gap-2">
                 {avatarOptions.map((av) => (
                   <motion.button
@@ -179,38 +182,40 @@ export default function ParentProfile() {
           <CardContent className="p-6 space-y-5">
             <div className="flex items-center gap-2 mb-1">
               <User className="h-4 w-4 text-primary" />
-              <h2 className="font-display font-semibold">{t('auth.name')}</h2>
+              <h2 className="font-display font-semibold">Dados Pessoais</h2>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">{t('auth.name')}</Label>
+              <Label htmlFor="name">Nome completo</Label>
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="rounded-xl" />
             </div>
 
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-muted-foreground" /> {t('auth.gender')}
+                <Shield className="h-3.5 w-3.5 text-muted-foreground" /> Género
               </Label>
               <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder={t('auth.gender')} /></SelectTrigger>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar género" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="male">{t('auth.gender_male')}</SelectItem>
-                  <SelectItem value="female">{t('auth.gender_female')}</SelectItem>
-                  <SelectItem value="other">{t('auth.gender_other')}</SelectItem>
+                  <SelectItem value="male">Masculino</SelectItem>
+                  <SelectItem value="female">Feminino</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 text-muted-foreground" /> {t('auth.email')}
+                <Mail className="h-3.5 w-3.5 text-muted-foreground" /> Email
               </Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="rounded-xl" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone" className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5 text-muted-foreground" /> {t('auth.phone')}
+                <Phone className="h-3.5 w-3.5 text-muted-foreground" /> Telemóvel
               </Label>
               <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="rounded-xl" />
             </div>
@@ -219,10 +224,12 @@ export default function ParentProfile() {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 text-muted-foreground" /> {t('auth.country')}
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" /> País / Moeda
               </Label>
               <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {COUNTRY_CURRENCIES.map(c => (
                     <SelectItem key={c.code} value={c.code}>
@@ -231,6 +238,7 @@ export default function ParentProfile() {
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">A moeda apresentada na aplicação será ajustada automaticamente.</p>
             </div>
 
             <Separator />
@@ -240,7 +248,9 @@ export default function ParentProfile() {
                 <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
               </Label>
               <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
-                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pt">🇵🇹 Português</SelectItem>
                   <SelectItem value="en">🇬🇧 English</SelectItem>
@@ -252,17 +262,20 @@ export default function ParentProfile() {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
-                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /> {t('auth.school_optional')}
+                <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /> Escola dos filhos
               </Label>
               <Select value={schoolTenantId || 'none'} onValueChange={setSchoolTenantId}>
-                <SelectTrigger className="rounded-xl"><SelectValue placeholder={t('auth.select_school_optional')} /></SelectTrigger>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Selecionar escola" />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">{t('auth.other_school')}</SelectItem>
+                  <SelectItem value="none">Nenhuma (editar depois)</SelectItem>
                   {schools.map(s => (
                     <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">Associa a escola dos teus filhos quando estiver disponível.</p>
             </div>
           </CardContent>
         </Card>
@@ -274,10 +287,24 @@ export default function ParentProfile() {
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-2 mb-1">
               <Users className="h-4 w-4 text-primary" />
-              <h2 className="font-display font-semibold">{t('nav.parent.children')}</h2>
+              <h2 className="font-display font-semibold">Família</h2>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-muted/50 text-center">
+                <p className="text-2xl font-display font-bold text-primary">2</p>
+                <p className="text-xs text-muted-foreground mt-1">Crianças</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-muted/50 text-center">
+                <p className="text-2xl font-display font-bold text-secondary">5</p>
+                <p className="text-xs text-muted-foreground mt-1">Tarefas Ativas</p>
+              </div>
+            </div>
+
+            <Separator />
+
             <div className="space-y-2">
-              <Label>ID</Label>
+              <Label>ID da Família</Label>
               <Input value={user?.householdId || '—'} readOnly className="rounded-xl bg-muted/30 text-muted-foreground" />
             </div>
           </CardContent>
@@ -287,7 +314,7 @@ export default function ParentProfile() {
       {/* Save */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
-          <Save className="h-4 w-4" /> {saving ? t('profile.saving') : t('profile.save')}
+          <Save className="h-4 w-4" /> {saving ? 'A guardar...' : 'Guardar Alterações'}
         </Button>
       </motion.div>
     </div>

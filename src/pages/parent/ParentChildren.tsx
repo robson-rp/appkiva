@@ -22,7 +22,6 @@ import EditChildDialog from '@/components/EditChildDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -35,7 +34,6 @@ function generateCode() {
 }
 
 export default function ParentChildren() {
-  const t = useT();
   const { data: children = [], isLoading } = useChildren();
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -59,23 +57,26 @@ export default function ParentChildren() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['children'] });
-      toast({ title: t('parent.children.removed'), description: t('parent.children.removed_desc') });
+      toast({ title: 'Criança removida', description: 'O perfil foi removido com sucesso.' });
       setDeleteChild(null);
     },
     onError: () => {
-      toast({ title: t('common.error'), description: t('parent.children.remove_error'), variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Não foi possível remover a criança.', variant: 'destructive' });
     },
   });
+  // Feature gate: check max_children limit
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
   const { upgrade } = useUpgradeSubscription();
   const hasMultiChild = hasFeature(FEATURES.MULTI_CHILD);
 
+  // Find current tier's max children
   const currentTier = tiers.find(t => t.name === tierName);
-  const maxChildren = currentTier?.maxChildren ?? 2;
+  const maxChildren = currentTier?.maxChildren ?? 2; // Free tier default: 2
   const childrenCount = children.length;
   const canAddChild = childrenCount < maxChildren || hasMultiChild;
 
+  // Budget edit dialog
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
   const [budgetChild, setBudgetChild] = useState<{ childId: string; profileId: string; displayName: string; monthlyBudget: number; dailySpendLimit: number } | null>(null);
   const [budgetValue, setBudgetValue] = useState('');
@@ -98,17 +99,17 @@ export default function ParentChildren() {
         updateBudget.mutateAsync({ childId: budgetChild.childId, monthlyBudget: monthlyVal }),
         updateDailyLimit.mutateAsync({ childId: budgetChild.childId, dailySpendLimit: dailyVal }),
       ]);
-      toast({ title: t('parent.children.limits_updated'), description: `${t('parent.allowance.monthly_freq')}: ${monthlyVal} 🪙 · ${t('parent.tasks.daily')}: ${dailyVal} 🪙` });
+      toast({ title: 'Limites atualizados! 💰', description: `Mensal: ${monthlyVal} 🪙 · Diário: ${dailyVal} 🪙` });
       createNotification({
         profileId: budgetChild.profileId,
-        title: t('parent.children.limits_updated'),
-        message: `${t('parent.children.monthly_limit')}: ${monthlyVal > 0 ? monthlyVal + ' KVC' : '—'} · ${t('parent.tasks.daily')}: ${dailyVal} KVC`,
+        title: 'Limites de gasto atualizados 💰',
+        message: `Limite mensal: ${monthlyVal > 0 ? monthlyVal + ' KVC' : 'sem limite'} · Limite diário: ${dailyVal} KVC`,
         type: 'vault',
         metadata: { monthlyBudget: monthlyVal, dailySpendLimit: dailyVal },
       });
       setBudgetDialogOpen(false);
     } catch {
-      toast({ title: t('common.error'), description: t('parent.children.limits_error'), variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Não foi possível atualizar os limites.', variant: 'destructive' });
     }
   };
 
@@ -117,7 +118,7 @@ export default function ParentChildren() {
   const handleCopy = (text: string, type: 'code' | 'link') => {
     navigator.clipboard.writeText(text);
     setCopied(type);
-    toast({ title: t('common.copied'), description: type === 'code' ? t('parent.children.code_copied') : t('parent.children.link_copied') });
+    toast({ title: 'Copiado! 📋', description: type === 'code' ? 'Código copiado para a área de transferência.' : 'Link copiado para a área de transferência.' });
     setTimeout(() => setCopied(null), 2000);
   };
 
@@ -137,7 +138,7 @@ export default function ParentChildren() {
       if (error) throw error;
       setInviteCode(newCode);
     } catch {
-      toast({ title: t('common.error'), description: t('parent.children.code_error'), variant: 'destructive' });
+      toast({ title: 'Erro', description: 'Não foi possível gerar o código.', variant: 'destructive' });
     } finally {
       setInviteSaving(false);
     }
@@ -150,7 +151,7 @@ export default function ParentChildren() {
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'KIVARA', text: `${t('common.invite')} — ${inviteCode}`, url: inviteLink });
+        await navigator.share({ title: 'Junta-te à minha família no KIVARA!', text: `Usa o código ${inviteCode} ou clica no link para te juntares à família.`, url: inviteLink });
       } catch {}
     } else {
       handleCopy(inviteLink, 'link');
@@ -165,24 +166,30 @@ export default function ParentChildren() {
         <div className="absolute bottom-0 left-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.children.management')}</p>
-            <h1 className="font-display text-2xl font-bold mt-1">{t('parent.children.title')}</h1>
-            <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.children.subtitle')}</p>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
+            <h1 className="font-display text-2xl font-bold mt-1">Crianças</h1>
+            <p className="text-sm text-primary-foreground/60 mt-1">Gere os perfis das tuas crianças</p>
           </div>
           <div className="flex gap-2">
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
-              if (!canAddChild) { setPaymentOpen(true); return; }
+              if (!canAddChild) {
+                setPaymentOpen(true);
+                return;
+              }
               await generateAndPersistCode();
               setInviteOpen(true);
             }}>
-              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.invite')}
+              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Convidar
             </Button>
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
-              if (!canAddChild) { setPaymentOpen(true); return; }
+              if (!canAddChild) {
+                setPaymentOpen(true);
+                return;
+              }
               await generateAndPersistCode();
               setInviteOpen(true);
             }}>
-              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.add')}
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Adicionar
             </Button>
           </div>
         </div>
@@ -190,17 +197,17 @@ export default function ParentChildren() {
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Users className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">{children.length}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">/ {maxChildren} {t('parent.children.max_children')}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">/ {maxChildren} crianças</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.children.total_balance')}</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">saldo total</span>
           </div>
           {!canAddChild && (
             <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setPaymentOpen(true)}>
               <Crown className="h-4 w-4 text-accent-foreground" />
-              <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">{t('parent.children.upgrade_more')}</span>
+              <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">Upgrade para mais crianças</span>
             </div>
           )}
         </div>
@@ -217,8 +224,8 @@ export default function ParentChildren() {
                   <Send className="h-3.5 w-3.5 text-chart-1" />
                 </div>
                 <div>
-                  <p className="text-sm font-display font-bold">{t('parent.children.budget_exceptions')}</p>
-                  <p className="text-[10px] text-muted-foreground">{pendingExceptions.length} {t('parent.children.pending_requests')}</p>
+                  <p className="text-sm font-display font-bold">Pedidos de Exceção</p>
+                  <p className="text-[10px] text-muted-foreground">{pendingExceptions.length} pedido(s) pendente(s)</p>
                 </div>
               </div>
               {pendingExceptions.map((req) => (
@@ -249,7 +256,7 @@ export default function ParentChildren() {
                       disabled={resolveException.isPending}
                     >
                       {resolveException.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
-                      {t('common.approve')}
+                      Aprovar
                     </Button>
                   </div>
                 </div>
@@ -285,10 +292,10 @@ export default function ParentChildren() {
         <Card className="border-border/50">
           <CardContent className="p-12 text-center">
             <div className="text-5xl mb-4">👶</div>
-            <h3 className="font-display font-bold text-lg mb-2">{t('parent.children.no_children')}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{t('parent.children.add_hint')}</p>
+            <h3 className="font-display font-bold text-lg mb-2">Ainda sem crianças</h3>
+            <p className="text-sm text-muted-foreground mb-4">Adiciona ou convida uma criança para começar.</p>
             <Button className="rounded-xl font-display gap-1.5" onClick={async () => { await generateAndPersistCode(); setInviteOpen(true); }}>
-              <Link2 className="h-4 w-4" /> {t('parent.children.invite_child')}
+              <Link2 className="h-4 w-4" /> Convidar Criança
             </Button>
           </CardContent>
         </Card>
@@ -306,17 +313,17 @@ export default function ParentChildren() {
                     <div className="flex-1">
                       <h3 className="font-display font-bold text-lg">{child.displayName}</h3>
                       {child.nickname && (
-                        <p className="text-xs text-muted-foreground">{t('parent.children.nickname')}: {child.nickname}</p>
+                        <p className="text-xs text-muted-foreground">Alcunha: {child.nickname}</p>
                       )}
                       {child.dateOfBirth && (
-                        <p className="text-xs text-muted-foreground">{differenceInYears(new Date(), new Date(child.dateOfBirth))} {t('common.years')}</p>
+                        <p className="text-xs text-muted-foreground">{differenceInYears(new Date(), new Date(child.dateOfBirth))} anos</p>
                       )}
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     <div className="bg-[hsl(var(--kivara-light-blue))] rounded-2xl p-3.5 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{t('parent.children.balance')}</p>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">Saldo</p>
                       <CoinDisplay amount={child.balance} size="sm" />
                     </div>
                     <div
@@ -324,10 +331,10 @@ export default function ParentChildren() {
                       onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
-                        <Wallet className="h-3 w-3" /> {t('parent.children.monthly_limit')}
+                        <Wallet className="h-3 w-3" /> Limite Mensal
                       </p>
                       <p className="font-display font-bold text-lg text-foreground">
-                        {child.monthlyBudget > 0 ? `${child.monthlyBudget} 🪙` : <span className="text-muted-foreground text-sm">{t('parent.children.set_limit')}</span>}
+                        {child.monthlyBudget > 0 ? `${child.monthlyBudget} 🪙` : <span className="text-muted-foreground text-sm">Definir</span>}
                       </p>
                     </div>
                   </div>
@@ -337,7 +344,7 @@ export default function ParentChildren() {
                       setEditChild({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, nickname: child.nickname, avatar: child.avatar, dateOfBirth: child.dateOfBirth });
                       setEditOpen(true);
                     }}>
-                      <Edit className="h-3.5 w-3.5" /> {t('common.edit')}
+                      <Edit className="h-3.5 w-3.5" /> Editar
                     </Button>
                     <Button
                       variant="outline"
@@ -345,7 +352,7 @@ export default function ParentChildren() {
                       className="flex-1 min-w-[100px] rounded-xl font-display gap-1.5 border-border/50 hover:bg-accent hover:text-accent-foreground transition-all duration-200 text-xs sm:text-sm"
                       onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
-                      <Wallet className="h-3.5 w-3.5" /> {t('parent.children.monthly_limit')}
+                      <Wallet className="h-3.5 w-3.5" /> Limite
                     </Button>
                     <Button variant="outline" size="icon" className="rounded-xl border-border/50 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 h-9 w-9" onClick={() => setDeleteChild({ childId: child.childId, displayName: child.displayName })}>
                       <Trash2 className="h-3.5 w-3.5" />
@@ -366,21 +373,21 @@ export default function ParentChildren() {
               <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
                 <Link2 className="h-5 w-5 text-primary" />
               </div>
-              {t('parent.children.invite_child')}
+              Convidar Criança
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              {t('auth.invite_hint')}
+              Partilha o código ou link para a criança se juntar à família.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 mt-2">
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('auth.invite_code')}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Código de convite</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-muted/50 rounded-2xl p-4 text-center border border-border/30">
                   <motion.p key={inviteCode} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-3xl font-bold tracking-[0.3em] text-foreground">
                     {inviteCode}
                   </motion.p>
-                  <p className="text-[10px] text-muted-foreground mt-1">48h</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Válido por 48 horas</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -392,20 +399,20 @@ export default function ParentChildren() {
                       <motion.div key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}><Copy className="h-3.5 w-3.5" /></motion.div>
                     )}
                   </AnimatePresence>
-                  {copied === 'code' ? t('common.copied') : t('common.copied').replace('! 📋', '')}
+                  {copied === 'code' ? 'Copiado!' : 'Copiar código'}
                 </Button>
                 <Button variant="outline" size="sm" className="rounded-xl font-display gap-1.5 border-border/50" onClick={handleRegenerate}>
-                  <RefreshCw className="h-3.5 w-3.5" />
+                  <RefreshCw className="h-3.5 w-3.5" /> Novo
                 </Button>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border/50" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">—</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">ou</span>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Link</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Link de convite</p>
               <div className="flex gap-2">
                 <Input readOnly value={inviteLink} className="rounded-xl border-border/50 text-xs bg-muted/30 font-mono" />
                 <Button variant="outline" size="icon" className="rounded-xl border-border/50 shrink-0" onClick={() => handleCopy(inviteLink, 'link')}>
@@ -414,14 +421,14 @@ export default function ParentChildren() {
               </div>
             </div>
             <Button className="w-full rounded-xl font-display gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4" /> {t('common.share')}
+              <Share2 className="h-4 w-4" /> Partilhar convite
             </Button>
             <div className="bg-[hsl(var(--kivara-light-gold))] rounded-2xl p-4 flex items-start gap-3">
               <QrCode className="h-5 w-5 text-accent-foreground shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-display font-bold text-accent-foreground">💡</p>
+                <p className="text-xs font-display font-bold text-accent-foreground">Como funciona?</p>
                 <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                  {t('auth.invite_hint')}
+                  A criança introduz o código ao criar a conta ou acede ao link. Depois de se registar, aparecerá automaticamente na tua lista de crianças.
                 </p>
               </div>
             </div>
@@ -435,15 +442,16 @@ export default function ParentChildren() {
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              {t('parent.children.monthly_limit')}
+              Limites de Gasto
             </DialogTitle>
             <DialogDescription>
-              {budgetChild?.displayName}
+              Define os limites de gasto de {budgetChild?.displayName}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5">
+            {/* Monthly limit */}
             <div className="space-y-2">
-              <Label className="text-xs font-display font-bold">{t('parent.children.monthly_limit')} (KivaCoins)</Label>
+              <Label className="text-xs font-display font-bold">Limite mensal (KivaCoins)</Label>
               <Input
                 type="number"
                 placeholder="Ex: 500"
@@ -468,12 +476,16 @@ export default function ParentChildren() {
                   </button>
                 ))}
               </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                Define 0 para remover o limite mensal
+              </p>
             </div>
 
             <div className="h-px bg-border/50" />
 
+            {/* Daily limit */}
             <div className="space-y-2">
-              <Label className="text-xs font-display font-bold">{t('parent.tasks.daily')} (KivaCoins)</Label>
+              <Label className="text-xs font-display font-bold">Limite diário (KivaCoins)</Label>
               <Input
                 type="number"
                 placeholder="Ex: 50"
@@ -498,6 +510,9 @@ export default function ParentChildren() {
                   </button>
                 ))}
               </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                Máximo que pode gastar por dia em compras
+              </p>
             </div>
 
             <Button
@@ -506,13 +521,13 @@ export default function ParentChildren() {
               disabled={updateBudget.isPending || updateDailyLimit.isPending}
             >
               <Wallet className="h-4 w-4" />
-              {(updateBudget.isPending || updateDailyLimit.isPending) ? t('profile.saving') : t('common.save')}
+              {(updateBudget.isPending || updateDailyLimit.isPending) ? 'A guardar...' : 'Guardar Limites'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Upgrade Payment */}
+      {/* Upgrade Payment for extra children */}
       <PaymentSimulator
         open={paymentOpen}
         onOpenChange={setPaymentOpen}
@@ -521,26 +536,27 @@ export default function ParentChildren() {
         onConfirmUpgrade={upgrade}
       />
 
+      {/* Edit Child Dialog */}
       <EditChildDialog open={editOpen} onOpenChange={setEditOpen} child={editChild} />
 
       {/* Delete Child Confirmation */}
       <AlertDialog open={!!deleteChild} onOpenChange={(open) => !open && setDeleteChild(null)}>
         <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display">{t('common.remove')} {deleteChild?.displayName}?</AlertDialogTitle>
+            <AlertDialogTitle className="font-display">Remover {deleteChild?.displayName}?</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('parent.children.remove_error')}
+              Esta ação remove o perfil da criança da tua lista. Esta operação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-display">{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl font-display">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               className="rounded-xl font-display bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={deleteChildMutation.isPending}
               onClick={() => deleteChild && deleteChildMutation.mutate(deleteChild.childId)}
             >
               {deleteChildMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-              {t('common.remove')}
+              Remover
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
