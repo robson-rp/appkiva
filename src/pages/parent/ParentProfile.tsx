@@ -244,6 +244,23 @@ export default function ParentProfile() {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5">
+                <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
+              </Label>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
                 <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" /> Escola dos filhos
               </Label>
               <Select value={schoolTenantId || 'none'} onValueChange={setSchoolTenantId}>
