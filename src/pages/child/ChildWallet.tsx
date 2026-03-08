@@ -163,7 +163,7 @@ export default function ChildWallet() {
               <Dialog open={donateDialogOpen} onOpenChange={setDonateDialogOpen}>
                 <DialogTrigger asChild>
                   <Button size="sm" className="rounded-xl font-display gap-1 bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white border-0">
-                    <Heart className="h-3.5 w-3.5" /> Doar
+                    <Heart className="h-3.5 w-3.5" /> {t('child.wallet.donate')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
