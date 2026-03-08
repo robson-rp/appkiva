@@ -906,7 +906,7 @@ function SocialProof() {
         </motion.div>
 
         {/* Testimonials — 3D rotation on enter */}
-        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-5">
+        <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-4">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
