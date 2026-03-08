@@ -13,16 +13,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRewards, useCreateReward, useDeleteReward, type RewardCategory } from '@/hooks/use-rewards';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
-
-const categoryLabels: Record<string, string> = {
-  experience: 'Experiência',
-  privilege: 'Privilégio',
-  physical: 'Físico',
-  digital: 'Digital',
-};
 
 const categoryColors: Record<string, string> = {
   experience: 'bg-primary/10 text-primary border-primary/20',
@@ -34,10 +28,18 @@ const categoryColors: Record<string, string> = {
 const iconOptions = ['🎬', '🌙', '🍕', '🎢', '📖', '📱', '🎮', '⚽', '🎨', '🎁', '🏖️', '🍦'];
 
 export default function ParentRewards() {
+  const t = useT();
   const { allowed: rewardsAllowed, loading: gateLoading } = useFeatureGate(FEATURES.CUSTOM_REWARDS);
   const { data: rewards = [], isLoading } = useRewards();
   const createReward = useCreateReward();
   const deleteReward = useDeleteReward();
+
+  const categoryLabels: Record<string, string> = {
+    experience: t('parent.rewards.cat.experience'),
+    privilege: t('parent.rewards.cat.privilege'),
+    physical: t('parent.rewards.cat.physical'),
+    digital: t('parent.rewards.cat.digital'),
+  };
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState('');
@@ -53,11 +55,7 @@ export default function ParentRewards() {
       {
         onSuccess: () => {
           setDialogOpen(false);
-          setName('');
-          setDescription('');
-          setPrice('');
-          setCategory('experience');
-          setIcon('🎁');
+          setName(''); setDescription(''); setPrice(''); setCategory('experience'); setIcon('🎁');
         },
       }
     );
@@ -66,7 +64,7 @@ export default function ParentRewards() {
   return (
     <FeatureGateWrapper
       allowed={rewardsAllowed || gateLoading}
-      featureName="Recompensas Personalizadas"
+      featureName={t('parent.rewards.title')}
     >
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-6 max-w-5xl mx-auto">
       {/* Hero */}
@@ -77,19 +75,17 @@ export default function ParentRewards() {
           <CardContent className="relative z-10 p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="space-y-2">
-                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">Gestão</p>
-                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">Recompensas Familiares</h1>
-                <p className="text-primary-foreground/60 text-sm">
-                  Cria recompensas personalizadas para motivar as crianças
-                </p>
+                <p className="text-primary-foreground/60 text-xs font-medium uppercase tracking-wider">{t('parent.rewards.management')}</p>
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground">{t('parent.rewards.title')}</h1>
+                <p className="text-primary-foreground/60 text-sm">{t('parent.rewards.subtitle')}</p>
               </div>
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">Activas</p>
+                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.active')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{rewards.filter(r => r.available).length}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">Resgatadas</p>
+                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.claimed')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{rewards.filter(r => r.claimedAt).length}</p>
                 </div>
               </div>
@@ -102,23 +98,23 @@ export default function ParentRewards() {
       <motion.div variants={item} className="flex justify-between items-center">
         <div>
           <h2 className="font-display text-lg font-bold flex items-center gap-2">
-            <Gift className="h-5 w-5 text-primary" /> Recompensas
+            <Gift className="h-5 w-5 text-primary" /> {t('parent.rewards.title')}
           </h2>
-          <p className="text-xs text-muted-foreground">{rewards.length} recompensas criadas</p>
+          <p className="text-xs text-muted-foreground">{rewards.length} {t('parent.rewards.count')}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="rounded-xl font-display gap-1">
-              <Plus className="h-4 w-4" /> Nova Recompensa
+              <Plus className="h-4 w-4" /> {t('parent.rewards.new_reward')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle className="font-display">Criar Recompensa</DialogTitle>
+              <DialogTitle className="font-display">{t('parent.rewards.create_reward')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Ícone</Label>
+                <Label>{t('parent.rewards.icon')}</Label>
                 <div className="flex flex-wrap gap-2">
                   {iconOptions.map(ic => (
                     <button
@@ -133,27 +129,27 @@ export default function ParentRewards() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Nome</Label>
-                <Input placeholder="Ex: Noite de cinema" value={name} onChange={e => setName(e.target.value)} />
+                <Label>{t('parent.rewards.name')}</Label>
+                <Input placeholder={t('parent.rewards.name_placeholder')} value={name} onChange={e => setName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Textarea placeholder="Descreve a recompensa..." value={description} onChange={e => setDescription(e.target.value)} />
+                <Label>{t('parent.rewards.description')}</Label>
+                <Textarea placeholder={t('parent.rewards.desc_placeholder')} value={description} onChange={e => setDescription(e.target.value)} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label>Preço (KVC)</Label>
+                  <Label>{t('parent.rewards.price')}</Label>
                   <Input type="number" placeholder="50" value={price} onChange={e => setPrice(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Categoria</Label>
+                  <Label>{t('parent.rewards.category')}</Label>
                   <Select value={category} onValueChange={v => setCategory(v as RewardCategory)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="experience">Experiência</SelectItem>
-                      <SelectItem value="privilege">Privilégio</SelectItem>
-                      <SelectItem value="physical">Físico</SelectItem>
-                      <SelectItem value="digital">Digital</SelectItem>
+                      <SelectItem value="experience">{t('parent.rewards.cat.experience')}</SelectItem>
+                      <SelectItem value="privilege">{t('parent.rewards.cat.privilege')}</SelectItem>
+                      <SelectItem value="physical">{t('parent.rewards.cat.physical')}</SelectItem>
+                      <SelectItem value="digital">{t('parent.rewards.cat.digital')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -163,7 +159,7 @@ export default function ParentRewards() {
                 disabled={!name || !price || createReward.isPending}
                 onClick={handleCreate}
               >
-                {createReward.isPending ? 'A criar...' : '🎁 Criar Recompensa'}
+                {createReward.isPending ? t('parent.rewards.creating') : t('parent.rewards.create_btn')}
               </Button>
             </div>
           </DialogContent>
@@ -191,8 +187,8 @@ export default function ParentRewards() {
         <Card className="border-border/50">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎁</div>
-            <p className="font-display font-bold text-sm">Sem recompensas ainda</p>
-            <p className="text-xs text-muted-foreground mt-1">Clica em "Nova Recompensa" para começar!</p>
+            <p className="font-display font-bold text-sm">{t('parent.rewards.no_rewards')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('parent.rewards.no_rewards_hint')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -228,7 +224,7 @@ export default function ParentRewards() {
                       disabled={deleteReward.isPending}
                       onClick={() => deleteReward.mutate(reward.id)}
                     >
-                      Remover
+                      {t('parent.rewards.remove')}
                     </Button>
                   </div>
                 </CardContent>

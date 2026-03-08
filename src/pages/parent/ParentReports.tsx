@@ -13,6 +13,7 @@ import { useHouseholdTasks } from '@/hooks/use-household-tasks';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -25,6 +26,7 @@ const COLORS = {
 };
 
 export default function ParentReports() {
+  const t = useT();
   const { allowed: reportsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const { data: children = [], isLoading: loadingChildren } = useChildren();
   const { data: householdTasks = [], isLoading: loadingTasks } = useHouseholdTasks();
@@ -32,27 +34,25 @@ export default function ParentReports() {
 
   const isLoading = loadingChildren || loadingTasks || loadingTx;
 
-  // Build task data per child
   const taskData = children.map((child) => {
-    const childTasks = householdTasks.filter(t => t.childProfileId === child.profileId);
+    const childTasks = householdTasks.filter(tk => tk.childProfileId === child.profileId);
     return {
       name: child.displayName,
-      completas: childTasks.filter(t => t.status === 'completed' || t.status === 'approved').length,
-      pendentes: childTasks.filter(t => t.status === 'pending').length,
-      progresso: childTasks.filter(t => t.status === 'in_progress').length,
+      [t('parent.reports.completed_tasks')]: childTasks.filter(tk => tk.status === 'completed' || tk.status === 'approved').length,
+      [t('parent.reports.in_progress_tasks')]: childTasks.filter(tk => tk.status === 'in_progress').length,
+      [t('parent.reports.pending_tasks')]: childTasks.filter(tk => tk.status === 'pending').length,
     };
   });
 
-  // Compute financial totals from real transactions
-  const totalEarned = householdTx.filter(t => t.direction === 'in').reduce((s, t) => s + t.amount, 0);
-  const totalSpent = householdTx.filter(t => t.direction === 'out').reduce((s, t) => s + t.amount, 0);
+  const totalEarned = householdTx.filter(tx => tx.direction === 'in').reduce((s, tx) => s + tx.amount, 0);
+  const totalSpent = householdTx.filter(tx => tx.direction === 'out').reduce((s, tx) => s + tx.amount, 0);
   const totalSaved = Math.max(totalEarned - totalSpent, 0);
   const savingsRate = totalEarned > 0 ? Math.round((totalSaved / totalEarned) * 100) : 0;
 
   const pieData = [
-    { name: 'Ganho', value: totalEarned },
-    { name: 'Gasto', value: totalSpent },
-    { name: 'Poupado', value: totalSaved },
+    { name: t('parent.reports.earned'), value: totalEarned },
+    { name: t('parent.reports.spent'), value: totalSpent },
+    { name: t('parent.reports.saved'), value: totalSaved },
   ];
   const pieColors = [COLORS.green, COLORS.red, COLORS.blue];
 
@@ -65,31 +65,28 @@ export default function ParentReports() {
     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
   };
 
-  // Generate weekly trend from real transactions (last 4 weeks)
   const now = new Date();
   const weeklyTrend = Array.from({ length: 4 }, (_, i) => {
     const weekEnd = new Date(now);
     weekEnd.setDate(weekEnd.getDate() - i * 7);
     const weekStart = new Date(weekEnd);
     weekStart.setDate(weekStart.getDate() - 7);
-    const weekTxs = householdTx.filter(t => {
-      const d = new Date(t.createdAt);
+    const weekTxs = householdTx.filter(tx => {
+      const d = new Date(tx.createdAt);
       return d >= weekStart && d < weekEnd;
     });
-    const ganho = weekTxs.filter(t => t.direction === 'in').reduce((s, t) => s + t.amount, 0);
-    const gasto = weekTxs.filter(t => t.direction === 'out').reduce((s, t) => s + t.amount, 0);
-    return { week: `Sem ${4 - i}`, ganho, gasto, poupado: Math.max(ganho - gasto, 0) };
+    const ganho = weekTxs.filter(tx => tx.direction === 'in').reduce((s, tx) => s + tx.amount, 0);
+    const gasto = weekTxs.filter(tx => tx.direction === 'out').reduce((s, tx) => s + tx.amount, 0);
+    return { week: `${t('parent.reports.week')} ${4 - i}`, [t('parent.reports.earned')]: ganho, [t('parent.reports.spent')]: gasto, [t('parent.reports.saved')]: Math.max(ganho - gasto, 0) };
   }).reverse();
 
-  // Insights derived from real data
   const topSaver = [...children].sort((a, b) => b.balance - a.balance)[0];
-  const topTaskCompleter = taskData.reduce((best, c) => c.completas > (best?.completas ?? 0) ? c : best, taskData[0]);
 
   return (
     <FeatureGateWrapper
       allowed={reportsAllowed || gateLoading}
-      featureName="Relatórios Educativos"
-      description="Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium."
+      featureName={t('parent.reports.upgrade_name')}
+      description={t('parent.reports.upgrade_desc')}
       tierName={tierName}
     >
     <div className="space-y-6">
@@ -98,9 +95,9 @@ export default function ParentReports() {
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 left-1/2 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
-          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Análise</p>
-          <h1 className="font-display text-2xl font-bold mt-1">Relatórios Educativos</h1>
-          <p className="text-sm text-primary-foreground/60 mt-1">Insights comportamentais e progresso financeiro</p>
+          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.reports.analysis')}</p>
+          <h1 className="font-display text-2xl font-bold mt-1">{t('parent.reports.title')}</h1>
+          <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.reports.subtitle')}</p>
         </div>
       </motion.div>
 
@@ -113,10 +110,10 @@ export default function ParentReports() {
           {/* KPI Cards */}
           <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Total Ganho', value: totalEarned, icon: TrendingUp, bg: 'bg-[hsl(var(--kivara-light-green))]', color: 'text-secondary' },
-              { label: 'Total Gasto', value: totalSpent, icon: TrendingDown, bg: 'bg-[hsl(var(--kivara-pink))]', color: 'text-destructive' },
-              { label: 'Total Poupado', value: totalSaved, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-blue))]', color: 'text-primary' },
-              { label: 'Taxa Poupança', value: `${savingsRate}%`, icon: ArrowUpRight, bg: 'bg-[hsl(var(--kivara-light-gold))]', color: 'text-accent-foreground' },
+              { label: t('parent.reports.total_earned'), value: totalEarned, icon: TrendingUp, bg: 'bg-[hsl(var(--kivara-light-green))]', color: 'text-secondary' },
+              { label: t('parent.reports.total_spent'), value: totalSpent, icon: TrendingDown, bg: 'bg-[hsl(var(--kivara-pink))]', color: 'text-destructive' },
+              { label: t('parent.reports.total_saved'), value: totalSaved, icon: PiggyBank, bg: 'bg-[hsl(var(--kivara-light-blue))]', color: 'text-primary' },
+              { label: t('parent.reports.savings_rate'), value: `${savingsRate}%`, icon: ArrowUpRight, bg: 'bg-[hsl(var(--kivara-light-gold))]', color: 'text-accent-foreground' },
             ].map((s) => (
               <motion.div key={s.label} variants={item} whileHover={{ scale: 1.03, y: -2 }}>
                 <Card className="border-border/50 hover:shadow-kivara transition-all duration-300 overflow-hidden">
@@ -135,7 +132,7 @@ export default function ParentReports() {
             ))}
           </motion.div>
 
-          {/* Insight da Semana */}
+          {/* Insight */}
           <motion.div variants={item} initial="hidden" animate="show">
             <Card className="gradient-kivara text-primary-foreground border-0 overflow-hidden relative">
               <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
@@ -145,11 +142,11 @@ export default function ParentReports() {
                     <Lightbulb className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-display font-bold text-lg mb-1">Insight da Semana</p>
+                    <p className="font-display font-bold text-lg mb-1">{t('parent.reports.insight_title')}</p>
                     <p className="text-primary-foreground/70 text-sm leading-relaxed">
                       {topSaver && totalEarned > 0
-                        ? `${topSaver.displayName} tem o maior saldo com 🪙 ${topSaver.balance}. A taxa de poupança geral é de ${savingsRate}%. ${savingsRate >= 30 ? 'Excelente resultado! 🎉' : 'Considere criar metas de poupança para motivar mais.'}`
-                        : 'Adicione crianças e comece a registar atividade para ver insights personalizados.'
+                        ? `${topSaver.displayName}: 🪙 ${topSaver.balance}. ${t('parent.reports.savings_rate')}: ${savingsRate}%. ${savingsRate >= 30 ? '🎉' : ''}`
+                        : t('parent.reports.no_children_hint')
                       }
                     </p>
                   </div>
@@ -158,18 +155,18 @@ export default function ParentReports() {
             </Card>
           </motion.div>
 
-          {/* Behavioral Insights from real data */}
+          {/* Behavioral Insights */}
           <motion.div variants={item} initial="hidden" animate="show">
             <Card className="border-border/50 overflow-hidden">
               <div className="h-1 bg-gradient-to-r from-secondary via-accent to-destructive" />
               <CardContent className="p-5">
                 <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
-                  <span className="text-lg">🧠</span> Insights Comportamentais
+                  <span className="text-lg">🧠</span> {t('parent.reports.behavioral')}
                 </h3>
                 <div className="space-y-3">
                   {children.map((child) => {
-                    const childTasks = householdTasks.filter(t => t.childProfileId === child.profileId);
-                    const completedCount = childTasks.filter(t => t.status === 'completed' || t.status === 'approved').length;
+                    const childTasks = householdTasks.filter(tk => tk.childProfileId === child.profileId);
+                    const completedCount = childTasks.filter(tk => tk.status === 'completed' || tk.status === 'approved').length;
                     const taskRate = childTasks.length > 0 ? Math.round((completedCount / childTasks.length) * 100) : 0;
                     const isGood = taskRate >= 50;
                     const cfg = isGood
@@ -187,12 +184,12 @@ export default function ParentReports() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
                             <p className="text-sm font-display font-bold">
-                              {isGood ? 'Bom progresso' : 'Precisa de incentivo'}
+                              {isGood ? t('parent.reports.good_progress') : t('parent.reports.needs_incentive')}
                             </p>
                             <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">{child.displayName}</span>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            {completedCount} de {childTasks.length} tarefas concluídas ({taskRate}%). Saldo: 🪙 {child.balance}
+                            {completedCount} / {childTasks.length} {t('parent.reports.tasks_completed')} ({taskRate}%). {t('common.balance')}: 🪙 {child.balance}
                           </p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
@@ -203,7 +200,7 @@ export default function ParentReports() {
                     );
                   })}
                   {children.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">Adicione crianças para ver insights.</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t('parent.reports.no_children_hint')}</p>
                   )}
                 </div>
               </CardContent>
@@ -212,13 +209,12 @@ export default function ParentReports() {
 
           {/* Charts Row */}
           <motion.div variants={container} initial="hidden" animate="show" className="grid md:grid-cols-2 gap-4">
-            {/* Weekly Trend */}
             <motion.div variants={item}>
               <Card className="border-border/50 overflow-hidden">
                 <div className="h-1 gradient-kivara" />
                 <CardContent className="p-5">
                   <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
-                    <span className="text-lg">📈</span> Tendência Semanal
+                    <span className="text-lg">📈</span> {t('parent.reports.weekly_trend')}
                   </h3>
                   <ResponsiveContainer width="100%" height={220}>
                     <AreaChart data={weeklyTrend}>
@@ -236,12 +232,12 @@ export default function ParentReports() {
                       <XAxis dataKey="week" tick={{ fontSize: 11 }} stroke="hsl(214, 20%, 70%)" />
                       <YAxis tick={{ fontSize: 11 }} stroke="hsl(214, 20%, 70%)" />
                       <Tooltip contentStyle={customTooltipStyle} />
-                      <Area type="monotone" dataKey="ganho" stroke={COLORS.green} fill="url(#gradGanho)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="poupado" stroke={COLORS.blue} fill="url(#gradPoupado)" strokeWidth={2} />
+                      <Area type="monotone" dataKey={t('parent.reports.earned')} stroke={COLORS.green} fill="url(#gradGanho)" strokeWidth={2} />
+                      <Area type="monotone" dataKey={t('parent.reports.saved')} stroke={COLORS.blue} fill="url(#gradPoupado)" strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                   <div className="flex justify-center gap-4 mt-3">
-                    {[{ name: 'Ganho', color: COLORS.green }, { name: 'Poupado', color: COLORS.blue }, { name: 'Gasto', color: COLORS.red }].map((l) => (
+                    {[{ name: t('parent.reports.earned'), color: COLORS.green }, { name: t('parent.reports.saved'), color: COLORS.blue }, { name: t('parent.reports.spent'), color: COLORS.red }].map((l) => (
                       <div key={l.name} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
                         <span className="text-[10px] text-muted-foreground font-medium">{l.name}</span>
@@ -252,13 +248,12 @@ export default function ParentReports() {
               </Card>
             </motion.div>
 
-            {/* Pie Chart */}
             <motion.div variants={item}>
               <Card className="border-border/50 overflow-hidden">
                 <div className="h-1 gradient-gold" />
                 <CardContent className="p-5">
                   <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
-                    <span className="text-lg">🍩</span> Distribuição Financeira
+                    <span className="text-lg">🍩</span> {t('parent.reports.financial_dist')}
                   </h3>
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
@@ -291,7 +286,7 @@ export default function ParentReports() {
                 <div className="h-1 bg-secondary" />
                 <CardContent className="p-5">
                   <h3 className="font-display font-bold text-sm mb-4 flex items-center gap-2">
-                    <span className="text-lg">📊</span> Tarefas por Criança
+                    <span className="text-lg">📊</span> {t('parent.reports.tasks_by_child')}
                   </h3>
                   {taskData.length > 0 ? (
                     <ResponsiveContainer width="100%" height={200}>
@@ -300,16 +295,16 @@ export default function ParentReports() {
                         <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(214, 20%, 70%)" />
                         <YAxis tick={{ fontSize: 11 }} stroke="hsl(214, 20%, 70%)" />
                         <Tooltip contentStyle={customTooltipStyle} />
-                        <Bar dataKey="completas" fill={COLORS.green} radius={[6, 6, 0, 0]} />
-                        <Bar dataKey="progresso" fill={COLORS.gold} radius={[6, 6, 0, 0]} />
-                        <Bar dataKey="pendentes" fill="hsl(214, 20%, 85%)" radius={[6, 6, 0, 0]} />
+                        <Bar dataKey={t('parent.reports.completed_tasks')} fill={COLORS.green} radius={[6, 6, 0, 0]} />
+                        <Bar dataKey={t('parent.reports.in_progress_tasks')} fill={COLORS.gold} radius={[6, 6, 0, 0]} />
+                        <Bar dataKey={t('parent.reports.pending_tasks')} fill="hsl(214, 20%, 85%)" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <p className="text-sm text-muted-foreground text-center py-8">Sem dados de tarefas</p>
+                    <p className="text-sm text-muted-foreground text-center py-8">{t('parent.reports.no_task_data')}</p>
                   )}
                   <div className="flex justify-center gap-4 mt-3">
-                    {[{ name: 'Completas', color: COLORS.green }, { name: 'Progresso', color: COLORS.gold }, { name: 'Pendentes', color: 'hsl(214, 20%, 85%)' }].map((l) => (
+                    {[{ name: t('parent.reports.completed_tasks'), color: COLORS.green }, { name: t('parent.reports.in_progress_tasks'), color: COLORS.gold }, { name: t('parent.reports.pending_tasks'), color: 'hsl(214, 20%, 85%)' }].map((l) => (
                       <div key={l.name} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
                         <span className="text-[10px] text-muted-foreground font-medium">{l.name}</span>
@@ -325,11 +320,11 @@ export default function ParentReports() {
                 <div className="h-1 bg-accent" />
                 <CardContent className="p-5 space-y-4">
                   <h3 className="font-display font-bold text-sm flex items-center gap-2">
-                    <span className="text-lg">🎯</span> Progresso por Criança
+                    <span className="text-lg">🎯</span> {t('parent.reports.child_progress')}
                   </h3>
                   {children.map((child) => {
-                    const childTasks = householdTasks.filter(t => t.childProfileId === child.profileId);
-                    const completedCount = childTasks.filter(t => t.status === 'completed' || t.status === 'approved').length;
+                    const childTasks = householdTasks.filter(tk => tk.childProfileId === child.profileId);
+                    const completedCount = childTasks.filter(tk => tk.status === 'completed' || tk.status === 'approved').length;
                     const taskProgress = childTasks.length > 0 ? Math.round((completedCount / childTasks.length) * 100) : 0;
 
                     return (
@@ -345,7 +340,7 @@ export default function ParentReports() {
                         </div>
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span className="text-[10px] text-muted-foreground font-medium">Tarefas</span>
+                            <span className="text-[10px] text-muted-foreground font-medium">{t('parent.reports.tasks_label')}</span>
                             <span className="text-[10px] font-display font-bold text-secondary">{taskProgress}%</span>
                           </div>
                           <Progress value={taskProgress} className="h-1.5 rounded-full" />
@@ -354,7 +349,7 @@ export default function ParentReports() {
                     );
                   })}
                   {children.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">Sem crianças registadas</p>
+                    <p className="text-sm text-muted-foreground text-center py-4">{t('parent.reports.no_children_registered')}</p>
                   )}
                 </CardContent>
               </Card>
