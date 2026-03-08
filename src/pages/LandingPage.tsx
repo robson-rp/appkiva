@@ -54,7 +54,7 @@ function AnimatedIcon({ icon: Icon, animation, className = "" }: {
 
   return (
     <motion.div
-      animate={variants[animation]}
+      animate={animVariants[animation]}
       transition={transitions[animation]}
       className="inline-flex"
     >
