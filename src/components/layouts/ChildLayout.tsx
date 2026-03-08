@@ -12,24 +12,30 @@ import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 import { XPProgressBar } from '@/components/XPProgressBar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useT } from '@/contexts/LanguageContext';
 
-const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
-  { title: 'Início', url: '/child', icon: Home },
-  { title: 'Carteira', url: '/child/wallet', icon: Wallet },
-  { title: 'Tarefas', url: '/child/tasks', icon: Target },
-  { title: 'Aprender', url: '/child/learn', icon: BookOpen },
-];
+function useChildNav() {
+  const t = useT();
+  const bottomNavItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+    { title: t('nav.child.home'), url: '/child', icon: Home },
+    { title: t('nav.child.wallet'), url: '/child/wallet', icon: Wallet },
+    { title: t('nav.child.tasks'), url: '/child/tasks', icon: Target },
+    { title: t('nav.child.learn'), url: '/child/learn', icon: BookOpen },
+  ];
 
-const moreMenuItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
-  { title: 'Cofres', url: '/child/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
-  { title: 'Sonhos', url: '/child/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
-  { title: 'Missões', url: '/child/missions', icon: Target },
-  { title: 'Loja', url: '/child/store', icon: ShoppingBag },
-  { title: 'Conquistas', url: '/child/achievements', icon: Trophy },
-  { title: 'Badges', url: '/child/badges', icon: Award },
-  { title: 'Streaks', url: '/child/streaks', icon: Flame },
-  { title: 'Diário', url: '/child/diary', icon: BookOpen },
-];
+  const moreMenuItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+    { title: t('nav.child.vaults'), url: '/child/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.child.dreams'), url: '/child/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
+    { title: t('nav.child.missions'), url: '/child/missions', icon: Target },
+    { title: t('nav.child.store'), url: '/child/store', icon: ShoppingBag },
+    { title: t('nav.child.achievements'), url: '/child/achievements', icon: Trophy },
+    { title: t('nav.child.badges'), url: '/child/badges', icon: Award },
+    { title: t('nav.child.streaks'), url: '/child/streaks', icon: Flame },
+    { title: t('nav.child.diary'), url: '/child/diary', icon: BookOpen },
+  ];
+
+  return { bottomNavItems, moreMenuItems };
+}
 
 export function ChildLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
@@ -37,6 +43,8 @@ export function ChildLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { hasFeature } = useAllFeatures();
   const [moreOpen, setMoreOpen] = useState(false);
+  const t = useT();
+  const { bottomNavItems, moreMenuItems } = useChildNav();
 
   const isMoreRouteActive = moreMenuItems.some((item) =>
     location.pathname === item.url || location.pathname.startsWith(item.url + '/')
@@ -44,7 +52,6 @@ export function ChildLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      {/* Header */}
       <header className="relative z-50">
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
         <div className="relative flex items-center justify-between px-4 py-3">
@@ -55,27 +62,25 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-7 opacity-60" />
               <p className="text-base font-display font-bold text-foreground">
-                Olá, {user?.name}! <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
+                {t('nav.child.hello')} {user?.name}! <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <NavLink to="/child/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label="Perfil">
+            <NavLink to="/child/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label={t('nav.child.profile')}>
               <UserCircle className="h-5 w-5 text-muted-foreground" />
             </NavLink>
             <ThemeToggle />
             <NotificationDropdown />
-            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label="Sair">
+            <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label={t('common.logout')}>
               <LogOut className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </header>
 
-      {/* XP Progress Bar */}
       <XPProgressBar />
 
-      {/* Content */}
       <AnimatePresence mode="wait">
         <motion.main
           id="main-content"
@@ -91,8 +96,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         </motion.main>
       </AnimatePresence>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
+      <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label={t('common.more_options')}>
         <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
         <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
@@ -102,7 +106,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
 
             return (
               <NavLink
-                key={item.title}
+                key={item.url}
                 to={item.url}
                 end={item.url === '/child'}
                 className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
@@ -132,16 +136,15 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             );
           })}
 
-          {/* More button */}
           <button
             onClick={() => setMoreOpen(true)}
             className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
-            aria-label="Mais opções"
+            aria-label={t('common.more_options')}
           >
             <div className={`relative p-1.5 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
               <MoreHorizontal className="h-6 w-6 relative z-10" />
             </div>
-            <span className="text-caption mt-0.5 font-semibold">Mais</span>
+            <span className="text-caption mt-0.5 font-semibold">{t('common.more')}</span>
             {isMoreRouteActive && (
               <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
             )}
@@ -149,11 +152,10 @@ export function ChildLayout({ children }: { children: ReactNode }) {
         </div>
       </nav>
 
-      {/* More Menu Sheet */}
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
           <SheetHeader className="pb-2">
-            <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+            <SheetTitle className="text-center text-lg font-display">{t('common.more_features')}</SheetTitle>
           </SheetHeader>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -168,9 +170,9 @@ export function ChildLayout({ children }: { children: ReactNode }) {
               if (locked) {
                 return (
                   <div
-                    key={item.title}
+                    key={item.url}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
-                    title="Requer upgrade"
+                    title={t('common.requires_upgrade')}
                   >
                     <div className="relative w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center">
                       <item.icon className="h-6 w-6" />
@@ -183,7 +185,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
 
               return (
                 <button
-                  key={item.title}
+                  key={item.url}
                   onClick={() => {
                     setMoreOpen(false);
                     navigate(item.url);

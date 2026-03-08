@@ -25,6 +25,7 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import PricingSection from "@/components/PricingSection";
+import { useT } from "@/contexts/LanguageContext";
 
 /* ─── animation variants ─── */
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -39,7 +40,6 @@ const fadeIn = {
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 const staggerFast = { visible: { transition: { staggerChildren: 0.06 } } };
 
-/* ─── Animated Icon wrapper ─── */
 function AnimatedIcon({ icon: Icon, animation, className = "" }: {
   icon: React.ElementType;
   animation: "spin" | "pulse" | "bounce" | "glow" | "wiggle";
@@ -71,7 +71,6 @@ function AnimatedIcon({ icon: Icon, animation, className = "" }: {
   );
 }
 
-/* ─── CountUp hook ─── */
 function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
@@ -92,7 +91,6 @@ function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
   return <span ref={ref}>0{suffix}</span>;
 }
 
-/* ─── Section wrapper — tighter padding ─── */
 function Section({ children, className = "", id }: { children: React.ReactNode; className?: string; id?: string }) {
   return (
     <motion.section
@@ -127,7 +125,6 @@ function SectionSubtitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ─── Gradient text (cross-browser) ─── */
 function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <span
@@ -144,7 +141,6 @@ function GradientText({ children, className = "" }: { children: React.ReactNode;
   );
 }
 
-/* ─── SVG Wave Divider ─── */
 function WaveDivider({ flip = false, className = "" }: { flip?: boolean; className?: string }) {
   return (
     <div className={`w-full overflow-hidden leading-[0] ${flip ? "rotate-180" : ""} ${className}`}>
@@ -159,11 +155,12 @@ function WaveDivider({ flip = false, className = "" }: { flip?: boolean; classNa
 }
 
 /* ═══════════════════════════════════════════
-   1. NAVBAR — clean, blur on scroll
+   1. NAVBAR
    ═══════════════════════════════════════════ */
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -172,10 +169,10 @@ function Navbar() {
   }, []);
 
   const navLinks = [
-    { label: "Como funciona", href: "#como-funciona" },
-    { label: "Universo", href: "#universo" },
-    { label: "Famílias", href: "#familias" },
-    { label: "Escolas", href: "#escolas" },
+    { label: t('nav.how'), href: "#como-funciona" },
+    { label: t('nav.universe'), href: "#universo" },
+    { label: t('nav.families'), href: "#familias" },
+    { label: t('nav.schools'), href: "#escolas" },
   ];
 
   return (
@@ -186,7 +183,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -206,17 +203,17 @@ function Navbar() {
 
         <div className="hidden md:flex items-center gap-3">
           <Button variant="ghost" asChild>
-            <Link to="/login">Entrar</Link>
+            <Link to="/login">{t('nav.login')}</Link>
           </Button>
           <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90 shimmer" asChild>
-            <Link to="/login">Criar conta</Link>
+            <Link to="/login">{t('nav.create_account')}</Link>
           </Button>
         </div>
 
         <button
           className="md:hidden p-2 text-foreground"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
+          aria-label={mobileOpen ? t('nav.close_menu') : t('nav.open_menu')}
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
@@ -242,10 +239,10 @@ function Navbar() {
           ))}
           <div className="flex gap-3 pt-4">
             <Button variant="outline" size="lg" className="flex-1" asChild>
-              <Link to="/login">Entrar</Link>
+              <Link to="/login">{t('nav.login')}</Link>
             </Button>
             <Button size="lg" className="flex-1 bg-secondary text-secondary-foreground" asChild>
-              <Link to="/login">Criar conta</Link>
+              <Link to="/login">{t('nav.create_account')}</Link>
             </Button>
           </div>
         </motion.div>
@@ -255,68 +252,22 @@ function Navbar() {
 }
 
 /* ═══════════════════════════════════════════
-   2. HERO — 6-slide carousel with autoplay
+   2. HERO
    ═══════════════════════════════════════════ */
-const HERO_SLIDES = [
-  {
-    headline: "Pequenos hábitos.",
-    headlineGradient: "Grandes futuros.",
-    subtitle: "KIVARA transforma educação financeira num jogo interactivo onde crianças aprendem a ganhar, poupar e planear o futuro.",
-    image: heroIllustration,
-    alt: "Crianças africanas a aprender sobre dinheiro",
-    cta: "Criar conta familiar",
-    ctaSecondary: "Explorar a plataforma",
-  },
-  {
-    headline: "Aprende através de",
-    headlineGradient: "missões.",
-    subtitle: "Missões diárias e semanais que ensinam conceitos financeiros de forma prática e divertida.",
-    image: heroMissions,
-    alt: "Criança a completar missão digital",
-    cta: "Começar missões",
-    ctaSecondary: "Ver como funciona",
-  },
-  {
-    headline: "Poupa para os teus",
-    headlineGradient: "sonhos.",
-    subtitle: "Cria metas de poupança, acompanha o progresso e aprende o valor de guardar para o que realmente importa.",
-    image: heroSavings,
-    alt: "Cofre com moedas e progresso",
-    cta: "Começar a poupar",
-    ctaSecondary: "Ver cofres",
-  },
-  {
-    headline: "Toda a família aprende",
-    headlineGradient: "junta.",
-    subtitle: "Pais acompanham, orientam e participam na jornada financeira dos filhos — tudo numa única plataforma.",
-    image: heroFamily,
-    alt: "Família africana unida com tablet",
-    cta: "Criar conta familiar",
-    ctaSecondary: "Para famílias",
-  },
-  {
-    headline: "Leva KIVARA para a",
-    headlineGradient: "escola.",
-    subtitle: "Professores podem integrar desafios financeiros nas aulas e acompanhar a evolução dos estudantes.",
-    image: heroSchool,
-    alt: "Sala de aula africana",
-    cta: "Registar escola",
-    ctaSecondary: "Para escolas",
-  },
-  {
-    headline: "Seguro e",
-    headlineGradient: "supervisionado.",
-    subtitle: "Dados protegidos, controlo parental total e um ambiente educativo concebido para a segurança das crianças.",
-    image: heroSecurity,
-    alt: "Segurança e proteção digital",
-    cta: "Saber mais",
-    ctaSecondary: "Segurança",
-  },
+const HERO_IMAGES = [heroIllustration, heroMissions, heroSavings, heroFamily, heroSchool, heroSecurity];
+const HERO_ALTS = [
+  "Crianças africanas a aprender sobre dinheiro",
+  "Criança a completar missão digital",
+  "Cofre com moedas e progresso",
+  "Família africana unida com tablet",
+  "Sala de aula africana",
+  "Segurança e proteção digital",
 ];
 
 const AUTO_PLAY_MS = 5000;
 
 function Hero() {
+  const t = useT();
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -325,6 +276,23 @@ function Hero() {
   const { scrollY } = useScroll();
   const heroParallaxY = useTransform(scrollY, [0, 600], [0, -80]);
   const startTimeRef = useRef(Date.now());
+
+  const slides = [1, 2, 3, 4, 5, 6].map(i => ({
+    headline: t(`hero.slide${i}.headline`),
+    headlineGradient: t(`hero.slide${i}.gradient`),
+    subtitle: t(`hero.slide${i}.subtitle`),
+    image: HERO_IMAGES[i - 1],
+    alt: HERO_ALTS[i - 1],
+    cta: t(`hero.slide${i}.cta`),
+    ctaSecondary: t(`hero.slide${i}.cta2`),
+  }));
+
+  const pills = [
+    { icon: ShieldCheck, label: t('hero.pill.secure'), color: "text-secondary" },
+    { icon: Users, label: t('hero.pill.families'), color: "text-primary" },
+    { icon: Star, label: t('hero.pill.free'), color: "text-accent" },
+    { icon: Zap, label: t('hero.pill.gamified'), color: "text-accent" },
+  ];
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -340,7 +308,6 @@ function Hero() {
     return () => { emblaApi.off("select", onSelect); };
   }, [emblaApi, onSelect]);
 
-  // Autoplay + progress
   useEffect(() => {
     if (!emblaApi) return;
     const tick = () => {
@@ -371,13 +338,12 @@ function Hero() {
       onMouseEnter={handlePause}
       onMouseLeave={handleResume}
     >
-      {/* Gradient mesh background */}
       <div className="absolute inset-0 gradient-mesh opacity-60 pointer-events-none" />
       <div className="absolute inset-0 dot-pattern opacity-30 pointer-events-none" />
 
       <div ref={emblaRef} className="overflow-hidden relative">
         <div className="flex">
-          {HERO_SLIDES.map((slide, i) => (
+          {slides.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
               <div className="relative px-5 sm:px-8 py-10 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
@@ -431,38 +397,31 @@ function Hero() {
         </div>
       </div>
 
-      {/* Slide indicators — sliding line with progress */}
+      {/* Slide indicators */}
       <div className="relative z-10 pb-2 md:pb-3 px-5 sm:px-8">
         <div className="relative h-[1.5px] mx-12 rounded-full bg-muted-foreground/8">
-          {/* Background segment (position indicator) */}
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-primary/20 transition-[left] duration-500 ease-out"
             style={{
-              width: `${100 / HERO_SLIDES.length}%`,
-              left: `${(selectedIndex / HERO_SLIDES.length) * 100}%`,
+              width: `${100 / slides.length}%`,
+              left: `${(selectedIndex / slides.length) * 100}%`,
             }}
           />
-          {/* Progress fill within active segment */}
           <div
             className="absolute inset-y-0 left-0 rounded-full bg-primary/50"
             style={{
-              width: `${(progress * 100) / HERO_SLIDES.length}%`,
-              left: `${(selectedIndex / HERO_SLIDES.length) * 100}%`,
+              width: `${(progress * 100) / slides.length}%`,
+              left: `${(selectedIndex / slides.length) * 100}%`,
               transition: progress === 0 ? 'left 0.5s ease-out, width 0.1s' : 'none',
             }}
           />
         </div>
       </div>
 
-      {/* Feature pills below carousel */}
+      {/* Feature pills */}
       <div className="relative z-10 px-5 sm:px-8 pb-8 md:pb-14">
         <div className="mx-auto max-w-7xl flex flex-wrap justify-center gap-3">
-          {[
-            { icon: ShieldCheck, label: "100% seguro", color: "text-secondary" },
-            { icon: Users, label: "+500 famílias", color: "text-primary" },
-            { icon: Star, label: "Gratuito", color: "text-accent" },
-            { icon: Zap, label: "Gamificado", color: "text-accent" },
-          ].map((pill, i) => (
+          {pills.map((pill, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.8, y: 10 }}
@@ -483,20 +442,21 @@ function Hero() {
 }
 
 /* ═══════════════════════════════════════════
-   3. PROBLEMA — animated icons
+   3. PROBLEMA
    ═══════════════════════════════════════════ */
 function ProblemSection() {
+  const t = useT();
   const points = [
-    { icon: AlertTriangle, text: "Crescemos sem aprender a gerir dinheiro, definir metas ou planear o futuro financeiro.", color: "text-destructive", bg: "bg-destructive/10", anim: "wiggle" as const },
-    { icon: TrendingDown, text: "Sem orientação adequada, as decisões financeiras tornam-se difíceis na vida adulta.", color: "text-accent-foreground", bg: "bg-accent/10", anim: "bounce" as const },
-    { icon: Sprout, text: "KIVARA nasceu para mudar isso — começando cedo, através do jogo e da prática.", color: "text-secondary", bg: "bg-secondary/10", anim: "pulse" as const },
+    { icon: AlertTriangle, text: t('problem.point1'), color: "text-destructive", bg: "bg-destructive/10", anim: "wiggle" as const },
+    { icon: TrendingDown, text: t('problem.point2'), color: "text-accent-foreground", bg: "bg-accent/10", anim: "bounce" as const },
+    { icon: Sprout, text: t('problem.point3'), color: "text-secondary", bg: "bg-secondary/10", anim: "pulse" as const },
   ];
   return (
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section className="bg-muted/40">
-        <SectionTitle>A maioria das pessoas aprende sobre dinheiro tarde demais</SectionTitle>
-        <SectionSubtitle>Poucas crianças recebem educação financeira. Queremos mudar isso.</SectionSubtitle>
+        <SectionTitle>{t('problem.title')}</SectionTitle>
+        <SectionSubtitle>{t('problem.subtitle')}</SectionSubtitle>
 
         <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-4">
           {points.map((p, i) => (
@@ -520,27 +480,28 @@ function ProblemSection() {
 }
 
 /* ═══════════════════════════════════════════
-   4. SOLUÇÃO — split screen with inline icons
+   4. SOLUÇÃO
    ═══════════════════════════════════════════ */
 function SolutionSection() {
+  const t = useT();
   const checks = [
-    { icon: Coins, text: "Missões práticas para aprender a ganhar" },
-    { icon: Target, text: "Metas de poupança com progresso visual" },
-    { icon: ShieldCheck, text: "Decisões financeiras num ambiente seguro" },
-    { icon: Eye, text: "Acompanhamento total pelos pais" },
+    { icon: Coins, text: t('solution.check1') },
+    { icon: Target, text: t('solution.check2') },
+    { icon: ShieldCheck, text: t('solution.check3') },
+    { icon: Eye, text: t('solution.check4') },
   ];
   return (
     <Section>
       <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-secondary/10 text-secondary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
-            A solução
+            {t('solution.badge')}
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-balance leading-[1.1]">
-            Aprender finanças através da <GradientText>experiência</GradientText>
+            {t('solution.title_before')}<GradientText>{t('solution.title_gradient')}</GradientText>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-lg text-muted-foreground mb-8 text-balance">
-            Em vez de teoria, KIVARA ensina através da prática. Cada acção transforma-se numa lição que constrói hábitos financeiros positivos.
+            {t('solution.subtitle')}
           </motion.p>
           <motion.div variants={stagger} className="space-y-3">
             {checks.map((item, i) => (
@@ -563,25 +524,25 @@ function SolutionSection() {
 }
 
 /* ═══════════════════════════════════════════
-   5. COMO FUNCIONA — animated icons, gradient border hover, scroll line
+   5. COMO FUNCIONA
    ═══════════════════════════════════════════ */
 function HowItWorks() {
+  const t = useT();
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end center"] });
 
   const steps = [
-    { icon: Coins, title: "Ganhar", desc: "Completar missões e tarefas para ganhar moedas virtuais.", color: "bg-accent text-accent-foreground", anim: "spin" as const },
-    { icon: Target, title: "Poupar", desc: "Criar metas e aprender a guardar para o que realmente importa.", color: "bg-secondary text-secondary-foreground", anim: "pulse" as const },
-    { icon: TrendingUp, title: "Evoluir", desc: "Desbloquear níveis, conquistas e novas aprendizagens financeiras.", color: "bg-primary text-primary-foreground", anim: "bounce" as const },
+    { icon: Coins, title: t('how.step1.title'), desc: t('how.step1.desc'), color: "bg-accent text-accent-foreground", anim: "spin" as const },
+    { icon: Target, title: t('how.step2.title'), desc: t('how.step2.desc'), color: "bg-secondary text-secondary-foreground", anim: "pulse" as const },
+    { icon: TrendingUp, title: t('how.step3.title'), desc: t('how.step3.desc'), color: "bg-primary text-primary-foreground", anim: "bounce" as const },
   ];
   return (
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section id="como-funciona" className="bg-muted/40">
-        <SectionTitle>Como funciona</SectionTitle>
-        <SectionSubtitle>Três passos simples para começar a jornada financeira.</SectionSubtitle>
+        <SectionTitle>{t('how.title')}</SectionTitle>
+        <SectionSubtitle>{t('how.subtitle')}</SectionSubtitle>
         <div className="relative" ref={sectionRef}>
-          {/* Animated scroll progress line — desktop only */}
           <div className="hidden md:block absolute top-[4.5rem] left-[17%] right-[17%] h-[2px] bg-border z-0 overflow-hidden">
             <motion.div
               className="h-full gradient-kivara origin-left"
@@ -596,7 +557,6 @@ function HowItWorks() {
                 whileHover={{ y: -6 }}
                 className="bg-card rounded-2xl border border-border p-6 text-center flex flex-col items-center gap-4 transition-all hover:shadow-xl hover:shadow-primary/[0.06] group relative overflow-hidden"
               >
-                {/* Gradient border on hover */}
                 <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none gradient-border" />
                 <div className="relative">
                   <div className={`rounded-2xl p-4 ${s.color} transition-transform group-hover:scale-110`}>
@@ -619,23 +579,23 @@ function HowItWorks() {
 }
 
 /* ═══════════════════════════════════════════
-   6. UNIVERSO — animated icon grid with central illustration
+   6. UNIVERSO
    ═══════════════════════════════════════════ */
 function UniverseSection() {
+  const t = useT();
   const zones = [
-    { icon: Building2, label: "Cidade do Dinheiro", desc: "Aprende a ganhar e gerir", bg: "bg-accent/10", color: "text-accent-foreground", anim: "bounce" as const },
-    { icon: TreePine, label: "Vale da Poupança", desc: "Guarda e faz crescer", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
-    { icon: BookOpen, label: "Academia Financeira", desc: "Lições interactivas", bg: "bg-primary/10", color: "text-primary", anim: "glow" as const },
-    { icon: Swords, label: "Arena dos Desafios", desc: "Compete e aprende", bg: "bg-destructive/10", color: "text-destructive", anim: "wiggle" as const },
-    { icon: ShoppingBag, label: "Mercado dos Sonhos", desc: "Realiza objectivos", bg: "bg-accent/10", color: "text-accent-foreground", anim: "spin" as const },
+    { icon: Building2, label: t('universe.zone1.label'), desc: t('universe.zone1.desc'), bg: "bg-accent/10", color: "text-accent-foreground", anim: "bounce" as const },
+    { icon: TreePine, label: t('universe.zone2.label'), desc: t('universe.zone2.desc'), bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
+    { icon: BookOpen, label: t('universe.zone3.label'), desc: t('universe.zone3.desc'), bg: "bg-primary/10", color: "text-primary", anim: "glow" as const },
+    { icon: Swords, label: t('universe.zone4.label'), desc: t('universe.zone4.desc'), bg: "bg-destructive/10", color: "text-destructive", anim: "wiggle" as const },
+    { icon: ShoppingBag, label: t('universe.zone5.label'), desc: t('universe.zone5.desc'), bg: "bg-accent/10", color: "text-accent-foreground", anim: "spin" as const },
   ];
   return (
     <Section id="universo">
-      <SectionTitle>Um mundo onde aprender sobre dinheiro se torna uma aventura</SectionTitle>
-      <SectionSubtitle>Cada zona representa um estágio da aprendizagem financeira.</SectionSubtitle>
+      <SectionTitle>{t('universe.title')}</SectionTitle>
+      <SectionSubtitle>{t('universe.subtitle')}</SectionSubtitle>
 
       <div className="relative">
-        {/* Central illustration behind grid on desktop */}
         <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
           <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
         </div>
@@ -661,31 +621,32 @@ function UniverseSection() {
 }
 
 /* ═══════════════════════════════════════════
-   7. BENEFÍCIOS PAIS — hover glow cards
+   7. BENEFÍCIOS PAIS
    ═══════════════════════════════════════════ */
 function ParentBenefits() {
+  const t = useT();
   const items = [
-    { icon: BarChart3, text: "Acompanhar o progresso financeiro dos filhos", bg: "bg-primary/10", color: "text-primary" },
-    { icon: Heart, text: "Incentivar hábitos saudáveis de poupança", bg: "bg-destructive/10", color: "text-destructive" },
-    { icon: ListChecks, text: "Criar tarefas e recompensas educativas", bg: "bg-secondary/10", color: "text-secondary" },
-    { icon: UserCheck, text: "Ensinar responsabilidade financeira na prática", bg: "bg-accent/10", color: "text-accent-foreground" },
+    { icon: BarChart3, text: t('parents.benefit1'), bg: "bg-primary/10", color: "text-primary" },
+    { icon: Heart, text: t('parents.benefit2'), bg: "bg-destructive/10", color: "text-destructive" },
+    { icon: ListChecks, text: t('parents.benefit3'), bg: "bg-secondary/10", color: "text-secondary" },
+    { icon: UserCheck, text: t('parents.benefit4'), bg: "bg-accent/10", color: "text-accent-foreground" },
   ];
   return (
     <Section id="familias">
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
           <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
-            Para famílias
+            {t('parents.badge')}
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
-            Uma ferramenta poderosa para <GradientText>famílias</GradientText>
+            {t('parents.title_before')}<GradientText>{t('parents.title_gradient')}</GradientText>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-8 text-balance">
-            Com KIVARA os pais podem acompanhar, ensinar e motivar os filhos na jornada financeira.
+            {t('parents.subtitle')}
           </motion.p>
           <motion.div variants={stagger} className="space-y-3">
             {items.map((item, i) => (
@@ -712,10 +673,11 @@ function ParentBenefits() {
    8. BENEFÍCIOS ESCOLAS
    ═══════════════════════════════════════════ */
 function SchoolBenefits() {
+  const t = useT();
   const items = [
-    { icon: BookOpen, text: "Integrar desafios financeiros nas aulas", bg: "bg-accent/10", color: "text-accent-foreground" },
-    { icon: BarChart3, text: "Acompanhar a evolução dos estudantes", bg: "bg-primary/10", color: "text-primary" },
-    { icon: Trophy, text: "Incentivar competição saudável entre turmas", bg: "bg-secondary/10", color: "text-secondary" },
+    { icon: BookOpen, text: t('schools.benefit1'), bg: "bg-accent/10", color: "text-accent-foreground" },
+    { icon: BarChart3, text: t('schools.benefit2'), bg: "bg-primary/10", color: "text-primary" },
+    { icon: Trophy, text: t('schools.benefit3'), bg: "bg-secondary/10", color: "text-secondary" },
   ];
   return (
     <>
@@ -724,13 +686,13 @@ function SchoolBenefits() {
         <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
           <div>
             <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
-              Para escolas
+              {t('schools.badge')}
             </motion.div>
             <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
-              Educação financeira para a <GradientText>nova geração</GradientText>
+              {t('schools.title_before')}<GradientText>{t('schools.title_gradient')}</GradientText>
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-8 text-balance">
-              Professores podem transformar a sala de aula num laboratório financeiro.
+              {t('schools.subtitle')}
             </motion.p>
             <motion.div variants={stagger} className="space-y-3">
               {items.map((item, i) => (
@@ -760,15 +722,16 @@ function SchoolBenefits() {
 }
 
 /* ═══════════════════════════════════════════
-   9. GAMIFICAÇÃO — animated chips + mockup
+   9. GAMIFICAÇÃO
    ═══════════════════════════════════════════ */
 function GamificationSection() {
+  const t = useT();
   const elements = [
-    { icon: Flame, label: "Missões diárias", bg: "bg-destructive/10", color: "text-destructive", anim: "glow" as const },
-    { icon: TrendingUp, label: "Níveis de progressão", bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
-    { icon: Trophy, label: "Ligas semanais", bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
-    { icon: Medal, label: "Medalhas e conquistas", bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
-    { icon: Gamepad2, label: "Avatares personalizados", bg: "bg-primary/10", color: "text-primary", anim: "spin" as const },
+    { icon: Flame, label: t('gamification.item1'), bg: "bg-destructive/10", color: "text-destructive", anim: "glow" as const },
+    { icon: TrendingUp, label: t('gamification.item2'), bg: "bg-primary/10", color: "text-primary", anim: "bounce" as const },
+    { icon: Trophy, label: t('gamification.item3'), bg: "bg-accent/10", color: "text-accent-foreground", anim: "wiggle" as const },
+    { icon: Medal, label: t('gamification.item4'), bg: "bg-secondary/10", color: "text-secondary", anim: "pulse" as const },
+    { icon: Gamepad2, label: t('gamification.item4'), bg: "bg-primary/10", color: "text-primary", anim: "spin" as const },
   ];
   return (
     <Section>
@@ -779,13 +742,13 @@ function GamificationSection() {
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
-            Gamificação
+            {t('gamification.badge')}
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
-            Porque as crianças adoram aprender com <GradientText>KIVARA</GradientText>
+            {t('gamification.title_before')}<GradientText>{t('gamification.title_gradient')}</GradientText>
           </motion.h2>
           <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-8 text-balance">
-            Aprender deixa de ser uma obrigação e torna-se uma experiência envolvente.
+            {t('gamification.subtitle')}
           </motion.p>
           <motion.div variants={staggerFast} className="flex flex-wrap gap-3">
             {elements.map((el, i) => (
@@ -810,27 +773,28 @@ function GamificationSection() {
 }
 
 /* ═══════════════════════════════════════════
-   10. CONFIANÇA — dark block, glow shield + badge
+   10. CONFIANÇA
    ═══════════════════════════════════════════ */
 function TrustSection() {
+  const t = useT();
   const points = [
-    { icon: Users, text: "Contas infantis supervisionadas", anim: "pulse" as const },
-    { icon: Eye, text: "Controlo parental completo", anim: "glow" as const },
-    { icon: Lock, text: "Dados protegidos e encriptados", anim: "wiggle" as const },
-    { icon: ShieldCheck, text: "Ambiente educativo seguro", anim: "glow" as const },
+    { icon: Users, text: t('trust.item2.title'), anim: "pulse" as const },
+    { icon: Eye, text: t('trust.item2.desc'), anim: "glow" as const },
+    { icon: Lock, text: t('trust.item1.title'), anim: "wiggle" as const },
+    { icon: ShieldCheck, text: t('trust.item4.desc'), anim: "glow" as const },
   ];
   return (
     <Section className="!bg-foreground !text-background">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center1 min-[420px]:grid-cols-">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center min-[420px]:grid-cols-">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
-            Segurança
+            {t('trust.badge')}
           </motion.div>
           <motion.h2 variants={fadeUp} className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-balance leading-[1.1]">
-            Criado para ser seguro
+            {t('trust.title_before')}<span style={{backgroundImage:"linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>{t('trust.title_gradient')}</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="opacity-60 mb-8 text-lg text-balance">
-            KIVARA foi concebida com segurança e privacidade como prioridade máxima.
+            {t('trust.subtitle')}
           </motion.p>
           <motion.div variants={staggerFast} className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
             {points.map((p, i) => (
@@ -858,14 +822,15 @@ function TrustSection() {
 }
 
 /* ═══════════════════════════════════════════
-   11. PROVA SOCIAL — 3D testimonials (compact)
+   11. PROVA SOCIAL
    ═══════════════════════════════════════════ */
 function SocialProof() {
+  const t = useT();
   const stats = [
-    { value: 500, suffix: "+", label: "Crianças activas" },
-    { value: 150, suffix: "+", label: "Famílias" },
-    { value: 10, suffix: "+", label: "Escolas" },
-    { value: 49, suffix: "", label: "Avaliação", display: "4.9★" },
+    { value: 500, suffix: "+", label: t('social.title').includes('trust') ? 'Active children' : 'Crianças activas' },
+    { value: 150, suffix: "+", label: t('nav.families') },
+    { value: 10, suffix: "+", label: t('nav.schools') },
+    { value: 49, suffix: "", label: "4.9★", display: "4.9★" },
   ];
 
   const testimonials = [
@@ -878,7 +843,6 @@ function SocialProof() {
     <>
       <WaveDivider className="text-muted/40 -mb-1" />
       <Section className="bg-muted/40">
-        {/* Stars */}
         <motion.div variants={fadeUp} className="text-center mb-4">
           <div className="flex items-center justify-center gap-1 mb-4">
             {[...Array(5)].map((_, i) => (
@@ -893,13 +857,12 @@ function SocialProof() {
               </motion.div>
             ))}
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-3 lea4 md:p-ding-[1.1]">
-            Mais de 500 crianças já começaram a sua jornada
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-3 leading-[1.1]">
+            {t('social.title')}
           </h2>
-          <p className="text-muted-foreground text-lg">Famílias e esc4 md:p-olas de vários países confiam em nós.</p>
+          <p className="text-muted-foreground text-lg">{t('social.subtitle')}</p>
         </motion.div>
 
-        {/* Stats */}
         <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 mt-6">
           {stats.map((s, i) => (
             <motion.div
@@ -916,9 +879,8 @@ function SocialProof() {
           ))}
         </motion.div>
 
-        {/* Testimonials — 3D rotation on enter */}
         <motion.div variants={staggerFast} className="grid md:grid-cols-3 gap-4">
-          {testimonials.map((t, i) => (
+          {testimonials.map((tm, i) => (
             <motion.div
               key={i}
               variants={{
@@ -934,14 +896,14 @@ function SocialProof() {
             >
               <Quote className="w-7 h-7 text-primary/10 absolute top-4 right-4" />
               <div className="flex gap-1 mb-3">
-                {[...Array(t.rating)].map((_, j) => (
+                {[...Array(tm.rating)].map((_, j) => (
                   <Star key={j} className="w-4 h-4 text-accent fill-accent" />
                 ))}
               </div>
-              <p className="text-base text-foreground mb-4 italic leading-relaxed">"{t.text}"</p>
+              <p className="text-base text-foreground mb-4 italic leading-relaxed">"{tm.text}"</p>
               <div>
-                <p className="text-sm font-bold text-foreground">{t.name}</p>
-                <p className="text-sm text-muted-foreground">{t.role}</p>
+                <p className="text-sm font-bold text-foreground">{tm.name}</p>
+                <p className="text-sm text-muted-foreground">{tm.role}</p>
               </div>
             </motion.div>
           ))}
@@ -953,9 +915,10 @@ function SocialProof() {
 }
 
 /* ═══════════════════════════════════════════
-   12. CTA FINAL — gradient shift hover
+   12. CTA FINAL
    ═══════════════════════════════════════════ */
 function FinalCTA() {
+  const t = useT();
   return (
     <motion.section
       initial="hidden"
@@ -964,7 +927,6 @@ function FinalCTA() {
       variants={stagger}
       className="relative px-5 sm:px-8 py-12 md:py-16 bg-secondary overflow-hidden"
     >
-      {/* Decorative glow orbs */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-background/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -977,10 +939,10 @@ function FinalCTA() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
         <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-5 text-secondary-foreground leading-[1.1]">
-          Comece hoje a construir o futuro financeiro do seu filho
+          {t('cta.title')}
         </h2>
         <p className="text-secondary-foreground/70 text-lg md:text-xl mb-8 max-w-xl mx-auto text-balance">
-          Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
+          {t('cta.subtitle')}
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Button
@@ -989,11 +951,11 @@ function FinalCTA() {
             asChild
           >
             <Link to="/login">
-              Criar conta familiar <ChevronRight className="ml-1" />
+              {t('cta.family')} <ChevronRight className="ml-1" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" className="text-base px-8 border-secondary-foreground/30 text-secondary-foreground hover:bg-secondary-foreground/10" asChild>
-            <Link to="/login">Levar KIVARA para a escola</Link>
+            <Link to="/login">{t('cta.school')}</Link>
           </Button>
         </div>
       </motion.div>
@@ -1002,36 +964,37 @@ function FinalCTA() {
 }
 
 /* ═══════════════════════════════════════════
-   13. FOOTER — compact gradient dark
+   13. FOOTER
    ═══════════════════════════════════════════ */
 function Footer() {
+  const t = useT();
   return (
     <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="col-span-2 md:col-span-1">
             <img src={kivaraLogoWhite} alt="KIVARA" className="h-10 md:h-12 opacity-90 mb-3" />
-            <p className="text-sm opacity-60">Educação financeira gamificada para crianças e famílias.</p>
+            <p className="text-sm opacity-60">{t('footer.tagline')}</p>
           </div>
           <div>
-            <h4 className="font-display text-sm font-semibold mb-3 opacity-90">Plataforma</h4>
+            <h4 className="font-display text-sm font-semibold mb-3 opacity-90">{t('footer.product')}</h4>
             <ul className="space-y-1.5">
-              <li><a href="#como-funciona" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Como funciona</a></li>
-              <li><a href="#universo" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Universo KIVARA</a></li>
-              <li><a href="#familias" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Para famílias</a></li>
-              <li><a href="#escolas" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Para escolas</a></li>
+              <li><a href="#como-funciona" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.how')}</a></li>
+              <li><a href="#universo" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.universe')}</a></li>
+              <li><a href="#familias" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.families')}</a></li>
+              <li><a href="#escolas" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.schools')}</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-display text-sm font-semibold mb-3 opacity-90">Conta</h4>
+            <h4 className="font-display text-sm font-semibold mb-3 opacity-90">{t('footer.company')}</h4>
             <ul className="space-y-1.5">
-              <li><Link to="/login" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Entrar</Link></li>
-              <li><Link to="/login" className="text-sm opacity-60 hover:opacity-100 transition-opacity">Criar conta</Link></li>
+              <li><Link to="/login" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.login')}</Link></li>
+              <li><Link to="/login" className="text-sm opacity-60 hover:opacity-100 transition-opacity">{t('nav.create_account')}</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-display text-sm font-semibold mb-3 opacity-90">Newsletter</h4>
-            <p className="text-sm opacity-60 mb-2">Receba dicas de educação financeira.</p>
+            <p className="text-sm opacity-60 mb-2">{t('footer.tagline')}</p>
             <div className="flex gap-2">
               <div className="flex-1 flex items-center bg-background/10 rounded-xl px-3 gap-2">
                 <Mail className="w-4 h-4 opacity-40" />
@@ -1044,8 +1007,8 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-background/10 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-sm opacity-50">© {new Date().getFullYear()} KIVARA. Todos os direitos reservados.</p>
-          <p className="text-sm opacity-40">Feito com ❤️ para a próxima geração financeira</p>
+          <p className="text-sm opacity-50">© {new Date().getFullYear()} KIVARA. {t('footer.rights')}</p>
+          <p className="text-sm opacity-40">{t('footer.made_with')} ❤️ {t('footer.for_children')}</p>
         </div>
       </div>
     </footer>

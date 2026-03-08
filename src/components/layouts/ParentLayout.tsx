@@ -17,37 +17,43 @@ import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
 import { useAllFeatures, FEATURES, FeatureKey } from '@/hooks/use-feature-gate';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useT } from '@/contexts/LanguageContext';
 
-const navItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
-  { title: 'Painel', url: '/parent', icon: LayoutDashboard },
-  { title: 'Crianças', url: '/parent/children', icon: Users },
-  { title: 'Tarefas', url: '/parent/tasks', icon: ListTodo },
-  { title: 'Mesada', url: '/parent/allowance', icon: Wallet },
-  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
-  { title: 'Recompensas', url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
-  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
-  { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
-  { title: 'Consentimento', url: '/parent/consent', icon: Shield },
-  { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
-  { title: 'Suporte', url: '/parent/support', icon: Headphones },
-];
+function useNavItems() {
+  const t = useT();
+  const navItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+    { title: t('nav.parent.panel'), url: '/parent', icon: LayoutDashboard },
+    { title: t('nav.parent.children'), url: '/parent/children', icon: Users },
+    { title: t('nav.parent.tasks'), url: '/parent/tasks', icon: ListTodo },
+    { title: t('nav.parent.allowance'), url: '/parent/allowance', icon: Wallet },
+    { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
+    { title: t('nav.parent.reports'), url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
+    { title: t('nav.parent.profile'), url: '/parent/profile', icon: UserCircle },
+    { title: t('nav.parent.consent'), url: '/parent/consent', icon: Shield },
+    { title: t('nav.parent.subscription'), url: '/parent/subscription', icon: Crown },
+    { title: t('nav.parent.support'), url: '/parent/support', icon: Headphones },
+  ];
 
-const mobileFixedItems = [
-  { title: 'Painel', url: '/parent', icon: LayoutDashboard },
-  { title: 'Crianças', url: '/parent/children', icon: Users },
-  { title: 'Tarefas', url: '/parent/tasks', icon: ListTodo },
-  { title: 'Mesada', url: '/parent/allowance', icon: Wallet },
-];
+  const mobileFixedItems = [
+    { title: t('nav.parent.panel'), url: '/parent', icon: LayoutDashboard },
+    { title: t('nav.parent.children'), url: '/parent/children', icon: Users },
+    { title: t('nav.parent.tasks'), url: '/parent/tasks', icon: ListTodo },
+    { title: t('nav.parent.allowance'), url: '/parent/allowance', icon: Wallet },
+  ];
 
-const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
-  { title: 'Cofres', url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
-  { title: 'Recompensas', url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
-  { title: 'Relatórios', url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
-  { title: 'Perfil', url: '/parent/profile', icon: UserCircle },
-  { title: 'Consentimento', url: '/parent/consent', icon: Shield },
-  { title: 'Subscrição', url: '/parent/subscription', icon: Crown },
-  { title: 'Suporte', url: '/parent/support', icon: Headphones },
-];
+  const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
+    { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
+    { title: t('nav.parent.reports'), url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
+    { title: t('nav.parent.profile'), url: '/parent/profile', icon: UserCircle },
+    { title: t('nav.parent.consent'), url: '/parent/consent', icon: Shield },
+    { title: t('nav.parent.subscription'), url: '/parent/subscription', icon: Crown },
+    { title: t('nav.parent.support'), url: '/parent/support', icon: Headphones },
+  ];
+
+  return { navItems, mobileFixedItems, mobileMoreItems };
+}
 
 function ParentSidebar() {
   const { state } = useSidebar();
@@ -55,6 +61,8 @@ function ParentSidebar() {
   const { logout, user } = useAuth();
   const location = useLocation();
   const { hasFeature } = useAllFeatures();
+  const t = useT();
+  const { navItems } = useNavItems();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -63,20 +71,20 @@ function ParentSidebar() {
           {!collapsed && (
             <div>
               <img src={kivaraLogo} alt="KIVARA" className="h-9 brightness-0 invert" />
-              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">Pequenos hábitos. Grandes futuros.</p>
+              <p className="text-small text-sidebar-foreground/50 font-body mt-0.5">{t('nav.parent.slogan')}</p>
             </div>
           )}
           {collapsed && <span className="text-xl font-display font-bold text-sidebar-primary">K</span>}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-caption uppercase tracking-widest">{t('nav.parent.menu')}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
                 const locked = item.requiredFeature ? !hasFeature(item.requiredFeature) : false;
                 return (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
                     {locked ? (
                       <TooltipProvider delayDuration={200}>
@@ -89,7 +97,7 @@ function ParentSidebar() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="right">
-                            <p className="text-small">Requer upgrade</p>
+                            <p className="text-small">{t('common.requires_upgrade')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -120,7 +128,7 @@ function ParentSidebar() {
               </div>
               <div>
                 <p className="text-sm font-display font-bold text-sidebar-foreground">{user.name}</p>
-                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">Encarregado</p>
+                <p className="text-caption text-sidebar-foreground/50 uppercase tracking-wider">{t('nav.parent.role')}</p>
               </div>
             </div>
           )}
@@ -129,10 +137,10 @@ function ParentSidebar() {
             size={collapsed ? 'icon' : 'default'}
             className="w-full text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-destructive/10 rounded-xl transition-all duration-200"
             onClick={logout}
-            aria-label="Sair"
+            aria-label={t('common.logout')}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="ml-2">Sair</span>}
+            {!collapsed && <span className="ml-2">{t('common.logout')}</span>}
           </Button>
         </div>
       </SidebarContent>
@@ -147,6 +155,8 @@ export function ParentLayout({ children }: { children: ReactNode }) {
   const { logout } = useAuth();
   const { hasFeature } = useAllFeatures();
   const [moreOpen, setMoreOpen] = useState(false);
+  const t = useT();
+  const { mobileFixedItems, mobileMoreItems } = useNavItems();
 
   const isMoreRouteActive = mobileMoreItems.some((item) =>
     location.pathname === item.url || location.pathname.startsWith(item.url + '/')
@@ -168,7 +178,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                 <ThemeToggle />
                 <NotificationDropdown />
                 {isMobile && (
-                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label="Sair">
+                  <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label={t('common.logout')}>
                     <LogOut className="h-5 w-5" />
                   </Button>
                 )}
@@ -190,9 +200,8 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             </motion.main>
           </AnimatePresence>
 
-          {/* Mobile Bottom Navigation */}
           {isMobile && (
-            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label="Navegação principal">
+            <nav className="fixed bottom-0 left-0 right-0 z-40" role="navigation" aria-label={t('common.more_options')}>
               <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-t border-border/50" />
               <div className="relative px-2 py-2.5 flex justify-around items-center max-w-lg mx-auto">
                 {mobileFixedItems.map((item) => {
@@ -202,7 +211,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <NavLink
-                      key={item.title}
+                      key={item.url}
                       to={item.url}
                       end={item.url === '/parent'}
                       className="relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 text-muted-foreground"
@@ -225,16 +234,15 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                   );
                 })}
 
-                {/* More button */}
                 <button
                   onClick={() => setMoreOpen(true)}
                   className={`relative flex flex-col items-center min-w-[48px] min-h-[48px] justify-center rounded-2xl transition-all duration-200 ${isMoreRouteActive ? 'text-primary' : 'text-muted-foreground'}`}
-                  aria-label="Mais opções"
+                  aria-label={t('common.more_options')}
                 >
                   <div className={`relative p-2 rounded-xl transition-all duration-300 ${isMoreRouteActive ? 'bg-primary/10' : ''}`}>
                     <MoreHorizontal className="h-6 w-6 relative z-10" />
                   </div>
-                  <span className="text-caption mt-0.5 font-semibold">Mais</span>
+                  <span className="text-caption mt-0.5 font-semibold">{t('common.more')}</span>
                   {isMoreRouteActive && (
                     <div className="absolute -bottom-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
                   )}
@@ -243,11 +251,10 @@ export function ParentLayout({ children }: { children: ReactNode }) {
             </nav>
           )}
 
-          {/* More Menu Sheet */}
           <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
             <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-8">
               <SheetHeader className="pb-2">
-                <SheetTitle className="text-center text-lg font-display">Mais funcionalidades</SheetTitle>
+                <SheetTitle className="text-center text-lg font-display">{t('common.more_features')}</SheetTitle>
               </SheetHeader>
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
@@ -262,9 +269,9 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                   if (locked) {
                     return (
                       <div
-                        key={item.title}
+                        key={item.url}
                         className="flex flex-col items-center gap-1.5 p-3 rounded-2xl text-muted-foreground/40 cursor-not-allowed select-none"
-                        title="Requer upgrade"
+                        title={t('common.requires_upgrade')}
                       >
                         <div className="relative w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center">
                           <item.icon className="h-6 w-6" />
@@ -277,7 +284,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
 
                   return (
                     <button
-                      key={item.title}
+                      key={item.url}
                       onClick={() => {
                         setMoreOpen(false);
                         navigate(item.url);
