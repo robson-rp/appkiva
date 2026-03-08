@@ -889,7 +889,7 @@ function SocialProof() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-12 mt-8">
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 mt-6">
           {stats.map((s, i) => (
             <motion.div
               key={i}
