@@ -423,7 +423,7 @@ function Hero() {
       </div>
 
       {/* Slide indicators — dot style */}
-      <div className="relative z-10 flex items-center justify-center gap-2.5 pb-6 md:pb-10">
+      <div className="relative z-10 flex items-center justify-center gap-2.5 pb-2 md:pb-3">
         {HERO_SLIDES.map((_, i) => (
           <button
             key={i}
