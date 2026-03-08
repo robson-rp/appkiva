@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ListTodo, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Task {
   id: string;
@@ -16,6 +17,7 @@ interface ChildPendingTasksProps {
 }
 
 export function ChildPendingTasks({ tasks }: ChildPendingTasksProps) {
+  const t = useT();
   const navigate = useNavigate();
 
   if (tasks.length === 0) return null;
@@ -27,10 +29,10 @@ export function ChildPendingTasks({ tasks }: ChildPendingTasksProps) {
           <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
             <ListTodo className="h-3.5 w-3.5 text-primary" />
           </div>
-          Próximas Tarefas
+          {t('child.pending.title')}
         </CardTitle>
         <button onClick={() => navigate('/child/tasks')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-          Ver todas <ChevronRight className="h-3 w-3" />
+          {t('child.pending.view_all')} <ChevronRight className="h-3 w-3" />
         </button>
       </CardHeader>
       <CardContent className="space-y-2">

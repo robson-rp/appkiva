@@ -31,6 +31,7 @@ import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { useChildTasks } from '@/hooks/use-child-tasks';
 import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { useStreakData } from '@/hooks/use-streaks';
+import { useT } from '@/contexts/LanguageContext';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,6 +43,7 @@ const itemVariants = {
 };
 
 export default function ChildDashboard() {
+  const t = useT();
   const { user } = useAuth();
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
@@ -53,7 +55,7 @@ export default function ChildDashboard() {
   const { data: dbVaults } = useDreamVaults(user?.profileId);
   const { data: streakData } = useStreakData();
 
-  const childName = user?.name ?? 'Explorador';
+  const childName = user?.name ?? t('child.dashboard.explorer');
   const childAvatar = user?.avatar ?? '🦊';
   const balance = walletBalance?.balance ?? 0;
   const childLevel: Level = 'saver';
@@ -95,9 +97,9 @@ export default function ChildDashboard() {
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
   const stats = [
-    { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/tasks' },
-    { label: 'Missões', value: activeMissions.length, icon: Target, gradient: 'from-kivara-green/10 to-kivara-light-green', iconColor: 'text-secondary', to: '/child/missions' },
-    { label: 'Cofres', value: vaults.length, icon: PiggyBank, gradient: 'from-kivara-gold/10 to-kivara-light-gold', iconColor: 'text-accent', to: '/child/vaults' },
+    { label: t('child.dashboard.tasks'), value: pendingTasks.length, icon: ListTodo, gradient: 'from-kivara-blue/10 to-kivara-light-blue', iconColor: 'text-primary', to: '/child/tasks' },
+    { label: t('child.dashboard.missions'), value: activeMissions.length, icon: Target, gradient: 'from-kivara-green/10 to-kivara-light-green', iconColor: 'text-secondary', to: '/child/missions' },
+    { label: t('child.dashboard.vaults'), value: vaults.length, icon: PiggyBank, gradient: 'from-kivara-gold/10 to-kivara-light-gold', iconColor: 'text-accent', to: '/child/vaults' },
   ];
 
   return (

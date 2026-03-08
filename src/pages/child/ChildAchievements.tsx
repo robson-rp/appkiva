@@ -5,8 +5,10 @@ import { LevelBadge } from '@/components/LevelBadge';
 import { Kivo } from '@/components/Kivo';
 import { Lock, Trophy, Star, Award } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function ChildAchievements() {
+  const t = useT();
   const child = mockChildren[0];
   const unlocked = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
   const locked = mockAchievements.filter((a) => !a.unlockedAt || a.childId !== child.id);
@@ -24,8 +26,8 @@ export default function ChildAchievements() {
                 <Trophy className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold">Conquistas</h1>
-                <p className="text-sm opacity-80">{unlocked.length} de {mockAchievements.length} desbloqueadas</p>
+                <h1 className="font-display text-xl font-bold">{t('child.achievements.title')}</h1>
+                <p className="text-sm opacity-80">{unlocked.length} {t('child.achievements.of')} {mockAchievements.length} {t('child.achievements.unlocked')}</p>
               </div>
             </div>
             <LevelBadge level={child.level} points={child.kivaPoints} showProgress />
@@ -43,8 +45,8 @@ export default function ChildAchievements() {
                   <Award className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-display font-bold text-sm text-foreground">Colecção de Badges</p>
-                  <p className="text-[10px] text-muted-foreground">Poupança, Generosidade, Disciplina e Conhecimento</p>
+                  <p className="font-display font-bold text-sm text-foreground">{t('child.achievements.badges_collection')}</p>
+                  <p className="text-[10px] text-muted-foreground">{t('child.achievements.badges_desc')}</p>
                 </div>
               </div>
               <span className="text-lg">→</span>
@@ -56,7 +58,7 @@ export default function ChildAchievements() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Star className="h-4 w-4 text-primary" />
-          <h2 className="font-display font-semibold text-sm text-foreground">Desbloqueadas ({unlocked.length})</h2>
+          <h2 className="font-display font-semibold text-sm text-foreground">{t('child.achievements.unlocked_section')} ({unlocked.length})</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {unlocked.map((ach, i) => (
@@ -91,7 +93,7 @@ export default function ChildAchievements() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Lock className="h-4 w-4 text-muted-foreground" />
-          <h2 className="font-display font-semibold text-sm text-muted-foreground">Por Desbloquear ({locked.length})</h2>
+          <h2 className="font-display font-semibold text-sm text-muted-foreground">{t('child.achievements.locked_section')} ({locked.length})</h2>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {locked.map((ach, i) => (

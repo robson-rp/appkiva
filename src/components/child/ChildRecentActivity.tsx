@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, ChevronRight, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Transaction {
   id: string;
@@ -20,6 +21,7 @@ function TxIcon({ type }: { type: string }) {
 }
 
 export function ChildRecentActivity({ transactions }: ChildRecentActivityProps) {
+  const t = useT();
   const navigate = useNavigate();
 
   return (
@@ -29,10 +31,10 @@ export function ChildRecentActivity({ transactions }: ChildRecentActivityProps) 
           <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
           </div>
-          Actividade Recente
+          {t('child.activity.title')}
         </CardTitle>
         <button onClick={() => navigate('/child/wallet')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-          Ver tudo <ChevronRight className="h-3 w-3" />
+          {t('child.activity.view_all')} <ChevronRight className="h-3 w-3" />
         </button>
       </CardHeader>
       <CardContent className="space-y-1">
