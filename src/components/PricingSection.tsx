@@ -138,7 +138,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {displayTiers.map((tier, i) => {
             const config = TIER_CONFIG[tier.tierType];
             const isPopular = config?.popular;
