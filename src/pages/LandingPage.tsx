@@ -391,7 +391,9 @@ function Hero() {
                       <GradientText>{slide.headlineGradient}</GradientText>
                     </h1>
                     <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
-                      {slide.sucol sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3 sm:flex-row gap-3p gap-4">
+                      {slide.subtitle}
+                    </p>
+                    <div className="mt-8 flex flex-col sm:flex-row gap-3">
                       <Button
                         size="lg"
                         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
