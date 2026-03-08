@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Mission } from '@/types/kivara';
 import { useEffect, useState } from 'react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface DailyMissionCardProps {
   mission: Mission;
@@ -11,12 +12,13 @@ interface DailyMissionCardProps {
 }
 
 function useCountdown(endDate: string) {
+  const t = useT();
   const [timeLeft, setTimeLeft] = useState('');
 
   useEffect(() => {
     const update = () => {
       const diff = new Date(endDate).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('Expirado'); return; }
+      if (diff <= 0) { setTimeLeft(t('streak.expired')); return; }
       const h = Math.floor(diff / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       setTimeLeft(h > 24 ? `${Math.ceil(h / 24)}d` : `${h}h ${m}m`);
@@ -24,7 +26,7 @@ function useCountdown(endDate: string) {
     update();
     const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
-  }, [endDate]);
+  }, [endDate, t]);
 
   return timeLeft;
 }
@@ -32,7 +34,7 @@ function useCountdown(endDate: string) {
 const typeEmoji: Record<string, string> = { saving: '🏦', budgeting: '📊', planning: '📋' };
 
 export function DailyMissionCard({ mission, type }: DailyMissionCardProps) {
-  // For demo purposes, generate an end date
+  const t = useT();
   const endDate = type === 'daily'
     ? new Date(Date.now() + 8 * 3600000).toISOString()
     : new Date(Date.now() + 5 * 86400000).toISOString();
@@ -58,7 +60,7 @@ export function DailyMissionCard({ mission, type }: DailyMissionCardProps) {
                     ? 'bg-accent/15 text-accent-foreground'
                     : 'bg-primary/15 text-primary'
                 }`}>
-                  {type === 'daily' ? '⚡ Diária' : '🗓️ Semanal'}
+                  {type === 'daily' ? t('mission.daily') : t('mission.weekly')}
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground line-clamp-1">{mission.description}</p>

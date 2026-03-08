@@ -2,8 +2,10 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, PiggyBank, Target, Medal } from 'lucide-react';
 import { mockChildren, mockVaults, mockDonations } from '@/data/mock-data';
+import { useT } from '@/contexts/LanguageContext';
 
 export function ChildFamilyRankings() {
+  const t = useT();
   const rankings = mockChildren.map((c) => {
     const childVaults = mockVaults.filter((v) => v.childId === c.id);
     const totalSaved = childVaults.reduce((s, v) => s + v.currentAmount, 0);
@@ -17,9 +19,9 @@ export function ChildFamilyRankings() {
   const bestPlanner = [...rankings].sort((a, b) => b.kivaPoints - a.kivaPoints);
 
   const categories = [
-    { title: '🏆 Poupador', data: bestSaver, metric: (c: any) => `${c.totalSaved} 🪙`, icon: PiggyBank },
-    { title: '🎯 Planeador', data: bestPlanner, metric: (c: any) => `${c.kivaPoints} pts`, icon: Target },
-    { title: '💜 Doador', data: bestDonor, metric: (c: any) => `${c.totalDonated} 🪙`, icon: Medal },
+    { title: t('child.rankings.saver'), data: bestSaver, metric: (c: any) => `${c.totalSaved} 🪙`, icon: PiggyBank },
+    { title: t('child.rankings.planner'), data: bestPlanner, metric: (c: any) => `${c.kivaPoints} pts`, icon: Target },
+    { title: t('child.rankings.donor'), data: bestDonor, metric: (c: any) => `${c.totalDonated} 🪙`, icon: Medal },
   ];
 
   return (
@@ -30,7 +32,7 @@ export function ChildFamilyRankings() {
           <div className="w-7 h-7 rounded-lg bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
             <Crown className="h-3.5 w-3.5 text-accent-foreground" />
           </div>
-          Ranking Familiar
+          {t('child.rankings.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>

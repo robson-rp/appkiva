@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Vault {
   id: string;
@@ -18,6 +19,7 @@ interface ChildSavingsProgressProps {
 }
 
 export function ChildSavingsProgress({ vaults }: ChildSavingsProgressProps) {
+  const t = useT();
   const navigate = useNavigate();
 
   if (vaults.length === 0) return null;
@@ -29,10 +31,10 @@ export function ChildSavingsProgress({ vaults }: ChildSavingsProgressProps) {
           <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center">
             <TrendingUp className="h-3.5 w-3.5 text-secondary" />
           </div>
-          Poupanças
+          {t('child.savings.title')}
         </CardTitle>
         <button onClick={() => navigate('/child/vaults')} className="text-xs text-primary font-semibold flex items-center gap-0.5 hover:underline">
-          Ver cofres <ChevronRight className="h-3 w-3" />
+          {t('child.savings.view_vaults')} <ChevronRight className="h-3 w-3" />
         </button>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -51,7 +53,7 @@ export function ChildSavingsProgress({ vaults }: ChildSavingsProgressProps) {
                     animate={{ opacity: 1, x: 0 }}
                     className="text-[10px] text-secondary font-display font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md"
                   >
-                    +{monthlyInterest}/mês
+                    +{monthlyInterest}{t('child.savings.per_month')}
                   </motion.span>
                   <span className="text-xs text-muted-foreground font-display font-bold">
                     {vault.currentAmount}/{vault.targetAmount} 🪙

@@ -4,6 +4,7 @@ import { Flame } from 'lucide-react';
 import { useStreakData } from '@/hooks/use-streaks';
 import { mockStreakData } from '@/data/streaks-data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useT, useLanguage } from '@/contexts/LanguageContext';
 
 interface StreakWidgetProps {
   onClick?: () => void;
@@ -36,14 +37,17 @@ const dayDotVariants = {
 };
 
 export function StreakWidget({ onClick }: StreakWidgetProps) {
+  const t = useT();
+  const { locale } = useLanguage();
   const { data: streakData } = useStreakData();
   const sd = streakData ?? mockStreakData;
   const isActive = sd.currentStreak > 0;
   const isHot = sd.currentStreak >= 7;
+  const dateLocale = locale === 'pt' ? 'pt-PT' : 'en-US';
 
   const lastDateFormatted = sd.lastActiveDate
-    ? new Date(sd.lastActiveDate + 'T00:00:00').toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' })
-    : 'Sem actividade registada';
+    ? new Date(sd.lastActiveDate + 'T00:00:00').toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
+    : t('streak.no_activity');
 
   return (
     <TooltipProvider>
@@ -54,13 +58,11 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               className="border border-border/50 cursor-pointer hover:shadow-lg transition-shadow duration-300 overflow-hidden relative"
               onClick={onClick}
             >
-        {/* Top gradient bar with glow when hot */}
         <div className={`h-1.5 ${isHot
           ? 'bg-gradient-to-r from-destructive via-chart-1 to-accent'
           : 'bg-gradient-to-r from-destructive/60 via-chart-1/60 to-accent/60'
         }`} />
 
-        {/* Background glow effect for hot streaks */}
         {isHot && (
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute -top-8 -right-8 w-32 h-32 bg-destructive/5 rounded-full blur-2xl" />
@@ -71,7 +73,6 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
         <CardContent className="p-4 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* Flame icon with pulse ring */}
               <div className="relative">
                 {isActive && (
                   <motion.div
@@ -94,8 +95,8 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 </motion.div>
               </div>
               <div>
-                <p className="text-sm font-display font-bold">Sequência Diária</p>
-                <p className="text-xs text-muted-foreground">{sd.totalActiveDays} dias activos no total</p>
+                <p className="text-sm font-display font-bold">{t('streak.daily_streak')}</p>
+                <p className="text-xs text-muted-foreground">{t('streak.active_days_total').replace('{count}', String(sd.totalActiveDays))}</p>
               </div>
             </div>
             <div className="text-right">
@@ -108,11 +109,10 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               >
                 {sd.currentStreak} 🔥
               </motion.p>
-              <p className="text-[10px] text-muted-foreground">Recorde: {sd.longestStreak}</p>
+              <p className="text-[10px] text-muted-foreground">{t('streak.record').replace('{count}', String(sd.longestStreak))}</p>
             </div>
           </div>
 
-          {/* Activity dots with day labels */}
           <div className="flex gap-1.5 mt-3">
             <AnimatePresence>
               {Array.from({ length: 7 }).map((_, i) => {
@@ -121,8 +121,8 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                 const dateStr = d.toISOString().split('T')[0];
                 const isActiveDay = sd.activeDates.includes(dateStr);
                 const isToday = i === 6;
-                const dayLabel = d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric' });
-                const shortDay = d.toLocaleDateString('pt-PT', { weekday: 'short' }).replace('.', '').slice(0, 3);
+                const dayLabel = d.toLocaleDateString(dateLocale, { weekday: 'short', day: 'numeric' });
+                const shortDay = d.toLocaleDateString(dateLocale, { weekday: 'short' }).replace('.', '').slice(0, 3);
                 return (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
@@ -158,7 +158,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                          </motion.div>
                         </div>
                         <span className={`text-[9px] capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
-                          {isToday ? 'Hoje' : shortDay}
+                          {isToday ? t('streak.today') : shortDay}
                         </span>
                       </div>
                     </TooltipTrigger>
@@ -171,7 +171,6 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
             </AnimatePresence>
           </div>
 
-          {/* Streak label for hot streaks */}
           {isHot && (
             <motion.p
               initial={{ opacity: 0, y: 4 }}
@@ -179,7 +178,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               transition={{ delay: 0.5 }}
               className="text-[10px] text-center text-destructive/70 font-semibold mt-2 tracking-wide uppercase"
             >
-              🔥 Em chamas! Continua assim!
+              {t('streak.on_fire')}
             </motion.p>
           )}
         </CardContent>
@@ -187,7 +186,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">
-          <p>Último dia activo: {lastDateFormatted}</p>
+          <p>{t('streak.last_active').replace('{date}', lastDateFormatted)}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

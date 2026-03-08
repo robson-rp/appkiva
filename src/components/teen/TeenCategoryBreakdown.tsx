@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
+import { useT } from '@/contexts/LanguageContext';
 
 interface TeenCategoryBreakdownProps {
   topCategories: [string, number][];
@@ -8,10 +9,11 @@ interface TeenCategoryBreakdownProps {
 }
 
 export function TeenCategoryBreakdown({ topCategories, totalSpent }: TeenCategoryBreakdownProps) {
+  const t = useT();
   return (
     <Card className="border-border/50">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-display">Gastos por Categoria</CardTitle>
+        <CardTitle className="text-sm font-display">{t('teen.category_breakdown')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {topCategories.map(([cat, amount]) => {
