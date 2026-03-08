@@ -368,8 +368,8 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-              <div className="relative px-5 sm:px-8 py-12 md:py-20">
-                <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+              <div className="relative px-5 sm:px-8 py-8 md:py-16">
+                <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={selectedIndex === i ? { opacity: 1, y: 0 } : { opacity: 0.3, y: 10 }}
