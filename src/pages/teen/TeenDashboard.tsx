@@ -15,8 +15,10 @@ import { TeenCategoryBreakdown } from '@/components/teen/TeenCategoryBreakdown';
 import { TeenRecentTransactions } from '@/components/teen/TeenRecentTransactions';
 import { StreakWidget } from '@/components/StreakWidget';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function TeenDashboard() {
+  const { t } = useLanguage();
   const teen = mockTeens[0];
   const navigate = useNavigate();
   const { data: realBudget } = useTeenBudget();
@@ -44,10 +46,10 @@ export default function TeenDashboard() {
     .slice(0, 4) as [string, number][];
 
   const stats = [
-    { label: 'Saldo', value: `${teen.balance} 🪙`, icon: Wallet, color: 'text-primary' },
-    { label: 'Orçamento', value: `${Math.round(budgetUsed)}% usado`, icon: Target, color: budgetUsed > 80 ? 'text-destructive' : 'text-chart-3' },
-    { label: 'Poupado', value: `${totalSaved} 🪙`, icon: PiggyBank, color: 'text-chart-3' },
-    { label: 'Gasto', value: `${totalSpent} 🪙`, icon: TrendingUp, color: 'text-chart-1' },
+    { label: t('common.balance'), value: `${teen.balance} 🪙`, icon: Wallet, color: 'text-primary' },
+    { label: t('teen.wallet.title'), value: `${Math.round(budgetUsed)}%`, icon: Target, color: budgetUsed > 80 ? 'text-destructive' : 'text-chart-3' },
+    { label: t('tx.vault_deposit'), value: `${totalSaved} 🪙`, icon: PiggyBank, color: 'text-chart-3' },
+    { label: t('tx.purchase'), value: `${totalSpent} 🪙`, icon: TrendingUp, color: 'text-chart-1' },
   ];
 
   return (
@@ -55,7 +57,7 @@ export default function TeenDashboard() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-heading md:text-heading-lg font-display font-bold text-foreground">
-          Olá, {teen.name}! 💪
+          {t('parent.dashboard.hello')} {teen.name}! 💪
         </h1>
         <p className="text-muted-foreground text-base mt-1">
           {levelConfig.avatar} {levelConfig.label} • {teen.kivaPoints} KivaPoints

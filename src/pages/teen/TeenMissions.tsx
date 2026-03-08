@@ -6,34 +6,36 @@ import { Progress } from '@/components/ui/progress';
 import { mockMissions } from '@/data/mock-data';
 import { Target, CheckCircle, Clock, Swords } from 'lucide-react';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Tab = 'missions' | 'challenges';
 
 export default function TeenMissions() {
   const [tab, setTab] = useState<Tab>('missions');
+  const { t } = useLanguage();
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-display font-bold text-foreground">Missões</h1>
-        <p className="text-muted-foreground text-sm">Desafios financeiros para subires de nível</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">{t('teen.missions.title')}</h1>
+        <p className="text-muted-foreground text-sm">{t('teen.missions.subtitle')}</p>
       </motion.div>
 
       {/* Tab Switcher */}
       <div className="flex gap-2 bg-muted/50 rounded-2xl p-1">
         {[
-          { id: 'missions' as Tab, label: 'Missões', icon: Target },
-          { id: 'challenges' as Tab, label: 'Desafios Semanais', icon: Swords },
-        ].map((t) => (
+          { id: 'missions' as Tab, label: t('teen.missions.tab.missions'), icon: Target },
+          { id: 'challenges' as Tab, label: t('teen.missions.tab.challenges'), icon: Swords },
+        ].map((t_item) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={t_item.id}
+            onClick={() => setTab(t_item.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-display font-bold transition-all duration-200 ${
-              tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground/70'
+              tab === t_item.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground/70'
             }`}
           >
-            <t.icon className="h-3.5 w-3.5" />
-            {t.label}
+            <t_item.icon className="h-3.5 w-3.5" />
+            {t_item.label}
           </button>
         ))}
       </div>
@@ -58,7 +60,7 @@ export default function TeenMissions() {
                       <h3 className="font-display font-bold text-foreground">{mission.title}</h3>
                     </div>
                     <Badge variant={mission.status === 'completed' ? 'default' : mission.status === 'in_progress' ? 'secondary' : 'outline'} className="text-[10px]">
-                      {mission.status === 'completed' ? 'Completa' : mission.status === 'in_progress' ? 'Em curso' : 'Disponível'}
+                      {mission.status === 'completed' ? t('teen.missions.status.completed') : mission.status === 'in_progress' ? t('teen.missions.status.in_progress') : t('teen.missions.status.available')}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-3">{mission.description}</p>
@@ -66,8 +68,8 @@ export default function TeenMissions() {
                     <Progress value={mission.status === 'completed' ? 100 : mission.status === 'in_progress' ? 45 : 0} className="h-2 mb-2" />
                   )}
                   <div className="flex gap-3 text-xs text-muted-foreground">
-                    <span>🪙 {mission.reward} moedas</span>
-                    <span>⭐ {mission.kivaPointsReward} pontos</span>
+                    <span>🪙 {mission.reward} {t('common.coins')}</span>
+                    <span>⭐ {mission.kivaPointsReward} {t('common.points')}</span>
                   </div>
                 </CardContent>
               </Card>
