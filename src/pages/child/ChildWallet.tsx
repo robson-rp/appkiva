@@ -241,7 +241,7 @@ export default function ChildWallet() {
           {transactions.length === 0 ? (
             <Card className="border-border/50">
               <CardContent className="py-8 text-center">
-                <p className="text-sm text-muted-foreground">Sem movimentos ainda</p>
+                <p className="text-sm text-muted-foreground">{t('child.wallet.no_movements')}</p>
               </CardContent>
             </Card>
           ) : transactions.map((tx) => {
