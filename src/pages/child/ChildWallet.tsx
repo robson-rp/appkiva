@@ -54,9 +54,9 @@ export default function ChildWallet() {
           id: tx.id,
           childId: child.id,
           description: tx.entry_type === 'vault_deposit'
-            ? `Poupança: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            ? `${t('child.wallet.saving_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.entry_type === 'vault_withdraw'
-            ? `Levantamento: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
+            ? `${t('child.wallet.withdrawal_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.description,
           amount: tx.amount,
           type: mapTxType(tx) as 'earned' | 'spent' | 'saved' | 'allowance' | 'donated',
