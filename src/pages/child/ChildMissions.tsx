@@ -12,30 +12,18 @@ import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { DailyMissionCard } from '@/components/DailyMissionCard';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
-const statusConfig = {
-  available: { label: 'Disponível', icon: Sparkles, bg: 'bg-[hsl(var(--kivara-light-green))]', badgeBg: 'bg-secondary text-secondary-foreground', color: 'text-secondary' },
-  in_progress: { label: 'Em Progresso', icon: Clock, bg: 'bg-[hsl(var(--kivara-light-gold))]', badgeBg: 'bg-accent text-accent-foreground', color: 'text-accent-foreground' },
-  completed: { label: 'Concluída', icon: CheckCircle2, bg: 'bg-[hsl(var(--kivara-light-blue))]', badgeBg: 'bg-primary text-primary-foreground', color: 'text-primary' },
-};
-
-const taskStatusConfig = {
-  pending: { label: 'Pendente', icon: Clock, bg: 'bg-muted', badgeCls: 'bg-muted text-muted-foreground border-0' },
-  in_progress: { label: 'Em Curso', icon: Zap, bg: 'bg-[hsl(var(--kivara-light-blue))]', badgeCls: 'bg-[hsl(var(--kivara-light-blue))] text-primary border-0' },
-  completed: { label: 'A Aprovar', icon: CheckCircle2, bg: 'bg-[hsl(var(--kivara-light-gold))]', badgeCls: 'bg-[hsl(var(--kivara-light-gold))] text-accent-foreground border-0' },
-  approved: { label: 'Aprovada ✅', icon: Award, bg: 'bg-[hsl(var(--kivara-light-green))]', badgeCls: 'bg-[hsl(var(--kivara-light-green))] text-secondary border-0' },
-};
-
 const categoryEmoji: Record<string, string> = { cleaning: '🧹', studying: '📚', helping: '🤝', other: '📌' };
-
 const typeEmoji: Record<string, string> = { saving: '🏦', budgeting: '📊', planning: '📋' };
 
 type Tab = 'tasks' | 'missions' | 'challenges';
 
 export default function ChildMissions() {
+  const t = useT();
   const [tab, setTab] = useState<Tab>('tasks');
   const { data: tasks = [], isLoading: loadingTasks } = useChildTasks();
   const completeTask = useCompleteTask();
@@ -48,24 +36,37 @@ export default function ChildMissions() {
   const completedTasks = tasks.filter(t => t.status === 'completed');
   const approvedTasks = tasks.filter(t => t.status === 'approved');
 
+  const statusConfig = {
+    available: { label: t('child.missions.status.available'), icon: Sparkles, bg: 'bg-[hsl(var(--kivara-light-green))]', badgeBg: 'bg-secondary text-secondary-foreground', color: 'text-secondary' },
+    in_progress: { label: t('child.missions.status.in_progress'), icon: Clock, bg: 'bg-[hsl(var(--kivara-light-gold))]', badgeBg: 'bg-accent text-accent-foreground', color: 'text-accent-foreground' },
+    completed: { label: t('child.missions.status.completed'), icon: CheckCircle2, bg: 'bg-[hsl(var(--kivara-light-blue))]', badgeBg: 'bg-primary text-primary-foreground', color: 'text-primary' },
+  };
+
+  const taskStatusConfig = {
+    pending: { label: t('child.tasks.pending'), icon: Clock, bg: 'bg-muted', badgeCls: 'bg-muted text-muted-foreground border-0' },
+    in_progress: { label: t('child.tasks.in_progress'), icon: Zap, bg: 'bg-[hsl(var(--kivara-light-blue))]', badgeCls: 'bg-[hsl(var(--kivara-light-blue))] text-primary border-0' },
+    completed: { label: t('child.tasks.to_approve'), icon: CheckCircle2, bg: 'bg-[hsl(var(--kivara-light-gold))]', badgeCls: 'bg-[hsl(var(--kivara-light-gold))] text-accent-foreground border-0' },
+    approved: { label: t('child.tasks.approved_label'), icon: Award, bg: 'bg-[hsl(var(--kivara-light-green))]', badgeCls: 'bg-[hsl(var(--kivara-light-green))] text-secondary border-0' },
+  };
+
   return (
     <div className="space-y-5 max-w-2xl mx-auto pb-4">
       {/* Tab Switcher */}
       <div className="flex gap-1 bg-muted/50 rounded-2xl p-1">
         {[
-          { id: 'tasks' as Tab, label: 'Tarefas', icon: ListTodo },
-          { id: 'missions' as Tab, label: 'Missões', icon: Target },
-          { id: 'challenges' as Tab, label: 'Desafios', icon: Swords },
-        ].map((t) => (
+          { id: 'tasks' as Tab, label: t('child.missions.tab.tasks'), icon: ListTodo },
+          { id: 'missions' as Tab, label: t('child.missions.tab.missions'), icon: Target },
+          { id: 'challenges' as Tab, label: t('child.missions.tab.challenges'), icon: Swords },
+        ].map((tb) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-display font-bold transition-all duration-200 ${
-              tab === t.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground/70'
+              tab === tb.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground/70'
             }`}
           >
-            <t.icon className="h-3.5 w-3.5" />
-            {t.label}
+            <tb.icon className="h-3.5 w-3.5" />
+            {tb.label}
           </button>
         ))}
       </div>
@@ -74,18 +75,22 @@ export default function ChildMissions() {
         <WeeklyChallenges />
       ) : tab === 'tasks' ? (
         <TasksTab
+          t={t}
           tasks={tasks}
           pendingTasks={pendingTasks}
           completedTasks={completedTasks}
           approvedTasks={approvedTasks}
           loading={loadingTasks}
           completeTask={completeTask}
+          taskStatusConfig={taskStatusConfig}
         />
       ) : (
         <MissionsTab
+          t={t}
           available={available}
           inProgress={inProgress}
           completed={completed}
+          statusConfig={statusConfig}
         />
       )}
     </div>
@@ -94,19 +99,23 @@ export default function ChildMissions() {
 
 /* ─── Tasks Tab ─── */
 function TasksTab({
+  t,
   tasks,
   pendingTasks,
   completedTasks,
   approvedTasks,
   loading,
   completeTask,
+  taskStatusConfig,
 }: {
-  tasks: ReturnType<typeof useChildTasks>['data'] & any[];
+  t: (key: string) => string;
+  tasks: any[];
   pendingTasks: any[];
   completedTasks: any[];
   approvedTasks: any[];
   loading: boolean;
   completeTask: ReturnType<typeof useCompleteTask>;
+  taskStatusConfig: any;
 }) {
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
@@ -121,15 +130,15 @@ function TasksTab({
                 <ListTodo className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold text-white">As Minhas Tarefas</h1>
-                <p className="text-sm text-white/60">Completa tarefas e ganha moedas!</p>
+                <h1 className="font-display text-xl font-bold text-white">{t('child.tasks.title')}</h1>
+                <p className="text-sm text-white/60">{t('child.tasks.subtitle')}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Por Fazer', value: pendingTasks.length, icon: Clock },
-                { label: 'A Aprovar', value: completedTasks.length, icon: CheckCircle2 },
-                { label: 'Aprovadas', value: approvedTasks.length, icon: Trophy },
+                { label: t('child.tasks.todo'), value: pendingTasks.length, icon: Clock },
+                { label: t('child.tasks.to_approve'), value: completedTasks.length, icon: CheckCircle2 },
+                { label: t('child.tasks.approved'), value: approvedTasks.length, icon: Trophy },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
@@ -152,8 +161,8 @@ function TasksTab({
         <Card className="border-border/50">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎯</div>
-            <p className="font-display font-bold text-sm">Sem tarefas por agora</p>
-            <p className="text-xs text-muted-foreground mt-1">O teu encarregado pode criar novas tarefas para ti!</p>
+            <p className="font-display font-bold text-sm">{t('child.tasks.no_tasks')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('child.tasks.no_tasks_hint')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -162,7 +171,7 @@ function TasksTab({
           {pendingTasks.length > 0 && (
             <motion.div variants={item}>
               <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-                <Zap className="h-4 w-4 text-accent-foreground" /> Por Fazer
+                <Zap className="h-4 w-4 text-accent-foreground" /> {t('child.tasks.todo')}
               </h2>
               <div className="space-y-3">
                 {pendingTasks.map((task) => {
@@ -204,7 +213,7 @@ function TasksTab({
                             ) : (
                               <CheckCircle2 className="h-3.5 w-3.5" />
                             )}
-                            Marcar como Concluída
+                            {t('child.tasks.mark_done')}
                           </Button>
                         </CardContent>
                       </Card>
@@ -219,7 +228,7 @@ function TasksTab({
           {completedTasks.length > 0 && (
             <motion.div variants={item}>
               <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-accent-foreground" /> A Aguardar Aprovação
+                <Clock className="h-4 w-4 text-accent-foreground" /> {t('child.tasks.waiting_approval')}
               </h2>
               <div className="space-y-3">
                 {completedTasks.map((task) => (
@@ -231,12 +240,12 @@ function TasksTab({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-display font-semibold text-sm">{task.title}</h3>
-                        <p className="text-[11px] text-muted-foreground">À espera que o encarregado aprove</p>
+                        <p className="text-[11px] text-muted-foreground">{t('child.tasks.waiting_parent')}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-display font-bold text-xs">🪙 {task.reward}</p>
                         <Badge className="text-[9px] bg-[hsl(var(--kivara-light-gold))] text-accent-foreground border-0 rounded-lg mt-0.5">
-                          <Clock className="h-3 w-3 mr-0.5" /> A Aprovar
+                          <Clock className="h-3 w-3 mr-0.5" /> {t('child.tasks.to_approve')}
                         </Badge>
                       </div>
                     </CardContent>
@@ -250,7 +259,7 @@ function TasksTab({
           {approvedTasks.length > 0 && (
             <motion.div variants={item}>
               <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-secondary" /> Aprovadas
+                <Trophy className="h-4 w-4 text-secondary" /> {t('child.tasks.approved')}
               </h2>
               <div className="space-y-3">
                 {approvedTasks.map((task) => (
@@ -287,15 +296,18 @@ function TasksTab({
 
 /* ─── Missions Tab (existing mock data) ─── */
 function MissionsTab({
+  t,
   available,
   inProgress,
   completed,
+  statusConfig,
 }: {
+  t: (key: string) => string;
   available: any[];
   inProgress: any[];
   completed: any[];
+  statusConfig: any;
 }) {
-  // Classify missions as daily or weekly based on index (demo heuristic)
   const dailyMissions = [...available, ...inProgress].filter((_, i) => i % 2 === 0);
   const weeklyMissions = [...available, ...inProgress].filter((_, i) => i % 2 !== 0);
 
@@ -312,15 +324,15 @@ function MissionsTab({
                 <Target className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold text-white">Missões</h1>
-                <p className="text-sm text-white/60">Completa missões diárias e semanais!</p>
+                <h1 className="font-display text-xl font-bold text-white">{t('child.missions.title')}</h1>
+                <p className="text-sm text-white/60">{t('child.missions.complete_tasks')}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Diárias', value: dailyMissions.length, icon: Sparkles },
-                { label: 'Semanais', value: weeklyMissions.length, icon: Zap },
-                { label: 'Concluídas', value: completed.length, icon: Trophy },
+                { label: t('child.missions.daily'), value: dailyMissions.length, icon: Sparkles },
+                { label: t('child.missions.weekly'), value: weeklyMissions.length, icon: Zap },
+                { label: t('child.missions.completed'), value: completed.length, icon: Trophy },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
@@ -337,8 +349,8 @@ function MissionsTab({
       {dailyMissions.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> Missões Diárias
-            <span className="text-[10px] text-muted-foreground font-normal ml-auto">Renovam a cada 24h</span>
+            <Sparkles className="h-4 w-4 text-accent" /> {t('child.missions.daily_missions')}
+            <span className="text-[10px] text-muted-foreground font-normal ml-auto">{t('child.missions.renew_24h')}</span>
           </h2>
           <div className="space-y-3">
             {dailyMissions.map((mission) => (
@@ -352,7 +364,7 @@ function MissionsTab({
       {weeklyMissions.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Target className="h-4 w-4 text-primary" /> Quests Semanais
+            <Target className="h-4 w-4 text-primary" /> {t('child.missions.weekly_quests')}
           </h2>
           <div className="space-y-3">
             {weeklyMissions.map((mission) => (
@@ -366,7 +378,7 @@ function MissionsTab({
       {inProgress.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Zap className="h-4 w-4 text-accent-foreground" /> Em Curso
+            <Zap className="h-4 w-4 text-accent-foreground" /> {t('child.missions.in_progress')}
           </h2>
           <div className="space-y-3">
             {inProgress.map((mission) => {
@@ -394,13 +406,13 @@ function MissionsTab({
                     </div>
                     <div className="space-y-1.5">
                       <div className="flex justify-between">
-                        <span className="text-[10px] text-muted-foreground font-medium">Progresso</span>
+                        <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
                         <span className="text-[10px] font-display font-bold text-accent-foreground">{progress}%</span>
                       </div>
                       <Progress value={progress} className="h-2 rounded-full" />
                     </div>
-                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast('🚀 O sistema de missões interactivas estará disponível em breve!')}>
-                        <Zap className="h-3.5 w-3.5" /> Continuar
+                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast(t('child.missions.coming_soon'))}>
+                        <Zap className="h-3.5 w-3.5" /> {t('child.missions.continue')}
                       </Button>
                   </CardContent>
                 </Card>
@@ -414,7 +426,7 @@ function MissionsTab({
       {available.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-secondary" /> Disponíveis
+            <Sparkles className="h-4 w-4 text-secondary" /> {t('child.missions.available')}
           </h2>
           <div className="space-y-3">
             {available.map((mission) => {
@@ -443,11 +455,11 @@ function MissionsTab({
                       {mission.targetAmount && (
                         <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 flex items-center gap-2">
                           <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">Meta: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
+                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
                         </div>
                       )}
-                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast('🚀 O sistema de missões interactivas estará disponível em breve!')}>
-                        <Target className="h-3.5 w-3.5" /> Começar Missão
+                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast(t('child.missions.coming_soon'))}>
+                        <Target className="h-3.5 w-3.5" /> {t('child.missions.start')}
                       </Button>
                     </CardContent>
                   </Card>
@@ -462,7 +474,7 @@ function MissionsTab({
       {completed.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary" /> Concluídas
+            <Trophy className="h-4 w-4 text-primary" /> {t('child.missions.completed')}
           </h2>
           <div className="space-y-3">
             {completed.map((mission) => {

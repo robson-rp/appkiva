@@ -10,22 +10,14 @@ import { BookOpen, Flame, PenLine, CalendarDays, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useDiaryEntries, useCreateDiaryEntry } from '@/hooks/use-diary-entries';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
 
-const MOODS: { emoji: DiaryMood; label: string }[] = [
-  { emoji: '😄', label: 'Muito feliz' },
-  { emoji: '😊', label: 'Feliz' },
-  { emoji: '😐', label: 'Normal' },
-  { emoji: '😔', label: 'Triste' },
-  { emoji: '😤', label: 'Frustrado' },
-];
-
 function calcStreak(entries: { createdAt: string }[]): number {
   if (entries.length === 0) return 0;
   const sorted = [...entries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  // Get unique dates
   const dates = [...new Set(sorted.map(e => new Date(e.createdAt).toISOString().split('T')[0]))];
   let streak = 1;
   for (let i = 0; i < dates.length - 1; i++) {
@@ -38,19 +30,8 @@ function calcStreak(entries: { createdAt: string }[]): number {
   return streak;
 }
 
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  if (date.toDateString() === today.toDateString()) return 'Hoje';
-  if (date.toDateString() === yesterday.toDateString()) return 'Ontem';
-
-  return date.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
-}
-
 export default function ChildDiary() {
+  const t = useT();
   const { user } = useAuth();
   const { data: dbEntries = [], isLoading } = useDiaryEntries();
   const createEntry = useCreateDiaryEntry();
@@ -58,7 +39,24 @@ export default function ChildDiary() {
   const [newText, setNewText] = useState('');
   const [newMood, setNewMood] = useState<DiaryMood | null>(null);
 
-  // Fallback to mock data
+  const MOODS: { emoji: DiaryMood; label: string }[] = [
+    { emoji: '😄', label: t('child.diary.mood.very_happy') },
+    { emoji: '😊', label: t('child.diary.mood.happy') },
+    { emoji: '😐', label: t('child.diary.mood.normal') },
+    { emoji: '😔', label: t('child.diary.mood.sad') },
+    { emoji: '😤', label: t('child.diary.mood.frustrated') },
+  ];
+
+  function formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (date.toDateString() === today.toDateString()) return t('child.diary.today');
+    if (date.toDateString() === yesterday.toDateString()) return t('child.diary.yesterday');
+    return date.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
+  }
+
   const child = mockChildren[0];
   const mockFallback = mockDiaryEntries.filter((e) => e.childId === child.id).map(e => ({
     id: e.id, profileId: '', text: e.text, mood: e.mood, tags: e.tags ?? [], createdAt: e.date,
@@ -80,9 +78,9 @@ export default function ChildDiary() {
       setNewText('');
       setNewMood(null);
       setIsWriting(false);
-      toast({ title: 'Reflexão guardada! 📝', description: 'Continua a escrever todos os dias para manter a tua sequência!' });
+      toast({ title: t('child.diary.saved'), description: t('child.diary.saved_desc') });
     } catch {
-      toast({ title: 'Erro', description: 'Não foi possível guardar a reflexão.', variant: 'destructive' });
+      toast({ title: t('common.error'), description: t('child.diary.save_error'), variant: 'destructive' });
     }
   };
 
@@ -99,32 +97,27 @@ export default function ChildDiary() {
                 <BookOpen className="h-6 w-6 text-foreground" />
               </div>
               <div>
-                <h1 className="font-display text-xl font-bold text-foreground">Diário Financeiro</h1>
-                <p className="text-sm text-foreground/60 font-body">As tuas reflexões sobre dinheiro</p>
+                <h1 className="font-display text-xl font-bold text-foreground">{t('child.diary.title')}</h1>
+                <p className="text-sm text-foreground/60 font-body">{t('child.diary.subtitle')}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Flame className="h-4 w-4 text-destructive mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">Sequência</p>
-                <motion.p
-                  key={streak}
-                  initial={{ scale: 1.3 }}
-                  animate={{ scale: 1 }}
-                  className="font-display font-bold text-foreground text-xl"
-                >
+                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.streak')}</p>
+                <motion.p key={streak} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display font-bold text-foreground text-xl">
                   {streak} 🔥
                 </motion.p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <CalendarDays className="h-4 w-4 text-primary mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">Entradas</p>
+                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.entries')}</p>
                 <p className="font-display font-bold text-foreground text-xl">{totalEntries}</p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Sparkles className="h-4 w-4 text-accent mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">Humor top</p>
+                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.top_mood')}</p>
                 <p className="font-display font-bold text-foreground text-xl">{topMood}</p>
               </div>
             </div>
@@ -141,7 +134,7 @@ export default function ChildDiary() {
                 onClick={() => setIsWriting(true)}
                 className="w-full rounded-2xl font-display gap-2 h-14 text-base bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0 shadow-kivara"
               >
-                <PenLine className="h-5 w-5" /> Escrever no diário
+                <PenLine className="h-5 w-5" /> {t('child.diary.write')}
               </Button>
             </motion.div>
           ) : (
@@ -156,7 +149,7 @@ export default function ChildDiary() {
                 <div className="h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
                 <CardContent className="p-4 space-y-4">
                   <div>
-                    <p className="text-xs font-display font-bold mb-2">Como te sentes hoje?</p>
+                    <p className="text-xs font-display font-bold mb-2">{t('child.diary.how_feel')}</p>
                     <div className="flex gap-2">
                       {MOODS.map((m) => (
                         <motion.button
@@ -176,9 +169,9 @@ export default function ChildDiary() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-display font-bold mb-2">A tua reflexão</p>
+                    <p className="text-xs font-display font-bold mb-2">{t('child.diary.your_reflection')}</p>
                     <Textarea
-                      placeholder="Hoje eu..."
+                      placeholder={t('child.diary.placeholder')}
                       value={newText}
                       onChange={(e) => setNewText(e.target.value)}
                       className="rounded-xl min-h-[100px] resize-none"
@@ -190,14 +183,14 @@ export default function ChildDiary() {
                       onClick={() => { setIsWriting(false); setNewText(''); setNewMood(null); }}
                       className="flex-1 rounded-xl font-display"
                     >
-                      Cancelar
+                      {t('common.cancel')}
                     </Button>
                     <Button
                       onClick={handleSubmit}
                       disabled={!newText.trim() || !newMood || createEntry.isPending}
                       className="flex-1 rounded-xl font-display gap-1 bg-gradient-to-r from-primary to-secondary text-primary-foreground border-0"
                     >
-                      <PenLine className="h-4 w-4" /> {createEntry.isPending ? 'A guardar...' : 'Guardar'}
+                      <PenLine className="h-4 w-4" /> {createEntry.isPending ? t('child.diary.saving') : t('child.diary.save')}
                     </Button>
                   </div>
                 </CardContent>
@@ -210,24 +203,18 @@ export default function ChildDiary() {
       {/* Entries Timeline */}
       <motion.div variants={item}>
         <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-          📖 Reflexões anteriores
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{entries.length} entradas</span>
+          {t('child.diary.previous')}
+          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{entries.length} {t('child.diary.entries_count')}</span>
         </h2>
         {isLoading ? (
-          <p className="text-sm text-muted-foreground text-center py-4">A carregar...</p>
+          <p className="text-sm text-muted-foreground text-center py-4">{t('child.diary.loading')}</p>
         ) : (
           <div className="space-y-3">
             {entries.map((entry, i) => (
-              <motion.div
-                key={entry.id}
-                variants={item}
-                whileHover={{ x: 4 }}
-                className="group"
-              >
+              <motion.div key={entry.id} variants={item} whileHover={{ x: 4 }} className="group">
                 <Card className="border-border/50 hover:shadow-md transition-all duration-200 overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex gap-3 p-4">
-                      {/* Mood + timeline */}
                       <div className="flex flex-col items-center gap-1 pt-0.5">
                         <motion.div
                           initial={{ scale: 0 }}
@@ -241,7 +228,6 @@ export default function ChildDiary() {
                           <div className="w-0.5 flex-1 bg-border/50 rounded-full min-h-[20px]" />
                         )}
                       </div>
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-[11px] font-display font-bold text-primary">{formatDate(entry.createdAt)}</span>
