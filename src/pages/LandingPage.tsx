@@ -100,7 +100,7 @@ function Section({ children, className = "", id }: { children: React.ReactNode; 
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className={`px-5 sm:px-8 py-16 md:py-24 ${className}`}
+      className={`px-5 sm:px-8 py-12 md:py-16 ${className}`}
     >
       <div className="mx-auto max-w-7xl">{children}</div>
     </motion.section>
