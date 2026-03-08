@@ -174,7 +174,7 @@ export default function ChildWallet() {
                   </DialogHeader>
                   <div className="space-y-4">
                     {causes.length === 0 ? (
-                      <p className="text-sm text-muted-foreground text-center py-4">Sem causas disponíveis de momento.</p>
+                      <p className="text-sm text-muted-foreground text-center py-4">{t('child.wallet.no_causes')}</p>
                     ) : (
                       <div className="grid grid-cols-2 gap-2">
                         {causes.map((cause) => (
