@@ -1,66 +1,128 @@
 
 
-# Revisão Responsiva da Landing Page
+# Plan: KIVARA Core Platform Architecture Evolution
 
-Após análise detalhada de todas as secções, identifiquei os seguintes problemas responsivos:
+## Current State Assessment
 
-## Problemas Encontrados
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-### 1. Hero — Imagem demasiado pequena em mobile
-- Linha 423: `max-w-[200px] sm:max-w-xs` é muito restritivo em mobile. A imagem fica minúscula.
-- **Fix**: Aumentar para `max-w-[280px] sm:max-w-sm`
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-### 2. Hero — Padding vertical insuficiente em mobile
-- Linha 381: `py-8 md:py-16` — pouco espaço em mobile para conteúdo tão denso.
-- **Fix**: `py-10 md:py-16`
+## What Lovable Can and Cannot Build
 
-### 3. Universo — Grid 2 colunas em mobile fica apertado
-- Linha 641: `grid-cols-2 md:grid-cols-5` — os cards com texto ficam comprimidos em ecrãs <375px.
-- **Fix**: `grid-cols-1 xs:grid-cols-2 md:grid-cols-5` — empilhar em ecrãs muito pequenos. Como não há breakpoint `xs`, usar `min-[420px]:grid-cols-2` para ser seguro.
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-### 4. Trust Section — Grid 2 colunas em mobile pequeno
-- Linha 834: `grid-cols-2 gap-3` — os 4 cards de segurança ficam apertados em mobile <375px.
-- **Fix**: `grid-cols-1 min-[420px]:grid-cols-2 gap-3`
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### 5. Footer — Newsletter input sem min-height
-- Linha 1037: O input de email não tem `min-h-[44px]` explícito e o botão "→" é pequeno.
-- **Fix**: Garantir touch targets adequados no footer.
+## Implementation Plan (4 Phases)
 
-### 6. Hero CTAs — Botões empilham mal em mobile estreito
-- Linha 396: `flex flex-wrap gap-4` — os dois botões com `px-8` podem não caber lado a lado em <375px.
-- **Fix**: `flex flex-col sm:flex-row gap-3` para empilhar verticalmente em mobile.
+### Phase 1 — Multi-Tenant Foundation
 
-### 7. Social Proof Stats — Texto muito grande em mobile
-- Linha 910: `text-2xl md:text-3xl` para números está bem, mas os cards com `p-5` ocupam muito espaço vertical.
-- **Fix**: `p-4 md:p-5` para compactar ligeiramente.
+**Database migrations:**
 
-### 8. Navbar altura — `h-18` não é classe Tailwind padrão
-- Linha 188: `h-18` não existe no Tailwind por defeito (seria `h-[4.5rem]`). Pode não aplicar.
-- **Fix**: Usar `h-[4.5rem] md:h-20`
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-### 9. Secções de benefícios — Imagens em mobile ocupam espaço excessivo
-- `max-w-xl` nas imagens em mobile faz com que ocupem a largura total sem limite visual.
-- **Fix**: Adicionar `max-w-sm sm:max-w-md md:max-w-xl` para escalar progressivamente.
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-### 10. FinalCTA — Botões lado a lado em mobile estreito
-- Linha 984: `flex flex-wrap justify-center gap-4` — com `px-8` em cada botão, podem não caber.
-- **Fix**: `flex flex-col sm:flex-row justify-center gap-3`
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-## Resumo das Alterações
+4. Expand `app_role` enum to include `admin`
 
-Ficheiro: `src/pages/LandingPage.tsx`
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-| Secção | Linha(s) | Problema | Correção |
-|--------|----------|----------|----------|
-| Navbar | 188 | `h-18` inválido | `h-[4.5rem] md:h-20` |
-| Hero image | 423 | Imagem muito pequena em mobile | `max-w-[280px] sm:max-w-sm md:max-w-lg lg:max-w-xl` |
-| Hero CTAs | 396 | Botões overflow em mobile | `flex flex-col sm:flex-row gap-3` |
-| Universo grid | 641 | Cards comprimidos <375px | `grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-5` |
-| ParentBenefits img | 677 | Imagem sem escala progressiva | `max-w-sm sm:max-w-md md:max-w-xl` |
-| SchoolBenefits img | 752 | Idem | `max-w-sm sm:max-w-md md:max-w-xl` |
-| Gamification img | 777 | Idem | `max-w-sm sm:max-w-md md:max-w-xl` |
-| Trust img | 852 | Idem | `max-w-sm sm:max-w-md md:max-w-xl` |
-| Trust grid | 834 | Cards apertados <375px | `grid-cols-1 min-[420px]:grid-cols-2 gap-3` |
-| Social stats | 908 | Padding excessivo mobile | `p-4 md:p-5` |
-| FinalCTA btns | 984 | Botões overflow | `flex flex-col sm:flex-row justify-center gap-3` |
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

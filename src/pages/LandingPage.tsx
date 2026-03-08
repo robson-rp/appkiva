@@ -185,7 +185,7 @@ function Navbar() {
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-18 md:h-20">
+      <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem].5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
           <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
         </Link>
@@ -378,7 +378,7 @@ function Hero() {
         <div className="flex">
           {HERO_SLIDES.map((slide, i) => (
             <div key={i} className="min-w-0 shrink-0 grow-0 basis-full">
-              <div className="relative px-5 sm:px-8 py-8 md:py-16">
+              <div className="relative px-5 sm:px-8 py-10 md:py-16">
                 <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-6 md:gap-10 items-center">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -393,7 +393,7 @@ function Hero() {
                     <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
                       {slide.subtitle}
                     </p>
-                    <div className="mt-8 flex flex-wrap gap-4">
+                    <div className="mt-8 flex flex-col sm:flex-row gap-3">
                       <Button
                         size="lg"
                         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base px-8 shimmer transition-shadow hover:shadow-lg hover:shadow-secondary/20"
@@ -420,7 +420,7 @@ function Hero() {
                     <img
                       src={slide.image}
                       alt={slide.alt}
-                      className="w-full max-w-[200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
+                      className="w-full max-w-[280px] sm:max-w-sm md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
@@ -638,7 +638,7 @@ function UniverseSection() {
         <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
           <div className="w-64 h-64 rounded-full bg-secondary/5 blur-3xl" />
         </div>
-        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <motion.div variants={staggerFast} className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-5 gap-3">
           {zones.map((z, i) => (
             <motion.div
               key={i}
@@ -671,10 +671,10 @@ function ParentBenefits() {
   ];
   return (
     <Section id="familias">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
@@ -749,7 +749,7 @@ function SchoolBenefits() {
           </div>
           <motion.div variants={fadeUp} className="flex justify-center relative">
             <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+            <img src={schoolBenefit} alt="Sala de aula africana" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
           </motion.div>
         </div>
       </Section>
@@ -774,7 +774,7 @@ function GamificationSection() {
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-accent/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-xl relative z-10 drop-shadow-xl" />
+          <img src={gamificationMockup} alt="Plataforma KIVARA gamificada" className="w-full max-w-sm sm:max-w-md md:max-w-xl relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-accent/10 text-accent-foreground rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
@@ -820,7 +820,7 @@ function TrustSection() {
   ];
   return (
     <Section className="!bg-foreground !text-background">
-      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center">
+      <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center1 min-[420px]:grid-cols-">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
             Segurança
@@ -831,7 +831,7 @@ function TrustSection() {
           <motion.p variants={fadeUp} className="opacity-60 mb-8 text-lg text-balance">
             KIVARA foi concebida com segurança e privacidade como prioridade máxima.
           </motion.p>
-          <motion.div variants={staggerFast} className="grid grid-cols-2 gap-3">
+          <motion.div variants={staggerFast} className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-3">
             {points.map((p, i) => (
               <motion.div
                 key={i}
@@ -849,7 +849,7 @@ function TrustSection() {
         </div>
         <motion.div variants={fadeUp} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-full bg-secondary/15 blur-3xl scale-75 pointer-events-none" />
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-xl opacity-90 relative z-10 drop-shadow-2xl" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-sm sm:max-w-md md:max-w-xl opacity-90 relative z-10 drop-shadow-2xl" />
         </motion.div>
       </div>
     </Section>
@@ -892,10 +892,10 @@ function SocialProof() {
               </motion.div>
             ))}
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-3 leading-[1.1]">
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-foreground text-balance mb-3 lea4 md:p-ding-[1.1]">
             Mais de 500 crianças já começaram a sua jornada
           </h2>
-          <p className="text-muted-foreground text-lg">Famílias e escolas de vários países confiam em nós.</p>
+          <p className="text-muted-foreground text-lg">Famílias e esc4 md:p-olas de vários países confiam em nós.</p>
         </motion.div>
 
         {/* Stats */}
@@ -905,7 +905,7 @@ function SocialProof() {
               key={i}
               variants={fadeUp}
               whileHover={{ y: -4, boxShadow: "0 16px 32px -8px hsl(var(--primary) / 0.12)" }}
-              className="bg-card rounded-2xl border border-border p-5 text-center transition-all"
+              className="bg-card rounded-2xl border border-border p-4 md:p-5 text-center transition-all"
             >
               <p className="font-display text-2xl md:text-3xl font-bold text-primary">
                 {s.display || <CountUp target={s.value} suffix={s.suffix} />}
@@ -981,7 +981,7 @@ function FinalCTA() {
         <p className="text-secondary-foreground/70 text-lg md:text-xl mb-8 max-w-xl mx-auto text-balance">
           Junte-se às famílias que estão a transformar a educação financeira dos seus filhos.
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
           <Button
             size="lg"
             className="bg-background text-foreground hover:bg-background/90 text-base px-8 shimmer transition-shadow hover:shadow-xl"
@@ -1034,9 +1034,9 @@ function Footer() {
             <div className="flex gap-2">
               <div className="flex-1 flex items-center bg-background/10 rounded-xl px-3 gap-2">
                 <Mail className="w-4 h-4 opacity-40" />
-                <input type="email" placeholder="email@exemplo.com" className="bg-transparent text-sm py-2 w-full outline-none placeholder:opacity-40" />
+                <input type="email" placeholder="email@exemplo.com" className="bg-transparent text-sm py-2.5 w-full outline-none placeholder:opacity-40 min-h-[44px]" />
               </div>
-              <button className="bg-secondary text-secondary-foreground rounded-xl px-3.5 text-sm font-semibold hover:bg-secondary/90 transition-colors">
+              <button className="bg-secondary text-secondary-foreground rounded-xl px-4 min-h-[44px] min-w-[44px] text-sm font-semibold hover:bg-secondary/90 transition-colors">
                 →
               </button>
             </div>
