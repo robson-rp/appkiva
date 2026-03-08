@@ -468,7 +468,7 @@ function SolutionSection() {
           <div className="relative">
             <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary via-secondary to-accent opacity-20 blur-lg animate-pulse-glow" />
             <div className="gradient-border rounded-3xl overflow-hidden">
-              <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-xs md:max-w-sm rounded-3xl relative z-10" />
+              <img src={heroIllustration} alt="Crianças a aprender finanças" className="w-full max-w-sm md:max-w-md rounded-3xl relative z-10" />
             </div>
           </div>
         </motion.div>
