@@ -219,7 +219,7 @@ export default function ChildWallet() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Total doado</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.total_donated')}</p>
                 <CurrencyDisplay amount={totalDonated} size="lg" className="font-display font-bold text-lg" />
               </div>
               <div className="bg-muted/40 rounded-xl p-3 text-center">
