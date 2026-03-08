@@ -995,7 +995,7 @@ function FinalCTA() {
    ═══════════════════════════════════════════ */
 function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-10">
+    <footer className="bg-gradient-to-b from-foreground to-foreground/95 text-background px-5 sm:px-8 py-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <div className="col-span-2 md:col-span-1">
