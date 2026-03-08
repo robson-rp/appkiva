@@ -18,6 +18,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useHouseholdVaults, useUpdateVaultInterestRate } from '@/hooks/use-savings-vaults';
 import { formatDistanceToNow } from 'date-fns';
 import { pt } from 'date-fns/locale';
+import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -30,6 +31,7 @@ const DEFAULT_CONFIG: Omit<AllowanceConfig, 'id' | 'childProfileId' | 'parentPro
 };
 
 export default function ParentAllowance() {
+  const t = useT();
   const { data: children = [], isLoading: loadingChildren } = useChildren();
   const { data: configs = [], isLoading: loadingConfigs } = useAllowanceConfigs();
   const { data: tasks = [] } = useHouseholdTasks();
@@ -75,9 +77,8 @@ export default function ParentAllowance() {
     if (!child) return;
 
     const eff = getEffective(childProfileId);
-    const completedTasks = tasks.filter(t => t.childProfileId === childProfileId && (t.status === 'completed' || t.status === 'approved')).length;
+    const completedTasks = tasks.filter(tk => tk.childProfileId === childProfileId && (tk.status === 'completed' || tk.status === 'approved')).length;
     const taskBonusTotal = completedTasks * eff.taskBonus;
-    // missions not yet in DB, so missionBonus = 0 for now
     const total = eff.baseAmount + taskBonusTotal;
 
     setSendingFor(childProfileId);
@@ -85,11 +86,10 @@ export default function ParentAllowance() {
       const result = await createTransaction({
         entry_type: 'allowance',
         amount: total,
-        description: `Mesada ${eff.frequency === 'weekly' ? 'semanal' : 'mensal'}`,
+        description: `${t('parent.allowance.title')} ${eff.frequency === 'weekly' ? t('parent.allowance.weekly') : t('parent.allowance.monthly_freq')}`,
         target_profile_id: childProfileId,
       });
 
-      // Update last_sent_at
       const cfg = getConfig(childProfileId);
       if (cfg) updateLastSent.mutate(cfg.id);
 
@@ -98,11 +98,11 @@ export default function ParentAllowance() {
       queryClient.invalidateQueries({ queryKey: ['household-transactions'] });
 
       toast({
-        title: 'Mesada enviada! 💰',
-        description: `${child.displayName} recebeu ${total} KivaCoins (base: ${eff.baseAmount} + bónus: ${taskBonusTotal}). Novo saldo: ${result.new_balance} KVC.`,
+        title: t('parent.allowance.sent'),
+        description: `${child.displayName}: ${total} KivaCoins (base: ${eff.baseAmount} + bonus: ${taskBonusTotal}). ${t('common.balance')}: ${result.new_balance} KVC.`,
       });
     } catch (err: any) {
-      toast({ title: 'Erro ao enviar mesada', description: err.message, variant: 'destructive' });
+      toast({ title: t('parent.allowance.send_error'), description: err.message, variant: 'destructive' });
     } finally {
       setSendingFor(null);
     }
@@ -128,25 +128,25 @@ export default function ParentAllowance() {
         <div className="absolute bottom-0 right-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">Gestão</p>
-            <h1 className="font-display text-2xl font-bold mt-1">Mesada Inteligente</h1>
-            <p className="text-sm text-primary-foreground/60 mt-1">Base + bónus por tarefas e missões</p>
+            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.allowance.management')}</p>
+            <h1 className="font-display text-2xl font-bold mt-1">{t('parent.allowance.title')}</h1>
+            <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.allowance.subtitle')}</p>
           </div>
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
             <BotMessageSquare className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-medium">Automático</span>
+            <span className="text-[10px] font-medium">{t('parent.allowance.automatic')}</span>
           </div>
         </div>
         <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Calendar className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalWeekly}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">base/sem</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.allowance.base_week')}</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">em circulação</span>
+            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.allowance.in_circulation')}</span>
           </div>
         </div>
       </motion.div>
@@ -156,17 +156,17 @@ export default function ParentAllowance() {
         <Card className="border-border/50">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">👶</div>
-            <p className="font-display font-bold text-sm">Sem crianças registadas</p>
-            <p className="text-xs text-muted-foreground mt-1">Adiciona uma criança para configurar a mesada.</p>
+            <p className="font-display font-bold text-sm">{t('parent.allowance.no_children')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('parent.allowance.no_children_hint')}</p>
           </CardContent>
         </Card>
       ) : (
         <motion.div variants={container} initial="hidden" animate="show" className="grid md:grid-cols-2 gap-4">
           {children.map((child) => {
             const eff = getEffective(child.profileId);
-            const completedTasks = tasks.filter(t => t.childProfileId === child.profileId && (t.status === 'completed' || t.status === 'approved')).length;
+            const completedTasks = tasks.filter(tk => tk.childProfileId === child.profileId && (tk.status === 'completed' || tk.status === 'approved')).length;
             const taskBonusTotal = completedTasks * eff.taskBonus;
-            const missionBonusTotal = 0; // missions not yet in DB
+            const missionBonusTotal = 0;
             const totalAllowance = eff.baseAmount + taskBonusTotal + missionBonusTotal;
             const isSending = sendingFor === child.profileId;
 
@@ -182,7 +182,7 @@ export default function ParentAllowance() {
                       <div className="flex-1">
                         <h3 className="font-display font-bold text-lg">{child.displayName}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Saldo actual</span>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.allowance.current_balance')}</span>
                           <CoinDisplay amount={child.balance} size="sm" />
                         </div>
                       </div>
@@ -192,33 +192,33 @@ export default function ParentAllowance() {
                     <div className="bg-muted/30 rounded-2xl p-4 border border-border/30 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
-                          <Zap className="h-3 w-3" /> Composição da mesada
+                          <Zap className="h-3 w-3" /> {t('parent.allowance.composition')}
                         </span>
                         <span className="font-display font-bold text-sm text-secondary">🪙 {totalAllowance}</span>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <Wallet className="h-3 w-3" /> Base ({eff.frequency === 'weekly' ? 'semanal' : 'mensal'})
+                            <Wallet className="h-3 w-3" /> {t('parent.allowance.base')} ({eff.frequency === 'weekly' ? t('parent.allowance.weekly') : t('parent.allowance.monthly_freq')})
                           </span>
                           <span className="font-display font-bold text-xs">🪙 {eff.baseAmount}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <ListTodo className="h-3 w-3" /> Bónus tarefas ({completedTasks} × {eff.taskBonus})
+                            <ListTodo className="h-3 w-3" /> {t('parent.allowance.task_bonus')} ({completedTasks} × {eff.taskBonus})
                           </span>
                           <span className="font-display font-bold text-xs text-secondary">+{taskBonusTotal}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <Target className="h-3 w-3" /> Bónus missões (0 × {eff.missionBonus})
+                            <Target className="h-3 w-3" /> {t('parent.allowance.mission_bonus')} (0 × {eff.missionBonus})
                           </span>
                           <span className="font-display font-bold text-xs text-secondary">+0</span>
                         </div>
                       </div>
                       <div className="h-px bg-border/50" />
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-display font-bold">Total esta semana</span>
+                        <span className="text-xs font-display font-bold">{t('parent.allowance.total_this_week')}</span>
                         <span className="font-display font-bold text-base text-primary">🪙 {totalAllowance}</span>
                       </div>
                     </div>
@@ -230,7 +230,7 @@ export default function ParentAllowance() {
                         onClick={() => handleSend(child.profileId)}
                       >
                         {isSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                        {isSending ? 'A enviar...' : 'Enviar Mesada'}
+                        {isSending ? t('parent.allowance.sending') : t('parent.allowance.send')}
                       </Button>
                       <Button variant="outline" size="icon" className="rounded-xl border-border/50 h-9 w-9 sm:h-10 sm:w-10" onClick={() => openConfig(child.profileId)}>
                         <Settings className="h-4 w-4" />
@@ -242,8 +242,8 @@ export default function ParentAllowance() {
                         <Wallet className="h-3.5 w-3.5" />
                         <span>
                           {eff.lastSentAt
-                            ? `Última mesada ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
-                            : 'Nenhuma mesada enviada ainda'}
+                            ? `${t('parent.allowance.last_sent')} ${formatDistanceToNow(new Date(eff.lastSentAt), { addSuffix: true, locale: pt })}`
+                            : t('parent.allowance.never_sent')}
                         </span>
                       </div>
                       {getConfig(child.profileId) && (
@@ -265,7 +265,7 @@ export default function ParentAllowance() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-4">
           <div className="flex items-center gap-2">
             <PiggyBank className="h-5 w-5 text-secondary" />
-            <h2 className="font-display font-bold text-lg">Taxas de Juro dos Cofres</h2>
+            <h2 className="font-display font-bold text-lg">{t('parent.allowance.vault_rates')}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {householdVaults.map((vault) => {
@@ -277,7 +277,7 @@ export default function ParentAllowance() {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{vault.icon}</div>
                       <div className="flex-1">
                         <h3 className="font-display font-bold text-sm">{vault.name}</h3>
-                        <p className="text-[10px] text-muted-foreground">{child?.displayName ?? 'Criança'}</p>
+                        <p className="text-[10px] text-muted-foreground">{child?.displayName ?? t('parent.tasks.child')}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-display font-bold text-sm">{vault.currentAmount} 🪙</p>
@@ -287,7 +287,7 @@ export default function ParentAllowance() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Percent className="h-3 w-3" /> Taxa de juro mensal
+                          <Percent className="h-3 w-3" /> {t('parent.allowance.monthly_rate')}
                         </span>
                         <span className="font-display font-bold text-sm text-secondary">{vault.interestRate}%</span>
                       </div>
@@ -297,8 +297,8 @@ export default function ParentAllowance() {
                           updateVaultRate.mutate(
                             { vaultId: vault.id, interestRate: v },
                             {
-                              onSuccess: () => toast({ title: 'Taxa atualizada! 📈', description: `${vault.name}: ${v}% por mês` }),
-                              onError: () => toast({ title: 'Erro', description: 'Não foi possível atualizar a taxa.', variant: 'destructive' }),
+                              onSuccess: () => toast({ title: t('parent.vaults.rate_updated'), description: `${vault.name}: ${v}%${t('parent.vaults.per_month')}` }),
+                              onError: () => toast({ title: t('common.error'), description: t('parent.vaults.create_error'), variant: 'destructive' }),
                             }
                           );
                         }}
@@ -327,37 +327,37 @@ export default function ParentAllowance() {
               <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-gold))] flex items-center justify-center">
                 <Settings className="h-5 w-5 text-accent-foreground" />
               </div>
-              Configurar Mesada — {children.find(c => c.profileId === configOpen)?.displayName}
+              {t('parent.allowance.configure')} — {children.find(c => c.profileId === configOpen)?.displayName}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-5 mt-2">
             <div className="space-y-2">
-              <Label className="text-sm font-display font-bold">Frequência</Label>
+              <Label className="text-sm font-display font-bold">{t('parent.allowance.frequency')}</Label>
               <Select value={editConfig.frequency} onValueChange={(v) => setEditConfig(prev => ({ ...prev, frequency: v as 'weekly' | 'monthly' }))}>
                 <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="weekly">Semanal</SelectItem>
-                  <SelectItem value="monthly">Mensal</SelectItem>
+                  <SelectItem value="weekly">{t('parent.tasks.weekly')}</SelectItem>
+                  <SelectItem value="monthly">{t('parent.tasks.monthly')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-display font-bold">Valor base</Label>
+                <Label className="text-sm font-display font-bold">{t('parent.allowance.base_amount')}</Label>
                 <span className="font-display font-bold text-sm">🪙 {editConfig.baseAmount}</span>
               </div>
               <Slider value={[editConfig.baseAmount]} onValueChange={([v]) => setEditConfig(prev => ({ ...prev, baseAmount: v }))} max={200} min={10} step={5} />
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-display font-bold">Bónus por tarefa concluída</Label>
+                <Label className="text-sm font-display font-bold">{t('parent.allowance.task_bonus_per')}</Label>
                 <span className="font-display font-bold text-sm">+{editConfig.taskBonus} 🪙</span>
               </div>
               <Slider value={[editConfig.taskBonus]} onValueChange={([v]) => setEditConfig(prev => ({ ...prev, taskBonus: v }))} max={30} min={0} step={1} />
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-display font-bold">Bónus por missão concluída</Label>
+                <Label className="text-sm font-display font-bold">{t('parent.allowance.mission_bonus_per')}</Label>
                 <span className="font-display font-bold text-sm">+{editConfig.missionBonus} 🪙</span>
               </div>
               <Slider value={[editConfig.missionBonus]} onValueChange={([v]) => setEditConfig(prev => ({ ...prev, missionBonus: v }))} max={50} min={0} step={1} />
@@ -367,7 +367,7 @@ export default function ParentAllowance() {
               onClick={saveConfig}
               disabled={upsertConfig.isPending}
             >
-              {upsertConfig.isPending ? 'A guardar...' : 'Guardar Configuração'}
+              {upsertConfig.isPending ? t('common.loading') : t('parent.allowance.save_config')}
             </Button>
           </div>
         </DialogContent>
