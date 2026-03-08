@@ -642,17 +642,7 @@ const pt: Record<string, string> = {
   'parent.reports.upgrade_name': 'Relatórios Educativos',
   'parent.reports.upgrade_desc': 'Acompanha o progresso financeiro dos teus filhos com gráficos detalhados e insights comportamentais. Disponível no plano Família Premium.',
 
-  // ─── Parent Consent ───
-  'parent.consent.title': 'Consentimento',
-  'parent.consent.subtitle': 'Gestão do consentimento parental',
-
-  // ─── Parent Support ───
-  'parent.support.title': 'Suporte',
-  'parent.support.subtitle': 'Estamos aqui para ajudar',
-
-  // ─── Parent Subscription ───
-  'parent.subscription.title': 'Subscrição',
-  'parent.subscription.subtitle': 'Gere o teu plano e funcionalidades',
+  // (moved to expanded sections below)
 
   // ─── Send Allowance Dialog ───
   'dialog.send_allowance.title': 'Enviar Mesada',
