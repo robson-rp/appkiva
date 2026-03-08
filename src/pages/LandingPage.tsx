@@ -899,13 +899,13 @@ function SocialProof() {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={staggerFast} className="grid grid-cols-2 m4 md:p-d:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 mt-6">
+        <motion.div variants={staggerFast} className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-8 mt-6">
           {stats.map((s, i) => (
             <motion.div
               key={i}
               variants={fadeUp}
- 4 md:p-             whileHover={{ y: -4, boxShadow: "0 16px 32px -8px hsl(var(--primary) / 0.12)" }}
-              className="bg-card rounded-2xl border border-border p-5 text-center transition-all"
+              whileHover={{ y: -4, boxShadow: "0 16px 32px -8px hsl(var(--primary) / 0.12)" }}
+              className="bg-card rounded-2xl border border-border p-4 md:p-5 text-center transition-all"
             >
               <p className="font-display text-2xl md:text-3xl font-bold text-primary">
                 {s.display || <CountUp target={s.value} suffix={s.suffix} />}
