@@ -148,6 +148,78 @@
     box-shadow: 0 10px 30px -10px hsl(var(--kivara-blue) / 0.3);
   }
 
+  /* Glassmorphism */
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50;
+  }
+  .glass-dark {
+    background: hsla(0 0% 100% / 0.08);
+    backdrop-filter: blur(16px);
+    border: 1px solid hsla(0 0% 100% / 0.12);
+  }
+
+  /* Gradient border via pseudo-element */
+  .gradient-border {
+    position: relative;
+    border: none;
+    background-clip: padding-box;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, hsl(var(--kivara-blue)), hsl(var(--kivara-green)), hsl(var(--kivara-gold)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px -4px hsl(var(--kivara-blue) / 0.4), 0 0 60px -8px hsl(var(--kivara-blue) / 0.15);
+  }
+  .glow-accent {
+    box-shadow: 0 0 20px -4px hsl(var(--kivara-gold) / 0.5), 0 0 60px -8px hsl(var(--kivara-gold) / 0.2);
+  }
+
+  /* Shimmer animation for CTAs */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, hsla(0 0% 100% / 0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    animation: shimmer-slide 2.5s ease-in-out infinite;
+  }
+
+  /* Gradient mesh background */
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse at 20% 50%, hsl(var(--kivara-blue) / 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, hsl(var(--kivara-green) / 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, hsl(var(--kivara-gold) / 0.1) 0%, transparent 50%);
+  }
+  .gradient-mesh-dark {
+    background:
+      radial-gradient(ellipse at 20% 50%, hsl(var(--kivara-blue) / 0.25) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, hsl(var(--kivara-green) / 0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, hsl(var(--kivara-gold) / 0.15) 0%, transparent 50%);
+  }
+
+  /* Dot pattern */
+  .dot-pattern {
+    background-image: radial-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
   /* Skip-to-content link */
   .skip-to-content {
     @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-xl focus:text-sm focus:font-semibold focus:shadow-lg;
@@ -166,4 +238,9 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
