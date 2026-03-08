@@ -311,7 +311,7 @@ function Hero() {
             </GradientText>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mt-6 text-body md:text-body-lg text-muted-foreground max-w-lg text-balance">
+          <motion.p variants={fadeUp} className="mt-8 text-body-lg md:text-lg text-muted-foreground max-w-xl text-balance">
             KIVARA transforma educação financeira num jogo interactivo onde crianças aprendem a ganhar,
             poupar e planear o futuro — enquanto os pais acompanham cada passo.
           </motion.p>
