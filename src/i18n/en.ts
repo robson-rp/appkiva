@@ -920,29 +920,6 @@ const en: Record<string, string> = {
   // ─── Teen Profile ───
   'teen.profile.title': 'Profile',
 
-  // ─── Teacher Dashboard ───
-  'teacher.dashboard.title': 'Dashboard',
-
-  // ─── Teacher Classes ───
-  'teacher.classes.title': 'Classes',
-
-  // ─── Teacher Challenges ───
-  'teacher.challenges.title': 'Challenges',
-
-  // ─── Teacher School ───
-  'teacher.school.title': 'School',
-
-  // ─── Partner Dashboard ───
-  'partner.dashboard.title': 'Dashboard',
-
-  // ─── Partner Programs ───
-  'partner.programs.title': 'Programs',
-
-  // ─── Partner Challenges ───
-  'partner.challenges.title': 'Challenges',
-
-  // ─── Partner Reports ───
-  'partner.reports.title': 'Reports',
 
   // ─── Learn Page ───
   'learn.title': 'Learn',
