@@ -664,7 +664,7 @@ function ParentBenefits() {
       <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-center">
         <motion.div variants={fadeUp} className="flex justify-center order-2 md:order-1 relative">
           <div className="absolute inset-0 rounded-full bg-primary/8 blur-3xl scale-75 pointer-events-none" />
-          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-md relative z-10 drop-shadow-xl" />
+          <img src={parentsBenefit} alt="Família africana a usar KIVARA" className="w-full max-w-lg relative z-10 drop-shadow-xl" />
         </motion.div>
         <div className="order-1 md:order-2">
           <motion.div variants={fadeUp} className="inline-block bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-5">
