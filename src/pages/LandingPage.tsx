@@ -416,8 +416,11 @@ function Hero() {
                     transition={{ duration: 0.5 }}
                     style={{ y: heroParallaxY }}
                   >
-                    <div className="absolute inset-0 rounded-full bg80px] sm:max-w-smr80px] sm:max-w-smt80px] sm:max-w-sm 80px] sm:max-w-sm
-80px] sm:max-w-sm 80px] sm:max-w-sma80px] sm:max-w-sm 80px] sm:max-w-sme80px] sm:max-w-sm 80px] sm:max-w-smm80px] sm:max-w-sm200px] sm:max-w-xs md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
+                    <div className="absolute inset-0 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
+                    <img
+                      src={slide.image}
+                      alt={slide.alt}
+                      className="w-full max-w-[280px] sm:max-w-sm md:max-w-lg lg:max-w-xl relative z-10 drop-shadow-2xl"
                     />
                   </motion.div>
                 </div>
