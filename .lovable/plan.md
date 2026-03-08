@@ -1,128 +1,35 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Splash Screen — Redesign Premium com Ilustração
 
-## Current State Assessment
+## Estado Atual
+Splash screen básico: fundo verde sólido (`bg-primary`), logótipo pequeno (h-20), texto "Kivara" e uma barra de progresso simples. Visualmente plano e sem impacto.
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+## Proposta
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+Transformar o splash screen num ecrã premium e imersivo:
 
-## What Lovable Can and Cannot Build
+### Layout
+- Fundo com gradiente rico (Kivara-blue para Kivara-green) em vez de cor sólida
+- Ilustração decorativa grande (reutilizar `hero-family.png`) posicionada no fundo/centro com opacidade reduzida como elemento visual de ambiente
+- Logótipo branco (`logo-kivara-white.svg`) maior (h-28 a h-32) centrado
+- Slogan oficial "Pequenos hábitos. Grandes futuros." com gradiente dourado animado
+- Subtítulo "Literacia financeira para famílias" mantido
+- Barra de progresso mais elegante: mais larga (w-24), com glow effect
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+### Animações (sequenciais com framer-motion)
+1. Ilustração de fundo faz fade-in com ligeiro scale-up (0.3s)
+2. Logótipo entra com spring animation (0.5s)
+3. Nome "Kivara" desliza de baixo (0.3s, delay 0.3)
+4. Slogan gradiente faz fade-in (delay 0.6)
+5. Subtítulo faz fade-in (delay 0.9)
+6. Barra de progresso com glow (delay 1.0, duração 1.2s)
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+### Detalhes Visuais
+- Partículas/círculos decorativos flutuantes sutis (2-3 bolhas com animate) para dar profundidade
+- Backdrop blur na área central do conteúdo
+- Sombra suave no logótipo
 
-## Implementation Plan (4 Phases)
-
-### Phase 1 — Multi-Tenant Foundation
-
-**Database migrations:**
-
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
-
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
-
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
-
-4. Expand `app_role` enum to include `admin`
-
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
-
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
-
-### Phase 2 — Currency Localization & Real Money Domain Separation
-
-**Database:**
-
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+## Ficheiro
+- `src/components/SplashScreen.tsx` — reescrita completa do componente
 
