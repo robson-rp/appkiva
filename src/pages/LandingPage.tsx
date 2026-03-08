@@ -797,7 +797,7 @@ function TrustSection() {
         </div>
         <motion.div variants={scaleIn} className="flex justify-center relative">
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-secondary/10 blur-2xl animate-pulse-glow" />
-          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-xs md:max-w-sm opacity-90 relative z-10" />
+          <img src={trustSecurityImg} alt="Segurança KIVARA" className="w-full max-w-sm md:max-w-md opacity-90 relative z-10" />
         </motion.div>
       </div>
     </Section>
