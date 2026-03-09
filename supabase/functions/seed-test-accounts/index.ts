@@ -77,22 +77,24 @@ Deno.serve(async (req) => {
 
   const results: Record<string, string> = {};
 
-  const findUserByEmail = async (email: string) => {
+  // Build email->user_id map by iterating all profiles and checking via getUserById
+  const findUserByEmail = async (email: string): Promise<string | null> => {
     const target = email.toLowerCase();
-    let page = 1;
-
-    while (page <= 20) {
-      const { data: pageData, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
-      if (error) return null;
-
-      const users = pageData?.users ?? [];
-      const found = users.find((u: any) => (u.email ?? '').toLowerCase() === target);
-      if (found) return found;
-
-      if (users.length < 200) break;
-      page += 1;
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id")
+      .limit(500);
+    
+    if (!profiles) return null;
+    
+    for (const p of profiles) {
+      try {
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(p.user_id);
+        if (userData?.user?.email?.toLowerCase() === target) {
+          return p.user_id;
+        }
+      } catch (_) { /* skip */ }
     }
-
     return null;
   };
 
@@ -110,12 +112,12 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
-      // User already exists – look up by email and force-update password
-      const existingUser = await findUserByEmail(acc.email);
+      // User already exists – look up by display_name in profiles and force-update password
+      const existingUserId = await findUserByEmail(acc.email);
 
-      if (existingUser) {
+      if (existingUserId) {
         // Force-update password to the new one
-        await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+        await supabaseAdmin.auth.admin.updateUserById(existingUserId, {
           password,
           email_confirm: true,
           user_metadata: {
@@ -125,16 +127,22 @@ Deno.serve(async (req) => {
           },
         });
 
-        results[acc.role] = existingUser.id;
+        // Also update the profile display_name
+        await supabaseAdmin
+          .from("profiles")
+          .update({ display_name: acc.name, avatar: acc.avatar })
+          .eq("user_id", existingUserId);
+
+
 
         const { data: existingRoles } = await supabaseAdmin
           .from("user_roles")
           .select("id")
-          .eq("user_id", existingUser.id)
+          .eq("user_id", existingUserId)
           .eq("role", acc.role);
 
         if (!existingRoles || existingRoles.length === 0) {
-          await supabaseAdmin.from("user_roles").insert({ user_id: existingUser.id, role: acc.role });
+          await supabaseAdmin.from("user_roles").insert({ user_id: existingUserId, role: acc.role });
         }
       } else {
         results[acc.role] = `skipped: ${error.message}`;
