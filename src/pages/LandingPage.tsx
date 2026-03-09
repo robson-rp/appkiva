@@ -20,12 +20,12 @@ import {
   Trophy, Flame, Medal, Gamepad2, Building2, TreePine,
   BookOpen, Swords, ShoppingBag, BarChart3, ListChecks,
   Heart, Lock, Eye, UserCheck, ChevronRight, Star, Zap, Menu, X,
-  AlertTriangle, TrendingDown, Sprout, Check, Mail, Quote,
+  AlertTriangle, TrendingDown, Sprout, Check, Mail, Quote, Globe,
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import PricingSection from "@/components/PricingSection";
-import { useT } from "@/contexts/LanguageContext";
+import { useT, useLanguage } from "@/contexts/LanguageContext";
 
 /* ─── animation variants ─── */
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -160,7 +160,8 @@ function WaveDivider({ flip = false, className = "" }: { flip?: boolean; classNa
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const t = useT();
+  const { locale, setLocale, t } = useLanguage();
+  const toggleLocale = () => setLocale(locale === 'pt' ? 'en' : 'pt');
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -202,6 +203,14 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleLocale}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Change language"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="uppercase">{locale}</span>
+          </button>
           <Button variant="ghost" asChild>
             <Link to="/login">{t('nav.login')}</Link>
           </Button>
@@ -237,6 +246,13 @@ function Navbar() {
               {link.label}
             </a>
           ))}
+          <button
+            onClick={toggleLocale}
+            className="flex items-center gap-2 py-3 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors border-b border-border/30"
+          >
+            <Globe className="h-4 w-4" />
+            {locale === 'pt' ? '🇬🇧 English' : '🇵🇹 Português'}
+          </button>
           <div className="flex gap-3 pt-4">
             <Button variant="outline" size="lg" className="flex-1" asChild>
               <Link to="/login">{t('nav.login')}</Link>
