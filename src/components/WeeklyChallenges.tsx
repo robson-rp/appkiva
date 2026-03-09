@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Clock, CheckCircle2, Flame, Users, Medal, Crown, Share2, Heart } from 'lucide-react';
-import { mockWeeklyChallenges, mockClassLeaderboard, mockFriendsLeaderboard } from '@/data/weekly-challenges-data';
-import { WeeklyChallenge, WeeklyChallengeStatus } from '@/types/kivara';
+import { Trophy, Clock, CheckCircle2, Flame, Users, Medal, Crown, Share2 } from 'lucide-react';
+import { useWeeklyChallenges, useClassroomLeaderboard, useHouseholdLeaderboard } from '@/hooks/use-weekly-challenges';
+import { WeeklyChallenge, WeeklyChallengeStatus, ClassLeaderboardEntry } from '@/types/kivara';
 import { LeagueBadge } from '@/components/LeagueBadge';
 import { useT } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -41,66 +42,82 @@ type RankingFilter = 'class' | 'friends';
 export function WeeklyChallenges() {
   const t = useT();
   const [rankFilter, setRankFilter] = useState<RankingFilter>('class');
-  const active = mockWeeklyChallenges.filter(c => c.status === 'active');
-  const past = mockWeeklyChallenges.filter(c => c.status !== 'active');
-  const leaderboard = rankFilter === 'friends' ? mockFriendsLeaderboard : mockClassLeaderboard;
+  const { data: challenges = [], isLoading } = useWeeklyChallenges();
+  const { data: classLeaderboard = [] } = useClassroomLeaderboard();
+  const { data: friendsLeaderboard = [] } = useHouseholdLeaderboard();
+
+  const active = challenges.filter(c => c.status === 'active');
+  const past = challenges.filter(c => c.status !== 'active');
+  const leaderboard = rankFilter === 'friends' ? friendsLeaderboard : classLeaderboard;
   const currentUser = leaderboard.find(e => e.isCurrentUser);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-20 w-full" />
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
       <motion.div variants={item}><LeagueBadge weeklyPoints={currentUser?.score ?? 0} /></motion.div>
 
       {/* Leaderboard with filter */}
-      <motion.div variants={item}>
-        <Card className="border-0 overflow-hidden shadow-kivara">
-          <div className="absolute inset-0 gradient-kivara" />
-          <CardContent className="relative z-10 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2"><Trophy className="h-5 w-5 text-white" /><h2 className="font-display font-bold text-white">{rankFilter === 'friends' ? t('challenges.friends_ranking') : t('challenges.ranking')}</h2></div>
-              <div className="flex gap-1 bg-white/10 rounded-xl p-0.5">
-                {(['class', 'friends'] as RankingFilter[]).map((f) => (
-                  <button
-                    key={f}
-                    onClick={() => setRankFilter(f)}
-                    className={`px-3 py-1 rounded-lg text-[10px] font-display font-bold transition-all ${rankFilter === f ? 'bg-white/25 text-white' : 'text-white/50 hover:text-white/80'}`}
-                  >
-                    {f === 'class' ? t('challenges.filter_class') : t('challenges.filter_friends')}
-                  </button>
-                ))}
+      {leaderboard.length > 0 && (
+        <motion.div variants={item}>
+          <Card className="border-0 overflow-hidden shadow-kivara">
+            <div className="absolute inset-0 gradient-kivara" />
+            <CardContent className="relative z-10 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2"><Trophy className="h-5 w-5 text-white" /><h2 className="font-display font-bold text-white">{rankFilter === 'friends' ? t('challenges.friends_ranking') : t('challenges.ranking')}</h2></div>
+                <div className="flex gap-1 bg-white/10 rounded-xl p-0.5">
+                  {(['class', 'friends'] as RankingFilter[]).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setRankFilter(f)}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-display font-bold transition-all ${rankFilter === f ? 'bg-white/25 text-white' : 'text-white/50 hover:text-white/80'}`}
+                    >
+                      {f === 'class' ? t('challenges.filter_class') : t('challenges.filter_friends')}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex justify-center items-end gap-3 mb-4">
-              {leaderboard.slice(0, 3).map((_, i) => {
-                const order = [1, 0, 2];
-                const idx = order[i];
-                if (idx >= leaderboard.length) return null;
-                const e = leaderboard[idx];
-                const heights = ['h-20', 'h-24', 'h-16'];
-                const MedalIcon = rankMedals[e.rank]?.icon || Medal;
-                const medalColor = rankMedals[e.rank]?.color || 'text-muted-foreground';
-                return (
-                  <motion.div key={e.rank} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 + i * 0.1 }} className="flex flex-col items-center">
-                    <div className={`relative mb-1 ${e.isCurrentUser ? 'ring-2 ring-white/60 rounded-full' : ''}`}>
-                      <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-xl">{e.avatar}</div>
-                      <div className="absolute -top-1.5 -right-1.5"><MedalIcon className={`h-4 w-4 ${medalColor}`} /></div>
-                    </div>
-                    <p className="text-[10px] text-white/80 font-semibold truncate max-w-[60px] text-center">{e.name}</p>
-                    <div className={`${heights[i]} w-14 rounded-t-xl bg-white/15 mt-1 flex items-end justify-center pb-1.5`}><span className="text-xs font-display font-bold text-white">{e.score}</span></div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            {currentUser && currentUser.rank > 3 && (
-              <div className="bg-white/10 rounded-xl p-2.5 flex items-center gap-3">
-                <span className="text-xs font-display font-bold text-white/60 w-6 text-center">#{currentUser.rank}</span>
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm">{currentUser.avatar}</div>
-                <div className="flex-1"><p className="text-xs font-display font-bold text-white">{currentUser.name} ({t('challenges.you')})</p></div>
-                <span className="text-xs font-display font-bold text-white">{currentUser.score} {t('challenges.pts')}</span>
+              <div className="flex justify-center items-end gap-3 mb-4">
+                {leaderboard.slice(0, 3).map((_, i) => {
+                  const order = [1, 0, 2];
+                  const idx = order[i];
+                  if (idx >= leaderboard.length) return null;
+                  const e = leaderboard[idx];
+                  const heights = ['h-20', 'h-24', 'h-16'];
+                  const MedalIcon = rankMedals[e.rank]?.icon || Medal;
+                  const medalColor = rankMedals[e.rank]?.color || 'text-muted-foreground';
+                  return (
+                    <motion.div key={e.rank} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 + i * 0.1 }} className="flex flex-col items-center">
+                      <div className={`relative mb-1 ${e.isCurrentUser ? 'ring-2 ring-white/60 rounded-full' : ''}`}>
+                        <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-xl">{e.avatar}</div>
+                        <div className="absolute -top-1.5 -right-1.5"><MedalIcon className={`h-4 w-4 ${medalColor}`} /></div>
+                      </div>
+                      <p className="text-[10px] text-white/80 font-semibold truncate max-w-[60px] text-center">{e.name}</p>
+                      <div className={`${heights[i]} w-14 rounded-t-xl bg-white/15 mt-1 flex items-end justify-center pb-1.5`}><span className="text-xs font-display font-bold text-white">{e.score}</span></div>
+                    </motion.div>
+                  );
+                })}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
+              {currentUser && currentUser.rank > 3 && (
+                <div className="bg-white/10 rounded-xl p-2.5 flex items-center gap-3">
+                  <span className="text-xs font-display font-bold text-white/60 w-6 text-center">#{currentUser.rank}</span>
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm">{currentUser.avatar}</div>
+                  <div className="flex-1"><p className="text-xs font-display font-bold text-white">{currentUser.name} ({t('challenges.you')})</p></div>
+                  <span className="text-xs font-display font-bold text-white">{currentUser.score} {t('challenges.pts')}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {active.length > 0 && (
         <motion.div variants={item}>
@@ -109,33 +126,42 @@ export function WeeklyChallenges() {
         </motion.div>
       )}
 
-      <motion.div variants={item}>
-        <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> {t('challenges.full_ranking')}</h2>
-        <Card className="border-border/50">
-          <CardContent className="p-0 divide-y divide-border/30">
-            {leaderboard.map((entry) => {
-              const MedalIcon = rankMedals[entry.rank]?.icon;
-              const medalColor = rankMedals[entry.rank]?.color;
-              return (
-                <div key={entry.rank} className={`flex items-center gap-3 px-4 py-3 ${entry.isCurrentUser ? 'bg-primary/[0.05]' : ''}`}>
-                  <span className="w-6 text-center font-display font-bold text-sm text-muted-foreground">{MedalIcon ? <MedalIcon className={`h-4 w-4 mx-auto ${medalColor}`} /> : `#${entry.rank}`}</span>
-                  <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-lg">{entry.avatar}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-display ${entry.isCurrentUser ? 'font-bold text-primary' : 'font-semibold'}`}>{entry.name} {entry.isCurrentUser && <span className="text-[10px] text-muted-foreground">({t('challenges.you')})</span>}</p>
-                    <p className="text-[10px] text-muted-foreground">{entry.challengesCompleted} {t('challenges.completed_count')}</p>
+      {leaderboard.length > 0 && (
+        <motion.div variants={item}>
+          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> {t('challenges.full_ranking')}</h2>
+          <Card className="border-border/50">
+            <CardContent className="p-0 divide-y divide-border/30">
+              {leaderboard.map((entry) => {
+                const MedalIcon = rankMedals[entry.rank]?.icon;
+                const medalColor = rankMedals[entry.rank]?.color;
+                return (
+                  <div key={entry.rank} className={`flex items-center gap-3 px-4 py-3 ${entry.isCurrentUser ? 'bg-primary/[0.05]' : ''}`}>
+                    <span className="w-6 text-center font-display font-bold text-sm text-muted-foreground">{MedalIcon ? <MedalIcon className={`h-4 w-4 mx-auto ${medalColor}`} /> : `#${entry.rank}`}</span>
+                    <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-lg">{entry.avatar}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-display ${entry.isCurrentUser ? 'font-bold text-primary' : 'font-semibold'}`}>{entry.name} {entry.isCurrentUser && <span className="text-[10px] text-muted-foreground">({t('challenges.you')})</span>}</p>
+                      <p className="text-[10px] text-muted-foreground">{entry.challengesCompleted} {t('challenges.completed_count')}</p>
+                    </div>
+                    <span className="font-display font-bold text-sm">{entry.score} <span className="text-[10px] text-muted-foreground">{t('challenges.pts')}</span></span>
                   </div>
-                  <span className="font-display font-bold text-sm">{entry.score} <span className="text-[10px] text-muted-foreground">{t('challenges.pts')}</span></span>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </motion.div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {past.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground" /> {t('challenges.previous')}</h2>
           <div className="space-y-3">{past.map((ch) => <ChallengeCard key={ch.id} challenge={ch} />)}</div>
+        </motion.div>
+      )}
+
+      {challenges.length === 0 && leaderboard.length === 0 && (
+        <motion.div variants={item} className="text-center py-12">
+          <span className="text-4xl block mb-3">🏆</span>
+          <p className="text-sm text-muted-foreground">{t('challenges.no_challenges') ?? 'Ainda não há desafios semanais. Volta em breve!'}</p>
         </motion.div>
       )}
     </motion.div>

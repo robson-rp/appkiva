@@ -2620,6 +2620,71 @@ export type Database = {
           },
         ]
       }
+      weekly_challenges: {
+        Row: {
+          created_at: string
+          current_value: number
+          description: string
+          icon: string
+          id: string
+          kiva_points_reward: number
+          participant_count: number
+          profile_id: string
+          reward: number
+          status: string
+          target_value: number
+          title: string
+          type: string
+          updated_at: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          current_value?: number
+          description?: string
+          icon?: string
+          id?: string
+          kiva_points_reward?: number
+          participant_count?: number
+          profile_id: string
+          reward?: number
+          status?: string
+          target_value?: number
+          title: string
+          type?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Update: {
+          created_at?: string
+          current_value?: number
+          description?: string
+          icon?: string
+          id?: string
+          kiva_points_reward?: number
+          participant_count?: number
+          profile_id?: string
+          reward?: number
+          status?: string
+          target_value?: number
+          title?: string
+          type?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_challenges_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       wallet_balances: {
