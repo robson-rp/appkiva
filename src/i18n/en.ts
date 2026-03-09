@@ -6,6 +6,7 @@ const en: Record<string, string> = {
   'nav.schools': 'Schools',
   'nav.security': 'Security',
   'nav.simulator': 'Simulator',
+  'nav.quiz': 'Quiz',
   'nav.pricing': 'Pricing',
   'nav.login': 'Sign in',
   'nav.start': 'Start for free',

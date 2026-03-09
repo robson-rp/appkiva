@@ -1056,6 +1056,7 @@ export default function LandingPage() {
         <TrustSection />
         <SocialProof />
         <ChildProgressSimulator />
+        <FinancialHabitsQuiz />
         <PricingSection />
         <FinalCTA />
       </main>
