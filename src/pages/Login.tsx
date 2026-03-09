@@ -1020,6 +1020,23 @@ export default function Login() {
                             </div>
                           )}
 
+                          {/* Referral code field (signup only) */}
+                          {authMode === 'signup' && contactMethod !== 'phone' && (
+                            <div className="space-y-2">
+                              <Label htmlFor="referralCode" className="font-semibold text-sm">
+                                {t('referral.code_label')} <span className="text-muted-foreground font-normal">{t('referral.code_optional')}</span>
+                              </Label>
+                              <Input
+                                id="referralCode"
+                                placeholder={t('referral.code_placeholder')}
+                                value={referralCode}
+                                onChange={e => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                                className="h-12 rounded-xl text-base tracking-wider font-mono"
+                                maxLength={8}
+                              />
+                            </div>
+                          )}
+
                           {contactMethod !== 'phone' && (
                             <Button
                               type="submit"
