@@ -2415,6 +2415,90 @@ const en: Record<string, string> = {
   'confetti.goal_reached': 'Goal reached! 🏆',
   'confetti.vault_reached': 'The vault "{name}" reached its target!',
   'confetti.congrats': '✨ Congratulations! ✨',
+
+  // ─── BadgesPage ───
+  'badges.title': 'Badges',
+  'badges.subtitle': 'Collect badges and show your progress',
+  'badges.collection': 'Collection',
+  'badges.all': 'All',
+  'badges.how_to_unlock': 'How to unlock',
+  'badges.unlocked_at': 'Unlocked on {date}',
+  'badges.close': 'Close',
+
+  // ─── NotFound ───
+  'notfound.title': '404',
+  'notfound.message': 'Oops! Page not found',
+  'notfound.back': 'Return to Home',
+
+  // ─── Install Page ───
+  'install.installed_title': 'Kivara installed!',
+  'install.install_title': 'Install Kivara',
+  'install.installed_desc': 'The app is already installed on your device.',
+  'install.install_desc': 'Install Kivara for quick access and offline features.',
+  'install.instant': 'Instant launch',
+  'install.offline': 'Works offline',
+  'install.native': 'Native experience',
+  'install.now': 'Install now',
+  'install.how_to': 'How to install:',
+  'install.step1': 'Open the browser menu (⋮ or ⋯)',
+  'install.step2': 'Select "Add to home screen"',
+  'install.step3': 'Confirm installation',
+
+  // ─── JoinFamily ───
+  'join.validating': 'Validating invite...',
+  'join.valid_title': 'Valid Invite! 🎉',
+  'join.valid_desc': 'Create your account to join the family. Use code {code} during registration.',
+  'join.create_account': 'Create Account',
+  'join.invalid_title': 'Invalid Invite',
+  'join.invalid_desc': 'This code has expired or has already been used. Ask your guardian for a new invite.',
+  'join.go_login': 'Go to Login',
+
+  // ─── StreaksPage ───
+  'streaks.title': 'Daily Streaks',
+  'streaks.subtitle': 'Consistency brings great rewards',
+  'streaks.current': 'Current',
+  'streaks.record': 'Record',
+  'streaks.active_days': 'Active days',
+  'streaks.next_milestone': 'Next milestone',
+  'streaks.days_label': '{count} days',
+  'streaks.calendar': 'Calendar',
+  'streaks.active': 'Active',
+  'streaks.inactive': 'Inactive',
+  'streaks.today': 'Today',
+  'streaks.rewards_title': 'Streak Rewards',
+  'streaks.claim': 'Claim',
+  'streaks.claimed_toast': 'Reward claimed!',
+  'streaks.claimed_desc': '+{points} KivaPoints for the {label} milestone!',
+  'streaks.error_claim': 'Could not claim the reward. Try again.',
+  'streaks.weekdays': 'Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+
+  // ─── LearnPage ───
+  'learn.title': 'Learn',
+  'learn.subtitle': 'Financial education micro-lessons',
+  'learn.progress': 'Progress',
+  'learn.lessons_count': '{completed}/{total} lessons',
+  'learn.map': 'Map',
+  'learn.all': 'All',
+  'learn.completed_toast': '🎉 Lesson completed!',
+  'learn.completed_desc': 'You earned {points} KivaPoints!',
+  'learn.correct_count': '{correct}/{total} correct',
+  'learn.questions_count': '0/{total} questions',
+
+  // ─── AcceptProgramInvite ───
+  'invite.accepted_title': 'Membership confirmed!',
+  'invite.accepted_desc': 'You are now part of the {name} program.',
+  'invite.go_panel': 'Go to panel',
+  'invite.invalid_title': 'Invalid invite',
+  'invite.invalid_desc': 'This invite is not valid or has expired.',
+  'invite.back': 'Back',
+  'invite.program_title': 'Program Invite',
+  'invite.program_desc': 'You have been invited to join the program:',
+  'invite.family': '👨‍👩‍👧 Family',
+  'invite.school': '🏫 School',
+  'invite.decline': 'Decline',
+  'invite.accept': 'Accept',
+  'invite.success': 'Invite accepted successfully!',
+  'invite.error': 'Error accepting invite',
 };
 
 export default en;
