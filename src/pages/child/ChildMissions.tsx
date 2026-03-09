@@ -95,6 +95,9 @@ export default function ChildMissions() {
           inProgress={inProgress}
           completed={completed}
           statusConfig={statusConfig}
+          loading={loadingMissions}
+          startMission={startMission}
+          completeMission={completeMissionMut}
         />
       )}
     </div>
