@@ -26,6 +26,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import PricingSection from "@/components/PricingSection";
 import ChildProgressSimulator from "@/components/ChildProgressSimulator";
+import FinancialHabitsQuiz from "@/components/FinancialHabitsQuiz";
 import { useT, useLanguage } from "@/contexts/LanguageContext";
 
 /* ─── animation variants ─── */
@@ -176,6 +177,7 @@ function Navbar() {
     { label: t('nav.families'), href: "#familias" },
     { label: t('nav.schools'), href: "#escolas" },
     { label: t('nav.simulator'), href: "#simulador" },
+    { label: t('nav.quiz'), href: "#teste" },
     { label: t('nav.security'), href: "#seguranca" },
     { label: t('nav.pricing'), href: "#precos" },
   ];
@@ -1054,6 +1056,7 @@ export default function LandingPage() {
         <TrustSection />
         <SocialProof />
         <ChildProgressSimulator />
+        <FinancialHabitsQuiz />
         <PricingSection />
         <FinalCTA />
       </main>
