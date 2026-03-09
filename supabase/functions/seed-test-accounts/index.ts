@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  const password = "Test1234!";
+  const password = "Kivara2026!@";
 
   const accounts = [
     { email: "encarregado@kivara.com", role: "parent", name: "Encarregado Teste", avatar: "👩" },
