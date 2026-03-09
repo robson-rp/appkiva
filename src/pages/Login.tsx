@@ -262,6 +262,17 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
+          // If referral code was provided, claim it after signup
+          if (referralCode) {
+            // Fire-and-forget: claim referral after a delay to let profile be created
+            setTimeout(async () => {
+              try {
+                await supabase.functions.invoke('claim-referral', {
+                  body: { referral_code: referralCode },
+                });
+              } catch {}
+            }, 3000);
+          }
           setEmailSignupSuccess(true);
           setSubmitting(false);
           return;
