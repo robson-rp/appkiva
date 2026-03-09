@@ -5,10 +5,12 @@ import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -73,19 +75,28 @@ export default function Login() {
   const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { login, signup, user } = useAuth();
+
+  // 2FA state
+  const [twoFACode, setTwoFACode] = useState('');
+  const [twoFAAttempts, setTwoFAAttempts] = useState(0);
+  const [twoFATrustDevice, setTwoFATrustDevice] = useState(false);
+  const [twoFAResendCountdown, setTwoFAResendCountdown] = useState(0);
+  const [twoFALocked, setTwoFALocked] = useState(false);
+  const twoFATimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const { login, signup, user, pending2FA, complete2FA } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect when user is loaded by AuthContext (replaces manual navigate after login)
+  // Redirect when user is loaded by AuthContext (pending2FA blocks redirect)
   useEffect(() => {
-    if (user) {
+    if (user && !pending2FA) {
       const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
       navigate(dest, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, pending2FA, navigate]);
 
-  // OTP countdown timer
+  // OTP countdown timer (phone auth)
   const startOtpCountdown = useCallback(() => {
     setOtpCountdown(60);
     if (otpTimerRef.current) clearInterval(otpTimerRef.current);
@@ -100,8 +111,26 @@ export default function Login() {
     }, 1000);
   }, []);
 
+  // 2FA resend countdown timer
+  const startTwoFACountdown = useCallback(() => {
+    setTwoFAResendCountdown(30);
+    if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
+    twoFATimerRef.current = setInterval(() => {
+      setTwoFAResendCountdown(prev => {
+        if (prev <= 1) {
+          if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
   useEffect(() => {
-    return () => { if (otpTimerRef.current) clearInterval(otpTimerRef.current); };
+    return () => {
+      if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+      if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -179,64 +208,9 @@ export default function Login() {
         }
 
         if (contactMethod === 'phone') {
-          // Phone auth not available without SMS provider
           toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
           setSubmitting(false);
           return;
-          /* Phone signup — reserved for when SMS provider is configured
-          if (!otpSent) {
-            const { error } = await supabase.auth.signInWithOtp({
-              phone: phoneWithPrefix,
-              options: {
-                data: {
-                  display_name: displayName || phoneWithPrefix,
-                  role: selectedRole,
-                  country,
-                  gender: gender || undefined,
-                  phone: phoneWithPrefix,
-                  institution_name: selectedRole === 'partner' ? displayName : undefined,
-                  sector: sector || undefined,
-                  school_tenant_id: (schoolTenantId && schoolTenantId !== 'other') ? schoolTenantId : undefined,
-                  avatar: selectedRole === 'parent' ? '👩' : selectedRole === 'teacher' ? '👨‍🏫' : selectedRole === 'teen' ? '🧑‍💻' : selectedRole === 'admin' ? '🛡️' : selectedRole === 'partner' ? '🏢' : '🦊',
-                },
-              },
-            });
-            if (error) {
-              toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-              setSubmitting(false);
-              return;
-            }
-            setOtpSent(true);
-            startOtpCountdown();
-            toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
-            setSubmitting(false);
-            return;
-          } else {
-            const { error } = await supabase.auth.verifyOtp({
-              phone: phoneWithPrefix,
-              token: otpCode,
-              type: 'sms',
-            });
-            if (error) {
-              toast({ title: t('auth.otp_invalid'), description: error.message, variant: 'destructive' });
-              setSubmitting(false);
-              return;
-            }
-            if (inviteData && (selectedRole === 'child' || selectedRole === 'teen')) {
-              const { data: { user } } = await supabase.auth.getUser();
-              if (user) {
-                const { data: profile } = await supabase
-                  .from('profiles')
-                  .select('id')
-                  .eq('user_id', user.id)
-                  .single();
-                if (profile) {
-                  await supabase.rpc('claim_invite_code', { _code: inviteCode, _profile_id: profile.id });
-                }
-              }
-            }
-          }
-          */
         } else {
           const { error } = await signup(
             email,
@@ -258,47 +232,31 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
-          // Show email verification screen instead of navigating
           setEmailSignupSuccess(true);
           setSubmitting(false);
           return;
         }
       } else {
         if (contactMethod === 'phone') {
-          // Phone auth not available without SMS provider
           toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
           setSubmitting(false);
           return;
-          /* Phone login — reserved for when SMS provider is configured
-          if (!otpSent) {
-            const { error } = await supabase.auth.signInWithOtp({ phone: phoneWithPrefix });
-            if (error) {
-              toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-              setSubmitting(false);
-              return;
-            }
-            setOtpSent(true);
-            startOtpCountdown();
-            toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
-            setSubmitting(false);
-            return;
-          } else {
-            const { error } = await supabase.auth.verifyOtp({
-              phone: phoneWithPrefix,
-              token: otpCode,
-              type: 'sms',
-            });
-            if (error) {
-              toast({ title: t('auth.otp_invalid'), description: error.message, variant: 'destructive' });
-              setSubmitting(false);
-              return;
-            }
-          }
-          */
         } else {
-          const { error } = await login(email, password);
+          const { error, requires2FA } = await login(email, password);
           if (error) {
             toast({ title: t('auth.error_login'), description: error, variant: 'destructive' });
+            setSubmitting(false);
+            return;
+          }
+          if (requires2FA) {
+            // Trigger reauthentication — sends OTP nonce to user's email
+            try {
+              await supabase.auth.reauthenticate();
+              startTwoFACountdown();
+              toast({ title: t('twofa.code_sent'), description: email });
+            } catch (e) {
+              console.warn('reauthenticate error:', e);
+            }
             setSubmitting(false);
             return;
           }
@@ -306,12 +264,84 @@ export default function Login() {
       }
 
       // Navigation is handled by the useEffect watching `user` from AuthContext
-      // No manual navigate() needed here
     } catch {
       toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
+  };
+
+  // ── 2FA handlers ──
+  const handleVerify2FA = async () => {
+    if (twoFACode.length !== 6 || submitting) return;
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { _2fa_verified_at: new Date().toISOString() },
+        nonce: twoFACode,
+      });
+
+      if (error) {
+        const newAttempts = twoFAAttempts + 1;
+        setTwoFAAttempts(newAttempts);
+        setTwoFACode('');
+
+        if (newAttempts >= 5) {
+          setTwoFALocked(true);
+          await supabase.auth.signOut();
+          complete2FA();
+          toast({ title: t('twofa.too_many_attempts'), description: t('twofa.try_again_later'), variant: 'destructive' });
+        } else {
+          toast({ title: t('twofa.invalid_code'), description: `${t('twofa.attempts_remaining')}: ${5 - newAttempts}`, variant: 'destructive' });
+        }
+        setSubmitting(false);
+        return;
+      }
+
+      // 2FA verified successfully — trust device if checked
+      if (twoFATrustDevice) {
+        const token = crypto.randomUUID();
+        localStorage.setItem('kivara_trusted_device', token);
+        try {
+          await supabase.functions.invoke('verify-2fa', {
+            body: { action: 'trust-device', device_token: token },
+          });
+        } catch {
+          // Non-critical failure
+        }
+      }
+
+      complete2FA();
+      toast({ title: t('twofa.verified') });
+    } catch {
+      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResend2FA = async () => {
+    if (twoFAResendCountdown > 0) return;
+    try {
+      await supabase.auth.reauthenticate();
+      startTwoFACountdown();
+      setTwoFACode('');
+      toast({ title: t('twofa.code_resent'), description: email });
+    } catch {
+      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
+    }
+  };
+
+  const handleCancel2FA = async () => {
+    await supabase.auth.signOut();
+    complete2FA();
+    setTwoFACode('');
+    setTwoFAAttempts(0);
+    setTwoFATrustDevice(false);
+    setTwoFAResendCountdown(0);
+    setTwoFALocked(false);
+    if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
   };
 
   const resetForm = () => {
@@ -334,6 +364,12 @@ export default function Login() {
     setEmailSignupSuccess(false);
     setOtpCountdown(0);
     if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+    setTwoFACode('');
+    setTwoFAAttempts(0);
+    setTwoFATrustDevice(false);
+    setTwoFAResendCountdown(0);
+    setTwoFALocked(false);
+    if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
@@ -436,7 +472,103 @@ export default function Login() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="w-full max-w-md"
         >
-          {!selectedRole ? (
+          {/* ── 2FA Verification Screen ── */}
+          {pending2FA ? (
+            <motion.div
+              key="two-fa"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {twoFALocked ? (
+                <div className="text-center space-y-4">
+                  <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                    <AlertTriangle className="h-8 w-8 text-destructive" />
+                  </div>
+                  <h2 className="font-display text-2xl font-bold text-foreground">{t('twofa.locked_title')}</h2>
+                  <p className="text-muted-foreground font-body text-sm">{t('twofa.locked_desc')}</p>
+                  <Button onClick={resetForm} variant="outline" className="rounded-xl">
+                    {t('auth.back')}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={handleCancel2FA}
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors font-body"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    {t('auth.back')}
+                  </button>
+
+                  <div className="text-center space-y-3">
+                    <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ShieldCheck className="h-8 w-8 text-primary" />
+                    </div>
+                    <h2 className="font-display text-2xl font-bold text-foreground">{t('twofa.title')}</h2>
+                    <p className="text-muted-foreground font-body text-sm">{t('twofa.instruction')}</p>
+                    <p className="text-xs text-muted-foreground">{email}</p>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <InputOTP maxLength={6} value={twoFACode} onChange={setTwoFACode}>
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  </div>
+
+                  <div className="flex items-center gap-2 justify-center">
+                    <Checkbox
+                      id="trustDevice"
+                      checked={twoFATrustDevice}
+                      onCheckedChange={(v) => setTwoFATrustDevice(!!v)}
+                    />
+                    <label htmlFor="trustDevice" className="text-sm text-muted-foreground cursor-pointer select-none">
+                      {t('twofa.trust_device')}
+                    </label>
+                  </div>
+
+                  <Button
+                    onClick={handleVerify2FA}
+                    className="w-full font-display font-bold h-13 rounded-xl text-base"
+                    size="lg"
+                    disabled={twoFACode.length !== 6 || submitting}
+                  >
+                    {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : t('twofa.confirm')}
+                  </Button>
+
+                  <div className="text-center">
+                    {twoFAResendCountdown > 0 ? (
+                      <span className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {t('twofa.resend_in')} {twoFAResendCountdown}s
+                      </span>
+                    ) : (
+                      <button
+                        onClick={handleResend2FA}
+                        className="text-xs text-primary font-semibold hover:underline"
+                      >
+                        {t('twofa.resend')}
+                      </button>
+                    )}
+                  </div>
+
+                  {twoFAAttempts > 0 && (
+                    <p className="text-center text-xs text-muted-foreground">
+                      {t('twofa.attempts_remaining')}: {5 - twoFAAttempts}
+                    </p>
+                  )}
+                </>
+              )}
+            </motion.div>
+          ) : !selectedRole ? (
               <motion.div
                 key="role-select"
                 initial={{ opacity: 0, y: 20 }}
