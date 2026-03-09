@@ -921,24 +921,6 @@ const pt: Record<string, string> = {
   'teen.profile.title': 'Perfil',
 
 
-  // ─── Learn Page ───
-  'learn.title': 'Aprender',
-  'learn.subtitle': 'Lições interactivas sobre educação financeira',
-
-  // ─── Badges Page ───
-  'badges.title': 'Badges',
-  'badges.subtitle': 'As tuas conquistas',
-
-  // ─── Streaks Page ───
-  'streaks.title': 'Streaks',
-  'streaks.subtitle': 'Mantém a tua sequência activa',
-
-  // ─── Install Page ───
-  'install.title': 'Instalar KIVARA',
-
-  // ─── Not Found ───
-  'notfound.title': 'Página não encontrada',
-  'notfound.back': 'Voltar ao início',
 
   // ─── Notifications ───
   'notifications.title': 'Notificações',
