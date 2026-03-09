@@ -67,6 +67,7 @@ export default function Login() {
   const [schoolTenantId, setSchoolTenantId] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [inviteValid, setInviteValid] = useState<boolean | null>(null);
+  const [referralCode, setReferralCode] = useState('');
   // Child login with username + PIN
   const [childUsername, setChildUsername] = useState('');
   const [childPin, setChildPin] = useState('');
