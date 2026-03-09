@@ -703,7 +703,7 @@ export default function Login() {
                         </div>
                       )}
 
-                      {contactMethod === 'email' || (isChildOrTeen && authMode === 'signup') ? (
+                      {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && (
                         <div className="space-y-2">
                           <Label htmlFor="email" className="font-semibold">{t('auth.email')}</Label>
                           <Input
@@ -715,28 +715,6 @@ export default function Login() {
                             className="h-12 rounded-xl text-base"
                             required
                           />
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <Label htmlFor="phone" className="font-semibold">{t('auth.phone')}</Label>
-                          <div className="flex gap-2">
-                            <div className="w-24 shrink-0">
-                              <Input
-                                value={COUNTRY_PHONE_PREFIXES[country] || '+244'}
-                                readOnly
-                                className="h-12 rounded-xl text-base text-center bg-muted/30 font-mono"
-                              />
-                            </div>
-                            <Input
-                              id="phone"
-                              type="tel"
-                              placeholder="912 345 678"
-                              value={phone}
-                              onChange={e => setPhone(e.target.value)}
-                              className="h-12 rounded-xl text-base"
-                              required
-                            />
-                          </div>
                         </div>
                       )}
 
