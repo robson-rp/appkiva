@@ -265,7 +265,7 @@ export default function TeacherChallenges() {
 
   const formDialog = (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display">
             {editingId ? t('teacher.challenges.edit_title') : t('teacher.challenges.create_title')}

@@ -668,7 +668,7 @@ export default function TeacherClasses() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingClass} onOpenChange={(open) => { if (!open) setEditingClass(null); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display">{t('teacher.classes.edit_title')}</DialogTitle>
           </DialogHeader>

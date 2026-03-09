@@ -329,8 +329,8 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Summary Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-small">
+            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+              <table className="w-full text-xs sm:text-small min-w-[480px]">
                 <thead>
                   <tr className="border-b border-border/50">
                     <th className="text-left py-3 font-display font-semibold text-muted-foreground">{t('teacher.dashboard.classes')}</th>
