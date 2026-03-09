@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Loader2, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
 const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', '👦🏻', '👧🏼', '🧒🏿', '👦🏽', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰'];
 
