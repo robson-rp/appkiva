@@ -11,7 +11,6 @@ import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useT } from '@/contexts/LanguageContext';
-import { useT } from '@/contexts/LanguageContext';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
