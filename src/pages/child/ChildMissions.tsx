@@ -28,9 +28,13 @@ export default function ChildMissions() {
   const { data: tasks = [], isLoading: loadingTasks } = useChildTasks();
   const completeTask = useCompleteTask();
 
-  const available = mockMissions.filter(m => m.status === 'available');
-  const inProgress = mockMissions.filter(m => m.status === 'in_progress');
-  const completed = mockMissions.filter(m => m.status === 'completed');
+  const { data: missions = [], isLoading: loadingMissions } = useChildMissions();
+  const startMission = useStartMission();
+  const completeMissionMut = useCompleteMission();
+
+  const available = missions.filter(m => m.status === 'available');
+  const inProgress = missions.filter(m => m.status === 'in_progress');
+  const completed = missions.filter(m => m.status === 'completed');
 
   const pendingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
   const completedTasks = tasks.filter(t => t.status === 'completed');
