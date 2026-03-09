@@ -297,7 +297,7 @@ export default function TeacherDashboard() {
             {/* Radar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.comparative')}</p>
-              <div className="h-72">
+              <div className="h-52 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
