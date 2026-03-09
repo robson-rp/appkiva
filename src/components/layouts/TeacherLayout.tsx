@@ -162,7 +162,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         {!isMobile && <TeacherSidebar />}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="relative z-50">
             <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
             <div className="relative h-16 flex items-center justify-between px-4 gap-4">
