@@ -422,6 +422,7 @@ export default function Login() {
     if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
     setChildUsername('');
     setChildPin('');
+    setReferralCode('');
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
