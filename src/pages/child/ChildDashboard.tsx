@@ -68,7 +68,8 @@ export default function ChildDashboard() {
 
   const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
   const pendingTasks = tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress');
-  const activeMissions = mockMissions.filter((m) => m.status === 'available' || m.status === 'in_progress');
+  const { data: missionsList = [] } = useChildMissions();
+  const activeMissions = missionsList.filter((m) => m.status === 'available' || m.status === 'in_progress');
   const vaults = dbVaults ?? [];
   const vaultsMapped = vaults.map(v => ({
     id: v.id,
