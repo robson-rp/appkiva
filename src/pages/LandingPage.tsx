@@ -25,6 +25,7 @@ import {
 import { useState, useEffect, useRef, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import PricingSection from "@/components/PricingSection";
+import ChildProgressSimulator from "@/components/ChildProgressSimulator";
 import { useT, useLanguage } from "@/contexts/LanguageContext";
 
 /* ─── animation variants ─── */
