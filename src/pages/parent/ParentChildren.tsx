@@ -62,6 +62,12 @@ export default function ParentChildren() {
   const [newChildAvatar, setNewChildAvatar] = useState('🦊');
   const [newChildDob, setNewChildDob] = useState('');
   const [creatingChild, setCreatingChild] = useState(false);
+  // Co-guardian state
+  const [guardianDialogOpen, setGuardianDialogOpen] = useState(false);
+  const [guardianEmail, setGuardianEmail] = useState('');
+  const { data: guardians = [] } = useHouseholdGuardians();
+  const inviteGuardian = useInviteGuardian();
+  const removeGuardian = useRemoveGuardian();
   const deleteChildMutation = useMutation({
     mutationFn: async (childId: string) => {
       const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
