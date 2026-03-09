@@ -121,23 +121,23 @@ export default function TeacherDashboard() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[35%] h-[60%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-5 sm:p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="space-y-2">
+           <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center gap-2">
-                  <p className="text-primary-foreground/60 text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
-                  <span className="text-caption bg-white/20 text-primary-foreground px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
+                  <p className="text-primary-foreground/60 text-xs sm:text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
+                  <span className="text-[10px] sm:text-caption bg-white/20 text-primary-foreground px-2 sm:px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
                 </div>
-                <h1 className="font-display text-heading md:text-heading-lg font-bold text-primary-foreground">
+                <h1 className="font-display text-xl sm:text-heading md:text-heading-lg font-bold text-primary-foreground">
                   {t('teacher.dashboard.hello')} {user?.name}! 📚
                 </h1>
-                <p className="text-primary-foreground/60 text-base max-w-md">
+                <p className="text-primary-foreground/60 text-sm sm:text-base max-w-md">
                   {t('teacher.dashboard.subtitle')}
                 </p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-5 text-center">
-                <p className="text-primary-foreground/60 text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
-                <p className="font-display text-base font-bold text-primary-foreground mt-1">Sol Nascente</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-center">
+                <p className="text-primary-foreground/60 text-[10px] sm:text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
+                <p className="font-display text-sm sm:text-base font-bold text-primary-foreground mt-1">Sol Nascente</p>
               </div>
             </div>
           </CardContent>
@@ -228,22 +228,22 @@ export default function TeacherDashboard() {
                   <motion.div
                     key={student.childId}
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50 min-h-[56px]"
+                    className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50 min-h-[48px] sm:min-h-[56px]"
                   >
-                    <span className="text-lg w-7 text-center font-display font-bold">
+                    <span className="text-base sm:text-lg w-6 sm:w-7 text-center font-display font-bold">
                       {i < 3 ? medals[i] : `${i + 1}.`}
                     </span>
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-xl">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-lg sm:text-xl shrink-0">
                       {student.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-display font-bold text-base">{student.name}</p>
-                      <div className="flex items-center gap-3 text-small text-muted-foreground">
-                        <span>⭐ {student.kivaPoints} pts</span>
+                      <p className="font-display font-bold text-sm sm:text-base truncate">{student.name}</p>
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-small text-muted-foreground">
+                        <span>⭐ {student.kivaPoints}</span>
                         <span>💾 {student.savingsRate}%</span>
                       </div>
                     </div>
-                    <span className="text-small text-muted-foreground font-display">{student.tasksCompleted} {t('teacher.dashboard.tasks')}</span>
+                    <span className="text-xs sm:text-small text-muted-foreground font-display hidden xs:block">{student.tasksCompleted} {t('teacher.dashboard.tasks')}</span>
                   </motion.div>
                 );
               })}
@@ -271,9 +271,9 @@ export default function TeacherDashboard() {
             {/* Bar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.averages')}</p>
-              <div className="h-72">
+              <div className="h-52 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={classComparison} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <BarChart data={classComparison} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
                     <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
@@ -297,7 +297,7 @@ export default function TeacherDashboard() {
             {/* Radar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.comparative')}</p>
-              <div className="h-72">
+              <div className="h-52 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
@@ -329,8 +329,8 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Summary Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-small">
+            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+              <table className="w-full text-xs sm:text-small min-w-[480px]">
                 <thead>
                   <tr className="border-b border-border/50">
                     <th className="text-left py-3 font-display font-semibold text-muted-foreground">{t('teacher.dashboard.classes')}</th>

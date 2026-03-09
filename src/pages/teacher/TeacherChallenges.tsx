@@ -182,7 +182,7 @@ export default function TeacherChallenges() {
             <div className="flex items-start justify-between flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <motion.div
-                  className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl"
+                  className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl sm:text-3xl shrink-0"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: 'spring' as const, stiffness: 400 }}
                 >
@@ -203,11 +203,11 @@ export default function TeacherChallenges() {
                 </Badge>
                 {canEdit && (
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(challenge)}>
-                      <Pencil className="h-3.5 w-3.5" />
+                    <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-7 sm:w-7" onClick={() => openEdit(challenge)}>
+                      <Pencil className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteDialogId(challenge.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
+                    <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-7 sm:w-7 text-destructive hover:text-destructive" onClick={() => setDeleteDialogId(challenge.id)}>
+                      <Trash2 className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                     </Button>
                   </div>
                 )}
@@ -265,7 +265,7 @@ export default function TeacherChallenges() {
 
   const formDialog = (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display">
             {editingId ? t('teacher.challenges.edit_title') : t('teacher.challenges.create_title')}
