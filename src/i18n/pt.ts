@@ -367,6 +367,7 @@ const pt: Record<string, string> = {
   'nav.teacher.classes': 'Turmas',
   'nav.teacher.challenges': 'Desafios',
   'nav.teacher.school': 'Escola',
+  'nav.teacher.profile': 'Perfil',
   'nav.teacher.slogan': 'Modo Escolar',
   'nav.teacher.role': 'Professor',
   'nav.teacher.badge': 'ESCOLA',
