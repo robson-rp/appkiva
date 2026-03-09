@@ -324,10 +324,36 @@ export default function Login() {
     setContactMethod('email');
     setOtpSent(false);
     setOtpCode('');
+    setEmailSignupSuccess(false);
+    setOtpCountdown(0);
+    if (otpTimerRef.current) clearInterval(otpTimerRef.current);
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
   const needsInviteFirst = isChildOrTeen && authMode === 'signup' && !inviteValid;
+
+  // Email signup success screen
+  if (emailSignupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md text-center space-y-6"
+        >
+          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <Mail className="h-10 w-10 text-primary" />
+          </div>
+          <h2 className="font-display text-2xl font-bold text-foreground">{t('auth.account_created')}</h2>
+          <p className="text-muted-foreground font-body">{t('auth.email_verification_sent')}</p>
+          <p className="text-sm text-muted-foreground">{email}</p>
+          <Button onClick={resetForm} variant="outline" className="rounded-xl">
+            {t('auth.back')}
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
