@@ -193,7 +193,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className={`flex-1 p-4 md:p-6 overflow-auto ${isMobile ? 'pb-28' : ''}`}
+              className={`flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-28' : ''}`}
             >
               {children}
             </motion.main>
