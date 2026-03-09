@@ -181,6 +181,15 @@ export default function Login() {
     setSubmitting(true);
 
     try {
+      // Anti-bot: silently reject if honeypot is filled
+      if (honeypot) {
+        setSubmitting(false);
+        // Simulate success to not reveal detection
+        if (authMode === 'signup') setEmailSignupSuccess(true);
+        else toast({ title: t('auth.generic_login_error'), variant: 'destructive' });
+        return;
+      }
+
       if (authMode === 'signup') {
         if (contactMethod === 'email' && !isPasswordValid(password)) {
           toast({ title: t('password.too_weak'), variant: 'destructive' });
