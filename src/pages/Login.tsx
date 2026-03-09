@@ -68,9 +68,39 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const { login, signup } = useAuth();
+  const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { login, signup, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect when user is loaded by AuthContext (replaces manual navigate after login)
+  useEffect(() => {
+    if (user) {
+      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
+      navigate(dest, { replace: true });
+    }
+  }, [user, navigate]);
+
+  // OTP countdown timer
+  const startOtpCountdown = useCallback(() => {
+    setOtpCountdown(60);
+    if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+    otpTimerRef.current = setInterval(() => {
+      setOtpCountdown(prev => {
+        if (prev <= 1) {
+          if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (otpTimerRef.current) clearInterval(otpTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     if (['teacher', 'parent', 'child', 'teen'].includes(selectedRole ?? '') && authMode === 'signup') {
