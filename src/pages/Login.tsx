@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import {
 import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
+import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
+import { isPasswordValid } from '@/lib/password-validation';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
@@ -150,6 +152,11 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
+        if (contactMethod === 'email' && !isPasswordValid(password)) {
+          toast({ title: t('password.too_weak'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
         if ((selectedRole === 'child' || selectedRole === 'teen') && !inviteValid) {
           toast({ title: t('auth.otp_invalid'), description: t('auth.invite_required'), variant: 'destructive' });
           setSubmitting(false);
@@ -724,13 +731,21 @@ export default function Login() {
                           <Input
                             id="password"
                             type="password"
-                            placeholder="••••••••"
+                            placeholder="••••••••••••"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             className="h-12 rounded-xl text-base"
-                            minLength={6}
+                            minLength={12}
                             required
                           />
+                          {authMode === 'signup' && <PasswordStrengthMeter password={password} />}
+                          {authMode === 'login' && (
+                            <div className="text-right">
+                              <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                                {t('password.forgot_link')}
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       )}
 

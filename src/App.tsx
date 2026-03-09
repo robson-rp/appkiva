@@ -26,6 +26,8 @@ const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Install = lazy(() => import("./pages/Install"));
 const LandingPage = lazy(() => import("./pages/LandingPage"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 // Parent
 const ParentDashboard = lazy(() => import("./pages/parent/ParentDashboard"));
@@ -251,6 +253,8 @@ function AppRoutes() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/join/:code" element={<JoinFamily />} />
               <Route path="/install" element={<Install />} />
               <Route path="*" element={<Navigate to="/" replace />} />
