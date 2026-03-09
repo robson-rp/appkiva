@@ -360,8 +360,20 @@ function MissionsTab({
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      {/* In Progress */}
+      {allActive.length === 0 && completed.length === 0 && (
+        <Card className="border-border/50">
+          <CardContent className="py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎯</div>
+            <p className="font-display font-bold text-sm">{t('child.tasks.no_tasks')}</p>
+            <p className="text-xs text-muted-foreground mt-1">O teu encarregado ainda não criou missões.</p>
+          </CardContent>
+        </Card>
+      )}
+
       {inProgress.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
