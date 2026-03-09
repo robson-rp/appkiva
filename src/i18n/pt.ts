@@ -2652,6 +2652,26 @@ const pt: Record<string, string> = {
   'security.risk': 'Risco',
   'security.account_unlocked': 'Conta desbloqueada',
   'common.all': 'Todos',
+
+  // ─── Child Account Creation ───
+  'auth.username': 'Nome de utilizador',
+  'auth.pin_hint': 'PIN de 4-6 dígitos definido pelo encarregado',
+  'auth.child_account_hint': 'A tua conta é criada pelo teu encarregado',
+  'parent.children.create_child': 'Criar conta',
+  'parent.children.create_child_title': 'Criar conta de criança',
+  'parent.children.create_child_desc': 'Cria uma conta para o teu filho aceder à plataforma com nome de utilizador e PIN.',
+  'parent.children.child_username': 'Nome de utilizador',
+  'parent.children.child_username_hint': '3-20 caracteres, apenas letras, números e _',
+  'parent.children.child_pin': 'PIN',
+  'parent.children.child_pin_confirm': 'Confirmar PIN',
+  'parent.children.child_pin_hint': '4-6 dígitos numéricos',
+  'parent.children.child_pin_mismatch': 'Os PINs não coincidem',
+  'parent.children.child_dob': 'Data de nascimento',
+  'parent.children.child_avatar': 'Avatar',
+  'parent.children.creating_account': 'A criar conta...',
+  'parent.children.account_created': 'Conta criada com sucesso!',
+  'parent.children.account_created_desc': 'A criança pode entrar com o nome de utilizador e PIN.',
+  'parent.children.username_taken': 'Este nome de utilizador já está em uso',
 };
 
 export default pt;

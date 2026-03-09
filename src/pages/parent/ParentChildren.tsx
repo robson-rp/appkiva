@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown, UserPlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -52,6 +52,15 @@ export default function ParentChildren() {
   const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
+  // Create child account state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newChildName, setNewChildName] = useState('');
+  const [newChildUsername, setNewChildUsername] = useState('');
+  const [newChildPin, setNewChildPin] = useState('');
+  const [newChildPinConfirm, setNewChildPinConfirm] = useState('');
+  const [newChildAvatar, setNewChildAvatar] = useState('🦊');
+  const [newChildDob, setNewChildDob] = useState('');
+  const [creatingChild, setCreatingChild] = useState(false);
   const deleteChildMutation = useMutation({
     mutationFn: async (childId: string) => {
       const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
@@ -187,12 +196,11 @@ export default function ParentChildren() {
             }}>
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.invite')}
             </Button>
-            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
+            <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
               if (!canAddChild) { setPaymentOpen(true); return; }
-              await generateAndPersistCode();
-              setInviteOpen(true);
+              setCreateOpen(true);
             }}>
-              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.add')}
+              <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.create_child')}
             </Button>
           </div>
         </div>
@@ -297,8 +305,8 @@ export default function ParentChildren() {
             <div className="text-5xl mb-4">👶</div>
             <h3 className="font-display font-bold text-lg mb-2">{t('parent.children.no_children')}</h3>
             <p className="text-sm text-muted-foreground mb-4">{t('parent.children.add_hint')}</p>
-            <Button className="rounded-xl font-display gap-1.5" onClick={async () => { await generateAndPersistCode(); setInviteOpen(true); }}>
-              <Link2 className="h-4 w-4" /> {t('parent.children.invite_child')}
+            <Button className="rounded-xl font-display gap-1.5" onClick={() => setCreateOpen(true)}>
+              <UserPlus className="h-4 w-4" /> {t('parent.children.create_child')}
             </Button>
           </CardContent>
         </Card>
@@ -562,6 +570,173 @@ export default function ParentChildren() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Child Account Dialog */}
+      <Dialog open={createOpen} onOpenChange={(open) => {
+        setCreateOpen(open);
+        if (!open) {
+          setNewChildName('');
+          setNewChildUsername('');
+          setNewChildPin('');
+          setNewChildPinConfirm('');
+          setNewChildAvatar('🦊');
+          setNewChildDob('');
+        }
+      }}>
+        <DialogContent className="sm:max-w-md rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center">
+                <UserPlus className="h-5 w-5 text-secondary" />
+              </div>
+              {t('parent.children.create_child_title')}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {t('parent.children.create_child_desc')}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            if (newChildPin !== newChildPinConfirm) {
+              toast({ title: t('parent.children.child_pin_mismatch'), variant: 'destructive' });
+              return;
+            }
+            setCreatingChild(true);
+            try {
+              const { data, error } = await supabase.functions.invoke('create-child-account', {
+                body: {
+                  display_name: newChildName,
+                  username: newChildUsername,
+                  pin: newChildPin,
+                  avatar: newChildAvatar,
+                  date_of_birth: newChildDob || null,
+                },
+              });
+              if (error || data?.error) {
+                toast({ title: t('common.error'), description: data?.error || error?.message, variant: 'destructive' });
+                return;
+              }
+              qc.invalidateQueries({ queryKey: ['children'] });
+              toast({ title: t('parent.children.account_created'), description: t('parent.children.account_created_desc') });
+              setCreateOpen(false);
+              setNewChildName('');
+              setNewChildUsername('');
+              setNewChildPin('');
+              setNewChildPinConfirm('');
+              setNewChildAvatar('🦊');
+              setNewChildDob('');
+            } catch (err: any) {
+              toast({ title: t('common.error'), description: err?.message, variant: 'destructive' });
+            } finally {
+              setCreatingChild(false);
+            }
+          }} className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('common.name')}</Label>
+              <Input
+                placeholder="Ex: João"
+                value={newChildName}
+                onChange={e => setNewChildName(e.target.value)}
+                className="rounded-xl"
+                required
+                minLength={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('parent.children.child_username')}</Label>
+              <Input
+                placeholder="ex: joao2026"
+                value={newChildUsername}
+                onChange={e => setNewChildUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+                className="rounded-xl font-mono"
+                required
+                minLength={3}
+                maxLength={20}
+              />
+              <p className="text-[10px] text-muted-foreground">{t('parent.children.child_username_hint')}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-display font-bold">{t('parent.children.child_pin')}</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="••••"
+                  value={newChildPin}
+                  onChange={e => setNewChildPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="rounded-xl text-center tracking-widest font-mono"
+                  required
+                  minLength={4}
+                  maxLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-display font-bold">{t('parent.children.child_pin_confirm')}</Label>
+                <Input
+                  type="password"
+                  inputMode="numeric"
+                  placeholder="••••"
+                  value={newChildPinConfirm}
+                  onChange={e => setNewChildPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="rounded-xl text-center tracking-widest font-mono"
+                  required
+                  minLength={4}
+                  maxLength={6}
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">{t('parent.children.child_pin_hint')}</p>
+            {newChildPin && newChildPinConfirm && newChildPin !== newChildPinConfirm && (
+              <p className="text-xs text-destructive text-center">{t('parent.children.child_pin_mismatch')}</p>
+            )}
+
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('parent.children.child_avatar')}</Label>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {['🦊', '🐼', '🦁', '🐸', '🐱', '🐶', '🦄', '🐨', '🐰', '🦋', '🐣', '🐙'].map(emoji => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setNewChildAvatar(emoji)}
+                    className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center transition-all ${
+                      newChildAvatar === emoji
+                        ? 'bg-primary/20 border-2 border-primary scale-110'
+                        : 'bg-muted/50 border border-border/30 hover:bg-muted'
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('parent.children.child_dob')} <span className="text-muted-foreground font-normal">({t('common.optional')})</span></Label>
+              <Input
+                type="date"
+                value={newChildDob}
+                onChange={e => setNewChildDob(e.target.value)}
+                className="rounded-xl"
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 6)).toISOString().split('T')[0]}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full rounded-xl font-display gap-2"
+              disabled={creatingChild || newChildUsername.length < 3 || newChildPin.length < 4 || newChildPin !== newChildPinConfirm || newChildName.length < 2}
+            >
+              {creatingChild ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> {t('parent.children.creating_account')}</>
+              ) : (
+                <><UserPlus className="h-4 w-4" /> {t('parent.children.create_child')}</>
+              )}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

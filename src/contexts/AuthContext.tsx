@@ -24,6 +24,7 @@ interface AuthContextType {
   currentChildId: string | null;
   pending2FA: boolean;
   login: (email: string, password: string) => Promise<{ error: string | null; requires2FA: boolean }>;
+  loginAsChild: (username: string, pin: string) => Promise<{ error: string | null }>;
   signup: (email: string, password: string, role: UserRole, displayName: string, country?: string, extra?: { gender?: string; phone?: string; institution_name?: string; sector?: string; school_tenant_id?: string; invite_code?: string }) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   setCurrentChildId: (id: string | null) => void;
@@ -189,6 +190,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const complete2FA = () => setPending2FA(false);
 
+  const loginAsChild = async (username: string, pin: string) => {
+    const syntheticEmail = `${username.toLowerCase()}@child.kivara.local`;
+    const { error } = await supabase.auth.signInWithPassword({ email: syntheticEmail, password: pin });
+    if (error) {
+      return { error: 'auth.generic_login_error' };
+    }
+    return { error: null };
+  };
+
   const signup = async (
     email: string,
     password: string,
@@ -290,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentChildId,
       pending2FA,
       login,
+      loginAsChild,
       signup,
       logout,
       setCurrentChildId,
