@@ -853,144 +853,197 @@ export default function Login() {
 
                   {!needsInviteFirst && (
                     <>
-                      {!(isChildOrTeen && authMode === 'signup') && (
-                        <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
-                          <button
-                            type="button"
-                            onClick={() => { setContactMethod('email'); setOtpSent(false); setOtpCode(''); }}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
-                              contactMethod === 'email'
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
-                            }`}
+                      {/* Child login: username + PIN */}
+                      {selectedRole === 'child' && authMode === 'login' ? (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="childUsername" className="font-semibold">{t('auth.username') || 'Nome de utilizador'}</Label>
+                            <Input
+                              id="childUsername"
+                              type="text"
+                              placeholder="ex: joao2026"
+                              value={childUsername}
+                              onChange={e => setChildUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+                              className="h-12 rounded-xl text-base"
+                              required
+                              autoComplete="username"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="childPin" className="font-semibold">PIN</Label>
+                            <Input
+                              id="childPin"
+                              type="password"
+                              inputMode="numeric"
+                              placeholder="••••"
+                              value={childPin}
+                              onChange={e => setChildPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
+                              maxLength={6}
+                              minLength={4}
+                              required
+                              autoComplete="current-password"
+                            />
+                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4-6 dígitos definido pelo encarregado'}</p>
+                          </div>
+                          <Button
+                            type="submit"
+                            className="w-full font-display font-bold h-13 rounded-xl text-base"
+                            size="lg"
+                            disabled={submitting || childUsername.length < 3 || childPin.length < 4}
                           >
-                            <Mail className="h-4 w-4" /> {t('auth.email')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => { setContactMethod('phone'); setOtpSent(false); setOtpCode(''); }}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all relative ${
-                              contactMethod === 'phone'
-                                ? 'bg-background text-foreground shadow-sm'
-                                : 'text-muted-foreground hover:text-foreground'
-                            }`}
-                          >
-                            <Phone className="h-4 w-4" /> {t('auth.phone')}
-                            <span className="absolute -top-1 -right-1 text-[9px] bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
-                          </button>
-                        </div>
-                      )}
-
-                      {contactMethod === 'phone' && (
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
-                          <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
-                          <p className="text-xs text-muted-foreground">{t('auth.phone_not_available_desc')}</p>
-                        </div>
-                      )}
-
-                      {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && (
-                        <div className="space-y-2">
-                          <Label htmlFor="email" className="font-semibold">{t('auth.email')}</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            placeholder="exemplo@email.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            className="h-12 rounded-xl text-base"
-                            required
-                          />
-                        </div>
-                      )}
-
-                      {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && !otpSent && (
-                        <div className="space-y-2">
-                          <Label htmlFor="password" className="font-semibold">{t('auth.password')}</Label>
-                          <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            className="h-12 rounded-xl text-base"
-                            minLength={12}
-                            required
-                          />
-                          {authMode === 'signup' && <PasswordStrengthMeter password={password} />}
-                          {authMode === 'login' && (
-                            <div className="text-right">
-                              <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
-                                {t('password.forgot_link')}
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {otpSent && contactMethod === 'phone' && (
-                        <div className="space-y-2">
-                          <Label htmlFor="otp" className="font-semibold">{t('auth.otp_code')}</Label>
-                          <p className="text-xs text-muted-foreground">{t('auth.otp_hint')}</p>
-                          <Input
-                            id="otp"
-                            placeholder="000000"
-                            value={otpCode}
-                            onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
-                            maxLength={6}
-                            required
-                          />
-                          <div className="flex items-center justify-between">
-                            {otpCountdown > 0 ? (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {t('auth.resend_in')} {otpCountdown}s
-                              </span>
-                            ) : (
+                            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : t('auth.sign_in')}
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {!(isChildOrTeen && authMode === 'signup') && (
+                            <div className="flex gap-2 p-1 bg-muted/50 rounded-xl">
                               <button
                                 type="button"
-                                onClick={() => { setOtpSent(false); setOtpCode(''); }}
-                                className="text-xs text-primary font-semibold hover:underline"
+                                onClick={() => { setContactMethod('email'); setOtpSent(false); setOtpCode(''); }}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
+                                  contactMethod === 'email'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                }`}
                               >
-                                {t('auth.resend_otp')}
+                                <Mail className="h-4 w-4" /> {t('auth.email')}
                               </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {contactMethod !== 'phone' && (
-                        <Button
-                          type="submit"
-                          className="w-full font-display font-bold h-13 rounded-xl text-base"
-                          size="lg"
-                          disabled={submitting}
-                        >
-                          {submitting ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : authMode === 'signup' ? (
-                            t('auth.sign_up')
-                          ) : (
-                            t('auth.sign_in')
+                              <button
+                                type="button"
+                                onClick={() => { setContactMethod('phone'); setOtpSent(false); setOtpCode(''); }}
+                                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all relative ${
+                                  contactMethod === 'phone'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                }`}
+                              >
+                                <Phone className="h-4 w-4" /> {t('auth.phone')}
+                                <span className="absolute -top-1 -right-1 text-[9px] bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
+                              </button>
+                            </div>
                           )}
-                        </Button>
+
+                          {contactMethod === 'phone' && (
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
+                              <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <p className="text-xs text-muted-foreground">{t('auth.phone_not_available_desc')}</p>
+                            </div>
+                          )}
+
+                          {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && (
+                            <div className="space-y-2">
+                              <Label htmlFor="email" className="font-semibold">{t('auth.email')}</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                placeholder="exemplo@email.com"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                className="h-12 rounded-xl text-base"
+                                required
+                              />
+                            </div>
+                          )}
+
+                          {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && !otpSent && (
+                            <div className="space-y-2">
+                              <Label htmlFor="password" className="font-semibold">{t('auth.password')}</Label>
+                              <Input
+                                id="password"
+                                type="password"
+                                placeholder="••••••••••••"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                className="h-12 rounded-xl text-base"
+                                minLength={12}
+                                required
+                              />
+                              {authMode === 'signup' && <PasswordStrengthMeter password={password} />}
+                              {authMode === 'login' && (
+                                <div className="text-right">
+                                  <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                                    {t('password.forgot_link')}
+                                  </Link>
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {otpSent && contactMethod === 'phone' && (
+                            <div className="space-y-2">
+                              <Label htmlFor="otp" className="font-semibold">{t('auth.otp_code')}</Label>
+                              <p className="text-xs text-muted-foreground">{t('auth.otp_hint')}</p>
+                              <Input
+                                id="otp"
+                                placeholder="000000"
+                                value={otpCode}
+                                onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
+                                maxLength={6}
+                                required
+                              />
+                              <div className="flex items-center justify-between">
+                                {otpCountdown > 0 ? (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {t('auth.resend_in')} {otpCountdown}s
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => { setOtpSent(false); setOtpCode(''); }}
+                                    className="text-xs text-primary font-semibold hover:underline"
+                                  >
+                                    {t('auth.resend_otp')}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {contactMethod !== 'phone' && (
+                            <Button
+                              type="submit"
+                              className="w-full font-display font-bold h-13 rounded-xl text-base"
+                              size="lg"
+                              disabled={submitting}
+                            >
+                              {submitting ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                              ) : authMode === 'signup' ? (
+                                t('auth.sign_up')
+                              ) : (
+                                t('auth.sign_in')
+                              )}
+                            </Button>
+                          )}
+                        </>
                       )}
 
-                      <p className="text-center text-sm text-muted-foreground">
-                        {authMode === 'login' ? (
-                          <>{t('auth.no_account')}{' '}
-                            <button type="button" onClick={() => { setAuthMode('signup'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
-                              {t('auth.register')}
-                            </button>
-                          </>
-                        ) : (
-                          <>{t('auth.has_account')}{' '}
-                            <button type="button" onClick={() => { setAuthMode('login'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
-                              {t('auth.login')}
-                            </button>
-                          </>
-                        )}
-                      </p>
+                      {/* Hide signup toggle for child login (parents create accounts) */}
+                      {selectedRole === 'child' && authMode === 'login' ? (
+                        <p className="text-center text-xs text-muted-foreground">
+                          {t('auth.child_account_hint') || 'A tua conta é criada pelo teu encarregado'}
+                        </p>
+                      ) : (
+                        <p className="text-center text-sm text-muted-foreground">
+                          {authMode === 'login' ? (
+                            <>{t('auth.no_account')}{' '}
+                              <button type="button" onClick={() => { setAuthMode('signup'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
+                                {t('auth.register')}
+                              </button>
+                            </>
+                          ) : (
+                            <>{t('auth.has_account')}{' '}
+                              <button type="button" onClick={() => { setAuthMode('login'); setOtpSent(false); setOtpCode(''); }} className="text-primary font-semibold hover:underline">
+                                {t('auth.login')}
+                              </button>
+                            </>
+                          )}
+                        </p>
+                      )}
                     </>
                   )}
                 </form>
