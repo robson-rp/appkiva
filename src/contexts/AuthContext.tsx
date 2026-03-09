@@ -300,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       currentChildId,
       pending2FA,
       login,
+      loginAsChild,
       signup,
       logout,
       setCurrentChildId,
