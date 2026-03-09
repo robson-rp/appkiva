@@ -273,7 +273,7 @@ function AppRoutes() {
   );
 }
 
-const App = () => {
+function AppShell() {
   const [splashDone, setSplashDone] = useState(() => sessionStorage.getItem('kivara-splash') === '1');
 
   const handleSplashComplete = useCallback(() => {
@@ -286,28 +286,34 @@ const App = () => {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-      <QueryClientProvider client={queryClient}>
-        <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <RewardAnimationProvider>
-                <a href="#main-content" className="skip-to-content">
-                  Saltar para o conteúdo
-                </a>
-                <OfflineBanner />
-                <AppRoutes />
-              </RewardAnimationProvider>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-        </LanguageProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <RewardAnimationProvider>
+            <a href="#main-content" className="skip-to-content">
+              Saltar para o conteúdo
+            </a>
+            <OfflineBanner />
+            <AppRoutes />
+          </RewardAnimationProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </>
   );
-};
+}
+
+const App = () => (
+  <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <QueryClientProvider client={queryClient}>
+      <LanguageProvider>
+        <TooltipProvider>
+          <AppShell />
+        </TooltipProvider>
+      </LanguageProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
+);
 
 export default App;
