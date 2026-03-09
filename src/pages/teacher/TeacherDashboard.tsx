@@ -121,23 +121,23 @@ export default function TeacherDashboard() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute top-[-30%] right-[-10%] w-[45%] h-[80%] rounded-full bg-white/5 blur-3xl" />
           <div className="absolute bottom-[-20%] left-[-10%] w-[35%] h-[60%] rounded-full bg-white/5 blur-3xl" />
-          <CardContent className="relative z-10 p-5 sm:p-6 md:p-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="space-y-2">
+           <CardContent className="relative z-10 p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center gap-2">
-                  <p className="text-primary-foreground/60 text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
-                  <span className="text-caption bg-white/20 text-primary-foreground px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
+                  <p className="text-primary-foreground/60 text-xs sm:text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
+                  <span className="text-[10px] sm:text-caption bg-white/20 text-primary-foreground px-2 sm:px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
                 </div>
-                <h1 className="font-display text-heading md:text-heading-lg font-bold text-primary-foreground">
+                <h1 className="font-display text-xl sm:text-heading md:text-heading-lg font-bold text-primary-foreground">
                   {t('teacher.dashboard.hello')} {user?.name}! 📚
                 </h1>
-                <p className="text-primary-foreground/60 text-base max-w-md">
+                <p className="text-primary-foreground/60 text-sm sm:text-base max-w-md">
                   {t('teacher.dashboard.subtitle')}
                 </p>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-5 text-center">
-                <p className="text-primary-foreground/60 text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
-                <p className="font-display text-base font-bold text-primary-foreground mt-1">Sol Nascente</p>
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-center">
+                <p className="text-primary-foreground/60 text-[10px] sm:text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
+                <p className="font-display text-sm sm:text-base font-bold text-primary-foreground mt-1">Sol Nascente</p>
               </div>
             </div>
           </CardContent>
