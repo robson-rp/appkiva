@@ -314,7 +314,7 @@ export default function TeacherDashboard() {
                         strokeWidth={2}
                       />
                     ))}
-                    <Legend wrapperStyle={{ fontSize: '13px' }} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
