@@ -2609,6 +2609,23 @@ const en: Record<string, string> = {
   'admin.finance.frozen_at': 'Frozen at',
   'admin.finance.frozen_by': 'By',
   'admin.finance.wallet_owner': 'Owner',
+
+  // ─── Two-Factor Authentication ───
+  'twofa.title': 'Security verification',
+  'twofa.instruction': 'Enter the code sent to your email.',
+  'twofa.confirm': 'Confirm',
+  'twofa.resend': 'Resend code',
+  'twofa.resend_in': 'Resend in',
+  'twofa.trust_device': 'Trust this device for 30 days',
+  'twofa.invalid_code': 'Invalid code',
+  'twofa.too_many_attempts': 'Too many failed attempts',
+  'twofa.try_again_later': 'Multiple failed attempts detected. Try again in a few minutes.',
+  'twofa.locked_title': 'Account temporarily locked',
+  'twofa.locked_desc': 'Multiple failed attempts detected. Try again in 15 minutes.',
+  'twofa.code_sent': 'Code sent',
+  'twofa.code_resent': 'New code sent',
+  'twofa.attempts_remaining': 'Attempts remaining',
+  'twofa.verified': 'Verification complete',
 };
 
 export default en;

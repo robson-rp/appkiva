@@ -22,16 +22,17 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   currentChildId: string | null;
-  login: (email: string, password: string) => Promise<{ error: string | null }>;
+  pending2FA: boolean;
+  login: (email: string, password: string) => Promise<{ error: string | null; requires2FA: boolean }>;
   signup: (email: string, password: string, role: UserRole, displayName: string, country?: string, extra?: { gender?: string; phone?: string; institution_name?: string; sector?: string; school_tenant_id?: string; invite_code?: string }) => Promise<{ error: string | null }>;
   logout: () => Promise<void>;
   setCurrentChildId: (id: string | null) => void;
+  complete2FA: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 async function fetchKivaraUser(supabaseUser: SupabaseUser, retries = 3): Promise<KivaraUser | null> {
-  // Fetch profile (with retry for race condition when trigger hasn't created it yet)
   let profile: { id: string; display_name: string; avatar: string | null; household_id: string | null } | null = null;
 
   for (let attempt = 0; attempt < retries; attempt++) {
@@ -53,7 +54,6 @@ async function fetchKivaraUser(supabaseUser: SupabaseUser, retries = 3): Promise
 
   if (!profile) return null;
 
-  // Fetch role
   const { data: roles } = await supabase
     .from('user_roles')
     .select('role')
@@ -77,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<KivaraUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentChildId, setCurrentChildId] = useState<string | null>(null);
+  const [pending2FA, setPending2FA] = useState(false);
   const streakRecorded = useRef(false);
 
   // Auto-record daily activity for streak tracking
@@ -91,13 +92,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user?.profileId]);
 
   useEffect(() => {
-    // Set up auth listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         setSession(newSession);
         if (newSession?.user) {
           setLoading(true);
-          // Use setTimeout to avoid potential deadlocks with Supabase client
           setTimeout(async () => {
             const kivaraUser = await fetchKivaraUser(newSession.user);
             setUser(kivaraUser);
@@ -110,7 +109,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check existing session
     supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
       setSession(existingSession);
       if (existingSession?.user) {
@@ -127,10 +125,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    return { error: null };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message, requires2FA: false };
+
+    // Check if user's role requires 2FA (parent, admin)
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', data.user.id);
+
+    const role = roles?.[0]?.role;
+    if (role === 'parent' || role === 'admin') {
+      // Check for trusted device
+      const deviceToken = localStorage.getItem('kivara_trusted_device');
+      if (deviceToken) {
+        try {
+          const { data: trustResult } = await supabase.functions.invoke('verify-2fa', {
+            body: { action: 'check-trust', device_token: deviceToken },
+          });
+          if (trustResult?.trusted) {
+            return { error: null, requires2FA: false };
+          }
+        } catch {
+          // Trust check failed — proceed with 2FA
+        }
+        localStorage.removeItem('kivara_trusted_device');
+      }
+      setPending2FA(true);
+      return { error: null, requires2FA: true };
+    }
+
+    return { error: null, requires2FA: false };
   };
+
+  const complete2FA = () => setPending2FA(false);
 
   const signup = async (
     email: string,
@@ -169,7 +197,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // If child/teen with invite code, claim it after signup
     if (extra?.invite_code && data.user && (role === 'child' || role === 'teen')) {
-      // Wait for profile to be created by trigger, then claim
       setTimeout(async () => {
         const { data: profile } = await supabase
           .from('profiles')
@@ -193,10 +220,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setCurrentChildId(null);
+    setPending2FA(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, currentChildId, login, signup, logout, setCurrentChildId }}>
+    <AuthContext.Provider value={{
+      user: pending2FA ? null : user,
+      session,
+      loading,
+      currentChildId,
+      pending2FA,
+      login,
+      signup,
+      logout,
+      setCurrentChildId,
+      complete2FA,
+    }}>
       {children}
     </AuthContext.Provider>
   );
