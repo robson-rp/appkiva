@@ -383,6 +383,92 @@ export default function ParentChildren() {
         </motion.div>
       )}
 
+      {/* Co-Guardian Section (Premium) */}
+      {tierName && tierName !== 'Free' && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-accent to-primary" />
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <ShieldCheck className="h-3.5 w-3.5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-display font-bold">{t('guardian.title')}</p>
+                    <p className="text-[10px] text-muted-foreground">{t('guardian.subtitle')}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="rounded-xl font-display gap-1.5 text-xs" onClick={() => setGuardianDialogOpen(true)}>
+                  <UserPlus className="h-3.5 w-3.5" /> {t('guardian.invite')}
+                </Button>
+              </div>
+              {guardians.length > 0 && (
+                <div className="space-y-2">
+                  {guardians.map(g => (
+                    <div key={g.id} className="flex items-center justify-between gap-3 bg-muted/40 rounded-xl p-3 border border-border/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{g.avatar}</span>
+                        <div>
+                          <p className="text-xs font-display font-bold">{g.displayName}</p>
+                          <p className="text-[10px] text-muted-foreground">{g.role === 'primary' ? t('guardian.primary') : t('guardian.secondary')}</p>
+                        </div>
+                      </div>
+                      {g.role === 'secondary' && (
+                        <Button size="sm" variant="ghost" className="rounded-xl text-xs text-destructive hover:text-destructive" onClick={() => removeGuardian.mutate(g.id)}>
+                          {t('guardian.remove')}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Guardian Invite Dialog */}
+      <Dialog open={guardianDialogOpen} onOpenChange={setGuardianDialogOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-accent-foreground" /> {t('guardian.invite')}
+            </DialogTitle>
+            <DialogDescription>{t('guardian.invite_desc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('guardian.email')}</Label>
+              <Input
+                type="email"
+                placeholder="ex: mae@email.com"
+                value={guardianEmail}
+                onChange={e => setGuardianEmail(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <Button
+              className="w-full rounded-xl font-display gap-2"
+              disabled={inviteGuardian.isPending || !guardianEmail}
+              onClick={async () => {
+                try {
+                  await inviteGuardian.mutateAsync(guardianEmail);
+                  toast({ title: t('guardian.sent'), description: t('guardian.sent_desc') });
+                  setGuardianDialogOpen(false);
+                  setGuardianEmail('');
+                } catch (err: any) {
+                  toast({ title: t('common.error'), description: err?.message, variant: 'destructive' });
+                }
+              }}
+            >
+              {inviteGuardian.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {inviteGuardian.isPending ? t('guardian.sending') : t('guardian.invite')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl border-border/50">
