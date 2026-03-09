@@ -258,6 +258,11 @@ export default function Login() {
         }
       } else {
         if (contactMethod === 'phone') {
+          // Phone auth not available without SMS provider
+          toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+          /* Phone login — reserved for when SMS provider is configured
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({ phone: phoneWithPrefix });
             if (error) {
@@ -266,6 +271,7 @@ export default function Login() {
               return;
             }
             setOtpSent(true);
+            startOtpCountdown();
             toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
@@ -281,6 +287,7 @@ export default function Login() {
               return;
             }
           }
+          */
         } else {
           const { error } = await login(email, password);
           if (error) {
@@ -291,8 +298,8 @@ export default function Login() {
         }
       }
 
-      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : selectedRole === 'admin' ? '/admin' : selectedRole === 'partner' ? '/partner' : '/child';
-      navigate(dest);
+      // Navigation is handled by the useEffect watching `user` from AuthContext
+      // No manual navigate() needed here
     } catch {
       toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
     } finally {
