@@ -424,8 +424,8 @@ function MissionsTab({
                       </div>
                       <Progress value={progress} className="h-2 rounded-full" />
                     </div>
-                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast(t('child.missions.coming_soon'))}>
-                        <Zap className="h-3.5 w-3.5" /> {t('child.missions.continue')}
+                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
+                        {completeMission.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} {t('child.missions.continue')}
                       </Button>
                   </CardContent>
                 </Card>
