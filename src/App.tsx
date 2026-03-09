@@ -53,6 +53,7 @@ const ChildStore = lazy(() => import("./pages/child/ChildStore"));
 const ChildDiary = lazy(() => import("./pages/child/ChildDiary"));
 const ChildDreams = lazy(() => import("./pages/child/ChildDreams"));
 const ChildProfile = lazy(() => import("./pages/child/ChildProfile"));
+const ChildRanking = lazy(() => import("./pages/child/ChildRanking"));
 
 // Teacher
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard"));
