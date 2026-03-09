@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, TrendingUp, Calculator, BarChart3, Globe, Vault, ArrowUpFromLine, ArrowDownToLine, Coins, Wallet, PiggyBank } from 'lucide-react';
+import { DollarSign, TrendingUp, Calculator, BarChart3, Globe, Vault, ArrowUpFromLine, ArrowDownToLine, Coins, Wallet, PiggyBank, ShieldAlert, Lock, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -46,6 +47,45 @@ export default function AdminFinance() {
   const [simTier, setSimTier] = useState('');
   const [simCount, setSimCount] = useState('10');
   const [simPeriod, setSimPeriod] = useState<'monthly' | 'yearly'>('monthly');
+
+  // Frozen wallets query
+  const { data: frozenWallets } = useQuery({
+    queryKey: ['admin_frozen_wallets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wallets')
+        .select('id, profile_id, is_frozen, frozen_at, frozen_by, freeze_reason')
+        .eq('is_frozen', true);
+      if (error) throw error;
+      // Get profile names for display
+      const profileIds = [...new Set((data ?? []).flatMap(w => [w.profile_id, w.frozen_by].filter(Boolean)))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', profileIds);
+      const profileMap = new Map((profiles ?? []).map(p => [p.id, p.display_name]));
+      return (data ?? []).map(w => ({
+        ...w,
+        owner_name: profileMap.get(w.profile_id) ?? w.profile_id,
+        frozen_by_name: w.frozen_by ? (profileMap.get(w.frozen_by) ?? w.frozen_by) : '—',
+      }));
+    },
+  });
+
+  // Risk flags query
+  const { data: riskFlags } = useQuery({
+    queryKey: ['admin_risk_flags_active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('risk_flags')
+        .select('*')
+        .is('resolved_at', null)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
 
   const revenueByCurrency = useMemo(() => {
     const map = new Map<string, { symbol: string; monthly: number; yearly: number; tenantCount: number }>();
@@ -105,6 +145,16 @@ export default function AdminFinance() {
         <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.finance.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('admin.finance.subtitle')}</p>
       </div>
+
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">{t('admin.finance.title')}</TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-1.5">
+            <ShieldAlert className="h-3.5 w-3.5" /> {t('admin.finance.wallet_security')}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-4">
 
       {/* Money Supply Audit */}
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
@@ -365,6 +415,96 @@ export default function AdminFinance() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6 mt-4">
+          {/* Frozen Wallets */}
+          <Card className="border-destructive/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <Lock className="h-4 w-4 text-destructive" /> {t('admin.finance.frozen_wallets')}
+                {frozenWallets && frozenWallets.length > 0 && (
+                  <Badge variant="destructive" className="ml-auto text-xs">{frozenWallets.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {!frozenWallets || frozenWallets.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-4">{t('admin.finance.no_frozen')}</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('admin.finance.wallet_owner')}</TableHead>
+                      <TableHead>{t('admin.finance.freeze_reason')}</TableHead>
+                      <TableHead>{t('admin.finance.frozen_at')}</TableHead>
+                      <TableHead>{t('admin.finance.frozen_by')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {frozenWallets.map((w) => (
+                      <TableRow key={w.id}>
+                        <TableCell className="font-medium">{w.owner_name}</TableCell>
+                        <TableCell className="text-sm">{w.freeze_reason ?? '—'}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {w.frozen_at ? new Date(w.frozen_at).toLocaleString('pt-PT') : '—'}
+                        </TableCell>
+                        <TableCell className="text-sm">{w.frozen_by_name}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Risk Flags */}
+          <Card className="border-amber-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" /> {t('admin.finance.risk_flags')}
+                {riskFlags && riskFlags.length > 0 && (
+                  <Badge className="ml-auto text-xs bg-amber-500">{riskFlags.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {!riskFlags || riskFlags.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-4">{t('admin.finance.no_risk_flags')}</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Severidade</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Data</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {riskFlags.map((flag) => (
+                      <TableRow key={flag.id}>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{flag.flag_type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={flag.severity === 'critical' || flag.severity === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                            {flag.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[300px] truncate">{flag.description}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(flag.created_at).toLocaleString('pt-PT')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

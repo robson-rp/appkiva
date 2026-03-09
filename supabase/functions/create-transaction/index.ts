@@ -14,6 +14,7 @@ interface TransactionRequest {
   reference_id?: string;
   reference_type?: string;
   metadata?: Record<string, unknown>;
+  idempotency_key?: string;
 }
 
 const VALID_ENTRY_TYPES = [
@@ -29,6 +30,9 @@ const PARENT_ONLY_TYPES = ["allowance", "task_reward", "mission_reward", "adjust
 
 // Types that require approval
 const REQUIRES_APPROVAL_TYPES = ["purchase", "donation", "transfer"];
+
+// Max transactions per hour for non-parent/admin users
+const HOURLY_VELOCITY_LIMIT = 20;
 
 function errorResponse(message: string, status: number, extra?: Record<string, unknown>) {
   return new Response(
@@ -95,6 +99,36 @@ Deno.serve(async (req) => {
       return errorResponse("A descrição é obrigatória", 400);
     }
 
+    // 2b. Idempotency check — if key provided, check for existing entry
+    if (body.idempotency_key) {
+      const { data: existingEntry } = await supabaseAdmin
+        .from("ledger_entries")
+        .select("*")
+        .eq("idempotency_key", body.idempotency_key)
+        .maybeSingle();
+
+      if (existingEntry) {
+        // Return the existing entry — safe retry
+        const { data: balance } = await supabaseAdmin
+          .from("wallet_balances")
+          .select("balance")
+          .eq("wallet_id", existingEntry.credit_wallet_id)
+          .single();
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            entry: existingEntry,
+            requires_approval: existingEntry.requires_approval,
+            new_balance: balance?.balance ?? null,
+            emission: EMISSION_TYPES.includes(existingEntry.entry_type),
+            idempotent_hit: true,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // 3. Get caller's profile and role
     const { data: callerProfile } = await supabaseAdmin
       .from("profiles")
@@ -120,6 +154,23 @@ Deno.serve(async (req) => {
       return errorResponse("Apenas encarregados podem executar esta transacção", 403);
     }
 
+    // 4b. Hourly velocity check for non-parent/admin users
+    if (!isParent && !isAdmin) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { count } = await supabaseAdmin
+        .from("ledger_entries")
+        .select("id", { count: "exact", head: true })
+        .eq("created_by", callerProfile.id)
+        .gte("created_at", oneHourAgo);
+
+      if ((count ?? 0) >= HOURLY_VELOCITY_LIMIT) {
+        return errorResponse("Limite de transacções por hora excedido. Aguarda antes de tentar novamente.", 429, {
+          limit: HOURLY_VELOCITY_LIMIT,
+          window: "1h",
+        });
+      }
+    }
+
     // 5. Get system wallet for emission types
     const systemWalletId = await getSystemWalletId(supabaseAdmin);
     if (!systemWalletId) {
@@ -129,7 +180,7 @@ Deno.serve(async (req) => {
     // 6. Get caller's wallet
     const { data: callerWallet } = await supabaseAdmin
       .from("wallets")
-      .select("id")
+      .select("id, is_frozen")
       .eq("profile_id", callerProfile.id)
       .eq("wallet_type", "virtual")
       .eq("currency", "KVC")
@@ -140,8 +191,15 @@ Deno.serve(async (req) => {
       return errorResponse("Carteira não encontrada", 404);
     }
 
+    // 6b. Frozen wallet check — caller's wallet
+    if (callerWallet.is_frozen) {
+      return errorResponse("A tua carteira está congelada. Contacta o teu encarregado ou administrador.", 403, {
+        frozen: true,
+      });
+    }
+
     // 7. Get target wallet if needed
-    let targetWallet: { id: string } | null = null;
+    let targetWallet: { id: string; is_frozen?: boolean } | null = null;
     if (body.target_profile_id) {
       const { data: targetProfile } = await supabaseAdmin
         .from("profiles")
@@ -159,7 +217,7 @@ Deno.serve(async (req) => {
 
       const { data: tw } = await supabaseAdmin
         .from("wallets")
-        .select("id")
+        .select("id, is_frozen")
         .eq("profile_id", body.target_profile_id)
         .eq("wallet_type", "virtual")
         .eq("currency", "KVC")
@@ -169,6 +227,11 @@ Deno.serve(async (req) => {
       targetWallet = tw;
       if (!targetWallet) {
         return errorResponse("Carteira do alvo não encontrada", 404);
+      }
+
+      // 7b. Frozen wallet check — target wallet
+      if (targetWallet.is_frozen) {
+        return errorResponse("A carteira do destinatário está congelada.", 403, { frozen: true });
       }
     }
 
@@ -340,11 +403,40 @@ Deno.serve(async (req) => {
         approved_by: requiresApproval ? null : callerProfile.id,
         approved_at: requiresApproval ? null : new Date().toISOString(),
         created_by: callerProfile.id,
+        idempotency_key: body.idempotency_key ?? null,
       })
       .select()
       .single();
 
     if (insertError) {
+      // Handle idempotency conflict gracefully
+      if (insertError.code === "23505" && body.idempotency_key) {
+        const { data: existingEntry } = await supabaseAdmin
+          .from("ledger_entries")
+          .select("*")
+          .eq("idempotency_key", body.idempotency_key)
+          .single();
+
+        if (existingEntry) {
+          const { data: balance } = await supabaseAdmin
+            .from("wallet_balances")
+            .select("balance")
+            .eq("wallet_id", existingEntry.credit_wallet_id)
+            .single();
+
+          return new Response(
+            JSON.stringify({
+              success: true,
+              entry: existingEntry,
+              requires_approval: existingEntry.requires_approval,
+              new_balance: balance?.balance ?? null,
+              emission: EMISSION_TYPES.includes(existingEntry.entry_type),
+              idempotent_hit: true,
+            }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
       console.error("Ledger insert error:", insertError);
       return errorResponse("Erro ao registar transacção", 500, { details: insertError.message });
     }
@@ -360,7 +452,6 @@ Deno.serve(async (req) => {
         const emissionLimit = Number(postEmissionStats.emission_limit) || 0;
         const emittedMonth = Number(postEmissionStats.emitted_this_month) || 0;
 
-        // Check if we already sent a notification for this threshold this month
         const monthStart = postEmissionStats.month_start;
         const thresholdType = pctUsed >= 100 ? "emission_100" : pctUsed >= 80 ? "emission_80" : null;
 

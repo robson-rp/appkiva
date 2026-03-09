@@ -772,6 +772,7 @@ export type Database = {
           description: string
           entry_type: Database["public"]["Enums"]["ledger_entry_type"]
           id: string
+          idempotency_key: string | null
           metadata: Json | null
           reference_id: string | null
           reference_type: string | null
@@ -788,6 +789,7 @@ export type Database = {
           description: string
           entry_type: Database["public"]["Enums"]["ledger_entry_type"]
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
           reference_id?: string | null
           reference_type?: string | null
@@ -804,6 +806,7 @@ export type Database = {
           description?: string
           entry_type?: Database["public"]["Enums"]["ledger_entry_type"]
           id?: string
+          idempotency_key?: string | null
           metadata?: Json | null
           reference_id?: string | null
           reference_type?: string | null
@@ -1625,6 +1628,7 @@ export type Database = {
           interest_rate: number
           name: string
           profile_id: string
+          requires_parent_approval: boolean
           target_amount: number
           updated_at: string
         }
@@ -1637,6 +1641,7 @@ export type Database = {
           interest_rate?: number
           name: string
           profile_id: string
+          requires_parent_approval?: boolean
           target_amount?: number
           updated_at?: string
         }
@@ -1649,6 +1654,7 @@ export type Database = {
           interest_rate?: number
           name?: string
           profile_id?: string
+          requires_parent_approval?: boolean
           target_amount?: number
           updated_at?: string
         }
@@ -2122,8 +2128,12 @@ export type Database = {
         Row: {
           created_at: string
           currency: string
+          freeze_reason: string | null
+          frozen_at: string | null
+          frozen_by: string | null
           id: string
           is_active: boolean
+          is_frozen: boolean
           is_system: boolean
           profile_id: string
           updated_at: string
@@ -2132,8 +2142,12 @@ export type Database = {
         Insert: {
           created_at?: string
           currency?: string
+          freeze_reason?: string | null
+          frozen_at?: string | null
+          frozen_by?: string | null
           id?: string
           is_active?: boolean
+          is_frozen?: boolean
           is_system?: boolean
           profile_id: string
           updated_at?: string
@@ -2142,14 +2156,25 @@ export type Database = {
         Update: {
           created_at?: string
           currency?: string
+          freeze_reason?: string | null
+          frozen_at?: string | null
+          frozen_by?: string | null
           id?: string
           is_active?: boolean
+          is_frozen?: boolean
           is_system?: boolean
           profile_id?: string
           updated_at?: string
           wallet_type?: Database["public"]["Enums"]["wallet_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "wallets_frozen_by_fkey"
+            columns: ["frozen_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wallets_profile_id_fkey"
             columns: ["profile_id"]
