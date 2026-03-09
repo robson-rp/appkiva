@@ -146,6 +146,16 @@ export default function AdminFinance() {
         <p className="text-sm text-muted-foreground">{t('admin.finance.subtitle')}</p>
       </div>
 
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">{t('admin.finance.title')}</TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-1.5">
+            <ShieldAlert className="h-3.5 w-3.5" /> {t('admin.finance.wallet_security')}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-4">
+
       {/* Money Supply Audit */}
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
         <CardHeader className="pb-2">
