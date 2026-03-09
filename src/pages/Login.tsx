@@ -684,14 +684,22 @@ export default function Login() {
                           <button
                             type="button"
                             onClick={() => { setContactMethod('phone'); setOtpSent(false); setOtpCode(''); }}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all relative ${
                               contactMethod === 'phone'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             <Phone className="h-4 w-4" /> {t('auth.phone')}
+                            <span className="absolute -top-1 -right-1 text-[9px] bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
                           </button>
+                        </div>
+                      )}
+
+                      {contactMethod === 'phone' && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
+                          <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <p className="text-xs text-muted-foreground">{t('auth.phone_not_available_desc')}</p>
                         </div>
                       )}
 
