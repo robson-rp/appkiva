@@ -74,6 +74,7 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
   const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
+  const [honeypot, setHoneypot] = useState('');
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 2FA state
@@ -180,6 +181,15 @@ export default function Login() {
     setSubmitting(true);
 
     try {
+      // Anti-bot: silently reject if honeypot is filled
+      if (honeypot) {
+        setSubmitting(false);
+        // Simulate success to not reveal detection
+        if (authMode === 'signup') setEmailSignupSuccess(true);
+        else toast({ title: t('auth.generic_login_error'), variant: 'destructive' });
+        return;
+      }
+
       if (authMode === 'signup') {
         if (contactMethod === 'email' && !isPasswordValid(password)) {
           toast({ title: t('password.too_weak'), variant: 'destructive' });
@@ -244,7 +254,7 @@ export default function Login() {
         } else {
           const { error, requires2FA } = await login(email, password);
           if (error) {
-            toast({ title: t('auth.error_login'), description: error, variant: 'destructive' });
+            toast({ title: t(error), variant: 'destructive' });
             setSubmitting(false);
             return;
           }
@@ -645,6 +655,17 @@ export default function Login() {
                 </div>
 
                 <form key={authMode} onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+                  {/* Honeypot anti-bot field */}
+                  <div className="absolute -left-[9999px]" aria-hidden="true">
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={e => setHoneypot(e.target.value)}
+                    />
+                  </div>
                   {authMode === 'signup' && (
                     <>
                       {isChildOrTeen && (

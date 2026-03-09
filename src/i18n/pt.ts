@@ -391,6 +391,7 @@ const pt: Record<string, string> = {
   'nav.admin.currencies': 'Moedas',
   'nav.admin.audit': 'Auditoria',
   'nav.admin.risk': 'Risco',
+  'nav.admin.auth_security': 'Segurança Auth',
   'nav.admin.compliance': 'Compliance',
   'nav.admin.lessons': 'Lições',
   'nav.admin.onboarding': 'Onboarding',
@@ -2626,6 +2627,26 @@ const pt: Record<string, string> = {
   'twofa.code_resent': 'Novo código enviado',
   'twofa.attempts_remaining': 'Tentativas restantes',
   'twofa.verified': 'Verificação concluída',
+
+  // ─── Login Security ───
+  'auth.generic_login_error': 'Não foi possível iniciar sessão. Verifique os dados e tente novamente.',
+  'auth.generic_reset_success': 'Se este email estiver registado, receberá instruções para redefinir a palavra-passe.',
+
+  // ─── Auth Security Dashboard ───
+  'security.auth_title': 'Segurança de Autenticação',
+  'security.auth_subtitle': 'Monitorização de eventos de login, bloqueios e ameaças',
+  'security.failed_logins': 'Logins falhados',
+  'security.lockouts': 'Bloqueios',
+  'security.active_lockouts': 'Bloqueios activos',
+  'security.locked_accounts': 'Contas bloqueadas',
+  'security.attempts': 'Tentativas',
+  'security.locked_until': 'Bloqueado até',
+  'security.unlock': 'Desbloquear',
+  'security.event_log': 'Registo de eventos',
+  'security.no_events': 'Sem eventos registados',
+  'security.risk': 'Risco',
+  'security.account_unlocked': 'Conta desbloqueada',
+  'common.all': 'Todos',
 };
 
 export default pt;

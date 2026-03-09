@@ -84,6 +84,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminCurrencies = lazy(() => import("./pages/admin/AdminCurrencies"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 const AdminRisk = lazy(() => import("./pages/admin/AdminRisk"));
+const AdminAuthSecurity = lazy(() => import("./pages/admin/AdminAuthSecurity"));
 const AdminCompliance = lazy(() => import("./pages/admin/AdminCompliance"));
 const AdminSchools = lazy(() => import("./pages/admin/AdminSchools"));
 const AdminFinance = lazy(() => import("./pages/admin/AdminFinance"));
@@ -128,6 +129,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/currencies" element={<AdminLayout><S><AdminCurrencies /></S></AdminLayout>} />
         <Route path="/admin/audit" element={<AdminLayout><S><AdminAudit /></S></AdminLayout>} />
         <Route path="/admin/risk" element={<AdminLayout><S><AdminRisk /></S></AdminLayout>} />
+        <Route path="/admin/auth-security" element={<AdminLayout><S><AdminAuthSecurity /></S></AdminLayout>} />
         <Route path="/admin/compliance" element={<AdminLayout><S><AdminCompliance /></S></AdminLayout>} />
         <Route path="/admin/schools" element={<AdminLayout><S><AdminSchools /></S></AdminLayout>} />
         <Route path="/admin/finance" element={<AdminLayout><S><AdminFinance /></S></AdminLayout>} />
