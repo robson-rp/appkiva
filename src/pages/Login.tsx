@@ -88,7 +88,7 @@ export default function Login() {
   const [twoFALocked, setTwoFALocked] = useState(false);
   const twoFATimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const { login, signup, user, pending2FA, complete2FA } = useAuth();
+  const { login, loginAsChild, signup, user, pending2FA, complete2FA } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
