@@ -78,22 +78,42 @@ Deno.serve(async (req) => {
   const results: Record<string, string> = {};
 
   const findUserByEmail = async (email: string) => {
-    const target = email.toLowerCase();
-    let page = 1;
-
-    while (page <= 20) {
-      const { data: pageData, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
-      if (error) return null;
-
-      const users = pageData?.users ?? [];
-      const found = users.find((u: any) => (u.email ?? '').toLowerCase() === target);
-      if (found) return found;
-
-      if (users.length < 200) break;
-      page += 1;
+    // Use profiles table to find user_id since listUsers has a known bug
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, display_name")
+      .limit(1000);
+    
+    if (error || !data) return null;
+    
+    // We need to check auth.users for the email - use single user lookup via signIn attempt
+    // Alternative: query via raw SQL won't work, so let's try getUserById after finding via metadata
+    // Best approach: just try to get all users page by page with error handling
+    try {
+      const res = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=1&per_page=1000`, {
+        headers: {
+          'Authorization': `Bearer ${serviceRoleKey}`,
+          'apikey': serviceRoleKey,
+        },
+      });
+      if (!res.ok) {
+        // Fallback: try to find by iterating known profile user_ids
+        for (const profile of data) {
+          try {
+            const { data: userData } = await supabaseAdmin.auth.admin.getUserById(profile.user_id);
+            if (userData?.user?.email?.toLowerCase() === email.toLowerCase()) {
+              return userData.user;
+            }
+          } catch (_) { /* skip */ }
+        }
+        return null;
+      }
+      const json = await res.json();
+      const users = json.users || [];
+      return users.find((u: any) => (u.email ?? '').toLowerCase() === email.toLowerCase()) || null;
+    } catch (_) {
+      return null;
     }
-
-    return null;
   };
 
   // ─── 1. Create or find users ───────────────────────────────
