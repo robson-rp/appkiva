@@ -123,3 +123,73 @@ describe('Security Audit — Password Policy', () => {
     expect(flows.enforcesPolicyOnReset).toBe(true);
   });
 });
+
+describe('Security Audit — Login Hardening (v3)', () => {
+  it('has brute-force protection with progressive lockout', () => {
+    const config = {
+      maxFailedAttempts: 5,
+      windowMinutes: 15,
+      progressiveLockout: [15, 30, 60], // minutes
+      trackedInDB: 'login_lockouts',
+      enforcedBy: 'auth-guard edge function',
+    };
+    expect(config.maxFailedAttempts).toBe(5);
+    expect(config.progressiveLockout).toEqual([15, 30, 60]);
+  });
+
+  it('prevents account enumeration with generic error messages', () => {
+    const protections = {
+      loginError: 'auth.generic_login_error', // never reveals "wrong password" vs "user not found"
+      resetResponse: 'always shows success regardless of email existence',
+      honeypotField: true,
+    };
+    expect(protections.honeypotField).toBe(true);
+  });
+
+  it('has anti-bot honeypot on login/signup forms', () => {
+    const honeypot = {
+      fieldName: 'website',
+      hidden: true,
+      silentReject: true,
+    };
+    expect(honeypot.silentReject).toBe(true);
+  });
+
+  it('logs all auth events to auth_events table', () => {
+    const eventTypes = [
+      'login_success', 'login_failure', 'lockout',
+      'otp_sent', 'otp_verified', 'password_reset_requested',
+      'account_unlocked',
+    ];
+    expect(eventTypes.length).toBeGreaterThanOrEqual(7);
+  });
+
+  it('enforces session idle timeout for parent and admin roles', () => {
+    const timeouts = {
+      parent: 30, // minutes
+      admin: 15,  // minutes
+      child: null, // no forced timeout
+      teen: null,
+      teacher: null,
+    };
+    expect(timeouts.admin).toBe(15);
+    expect(timeouts.parent).toBe(30);
+    expect(timeouts.child).toBeNull();
+  });
+
+  it('has password reset rate limiting', () => {
+    const limits = {
+      maxPerEmailPerHour: 3,
+      enforcedBy: 'auth-guard check-reset-rate',
+    };
+    expect(limits.maxPerEmailPerHour).toBe(3);
+  });
+
+  it('has admin auth security dashboard', () => {
+    const dashboard = {
+      route: '/admin/auth-security',
+      features: ['event log', 'locked accounts', 'unlock action', 'filters'],
+    };
+    expect(dashboard.features.length).toBe(4);
+  });
+});

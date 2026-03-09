@@ -2627,6 +2627,26 @@ const en: Record<string, string> = {
   'twofa.code_resent': 'New code sent',
   'twofa.attempts_remaining': 'Attempts remaining',
   'twofa.verified': 'Verification complete',
+
+  // ─── Login Security ───
+  'auth.generic_login_error': 'Unable to sign in. Please check your credentials and try again.',
+  'auth.generic_reset_success': 'If this email is registered, you will receive reset instructions.',
+
+  // ─── Auth Security Dashboard ───
+  'security.auth_title': 'Authentication Security',
+  'security.auth_subtitle': 'Monitor login events, lockouts and threats',
+  'security.failed_logins': 'Failed logins',
+  'security.lockouts': 'Lockouts',
+  'security.active_lockouts': 'Active lockouts',
+  'security.locked_accounts': 'Locked accounts',
+  'security.attempts': 'Attempts',
+  'security.locked_until': 'Locked until',
+  'security.unlock': 'Unlock',
+  'security.event_log': 'Event log',
+  'security.no_events': 'No events recorded',
+  'security.risk': 'Risk',
+  'security.account_unlocked': 'Account unlocked',
+  'common.all': 'All',
 };
 
 export default en;
