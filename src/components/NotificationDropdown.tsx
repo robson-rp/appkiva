@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { hapticLight, hapticUrgent, playUrgentAlert } from '@/lib/celebration-effects';
 import { useAuth } from '@/contexts/AuthContext';
+import { useT } from '@/contexts/LanguageContext';
 
 type NotifType = 'task' | 'mission' | 'achievement' | 'savings' | 'streak' | 'class' | 'reward' | 'vault';
 
@@ -23,9 +24,9 @@ const typeConfig: Record<NotifType, { icon: typeof Bell; bg: string }> = {
 };
 
 export function NotificationDropdown() {
+  const t = useT();
   const { user } = useAuth();
 
-  // Real notifications from database
   const { data: realNotifications } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
@@ -77,14 +78,13 @@ export function NotificationDropdown() {
 
   const relativeDate = (date: string) => {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
-    if (diff === 0) return 'Hoje';
-    if (diff === 1) return 'Ontem';
-    return `Há ${diff} dias`;
+    if (diff === 0) return t('notif.today');
+    if (diff === 1) return t('notif.yesterday');
+    return t('notif.days_ago').replace('{days}', String(diff));
   };
 
   return (
     <>
-      {/* Urgent Banner */}
       <AnimatePresence>
         {showBanner && urgentNotif && (
           <motion.div
@@ -112,7 +112,7 @@ export function NotificationDropdown() {
                   setShowBanner(false);
                 }}
               >
-                <CheckCheck className="h-3 w-3" /> Lida
+                <CheckCheck className="h-3 w-3" /> {t('notif.read')}
               </Button>
               <button onClick={() => { setDismissedBannerId(urgentNotif.id); setShowBanner(false); }} className="shrink-0 p-1 rounded-lg hover:bg-destructive-foreground/10 transition-colors">
                 <X className="h-4 w-4" />
@@ -138,12 +138,11 @@ export function NotificationDropdown() {
           </button>
         </PopoverTrigger>
         <PopoverContent align="end" sideOffset={8} className="w-80 p-0 rounded-2xl border-border/50 shadow-xl overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-muted/30">
             <div>
-              <h3 className="font-display font-bold text-sm">Notificações</h3>
+              <h3 className="font-display font-bold text-sm">{t('notif.title')}</h3>
               {unreadCount > 0 && (
-                <p className="text-[10px] text-muted-foreground">{unreadCount} por ler</p>
+                <p className="text-[10px] text-muted-foreground">{t('notif.unread').replace('{count}', String(unreadCount))}</p>
               )}
             </div>
             <div className="flex items-center gap-1">
@@ -152,26 +151,25 @@ export function NotificationDropdown() {
                 size="icon"
                 className={`h-7 w-7 rounded-lg ${muted ? 'text-muted-foreground' : 'text-primary'} hover:bg-primary/10`}
                 onClick={toggleMute}
-                title={muted ? 'Ativar som' : 'Silenciar'}
+                title={muted ? t('notif.unmute') : t('notif.mute')}
               >
                 {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
               </Button>
               {unreadCount > 0 && (
                 <Button variant="ghost" size="sm" className="text-xs text-primary h-7 rounded-lg gap-1 hover:bg-primary/10" onClick={handleMarkAllRead}>
-                  <CheckCheck className="h-3 w-3" /> Marcar tudo
+                  <CheckCheck className="h-3 w-3" /> {t('notif.mark_all')}
                 </Button>
               )}
             </div>
           </div>
 
-          {/* List */}
           <div className="max-h-72 overflow-y-auto">
             <AnimatePresence>
               {notifications.length === 0 ? (
                 <div className="p-6 text-center">
                   <p className="text-2xl mb-1">🎉</p>
-                  <p className="text-sm text-muted-foreground">Sem notificações</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-1">Kivo avisará quando houver novidades!</p>
+                  <p className="text-sm text-muted-foreground">{t('notif.empty_title')}</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-1">{t('notif.empty_desc')}</p>
                 </div>
               ) : (
                 notifications.map((notif, i) => {
@@ -207,7 +205,7 @@ export function NotificationDropdown() {
                       <button
                         onClick={() => handleArchive(notif.id)}
                         className="shrink-0 p-1.5 rounded-lg text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors mt-1"
-                        title="Arquivar"
+                        title={t('notif.archive')}
                       >
                         <Archive className="h-3.5 w-3.5" />
                       </button>

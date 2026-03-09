@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Level, LEVEL_CONFIG } from '@/types/kivara';
 import { Progress } from '@/components/ui/progress';
+import { useT } from '@/contexts/LanguageContext';
 
 interface LevelBadgeProps {
   level: Level;
@@ -10,6 +11,7 @@ interface LevelBadgeProps {
 }
 
 export function LevelBadge({ level, points, showProgress = false, showAvatar = false }: LevelBadgeProps) {
+  const t = useT();
   const config = LEVEL_CONFIG[level];
   const levels = Object.entries(LEVEL_CONFIG);
   const currentIndex = levels.findIndex(([k]) => k === level);
@@ -42,7 +44,7 @@ export function LevelBadge({ level, points, showProgress = false, showAvatar = f
           <Progress value={progress} className="h-2" />
           <div className="flex items-center justify-between">
             <p className="text-[10px] text-muted-foreground">
-              {nextLevel[1].minPoints - points} pts para {nextLevel[1].label}
+              {t('level.pts_to').replace('{pts}', String(nextLevel[1].minPoints - points)).replace('{label}', nextLevel[1].label)}
             </p>
             <span className="text-[10px] text-muted-foreground">→ {nextLevel[1].avatar}</span>
           </div>

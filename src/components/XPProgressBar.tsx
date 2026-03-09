@@ -3,8 +3,10 @@ import { Level, LEVEL_CONFIG } from '@/types/kivara';
 import { mockChildren, mockTeens } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
 import { Zap } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 export function XPProgressBar() {
+  const t = useT();
   const { user } = useAuth();
   const data = user?.role === 'teen' ? mockTeens[0] : mockChildren[0];
   const level = data.level;
@@ -26,12 +28,10 @@ export function XPProgressBar() {
       className="mx-4 mt-1 mb-0"
     >
       <div className="flex items-center gap-2 bg-card/60 backdrop-blur-md rounded-2xl px-3 py-2 border border-border/30">
-        {/* Avatar */}
         <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-lg shrink-0">
           {config.avatar}
         </div>
 
-        {/* Progress */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
             <span className="text-[10px] font-display font-bold text-foreground">{config.label}</span>
@@ -50,7 +50,7 @@ export function XPProgressBar() {
           </div>
           {nextLevel && (
             <p className="text-[9px] text-muted-foreground mt-0.5">
-              {remaining} FXP para {nextLevel[1].label} {nextLevel[1].avatar}
+              {t('xp.to_next').replace('{remaining}', String(remaining)).replace('{label}', nextLevel[1].label).replace('{avatar}', nextLevel[1].avatar)}
             </p>
           )}
         </div>

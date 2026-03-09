@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { KIVO_TIPS } from '@/data/mock-data';
 import kivoImg from '@/assets/kivo.svg';
+import { useT } from '@/contexts/LanguageContext';
 
 interface KivoProps {
   page: keyof typeof KIVO_TIPS;
 }
 
 export function Kivo({ page }: KivoProps) {
+  const t = useT();
   const tips = KIVO_TIPS[page] || KIVO_TIPS.dashboard;
   const [tipIndex, setTipIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -39,7 +41,7 @@ export function Kivo({ page }: KivoProps) {
               onClick={() => setTipIndex((i) => (i + 1) % tips.length)}
               className="mt-2 text-xs text-primary font-semibold hover:underline"
             >
-              Outra dica →
+              {t('kivo.next_tip')}
             </button>
           </div>
           <motion.div

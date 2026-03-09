@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Level, LEVEL_CONFIG } from '@/types/kivara';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Particle {
   id: number;
@@ -42,6 +43,7 @@ function generateParticles(count: number): Particle[] {
 }
 
 export function LevelUpCeremony({ fromLevel, toLevel, onComplete }: LevelUpCeremonyProps) {
+  const t = useT();
   const [phase, setPhase] = useState<'enter' | 'transform' | 'reveal' | 'done'>('enter');
   const [particles] = useState(() => generateParticles(24));
   const fromConfig = LEVEL_CONFIG[fromLevel];
@@ -225,7 +227,7 @@ export function LevelUpCeremony({ fromLevel, toLevel, onComplete }: LevelUpCerem
                     transition={{ delay: 0.6 }}
                     className="font-display text-2xl font-bold text-foreground"
                   >
-                    Nível Desbloqueado! 🎉
+                    {t('level.unlocked')}
                   </motion.p>
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
