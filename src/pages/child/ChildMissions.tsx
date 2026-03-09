@@ -321,8 +321,15 @@ function MissionsTab({
   startMission: ReturnType<typeof useStartMission>;
   completeMission: ReturnType<typeof useCompleteMission>;
 }) {
-  const dailyMissions = [...available, ...inProgress].filter((_, i) => i % 2 === 0);
-  const weeklyMissions = [...available, ...inProgress].filter((_, i) => i % 2 !== 0);
+  const allActive = [...available, ...inProgress];
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
