@@ -30,13 +30,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function fetchKivaraUser(supabaseUser: SupabaseUser): Promise<KivaraUser | null> {
-  // Fetch profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, display_name, avatar, household_id')
-    .eq('user_id', supabaseUser.id)
-    .single();
+async function fetchKivaraUser(supabaseUser: SupabaseUser, retries = 3): Promise<KivaraUser | null> {
+  // Fetch profile (with retry for race condition when trigger hasn't created it yet)
+  let profile: { id: string; display_name: string; avatar: string | null; household_id: string | null } | null = null;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, display_name, avatar, household_id')
+      .eq('user_id', supabaseUser.id)
+      .single();
+    
+    if (data) {
+      profile = data;
+      break;
+    }
+
+    if (attempt < retries - 1) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
 
   if (!profile) return null;
 

@@ -1,57 +1,128 @@
 
 
-## Revisão do Fluxo de Autenticação — Email + Telefone
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Diagnóstico
+## Current State Assessment
 
-O código do Login (`src/pages/Login.tsx`) e do AuthContext já implementam ambos os fluxos (email com password e telefone com OTP). No entanto, existem problemas que impedem o funcionamento correcto:
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-**1. Login por Telefone requer configuração do provider SMS**
-O Lovable Cloud (Supabase) precisa de um provider SMS configurado (Twilio, Vonage, etc.) para enviar OTPs por SMS. Sem isso, `signInWithOtp({ phone })` falha silenciosamente ou retorna erro. Como não há provider SMS configurado, o login por telefone não funciona.
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-**2. Fluxo pós-login por telefone — race condition no perfil**
-Quando um utilizador faz signup por telefone, o `signInWithOtp` + `verifyOtp` cria o utilizador mas o trigger `handle_new_user` pode não criar o perfil correctamente porque os `raw_user_meta_data` são passados no primeiro `signInWithOtp` e podem não persistir.
+## What Lovable Can and Cannot Build
 
-**3. Navegação pós-autenticação não espera pelo AuthContext**
-Após login/signup bem-sucedido, o código faz `navigate(dest)` imediatamente. Mas o `AuthContext` ainda não carregou o `KivaraUser` (é assíncrono via `onAuthStateChange`). Isto causa redirecionamento para a rota certa mas sem dados do utilizador, resultando em erro ou página em branco.
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-**4. Crianças/Adolescentes forçados a usar email no signup**
-No código actual (linha 598-623), crianças e adolescentes no signup não vêem o toggle email/phone — são forçados a usar email. Isto é intencional mas limita a usabilidade.
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### Plano de Correção
+## Implementation Plan (4 Phases)
 
-#### Ficheiro: `src/pages/Login.tsx`
+### Phase 1 — Multi-Tenant Foundation
 
-1. **Corrigir navegação pós-auth**: Em vez de navegar imediatamente após login/signup, remover o `navigate(dest)` manual e deixar o `AuthContext` + router guards tratarem do redirecionamento quando o `user` estiver carregado.
+**Database migrations:**
 
-2. **Melhorar feedback de erro no telefone**: Quando o OTP falha, mostrar mensagem clara. Adicionar botão "Reenviar código" após 60 segundos.
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-3. **Adicionar countdown para reenvio de OTP**: Timer de 60s visível após enviar o código.
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-4. **Corrigir email signup feedback**: Após signup por email, não tentar navegar — mostrar mensagem de confirmação a pedir que verifiquem o email.
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-#### Ficheiro: `src/contexts/AuthContext.tsx`
+4. Expand `app_role` enum to include `admin`
 
-5. **Melhorar tratamento de phone auth**: O `fetchKivaraUser` pode falhar se o perfil ainda não existir (race condition com trigger). Adicionar retry com delay.
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-#### Ficheiro: `src/App.tsx`
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-6. **Verificar guards de rota**: Confirmar que as rotas protegidas redireccionam para `/login` quando `user` é `null` e `loading` é `false`, evitando ecrãs em branco.
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-#### i18n (`src/i18n/pt.ts` e `src/i18n/en.ts`)
+**Database:**
 
-7. **Adicionar chaves**: `auth.resend_otp`, `auth.resend_in`, `auth.email_verification_sent`, `auth.phone_not_available`.
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-#### Nota sobre SMS Provider
+2. Add `real_money_enabled` flag to tenants
 
-O login por telefone requer um provider SMS no backend. Sem Twilio/Vonage configurado, vamos mostrar uma mensagem informativa quando o utilizador selecciona "Telefone", indicando que esta funcionalidade estará disponível em breve — em vez de falhar silenciosamente. Alternativamente, se quiser activar o SMS, será necessário configurar as credenciais do Twilio.
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-### Resumo de Ficheiros
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-| Ficheiro | Acção |
-|----------|-------|
-| `src/pages/Login.tsx` | Corrigir navegação pós-auth, adicionar resend OTP timer, melhorar feedback |
-| `src/contexts/AuthContext.tsx` | Adicionar retry no fetchKivaraUser para phone auth |
-| `src/i18n/pt.ts` | Adicionar ~5 chaves auth |
-| `src/i18n/en.ts` | Adicionar ~5 chaves auth |
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2 } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
@@ -68,9 +68,39 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const { login, signup } = useAuth();
+  const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
+  const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { login, signup, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect when user is loaded by AuthContext (replaces manual navigate after login)
+  useEffect(() => {
+    if (user) {
+      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
+      navigate(dest, { replace: true });
+    }
+  }, [user, navigate]);
+
+  // OTP countdown timer
+  const startOtpCountdown = useCallback(() => {
+    setOtpCountdown(60);
+    if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+    otpTimerRef.current = setInterval(() => {
+      setOtpCountdown(prev => {
+        if (prev <= 1) {
+          if (otpTimerRef.current) clearInterval(otpTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (otpTimerRef.current) clearInterval(otpTimerRef.current); };
+  }, []);
 
   useEffect(() => {
     if (['teacher', 'parent', 'child', 'teen'].includes(selectedRole ?? '') && authMode === 'signup') {
@@ -142,6 +172,11 @@ export default function Login() {
         }
 
         if (contactMethod === 'phone') {
+          // Phone auth not available without SMS provider
+          toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+          /* Phone signup — reserved for when SMS provider is configured
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({
               phone: phoneWithPrefix,
@@ -165,6 +200,7 @@ export default function Login() {
               return;
             }
             setOtpSent(true);
+            startOtpCountdown();
             toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
@@ -193,6 +229,7 @@ export default function Login() {
               }
             }
           }
+          */
         } else {
           const { error } = await signup(
             email,
@@ -214,10 +251,18 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
-          toast({ title: t('auth.account_created'), description: t('auth.check_email') });
+          // Show email verification screen instead of navigating
+          setEmailSignupSuccess(true);
+          setSubmitting(false);
+          return;
         }
       } else {
         if (contactMethod === 'phone') {
+          // Phone auth not available without SMS provider
+          toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+          /* Phone login — reserved for when SMS provider is configured
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({ phone: phoneWithPrefix });
             if (error) {
@@ -226,6 +271,7 @@ export default function Login() {
               return;
             }
             setOtpSent(true);
+            startOtpCountdown();
             toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
@@ -241,6 +287,7 @@ export default function Login() {
               return;
             }
           }
+          */
         } else {
           const { error } = await login(email, password);
           if (error) {
@@ -251,8 +298,8 @@ export default function Login() {
         }
       }
 
-      const dest = selectedRole === 'parent' ? '/parent' : selectedRole === 'teacher' ? '/teacher' : selectedRole === 'teen' ? '/teen' : selectedRole === 'admin' ? '/admin' : selectedRole === 'partner' ? '/partner' : '/child';
-      navigate(dest);
+      // Navigation is handled by the useEffect watching `user` from AuthContext
+      // No manual navigate() needed here
     } catch {
       toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
     } finally {
@@ -277,10 +324,36 @@ export default function Login() {
     setContactMethod('email');
     setOtpSent(false);
     setOtpCode('');
+    setEmailSignupSuccess(false);
+    setOtpCountdown(0);
+    if (otpTimerRef.current) clearInterval(otpTimerRef.current);
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
   const needsInviteFirst = isChildOrTeen && authMode === 'signup' && !inviteValid;
+
+  // Email signup success screen
+  if (emailSignupSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md text-center space-y-6"
+        >
+          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+            <Mail className="h-10 w-10 text-primary" />
+          </div>
+          <h2 className="font-display text-2xl font-bold text-foreground">{t('auth.account_created')}</h2>
+          <p className="text-muted-foreground font-body">{t('auth.email_verification_sent')}</p>
+          <p className="text-sm text-muted-foreground">{email}</p>
+          <Button onClick={resetForm} variant="outline" className="rounded-xl">
+            {t('auth.back')}
+          </Button>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -611,18 +684,26 @@ export default function Login() {
                           <button
                             type="button"
                             onClick={() => { setContactMethod('phone'); setOtpSent(false); setOtpCode(''); }}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all ${
+                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-display font-medium transition-all relative ${
                               contactMethod === 'phone'
                                 ? 'bg-background text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             <Phone className="h-4 w-4" /> {t('auth.phone')}
+                            <span className="absolute -top-1 -right-1 text-[9px] bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
                           </button>
                         </div>
                       )}
 
-                      {contactMethod === 'email' || (isChildOrTeen && authMode === 'signup') ? (
+                      {contactMethod === 'phone' && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
+                          <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
+                          <p className="text-xs text-muted-foreground">{t('auth.phone_not_available_desc')}</p>
+                        </div>
+                      )}
+
+                      {(contactMethod === 'email' || (isChildOrTeen && authMode === 'signup')) && (
                         <div className="space-y-2">
                           <Label htmlFor="email" className="font-semibold">{t('auth.email')}</Label>
                           <Input
@@ -634,28 +715,6 @@ export default function Login() {
                             className="h-12 rounded-xl text-base"
                             required
                           />
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <Label htmlFor="phone" className="font-semibold">{t('auth.phone')}</Label>
-                          <div className="flex gap-2">
-                            <div className="w-24 shrink-0">
-                              <Input
-                                value={COUNTRY_PHONE_PREFIXES[country] || '+244'}
-                                readOnly
-                                className="h-12 rounded-xl text-base text-center bg-muted/30 font-mono"
-                              />
-                            </div>
-                            <Input
-                              id="phone"
-                              type="tel"
-                              placeholder="912 345 678"
-                              value={phone}
-                              onChange={e => setPhone(e.target.value)}
-                              className="h-12 rounded-xl text-base"
-                              required
-                            />
-                          </div>
                         </div>
                       )}
 
@@ -688,27 +747,41 @@ export default function Login() {
                             maxLength={6}
                             required
                           />
+                          <div className="flex items-center justify-between">
+                            {otpCountdown > 0 ? (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {t('auth.resend_in')} {otpCountdown}s
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => { setOtpSent(false); setOtpCode(''); }}
+                                className="text-xs text-primary font-semibold hover:underline"
+                              >
+                                {t('auth.resend_otp')}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
 
-                      <Button
-                        type="submit"
-                        className="w-full font-display font-bold h-13 rounded-xl text-base"
-                        size="lg"
-                        disabled={submitting}
-                      >
-                        {submitting ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : otpSent ? (
-                          t('auth.verify_code')
-                        ) : contactMethod === 'phone' ? (
-                          t('common.send')
-                        ) : authMode === 'signup' ? (
-                          t('auth.sign_up')
-                        ) : (
-                          t('auth.sign_in')
-                        )}
-                      </Button>
+                      {contactMethod !== 'phone' && (
+                        <Button
+                          type="submit"
+                          className="w-full font-display font-bold h-13 rounded-xl text-base"
+                          size="lg"
+                          disabled={submitting}
+                        >
+                          {submitting ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : authMode === 'signup' ? (
+                            t('auth.sign_up')
+                          ) : (
+                            t('auth.sign_in')
+                          )}
+                        </Button>
+                      )}
 
                       <p className="text-center text-sm text-muted-foreground">
                         {authMode === 'login' ? (
