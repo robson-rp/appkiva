@@ -2587,6 +2587,10 @@ const pt: Record<string, string> = {
   'password.redirect_login': 'Será redirecionado para o login em instantes…',
   'password.invalid_link': 'Link inválido ou expirado',
   'password.invalid_link_desc': 'Este link de recuperação já não é válido. Solicite um novo na página de login.',
+  'password.change_title': 'Alterar palavra-passe',
+  'password.confirm_password': 'Confirmar palavra-passe',
+  'password.mismatch': 'As palavras-passe não coincidem.',
+  'password.match': 'As palavras-passe coincidem.',
 
   // ─── Wallet Protection ───
   'wallet.frozen': 'Carteira congelada',
