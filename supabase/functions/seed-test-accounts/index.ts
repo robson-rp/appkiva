@@ -84,7 +84,13 @@ Deno.serve(async (req) => {
           },
         });
 
-        results[acc.role] = existingUserId;
+        // Also update the profile display_name
+        await supabaseAdmin
+          .from("profiles")
+          .update({ display_name: acc.name, avatar: acc.avatar })
+          .eq("user_id", existingUserId);
+
+
 
         const { data: existingRoles } = await supabaseAdmin
           .from("user_roles")
