@@ -267,7 +267,7 @@ export default function TeacherDashboard() {
               <Download className="h-4 w-4" /> {t('teacher.dashboard.export_pdf')}
             </Button>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 px-2 sm:px-6">
             {/* Bar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.averages')}</p>
