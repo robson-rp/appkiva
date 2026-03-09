@@ -391,6 +391,7 @@ const en: Record<string, string> = {
   'nav.admin.currencies': 'Currencies',
   'nav.admin.audit': 'Audit',
   'nav.admin.risk': 'Risk',
+  'nav.admin.auth_security': 'Auth Security',
   'nav.admin.compliance': 'Compliance',
   'nav.admin.lessons': 'Lessons',
   'nav.admin.onboarding': 'Onboarding',
