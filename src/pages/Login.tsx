@@ -102,6 +102,11 @@ export default function Login() {
       setAuthMode('signup');
       if (!selectedRole) setSelectedRole('child');
     }
+    const ref = params.get('ref');
+    if (ref) {
+      setReferralCode(ref.toUpperCase().slice(0, 8));
+      setAuthMode('signup');
+    }
   }, []);
 
   // Redirect when user is loaded by AuthContext (pending2FA blocks redirect)
