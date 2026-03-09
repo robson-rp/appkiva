@@ -2328,6 +2328,17 @@ const pt: Record<string, string> = {
   'child.rankings.planner': '🎯 Planeador',
   'child.rankings.donor': '💜 Doador',
 
+  // ─── Ranking Page ───
+  'ranking.title': 'Ranking',
+  'ranking.subtitle': 'Competição saudável entre irmãos e colegas',
+  'ranking.tab_siblings': 'Irmãos',
+  'ranking.tab_classmates': 'Colegas',
+  'ranking.filter_class': 'Turma',
+  'ranking.filter_friends': 'Amigos',
+  'ranking.cat_savings': 'Poupança',
+  'ranking.cat_points': 'KivaPoints',
+  'ranking.cat_donations': 'Doações',
+
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Poupanças',
   'child.savings.view_vaults': 'Ver cofres',
