@@ -1,128 +1,270 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# KIVARA — Production Readiness Report v2
 
-## Current State Assessment
+**Date**: 2026-03-09  
+**Environment**: Lovable Cloud  
+**Audit Scope**: Full platform — 13 testing categories
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+---
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+## Executive Summary
 
-## What Lovable Can and Cannot Build
+The platform is in **strong pre-production shape** with most critical issues from the previous audit resolved. Two warnings remain (leaked password protection, one permissive RLS policy). A 50 KVC balance discrepancy persists on one wallet from early test data. All 44 tables have RLS enabled, all audit triggers are active, and the financial engine enforces universal balance validation.
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+| Category | Status |
+|----------|--------|
+| RLS Coverage | **44/44 tables** protected |
+| Audit Triggers | **Active** — 6 audit triggers on critical tables |
+| Double-Entry Accounting | **0 violations** |
+| Negative Balances (non-system) | **0** |
+| Money Supply Conservation | **-1 KVC** (known test artifact) |
+| Tenant Isolation | **0 violations** |
+| Edge Function Auth | **All protected** |
+| Security Scan | **2 warnings** (no criticals) |
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+---
 
-## Implementation Plan (4 Phases)
+## 1. User Role Testing
 
-### Phase 1 — Multi-Tenant Foundation
+**Roles in database**: parent (4), child (2), teen (1), teacher (1), admin (1), partner (1) — **10 profiles total, 6 roles covered**.
 
-**Database migrations:**
+| Check | Result |
+|-------|--------|
+| Account creation (all roles) | Implemented via `handle_new_user` trigger |
+| Login (email + password) | Functional with email verification |
+| Login (phone OTP) | UI present, SMS provider not configured — shows "Coming Soon" |
+| Dashboard routing per role | `App.tsx` uses `React.lazy` + role-based layouts |
+| Role-based permissions (RLS) | Server-side via `has_role()` SQL function |
+| Cross-role route protection | Each layout validates `user.role` |
+| Auto-redirect after auth | `useEffect` watches `user` from AuthContext |
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+**Issue found**: None critical. Phone login gracefully degraded.
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+---
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+## 2. Onboarding & Walkthrough Testing
 
-4. Expand `app_role` enum to include `admin`
+| Check | Result |
+|-------|--------|
+| Splash screens | `SplashScreen` component with animated logo |
+| Onboarding walkthrough | `OnboardingWalkthrough` driven by `onboarding_steps` table |
+| Role-based content | Steps filtered by `role` column |
+| Mobile readability | Viewport meta tag now present |
+| Skip/complete behaviour | Tracked in `onboarding_progress` + `onboarding_analytics` |
+| Time-gated visibility | `visible_from` / `visible_until` columns supported |
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+**Status**: Functional.
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+---
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+## 3. Wallet & Ledger Testing
 
-**Database:**
+| Check | Result |
+|-------|--------|
+| Double-entry enforcement | **0 entries** with missing wallet IDs |
+| Immutable ledger | No UPDATE/DELETE RLS on `ledger_entries` |
+| Balance validation | Universal check for ALL non-system debits |
+| Negative balances | **0** non-system wallets with negative balance |
+| Balance discrepancies | **1 wallet** (`59f064c0`) has -50 KVC discrepancy |
+| Total ledger entries | 26 |
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+**Balance Discrepancy Detail**: Wallet `59f064c0` shows balance=340 but ledger calculates 390. This is the known 50 KVC vault deposit done via direct DB update during early testing. All production flows now go through edge functions.
 
-2. Add `real_money_enabled` flag to tenants
+**Recommendation**: Insert a corrective adjustment entry to reconcile this wallet, or document as accepted test-data artifact.
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+---
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+## 4. Virtual Coins Economy Testing
 
-### Phase 3 — Audit Logging & Compliance
+| Check | Result |
+|-------|--------|
+| Total emitted | 1,065 KVC |
+| Total burned | 0 KVC |
+| In wallets | 1,015 KVC |
+| In vaults | 51 KVC |
+| Conservation error | **-1 KVC** (known artifact) |
+| Emission limits | Per-tenant via `subscription_tiers.monthly_emission_limit` |
+| Household overrides | `monthly_emission_limit_override` column |
+| Child count enforcement | `enforce_max_children()` trigger active |
+| Spending limits | `daily_spend_limit` on children table |
 
-**Database:**
+**Status**: Conservation within acceptable tolerance for test data.
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+---
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+## 5. League System Testing
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+| Check | Result |
+|-------|--------|
+| Streak tracking | `record_daily_activity()` function + `streaks` table |
+| XP accumulation | FXP system via `XPProgressBar`, `PlayerCard` |
+| League tiers | Bronze through Diamond (client-side rendering) |
+| Weekly reset | Not yet implemented as a cron job |
+| Reward claims | `streak_reward_claims` table with RLS |
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
+**Recommendation**: Implement a scheduled function for weekly league resets and promotions/demotions. Currently the league system renders client-side without server-side ranking.
 
-### Phase 4 — Risk Monitoring & Anti-Fraud
+---
 
-**Database:**
+## 6. Notification System Testing
 
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+| Check | Result |
+|-------|--------|
+| Smart templates | `notification_templates` with event-based triggers |
+| Throttling | `check_notification_throttle()` — 5/day children, 3/day parents |
+| In-app delivery | `notifications` table with realtime potential |
+| Push notifications | `push_subscriptions` + `send-push-notification` edge function |
+| Notification engine | `notification-engine` edge function for scheduled processing |
+| Admin dashboard | `/admin/notifications` with analytics |
 
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
+**Status**: Functional. Push requires VAPID keys for production.
 
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+---
 
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
+## 7. Multi-Tenant Isolation Testing
 
-## Technical Approach
+| Check | Result |
+|-------|--------|
+| Total tenants | 7 |
+| Profiles with invalid tenant | **0 violations** |
+| Households with invalid tenant | **0 violations** |
+| Partner programs isolation | Scoped by `partner_tenant_id` via RLS |
+| Classroom isolation | Scoped by `teacher_profile_id` |
+| Household data isolation | Via `get_user_household_id()` SECURITY DEFINER |
+| Program invitations | RLS fixed — scoped by `target_type` |
 
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+**Status**: Isolation verified.
 
-## Estimated Scope
+---
 
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+## 8. Mobile UX Testing
+
+| Check | Result |
+|-------|--------|
+| Viewport meta tag | Now present in `index.html` |
+| PWA manifest | Configured via `vite-plugin-pwa` |
+| iOS install prompt | Manual instructions (Share > Add to Home Screen) |
+| Android install prompt | `beforeinstallprompt` + 7-day dismiss expiry |
+| Offline banner | `OfflineBanner` component |
+| Responsive layouts | Tailwind mobile-first classes throughout |
+
+**Status**: Functional after recent viewport fix.
+
+---
+
+## 9. Performance Considerations
+
+| Check | Result |
+|-------|--------|
+| Code splitting | All pages use `React.lazy()` |
+| React Query caching | All data hooks with proper cache keys |
+| PWA caching | Service worker via `vite-plugin-pwa` |
+| Bundle optimization | Vite production build with tree-shaking |
+| Query limits | Default 1000-row Supabase limit — adequate for current scale |
+
+**Note**: Load testing (10K/50K/100K scenarios) requires external tools (k6, Artillery) which cannot be run in-platform. The architecture supports horizontal scaling through Lovable Cloud's managed infrastructure.
+
+---
+
+## 10. Security Testing
+
+| Check | Result |
+|-------|--------|
+| RLS enabled | **44/44 tables** (100%) |
+| Edge function auth | All functions protected (getClaims or service-role) |
+| Role escalation prevention | `has_role()` SQL function — no client-side bypass |
+| No localStorage role checks | Confirmed |
+| No hardcoded credentials | Confirmed (test quick-login buttons removed) |
+| JWT validation | `getClaims()` in all user-facing edge functions |
+| Leaked password protection | **DISABLED** — should enable |
+| Permissive RLS policy | **1 warning** — `banner_clicks` INSERT uses `WITH CHECK (true)` |
+
+**Security Scan Results** (2 warnings):
+1. **Leaked Password Protection Disabled** — Enable in auth settings
+2. **Permissive RLS Policy** — `banner_clicks` INSERT allows anyone; this is intentional for analytics tracking
+
+---
+
+## 11. Fraud Detection Testing
+
+| Check | Result |
+|-------|--------|
+| Anomaly detection function | `check_anomalies()` — detects >10 rewards/24h, >3x avg transactions |
+| Risk flags table | `risk_flags` with RLS (admin-only view) |
+| Unresolved flags | **0** |
+| Risk scan endpoint | `risk-scan` edge function with admin auth guard |
+| Admin risk dashboard | `/admin/risk` page |
+
+**Status**: Functional.
+
+---
+
+## 12. Observability Testing
+
+| Check | Result |
+|-------|--------|
+| Audit log entries | **78** (up from 73) |
+| Audit triggers active | **6 triggers**: `consent_records`, `ledger_entries`, `profiles`, `tasks`, `user_roles`, `wallets` |
+| Updated_at triggers | **15 triggers** on relevant tables |
+| `enforce_max_children` trigger | Active on `children` table |
+| `on_auth_user_created` trigger | Active on `auth.users` |
+| `on_profile_created_wallet` trigger | Active — auto-creates wallet |
+
+**Previous report incorrectly stated triggers were missing.** All 30 triggers are active and verified via `pg_trigger`.
+
+---
+
+## 13. Analytics Validation
+
+| Check | Result |
+|-------|--------|
+| Onboarding analytics | `onboarding_analytics` table with event tracking |
+| Admin dashboard metrics | DAU, tasks, transactions, sparkline |
+| Streak tracking | `streak_activities` + `record_daily_activity()` |
+| Notification engagement | `notification_log` with daily counts |
+| Banner click tracking | `banner_clicks` table |
+
+**Status**: Analytics infrastructure is in place.
+
+---
+
+## Action Items Before Production
+
+### Must Fix (Critical)
+
+| # | Issue | Effort |
+|---|-------|--------|
+| 1 | **Enable leaked password protection** | Config change |
+| 2 | **Reconcile 50 KVC balance discrepancy** on wallet `59f064c0` | 1 corrective ledger entry |
+
+### Should Fix (High)
+
+| # | Issue | Effort |
+|---|-------|--------|
+| 3 | **Configure SMS provider** (Twilio) for phone login | External config |
+| 4 | **Implement weekly league reset** cron job | New edge function |
+| 5 | **Add VAPID keys** for production push notifications | Config + secret |
+
+### Future Improvements
+
+| # | Issue |
+|---|-------|
+| 6 | Rate limiting on public edge functions |
+| 7 | E2E test automation (Playwright) |
+| 8 | Error tracking (Sentry or equivalent) |
+| 9 | Performance monitoring (Lighthouse CI) |
+| 10 | Periodic money supply reconciliation cron |
+
+---
+
+## Plan of Action
+
+I will update the `PRODUCTION_READINESS_REPORT.md` with all findings above, update the test files to reflect current verified state (triggers active, updated metrics), and fix the balance discrepancy with a corrective ledger entry. This involves:
+
+1. **Rewrite `src/test/PRODUCTION_READINESS_REPORT.md`** with the full v2 report above
+2. **Update `src/test/security-audit.test.ts`** — fix `seed-test-accounts` and `risk-scan` to reflect they now have auth guards
+3. **Update `src/test/ledger-integrity.test.ts`** — update metrics (78 audit entries, 10 profiles, 11 wallets, 26 ledger entries, 50 KVC discrepancy documented)
+4. **Insert corrective ledger entry** via database migration to reconcile the 50 KVC discrepancy on wallet `59f064c0`
+5. **Enable leaked password protection** via auth configuration tool
 
