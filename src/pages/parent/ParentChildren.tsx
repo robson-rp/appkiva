@@ -52,6 +52,15 @@ export default function ParentChildren() {
   const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
+  // Create child account state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newChildName, setNewChildName] = useState('');
+  const [newChildUsername, setNewChildUsername] = useState('');
+  const [newChildPin, setNewChildPin] = useState('');
+  const [newChildPinConfirm, setNewChildPinConfirm] = useState('');
+  const [newChildAvatar, setNewChildAvatar] = useState('🦊');
+  const [newChildDob, setNewChildDob] = useState('');
+  const [creatingChild, setCreatingChild] = useState(false);
   const deleteChildMutation = useMutation({
     mutationFn: async (childId: string) => {
       const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
