@@ -6,70 +6,119 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Wallet, Target, CheckCircle2, Trophy, TrendingUp, Clock, Coins } from 'lucide-react';
-import { mockChildren, mockLeaderboard, mockTasks, mockTransactions, mockVaults, mockAchievements } from '@/data/mock-data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useT } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
+import { useBadgesWithProgress } from '@/hooks/use-badges';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
+
+function useStudentProfile(studentProfileId?: string) {
+  return useQuery({
+    queryKey: ['student-profile', studentProfileId],
+    queryFn: async () => {
+      if (!studentProfileId) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar')
+        .eq('id', studentProfileId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!studentProfileId,
+  });
+}
+
+function useStudentTasks(studentProfileId?: string) {
+  return useQuery({
+    queryKey: ['student-tasks', studentProfileId],
+    queryFn: async () => {
+      if (!studentProfileId) return [];
+      const { data, error } = await supabase
+        .from('missions')
+        .select('*')
+        .eq('child_profile_id', studentProfileId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!studentProfileId,
+  });
+}
+
+function useStudentVaults(studentProfileId?: string) {
+  return useQuery({
+    queryKey: ['student-vaults', studentProfileId],
+    queryFn: async () => {
+      if (!studentProfileId) return [];
+      const { data, error } = await supabase
+        .from('dream_vaults')
+        .select('*')
+        .eq('profile_id', studentProfileId);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!studentProfileId,
+  });
+}
 
 export default function TeacherStudentProfile() {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
   const t = useT();
 
-  const statusLabels: Record<string, { label: string; color: string }> = {
-    pending: { label: t('teacher.student.status_pending'), color: 'bg-muted text-muted-foreground' },
-    in_progress: { label: t('teacher.student.status_in_progress'), color: 'bg-primary/10 text-primary' },
-    completed: { label: t('teacher.student.status_completed'), color: 'bg-secondary/10 text-secondary' },
-    approved: { label: t('teacher.student.status_approved'), color: 'bg-secondary/10 text-secondary' },
-  };
+  const { data: profile, isLoading: loadingProfile } = useStudentProfile(studentId);
+  const { data: walletData } = useWalletBalance(studentId);
+  const { data: walletTx = [] } = useWalletTransactions(studentId, 10);
+  const { data: tasks = [] } = useStudentTasks(studentId);
+  const { data: vaults = [] } = useStudentVaults(studentId);
+  const badgesData = useBadgesWithProgress(studentId);
 
-  const txTypeLabels: Record<string, { label: string; color: string; sign: string }> = {
-    allowance: { label: t('teacher.student.tx_allowance'), color: 'text-primary', sign: '+' },
-    earned: { label: t('teacher.student.tx_earned'), color: 'text-secondary', sign: '+' },
-    saved: { label: t('teacher.student.tx_saved'), color: 'text-blue-500', sign: '→' },
-    spent: { label: t('teacher.student.tx_spent'), color: 'text-destructive', sign: '-' },
-    donated: { label: t('teacher.student.tx_donated'), color: 'text-amber-500', sign: '-' },
-  };
-
-  const leaderboard = mockLeaderboard.find(s => s.childId === studentId);
-  const child = mockChildren.find(c => c.id === studentId);
-  const studentTransactions = mockTransactions.filter(tx => tx.childId === studentId);
-  const balance = child?.balance ?? 0;
   const [chartPeriod, setChartPeriod] = useState<'weekly' | 'monthly'>('weekly');
 
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    available: { label: t('teacher.student.status_pending'), color: 'bg-muted text-muted-foreground' },
+    in_progress: { label: t('teacher.student.status_in_progress'), color: 'bg-primary/10 text-primary' },
+    completed: { label: t('teacher.student.status_completed'), color: 'bg-secondary/10 text-secondary' },
+  };
+
+  const balance = Number(walletData?.balance ?? 0);
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
+  const unlockedBadges = badgesData.filter(b => b.unlockedAt);
+
   const savingsChartData = useMemo(() => {
-    const sorted = [...studentTransactions].sort((a, b) => a.date.localeCompare(b.date));
+    if (walletTx.length === 0) {
+      const base = balance > 0 ? balance : 100;
+      if (chartPeriod === 'weekly') {
+        const weeks = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'];
+        return weeks.map((w, i) => ({ date: w, poupança: Math.round(base * 0.15 * (i + 1)), saldo: Math.round(base * (0.4 + i * 0.12)) }));
+      }
+      const months = ['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'];
+      return months.map((m, i) => ({ date: m, poupança: Math.round(base * 0.08 * (i + 1) * (i + 1)), saldo: Math.round(base * (0.2 + i * 0.16)) }));
+    }
+
     let cumSaved = 0;
     let cumBalance = 0;
-    const points = sorted.map(tx => {
-      if (tx.type === 'saved') cumSaved += tx.amount;
-      if (tx.type === 'allowance' || tx.type === 'earned') cumBalance += tx.amount;
-      if (tx.type === 'spent' || tx.type === 'donated') cumBalance -= tx.amount;
-      const d = new Date(tx.date);
+    return walletTx.map(tx => {
+      if (tx.entry_type === 'vault_deposit') cumSaved += tx.amount;
+      if (tx.direction === 'credit') cumBalance += tx.amount;
+      if (tx.direction === 'debit') cumBalance -= tx.amount;
+      const d = new Date(tx.created_at);
       return { date: `${d.getDate()}/${d.getMonth() + 1}`, poupança: cumSaved, saldo: Math.max(0, cumBalance) };
     });
+  }, [walletTx, balance, chartPeriod]);
 
-    const base = balance > 0 ? balance : 100;
-    if (chartPeriod === 'weekly') {
-      if (points.length >= 4) return points;
-      const weeks = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'];
-      return weeks.map((w, i) => ({
-        date: w,
-        poupança: Math.round(base * 0.15 * (i + 1)),
-        saldo: Math.round(base * (0.4 + i * 0.12)),
-      }));
-    }
-    const months = ['Out', 'Nov', 'Dez', 'Jan', 'Fev', 'Mar'];
-    return months.map((m, i) => ({
-      date: m,
-      poupança: Math.round(base * 0.08 * (i + 1) * (i + 1)),
-      saldo: Math.round(base * (0.2 + i * 0.16)),
-    }));
-  }, [studentTransactions, balance, chartPeriod]);
+  if (loadingProfile) {
+    return <div className="space-y-4"><Skeleton className="h-10 w-32" /><Skeleton className="h-40 w-full" /></div>;
+  }
 
-  if (!leaderboard) {
+  if (!profile) {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <p className="text-muted-foreground">{t('teacher.student.not_found')}</p>
@@ -79,11 +128,6 @@ export default function TeacherStudentProfile() {
       </div>
     );
   }
-  const studentVaults = mockVaults.filter(v => v.childId === studentId);
-  const studentTasks = mockTasks.filter(task => task.childId === studentId);
-  const studentAchievements = mockAchievements.filter(a => a.childId === studentId);
-  const kivaPoints = leaderboard.kivaPoints;
-  const completedTasks = studentTasks.filter(task => task.status === 'completed' || task.status === 'approved').length;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-4xl mx-auto">
@@ -101,18 +145,11 @@ export default function TeacherStudentProfile() {
           <CardContent className="relative z-10 p-6 sm:p-8">
             <div className="flex items-center gap-4 sm:gap-6">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-4xl sm:text-5xl">
-                {leaderboard.avatar}
+                {profile.avatar ?? '👤'}
               </div>
               <div className="space-y-1">
-                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">{leaderboard.name}</h1>
-                <div className="flex flex-wrap items-center gap-2">
-                  {child && (
-                    <Badge className="bg-white/15 text-primary-foreground border-0 text-[10px] uppercase tracking-wider">
-                      {t('teacher.student.level')}: {child.level}
-                    </Badge>
-                  )}
-                  <span className="text-primary-foreground/60 text-xs">⭐ {kivaPoints} KivaPoints</span>
-                </div>
+                <h1 className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-primary-foreground">{profile.display_name}</h1>
+                <span className="text-primary-foreground/60 text-xs">🪙 {balance} KVC</span>
               </div>
             </div>
           </CardContent>
@@ -123,9 +160,9 @@ export default function TeacherStudentProfile() {
       <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: t('teacher.student.balance'), value: `${balance}`, icon: Wallet, color: 'text-primary' },
-          { label: t('teacher.student.savings'), value: `${leaderboard.savingsRate}%`, icon: TrendingUp, color: 'text-secondary' },
+          { label: t('teacher.student.savings'), value: `${vaults.length}`, icon: TrendingUp, color: 'text-secondary' },
           { label: t('teacher.student.tasks'), value: `${completedTasks}`, icon: CheckCircle2, color: 'text-emerald-500' },
-          { label: 'KivaPoints', value: `${kivaPoints}`, icon: Coins, color: 'text-amber-500' },
+          { label: 'Badges', value: `${unlockedBadges.length}`, icon: Coins, color: 'text-amber-500' },
         ].map(stat => (
           <Card key={stat.label} className="border-border/50">
             <CardContent className="p-4 text-center space-y-1">
@@ -192,18 +229,20 @@ export default function TeacherStudentProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {studentVaults.length === 0 ? (
+              {vaults.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_vaults')}</p>
-              ) : studentVaults.map(vault => {
-                const pct = Math.round((vault.currentAmount / vault.targetAmount) * 100);
+              ) : vaults.map(vault => {
+                const targetAmount = Number(vault.target_amount);
+                const currentAmount = Number(vault.current_amount);
+                const pct = targetAmount > 0 ? Math.round((currentAmount / targetAmount) * 100) : 0;
                 return (
                   <div key={vault.id} className="space-y-1.5 p-3 rounded-xl bg-muted/20">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-display font-semibold">{vault.icon} {vault.name}</span>
+                      <span className="text-sm font-display font-semibold">{vault.icon} {vault.title}</span>
                       <span className="text-xs font-bold text-primary">{pct}%</span>
                     </div>
                     <Progress value={pct} className="h-2" />
-                    <p className="text-[10px] text-muted-foreground">{vault.currentAmount} / {vault.targetAmount} {t('teacher.student.coins')}</p>
+                    <p className="text-[10px] text-muted-foreground">{currentAmount} / {targetAmount} KVC</p>
                   </div>
                 );
               })}
@@ -211,7 +250,7 @@ export default function TeacherStudentProfile() {
           </Card>
         </motion.div>
 
-        {/* Tasks */}
+        {/* Tasks / Missions */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -220,15 +259,15 @@ export default function TeacherStudentProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {studentTasks.length === 0 ? (
+              {tasks.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_tasks')}</p>
-              ) : studentTasks.map(task => {
-                const s = statusLabels[task.status] ?? statusLabels.pending;
+              ) : tasks.map(task => {
+                const s = statusLabels[task.status] ?? statusLabels.available;
                 return (
                   <div key={task.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
                     <div className="min-w-0">
                       <p className="text-sm font-display font-semibold truncate">{task.title}</p>
-                      <p className="text-[10px] text-muted-foreground">+{task.reward} {t('teacher.student.coins')}</p>
+                      <p className="text-[10px] text-muted-foreground">+{task.reward} KVC</p>
                     </div>
                     <Badge className={`${s.color} border-0 text-[10px] shrink-0`}>{s.label}</Badge>
                   </div>
@@ -238,7 +277,7 @@ export default function TeacherStudentProfile() {
           </Card>
         </motion.div>
 
-        {/* Achievements */}
+        {/* Badges/Achievements */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -247,14 +286,14 @@ export default function TeacherStudentProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {studentAchievements.length === 0 ? (
+              {unlockedBadges.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_achievements')}</p>
-              ) : studentAchievements.map(ach => (
-                <div key={ach.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20">
-                  <span className="text-2xl">{ach.icon}</span>
+              ) : unlockedBadges.map(b => (
+                <div key={b.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20">
+                  <span className="text-2xl">{b.icon}</span>
                   <div className="min-w-0">
-                    <p className="text-sm font-display font-semibold">{ach.title}</p>
-                    <p className="text-[10px] text-muted-foreground">{ach.description}</p>
+                    <p className="text-sm font-display font-semibold">{b.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{b.description}</p>
                   </div>
                 </div>
               ))}
@@ -262,7 +301,7 @@ export default function TeacherStudentProfile() {
           </Card>
         </motion.div>
 
-        {/* Transactions */}
+        {/* Recent Transactions */}
         <motion.div variants={item}>
           <Card className="border-border/50 h-full">
             <CardHeader className="pb-3">
@@ -271,22 +310,19 @@ export default function TeacherStudentProfile() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {studentTransactions.length === 0 ? (
+              {walletTx.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-4">{t('teacher.student.no_transactions')}</p>
-              ) : studentTransactions.map(tx => {
-                const txType = txTypeLabels[tx.type] ?? txTypeLabels.earned;
-                return (
-                  <div key={tx.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
-                    <div className="min-w-0">
-                      <p className="text-sm font-display font-medium truncate">{tx.description}</p>
-                      <p className="text-[10px] text-muted-foreground">{tx.date}</p>
-                    </div>
-                    <span className={`text-sm font-display font-bold shrink-0 ${txType.color}`}>
-                      {txType.sign}{tx.amount}
-                    </span>
+              ) : walletTx.map(tx => (
+                <div key={tx.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
+                  <div className="min-w-0">
+                    <p className="text-sm font-display font-medium truncate">{tx.description}</p>
+                    <p className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString('pt-PT')}</p>
                   </div>
-                );
-              })}
+                  <span className={`text-sm font-display font-bold shrink-0 ${tx.direction === 'credit' ? 'text-secondary' : 'text-destructive'}`}>
+                    {tx.direction === 'credit' ? '+' : '-'}{tx.amount}
+                  </span>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </motion.div>

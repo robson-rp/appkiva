@@ -14,20 +14,21 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { OnboardingWalkthrough } from '@/components/OnboardingWalkthrough';
-import { mockChallenges } from '@/data/mock-data';
+import { useCollectiveChallenges } from '@/hooks/use-collective-challenges';
 import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useT } from '@/contexts/LanguageContext';
 
-const urgentChallenges = mockChallenges.filter(
-  c => c.status === 'active' && (c.currentAmount / c.targetAmount) >= 0.5
-);
-const urgentChallengesCount = urgentChallenges.length;
-const hasCriticalChallenges = urgentChallenges.some(c => (c.currentAmount / c.targetAmount) >= 0.8);
-
 function useTeacherNav() {
   const t = useT();
+  const { data: challenges = [] } = useCollectiveChallenges();
+  const urgentChallenges = challenges.filter(
+    c => c.status === 'active' && c.target_amount > 0 && (c.current_amount / c.target_amount) >= 0.5
+  );
+  const urgentChallengesCount = urgentChallenges.length;
+  const hasCriticalChallenges = urgentChallenges.some(c => (c.current_amount / c.target_amount) >= 0.8);
+
   const navItems = [
     { title: t('nav.teacher.panel'), url: '/teacher', icon: LayoutDashboard },
     { title: t('nav.teacher.classes'), url: '/teacher/classes', icon: Users },
@@ -47,7 +48,7 @@ function useTeacherNav() {
     { title: t('nav.teacher.profile'), url: '/teacher/profile', icon: UserCircle },
   ];
 
-  return { navItems, mobileFixedItems, mobileMoreItems };
+  return { navItems, mobileFixedItems, mobileMoreItems, urgentChallenges, hasCriticalChallenges };
 }
 
 function TeacherSidebar() {
@@ -56,7 +57,7 @@ function TeacherSidebar() {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const t = useT();
-  const { navItems } = useTeacherNav();
+  const { navItems, urgentChallenges, hasCriticalChallenges } = useTeacherNav();
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -103,7 +104,7 @@ function TeacherSidebar() {
                                 className="flex items-center justify-between gap-2 text-small w-full rounded-lg px-2 py-1.5 hover:bg-accent/50 transition-colors text-left"
                               >
                                 <span>{ch.icon} {ch.title}</span>
-                                <span className="font-bold text-primary">{Math.round((ch.currentAmount / ch.targetAmount) * 100)}%</span>
+                                <span className="font-bold text-primary">{Math.round((ch.current_amount / ch.target_amount) * 100)}%</span>
                               </button>
                             ))}
                           </HoverCardContent>
@@ -152,7 +153,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
   const { logout } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
   const t = useT();
-  const { mobileFixedItems, mobileMoreItems } = useTeacherNav();
+  const { mobileFixedItems, mobileMoreItems, hasCriticalChallenges } = useTeacherNav();
 
   const isMoreRouteActive = mobileMoreItems.some((item) =>
     location.pathname === item.url || location.pathname.startsWith(item.url + '/')

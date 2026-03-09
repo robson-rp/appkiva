@@ -92,7 +92,10 @@ export default function ChildDashboard() {
       }))
     : [];
 
-  const unlockedAchievements = mockAchievements.filter((a) => a.unlockedAt);
+  const badgesData = useBadgesWithProgress();
+  const unlockedAchievements = badgesData
+    .filter(b => b.unlockedAt)
+    .map(b => ({ id: b.id, icon: b.icon, title: b.name }));
 
   const levels = Object.keys(LEVEL_CONFIG) as Level[];
   const currentLevelIndex = levels.indexOf(childLevel);
