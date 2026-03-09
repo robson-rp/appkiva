@@ -4,14 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { mockBadges } from '@/data/badges-data';
+import { useBadgesWithProgress } from '@/hooks/use-badges';
 import { BADGE_CATEGORIES, BADGE_TIERS, BadgeCategory, CollectibleBadge } from '@/types/kivara';
 import { Award, Lock, Sparkles, Trophy } from 'lucide-react';
 import { BadgeUnlockCeremony } from '@/components/BadgeUnlockCeremony';
 import { useT } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function BadgesPage() {
   const t = useT();
+  const badgesData = useBadgesWithProgress();
   const [selectedBadge, setSelectedBadge] = useState<CollectibleBadge | null>(null);
   const [unlockingBadge, setUnlockingBadge] = useState<CollectibleBadge | null>(null);
 
@@ -23,18 +25,41 @@ export default function BadgesPage() {
     }
   }, []);
 
-  const unlocked = mockBadges.filter(b => b.unlockedAt);
-  const locked = mockBadges.filter(b => !b.unlockedAt);
-  const totalProgress = Math.round((unlocked.length / mockBadges.length) * 100);
+  // Map DB badges to CollectibleBadge format
+  const allBadges: CollectibleBadge[] = badgesData.map(b => ({
+    id: b.id,
+    name: b.name,
+    description: b.description,
+    icon: b.icon,
+    category: b.category as BadgeCategory,
+    tier: b.tier as 'bronze' | 'silver' | 'gold' | 'platinum',
+    requirement: b.requirement,
+    unlockedAt: b.unlockedAt ? new Date(b.unlockedAt).toLocaleDateString('pt-PT') : undefined,
+  }));
+
+  const unlocked = allBadges.filter(b => b.unlockedAt);
+  const totalProgress = allBadges.length > 0 ? Math.round((unlocked.length / allBadges.length) * 100) : 0;
 
   const categories = Object.entries(BADGE_CATEGORIES);
   const tierOrder: Array<'bronze' | 'silver' | 'gold' | 'platinum'> = ['bronze', 'silver', 'gold', 'platinum'];
 
   const getCategoryProgress = (cat: BadgeCategory) => {
-    const catBadges = mockBadges.filter(b => b.category === cat);
+    const catBadges = allBadges.filter(b => b.category === cat);
     const catUnlocked = catBadges.filter(b => b.unlockedAt);
     return { total: catBadges.length, unlocked: catUnlocked.length, pct: catBadges.length > 0 ? Math.round((catUnlocked.length / catBadges.length) * 100) : 0 };
   };
+
+  if (allBadges.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-24 w-full" />
+        <div className="grid grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -54,7 +79,7 @@ export default function BadgesPage() {
                 <Trophy className="h-5 w-5 text-primary" />
                 <span className="font-display font-bold text-foreground">{t('badges.collection')}</span>
               </div>
-              <span className="text-sm font-display font-bold text-primary">{unlocked.length}/{mockBadges.length}</span>
+              <span className="text-sm font-display font-bold text-primary">{unlocked.length}/{allBadges.length}</span>
             </div>
             <Progress value={totalProgress} className="h-2.5" />
             <div className="flex gap-3 mt-3">
@@ -92,7 +117,7 @@ export default function BadgesPage() {
 
         <TabsContent value="all" className="mt-4 space-y-6">
           {categories.map(([key, cat]) => {
-            const catBadges = mockBadges.filter(b => b.category === key);
+            const catBadges = allBadges.filter(b => b.category === key);
             const prog = getCategoryProgress(key as BadgeCategory);
             return (
               <CategorySection key={key} catKey={key as BadgeCategory} cat={cat} badges={catBadges} progress={prog} onSelect={handleSimulateUnlock} />
@@ -101,7 +126,7 @@ export default function BadgesPage() {
         </TabsContent>
 
         {categories.map(([key, cat]) => {
-          const catBadges = mockBadges.filter(b => b.category === key);
+          const catBadges = allBadges.filter(b => b.category === key);
           const prog = getCategoryProgress(key as BadgeCategory);
           return (
             <TabsContent key={key} value={key} className="mt-4">

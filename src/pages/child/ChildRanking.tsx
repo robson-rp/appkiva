@@ -4,28 +4,17 @@ import { Crown, Medal, Users, Home as HomeIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockChildren, mockVaults, mockDonations } from '@/data/mock-data';
-import { mockClassLeaderboard, mockFriendsLeaderboard } from '@/data/weekly-challenges-data';
+import { useHouseholdRankings } from '@/hooks/use-household-rankings';
+import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { ClassLeaderboardEntry } from '@/types/kivara';
-
-/* ── helpers ── */
-
-function buildSiblingRankings() {
-  return mockChildren.map((c) => {
-    const saved = mockVaults.filter((v) => v.childId === c.id).reduce((s, v) => s + v.currentAmount, 0);
-    const donated = mockDonations.filter((d) => d.childId === c.id).reduce((s, d) => s + d.amount, 0);
-    return { ...c, saved, donated };
-  });
-}
 
 const MEDAL = ['🥇', '🥈', '🥉'];
 
 /* ── Podium ── */
-
 function Podium({ entries }: { entries: ClassLeaderboardEntry[] }) {
   const top3 = entries.slice(0, 3);
-  // order: 2nd, 1st, 3rd for visual podium
   const order = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
   const heights = ['h-16', 'h-24', 'h-12'];
   const positions = top3.length >= 3 ? [1, 0, 2] : top3.map((_, i) => i);
@@ -33,7 +22,7 @@ function Podium({ entries }: { entries: ClassLeaderboardEntry[] }) {
   return (
     <div className="flex items-end justify-center gap-3 pt-6 pb-2">
       {order.map((entry, vi) => {
-        const ri = positions[vi]; // real rank index
+        const ri = positions[vi];
         return (
           <motion.div
             key={entry.name}
@@ -61,7 +50,6 @@ function Podium({ entries }: { entries: ClassLeaderboardEntry[] }) {
 }
 
 /* ── Leaderboard List ── */
-
 function LeaderboardList({ entries }: { entries: ClassLeaderboardEntry[] }) {
   return (
     <div className="space-y-1.5 mt-3">
@@ -89,19 +77,23 @@ function LeaderboardList({ entries }: { entries: ClassLeaderboardEntry[] }) {
 }
 
 /* ── Siblings Tab ── */
-
 function SiblingsTab() {
   const t = useT();
-  const siblings = buildSiblingRankings();
+  const { user } = useAuth();
+  const { data: rankings = [], isLoading } = useHouseholdRankings();
 
-  const categories: { label: string; key: 'saved' | 'kivaPoints' | 'donated'; icon: string }[] = [
-    { label: t('ranking.cat_savings'), key: 'saved', icon: '🐷' },
-    { label: t('ranking.cat_points'), key: 'kivaPoints', icon: '⭐' },
-    { label: t('ranking.cat_donations'), key: 'donated', icon: '💝' },
+  const categories: { label: string; key: 'totalSaved' | 'balance' | 'totalDonated'; icon: string }[] = [
+    { label: t('ranking.cat_savings'), key: 'totalSaved', icon: '🐷' },
+    { label: t('ranking.cat_points'), key: 'balance', icon: '⭐' },
+    { label: t('ranking.cat_donations'), key: 'totalDonated', icon: '💝' },
   ];
 
   const [cat, setCat] = useState(0);
-  const sorted = [...siblings].sort((a, b) => (b as any)[categories[cat].key] - (a as any)[categories[cat].key]);
+
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (rankings.length === 0) return <p className="text-sm text-muted-foreground text-center py-8">{t('ranking.no_siblings')}</p>;
+
+  const sorted = [...rankings].sort((a, b) => (b as any)[categories[cat].key] - (a as any)[categories[cat].key]);
 
   const entries: ClassLeaderboardEntry[] = sorted.map((s, i) => ({
     rank: i + 1,
@@ -109,12 +101,11 @@ function SiblingsTab() {
     avatar: s.avatar,
     score: (s as any)[categories[cat].key],
     challengesCompleted: 0,
-    isCurrentUser: s.id === 'child-1',
+    isCurrentUser: s.profileId === user?.profileId,
   }));
 
   return (
     <div>
-      {/* category pills */}
       <div className="flex gap-2 mb-2 overflow-x-auto pb-1">
         {categories.map((c, i) => (
           <button
@@ -126,45 +117,23 @@ function SiblingsTab() {
           </button>
         ))}
       </div>
-
       {entries.length >= 2 && <Podium entries={entries} />}
       <LeaderboardList entries={entries} />
     </div>
   );
 }
 
-/* ── Classmates Tab ── */
-
-type ClassFilter = 'class' | 'friends';
-
+/* ── Classmates Tab (placeholder - needs classroom leaderboard query) ── */
 function ClassmatesTab() {
   const t = useT();
-  const [filter, setFilter] = useState<ClassFilter>('class');
-  const entries = filter === 'friends' ? mockFriendsLeaderboard : mockClassLeaderboard;
-
   return (
-    <div>
-      <div className="flex gap-2 mb-2">
-        {(['class', 'friends'] as ClassFilter[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${filter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
-          >
-            {f === 'class' ? <Users className="h-3.5 w-3.5" /> : <Medal className="h-3.5 w-3.5" />}
-            {f === 'class' ? t('ranking.filter_class') : t('ranking.filter_friends')}
-          </button>
-        ))}
-      </div>
-
-      {entries.length >= 3 && <Podium entries={entries} />}
-      <LeaderboardList entries={entries} />
+    <div className="text-center py-8">
+      <p className="text-sm text-muted-foreground">{t('ranking.classmates_coming_soon') ?? 'Rankings de colegas em breve'}</p>
     </div>
   );
 }
 
 /* ── Page ── */
-
 export default function ChildRanking() {
   const t = useT();
 

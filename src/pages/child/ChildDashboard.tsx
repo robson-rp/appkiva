@@ -6,7 +6,7 @@ import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { PlayerCard } from '@/components/PlayerCard';
 import { Kivo } from '@/components/Kivo';
-import { mockAchievements } from '@/data/mock-data';
+import { useBadgesWithProgress } from '@/hooks/use-badges';
 import { useChildMissions } from '@/hooks/use-missions';
 import { StreakWidget } from '@/components/StreakWidget';
 import { ListTodo, Target, PiggyBank } from 'lucide-react';
@@ -92,7 +92,10 @@ export default function ChildDashboard() {
       }))
     : [];
 
-  const unlockedAchievements = mockAchievements.filter((a) => a.unlockedAt);
+  const badgesData = useBadgesWithProgress();
+  const unlockedAchievements = badgesData
+    .filter(b => b.unlockedAt)
+    .map(b => ({ id: b.id, icon: b.icon, title: b.name }));
 
   const levels = Object.keys(LEVEL_CONFIG) as Level[];
   const currentLevelIndex = levels.indexOf(childLevel);

@@ -1,89 +1,128 @@
 
 
-# Audit: Páginas e funcionalidades ainda com dados mock
+# Plan: KIVARA Core Platform Architecture Evolution
 
-## Resumo
+## Current State Assessment
 
-**Não, nem todas as funcionalidades estão operacionais com dados reais.** Existe ainda uma quantidade significativa de páginas e componentes que dependem de dados mock estáticos do ficheiro `src/data/mock-data.ts` e outros ficheiros de dados simulados. Abaixo está o inventário completo.
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
----
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-## Páginas e componentes com dados MOCK (não operacionais)
+## What Lovable Can and Cannot Build
 
-### Criança
-| Página/Componente | Dados mock usados | Impacto |
-|---|---|---|
-| `ChildDreams.tsx` | `mockDreamVaults`, `mockChildren` | Fallback para sonhos mock se BD vazia |
-| `ChildRanking.tsx` | `mockChildren`, `mockVaults`, `mockDonations`, `mockClassLeaderboard`, `mockFriendsLeaderboard` | Rankings totalmente mock |
-| `ChildStore.tsx` | Provavelmente mock (precisa confirmar) | Loja de recompensas |
-| `ChildAchievements.tsx` | `mockAchievements` (via `mock-data.ts`) | Conquistas estáticas |
-| `ChildFamilyRankings.tsx` (componente) | `mockChildren`, `mockVaults`, `mockDonations` | Widget do dashboard com dados falsos |
-| `ChildAchievementsStrip.tsx` | `mockAchievements` (via dashboard) | Strip de conquistas no dashboard |
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-### Adolescente
-| Página/Componente | Dados mock usados | Impacto |
-|---|---|---|
-| `TeenDashboard.tsx` | `mockTeens`, `mockTeenTransactions` | Dashboard inteiro usa teen mock para nível, XP, transações |
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### Professor
-| Página/Componente | Dados mock usados | Impacto |
-|---|---|---|
-| `TeacherStudentProfile.tsx` | `mockChildren`, `mockLeaderboard`, `mockTasks`, `mockTransactions`, `mockVaults`, `mockAchievements` | Perfil do aluno 100% mock |
-| `TeacherChallenges.tsx` | `mockChallenges`, `mockClassrooms` | Desafios coletivos 100% mock |
-| `TeacherLayout.tsx` | `mockChallenges` | Badge de desafios urgentes no sidebar |
+## Implementation Plan (4 Phases)
 
-### Parceiro
-| Página/Componente | Dados mock usados | Impacto |
-|---|---|---|
-| (Parceiro parece migrado para BD) | — | OK |
+### Phase 1 — Multi-Tenant Foundation
 
-### Componentes partilhados
-| Componente | Dados mock usados | Impacto |
-|---|---|---|
-| `BadgesPage.tsx` | `mockBadges` | Página de badges 100% mock |
-| `StreaksPage.tsx` | `mockStreakData` (fallback) | Fallback se BD vazia |
-| `WeeklyChallenges.tsx` | `mockWeeklyChallenges`, `mockClassLeaderboard`, `mockFriendsLeaderboard` | Desafios semanais 100% mock |
-| `XPProgressBar.tsx` | `mockChildren`, `mockTeens` | Barra de XP usa dados estáticos |
-| `StreakWidget.tsx` | `mockStreakData` (fallback) | Fallback se BD vazia |
+**Database migrations:**
 
----
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-## Páginas já operacionais com dados reais
-- **Criança**: Dashboard (parcial), Wallet, Tasks, Missions, Vaults, Diary, Profile
-- **Encarregado**: Dashboard, Children, Tasks, Missions, Allowance, Rewards, Vaults, Reports, Profile, Subscription
-- **Professor**: Dashboard, Classes (CRUD turmas/alunos)
-- **Parceiro**: Dashboard, Programs, Challenges, Reports, Profile, Subscription
-- **Admin**: Todas as páginas administrativas
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
----
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-## Plano de migração (priorizado)
+4. Expand `app_role` enum to include `admin`
 
-### 1. Badges/Conquistas → tabela `badges` + `badge_progress`
-Criar tabelas para definição de badges e progresso por perfil. Substituir `mockBadges` e `mockAchievements` em `BadgesPage`, `ChildAchievements`, `ChildDashboard`.
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-### 2. Rankings familiares → queries reais
-Substituir `ChildFamilyRankings` e `ChildRanking` para usar dados do household real (saldos de wallets, vaults, doações).
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-### 3. TeenDashboard → dados reais
-Remover `mockTeens` e `mockTeenTransactions`, usar hooks existentes (`useWalletBalance`, `useWalletTransactions`, `useStreakData`).
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-### 4. Desafios semanais → tabela `weekly_challenges`
-Criar tabela e migrar `WeeklyChallenges.tsx` e leaderboards.
+**Database:**
 
-### 5. TeacherStudentProfile → queries reais
-Usar hooks existentes para buscar dados reais do aluno (wallet, tasks, vaults, achievements).
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-### 6. TeacherChallenges → queries reais
-Migrar `mockChallenges` para tabela de desafios coletivos com gestão real.
+2. Add `real_money_enabled` flag to tenants
 
-### 7. XPProgressBar → dados reais
-Usar streak/kiva points do perfil autenticado em vez de mock.
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-### 8. Loja de recompensas (ChildStore) → verificar estado actual
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
----
+### Phase 3 — Audit Logging & Compliance
 
-## Estimativa de esforço
-Migração completa: ~8-10 etapas de implementação. Recomendo priorizar por role (Teen Dashboard primeiro por ser rápido, depois Badges que afeta múltiplas páginas).
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
