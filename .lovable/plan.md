@@ -1,128 +1,157 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Login Security Hardening — KIVARA
 
-## Current State Assessment
+## Current State
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+**Already implemented:**
+- 2FA for parent/admin (email OTP via reauthenticate + trusted devices)
+- Strong password policy (12 chars, complexity, blocklist)
+- Password strength meter
+- Forgot/reset password flow
+- Role-based access via RLS + edge function guards
+- Wallet freeze, idempotency, velocity limits
+- Risk flags + anomaly detection (`check_anomalies()`, `risk-scan`)
+- Audit triggers on critical tables
+- Immutable ledger (no UPDATE/DELETE RLS)
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+**Missing:**
+- No brute-force / lockout tracking (client or server)
+- Login error messages reveal specifics (Supabase raw errors shown)
+- No auth event logging table
+- No honeypot / anti-bot fields
+- No admin security monitoring dashboard for auth events
+- No generic error messages for account enumeration protection
+- No password reset rate limiting
+- No session idle timeout
 
-## What Lovable Can and Cannot Build
+## Plan
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+### 1. Database Migration — Auth Security Tables
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+Create `auth_events` table for comprehensive auth logging:
 
-## Implementation Plan (4 Phases)
+```sql
+CREATE TABLE auth_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type text NOT NULL, -- login_success, login_failure, lockout, otp_sent, otp_verified, password_reset_requested, password_changed, session_revoked, device_trusted, suspicious_login
+  email text,
+  user_id uuid,
+  ip_address text,
+  user_agent text,
+  metadata jsonb DEFAULT '{}',
+  risk_level text DEFAULT 'low', -- low, medium, high, critical
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 
-### Phase 1 — Multi-Tenant Foundation
+-- Index for lookups
+CREATE INDEX idx_auth_events_email_type ON auth_events (email, event_type, created_at);
+CREATE INDEX idx_auth_events_created ON auth_events (created_at DESC);
 
-**Database migrations:**
+-- RLS: admin read-only
+ALTER TABLE auth_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admins can view auth events" ON auth_events FOR SELECT TO authenticated
+  USING (has_role(auth.uid(), 'admin'));
+```
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+Create `login_lockouts` table for brute-force tracking:
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+```sql
+CREATE TABLE login_lockouts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL,
+  failed_attempts int NOT NULL DEFAULT 0,
+  lockout_count int NOT NULL DEFAULT 0,
+  locked_until timestamptz,
+  last_attempt_at timestamptz DEFAULT now(),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(email)
+);
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+ALTER TABLE login_lockouts ENABLE ROW LEVEL SECURITY;
+-- No client access — only edge functions with service role
+```
 
-4. Expand `app_role` enum to include `admin`
+### 2. Edge Function: `auth-guard`
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+New edge function handling login protection logic. Called from client before/after login attempts.
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+**Actions:**
+- `check-lockout`: Given an email, check if account is locked. Returns `{ locked, locked_until, retry_after_seconds }`.
+- `record-failure`: Record a failed login. After 5 failures in 15 min → lock. Progressive lockout (15m → 30m → 60m based on `lockout_count`).
+- `record-success`: Clear failed attempts, log success event.
+- `log-event`: Generic auth event logger (for OTP events, password resets, etc.)
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+**Rate limiting for password resets:** Track via `auth_events` — max 3 reset requests per email/hour, max 10 per IP/hour.
 
-**Database:**
+### 3. Update Login Flow (AuthContext + Login.tsx)
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+**AuthContext changes:**
+- Before calling `signInWithPassword`, invoke `auth-guard` with `check-lockout` action
+- If locked, return generic error without attempting login
+- On login failure, invoke `record-failure`
+- On login success, invoke `record-success`
 
-2. Add `real_money_enabled` flag to tenants
+**Generic error messages (enumeration protection):**
+- Replace all specific Supabase error messages with: `"Não foi possível iniciar sessão. Verifique os dados e tente novamente."`
+- Password reset always shows: `"Se este email estiver registado, receberá instruções."`
 
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+**Honeypot field:**
+- Add hidden `website` input field to login/signup forms
+- If filled (bot), silently reject submission
 
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+### 4. Update ForgotPassword.tsx
 
-### Phase 3 — Audit Logging & Compliance
+- Call `auth-guard` to check reset rate limit before sending
+- Always show generic success message regardless of whether email exists
 
-**Database:**
+### 5. Admin Auth Security Dashboard
 
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
+New page or tab in AdminRisk showing:
+- Recent auth events (login failures, lockouts, OTP abuse)
+- Failed login spikes (chart)
+- Locked accounts list with unlock action
+- Filter by date, email, event type, risk level
+- Admin actions: unlock account, force password reset
 
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+### 6. Session Idle Timeout
 
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+Add idle timeout logic in AuthContext:
+- Track last activity timestamp
+- Parent/guardian: 30 min idle → auto logout
+- Admin: 15 min idle → auto logout
+- Child/teen/teacher: no forced timeout (managed by Supabase token refresh)
 
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
+### 7. i18n Keys (~15 keys)
 
-### Phase 4 — Risk Monitoring & Anti-Fraud
+Generic auth error messages, lockout messages, admin dashboard labels.
 
-**Database:**
+### 8. Security Test Suite Update
 
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+Update `src/test/security-audit.test.ts` to document:
+- Brute force protection
+- Account enumeration protection
+- Honeypot anti-bot
+- Auth event logging
+- Session timeout
 
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
+## Files Summary
 
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+| File | Action |
+|------|--------|
+| DB Migration | Create `auth_events`, `login_lockouts` tables |
+| `supabase/functions/auth-guard/index.ts` | **New** — lockout check, failure recording, event logging |
+| `src/contexts/AuthContext.tsx` | **Edit** — pre-login lockout check, generic errors, idle timeout |
+| `src/pages/Login.tsx` | **Edit** — honeypot field, generic errors, lockout UI |
+| `src/pages/ForgotPassword.tsx` | **Edit** — rate limit check, generic messaging |
+| `src/pages/admin/AdminRisk.tsx` | **Edit** — add auth security tab |
+| `src/i18n/pt.ts` + `src/i18n/en.ts` | **Edit** — ~15 keys |
+| `src/test/security-audit.test.ts` | **Edit** — document new controls |
+| `supabase/config.toml` | **Edit** — add auth-guard function |
 
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+## Out of Scope
+- IP geolocation / impossible travel detection (requires third-party service)
+- CAPTCHA integration (would require external provider like hCaptcha)
+- HTTP-level rate limiting (managed by Lovable Cloud infrastructure)
+- CSRF protection (handled by SPA architecture + JWT)
 
