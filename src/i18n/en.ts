@@ -2652,6 +2652,26 @@ const en: Record<string, string> = {
   'security.risk': 'Risk',
   'security.account_unlocked': 'Account unlocked',
   'common.all': 'All',
+
+  // ─── Child Account Creation ───
+  'auth.username': 'Username',
+  'auth.pin_hint': '4-6 digit PIN set by parent',
+  'auth.child_account_hint': 'Your account is created by your parent',
+  'parent.children.create_child': 'Create account',
+  'parent.children.create_child_title': 'Create child account',
+  'parent.children.create_child_desc': 'Create an account for your child to access the platform with a username and PIN.',
+  'parent.children.child_username': 'Username',
+  'parent.children.child_username_hint': '3-20 characters, letters, numbers and _ only',
+  'parent.children.child_pin': 'PIN',
+  'parent.children.child_pin_confirm': 'Confirm PIN',
+  'parent.children.child_pin_hint': '4-6 numeric digits',
+  'parent.children.child_pin_mismatch': 'PINs do not match',
+  'parent.children.child_dob': 'Date of birth',
+  'parent.children.child_avatar': 'Avatar',
+  'parent.children.creating_account': 'Creating account...',
+  'parent.children.account_created': 'Account created successfully!',
+  'parent.children.account_created_desc': 'The child can sign in with their username and PIN.',
+  'parent.children.username_taken': 'This username is already taken',
 };
 
 export default en;
