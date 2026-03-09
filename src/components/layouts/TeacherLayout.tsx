@@ -162,7 +162,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         {!isMobile && <TeacherSidebar />}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header className="relative z-50">
             <div className="absolute inset-0 bg-card/80 backdrop-blur-xl border-b border-border/50" />
             <div className="relative h-16 flex items-center justify-between px-4 gap-4">
@@ -193,7 +193,7 @@ export function TeacherLayout({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className={`flex-1 p-4 md:p-6 overflow-auto ${isMobile ? 'pb-28' : ''}`}
+              className={`flex-1 p-3 sm:p-4 md:p-6 overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-28' : ''}`}
             >
               {children}
             </motion.main>

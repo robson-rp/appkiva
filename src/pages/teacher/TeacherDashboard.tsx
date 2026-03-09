@@ -114,7 +114,7 @@ export default function TeacherDashboard() {
   ];
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 sm:space-y-6 max-w-5xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 sm:space-y-6 max-w-5xl mx-auto w-full min-w-0">
       {/* Hero */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
@@ -254,7 +254,7 @@ export default function TeacherDashboard() {
 
       {/* Class Comparison Panel */}
       <motion.div variants={item}>
-        <Card className="border-border/50 overflow-hidden">
+        <Card className="border-border/50 overflow-hidden w-full">
           <div className="h-0.5 bg-gradient-to-r from-primary via-secondary to-primary" />
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-display flex items-center gap-2">
@@ -267,16 +267,16 @@ export default function TeacherDashboard() {
               <Download className="h-4 w-4" /> {t('teacher.dashboard.export_pdf')}
             </Button>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 px-2 sm:px-6">
             {/* Bar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.averages')}</p>
               <div className="h-52 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={classComparison} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <BarChart data={classComparison} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                    <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                    <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" width={30} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',
@@ -285,7 +285,7 @@ export default function TeacherDashboard() {
                         fontSize: '13px',
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: '13px' }} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
                     <Bar dataKey="poupança" name={t('teacher.dashboard.savings_pct')} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="pontos" name={t('teacher.dashboard.points_avg')} fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="tarefas" name={t('teacher.dashboard.tasks_avg')} fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
@@ -297,12 +297,12 @@ export default function TeacherDashboard() {
             {/* Radar Chart */}
             <div>
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.comparative')}</p>
-              <div className="h-52 sm:h-72">
+              <div className="h-56 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 13, fill: 'hsl(var(--muted-foreground))' }} />
-                    <PolarRadiusAxis tick={{ fontSize: 11 }} stroke="hsl(var(--border))" />
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                    <PolarRadiusAxis tick={{ fontSize: 9 }} stroke="hsl(var(--border))" />
                     {classComparison.map((cls, i) => (
                       <Radar
                         key={cls.name}
@@ -314,7 +314,7 @@ export default function TeacherDashboard() {
                         strokeWidth={2}
                       />
                     ))}
-                    <Legend wrapperStyle={{ fontSize: '13px' }} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--card))',

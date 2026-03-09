@@ -304,7 +304,7 @@ export default function TeacherClasses() {
   }
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto">
+    <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto w-full min-w-0">
       {/* Hero */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden relative shadow-kivara">
