@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -29,6 +29,11 @@ interface AuthContextType {
   setCurrentChildId: (id: string | null) => void;
   complete2FA: () => void;
 }
+
+// Idle timeout constants (ms)
+const IDLE_TIMEOUT_PARENT = 30 * 60 * 1000; // 30 minutes
+const IDLE_TIMEOUT_ADMIN = 15 * 60 * 1000;  // 15 minutes
+const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart', 'scroll'];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
