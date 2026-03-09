@@ -27,6 +27,7 @@ function useAdminNav() {
     { title: t('nav.admin.currencies'), url: '/admin/currencies', icon: Globe },
     { title: t('nav.admin.audit'), url: '/admin/audit', icon: ScrollText },
     { title: t('nav.admin.risk'), url: '/admin/risk', icon: AlertTriangle },
+    { title: t('nav.admin.auth_security'), url: '/admin/auth-security', icon: ShieldAlert },
     { title: t('nav.admin.compliance'), url: '/admin/compliance', icon: Shield },
     { title: t('nav.admin.lessons'), url: '/admin/lessons', icon: BookOpen },
     { title: t('nav.admin.onboarding'), url: '/admin/onboarding', icon: Sparkles },

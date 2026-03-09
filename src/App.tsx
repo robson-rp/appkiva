@@ -129,6 +129,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/currencies" element={<AdminLayout><S><AdminCurrencies /></S></AdminLayout>} />
         <Route path="/admin/audit" element={<AdminLayout><S><AdminAudit /></S></AdminLayout>} />
         <Route path="/admin/risk" element={<AdminLayout><S><AdminRisk /></S></AdminLayout>} />
+        <Route path="/admin/auth-security" element={<AdminLayout><S><AdminAuthSecurity /></S></AdminLayout>} />
         <Route path="/admin/compliance" element={<AdminLayout><S><AdminCompliance /></S></AdminLayout>} />
         <Route path="/admin/schools" element={<AdminLayout><S><AdminSchools /></S></AdminLayout>} />
         <Route path="/admin/finance" element={<AdminLayout><S><AdminFinance /></S></AdminLayout>} />
