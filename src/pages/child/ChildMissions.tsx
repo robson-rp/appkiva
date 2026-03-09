@@ -465,10 +465,10 @@ function MissionsTab({
                           <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                         </div>
                       </div>
-                      {mission.targetAmount && (
+                      {mission.target_amount && (
                         <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 flex items-center gap-2">
                           <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
+                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
                         </div>
                       )}
                       <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast(t('child.missions.coming_soon'))}>
