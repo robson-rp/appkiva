@@ -471,7 +471,7 @@ function MissionsTab({
                           <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
                         </div>
                       )}
-                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast(t('child.missions.coming_soon'))}>
+                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" disabled={startMission.isPending} onClick={() => startMission.mutate(mission.id)}>
                         <Target className="h-3.5 w-3.5" /> {t('child.missions.start')}
                       </Button>
                     </CardContent>
