@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2 } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
