@@ -102,12 +102,12 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
-      // User already exists – look up by email and force-update password
-      const existingUser = await findUserByEmail(acc.email);
+      // User already exists – look up by display_name in profiles and force-update password
+      const existingUserId = await findUserIdByName(acc.name);
 
-      if (existingUser) {
+      if (existingUserId) {
         // Force-update password to the new one
-        await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+        await supabaseAdmin.auth.admin.updateUserById(existingUserId, {
           password,
           email_confirm: true,
           user_metadata: {
@@ -117,16 +117,16 @@ Deno.serve(async (req) => {
           },
         });
 
-        results[acc.role] = existingUser.id;
+        results[acc.role] = existingUserId;
 
         const { data: existingRoles } = await supabaseAdmin
           .from("user_roles")
           .select("id")
-          .eq("user_id", existingUser.id)
+          .eq("user_id", existingUserId)
           .eq("role", acc.role);
 
         if (!existingRoles || existingRoles.length === 0) {
-          await supabaseAdmin.from("user_roles").insert({ user_id: existingUser.id, role: acc.role });
+          await supabaseAdmin.from("user_roles").insert({ user_id: existingUserId, role: acc.role });
         }
       } else {
         results[acc.role] = `skipped: ${error.message}`;
