@@ -65,7 +65,9 @@ export default function TeacherChallenges() {
     teamwork: t('teacher.challenges.type_teamwork'),
   };
 
-  const [challenges, setChallenges] = useState<CollectiveChallenge[]>([...mockChallenges]);
+  const { data: dbChallenges } = useCollectiveChallenges();
+  const { data: classrooms } = useClassrooms();
+  const [challenges, setChallenges] = useState<CollectiveChallenge[]>([]);
   const [form, setForm] = useState<ChallengeFormData>({ ...emptyForm });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
