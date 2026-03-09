@@ -261,7 +261,17 @@ export default function Login() {
           return;
         }
       } else {
-        if (contactMethod === 'phone') {
+        // Login mode
+        if (selectedRole === 'child') {
+          // Child login with username + PIN
+          const { error } = await loginAsChild(childUsername, childPin);
+          if (error) {
+            toast({ title: t(error), variant: 'destructive' });
+            setSubmitting(false);
+            return;
+          }
+          // Navigation handled by useEffect
+        } else if (contactMethod === 'phone') {
           toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
           setSubmitting(false);
           return;
@@ -273,7 +283,6 @@ export default function Login() {
             return;
           }
           if (requires2FA) {
-            // Trigger reauthentication — sends OTP nonce to user's email
             try {
               await supabase.auth.reauthenticate();
               startTwoFACountdown();
