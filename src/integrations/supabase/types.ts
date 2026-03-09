@@ -154,6 +154,81 @@ export type Database = {
         }
         Relationships: []
       }
+      badge_progress: {
+        Row: {
+          badge_id: string
+          id: string
+          profile_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          badge_id: string
+          id?: string
+          profile_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          badge_id?: string
+          id?: string
+          profile_id?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_progress_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "badge_progress_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          requirement: string
+          sort_order: number
+          tier: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          requirement?: string
+          sort_order?: number
+          tier?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          requirement?: string
+          sort_order?: number
+          tier?: string
+        }
+        Relationships: []
+      }
       banner_clicks: {
         Row: {
           banner_id: string
@@ -394,6 +469,78 @@ export type Database = {
           },
           {
             foreignKeyName: "classrooms_teacher_profile_id_fkey"
+            columns: ["teacher_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collective_challenges: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          current_amount: number
+          description: string
+          end_date: string
+          icon: string
+          id: string
+          kiva_points_reward: number
+          reward: number
+          start_date: string
+          status: string
+          target_amount: number
+          teacher_profile_id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          current_amount?: number
+          description?: string
+          end_date?: string
+          icon?: string
+          id?: string
+          kiva_points_reward?: number
+          reward?: number
+          start_date?: string
+          status?: string
+          target_amount?: number
+          teacher_profile_id: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          current_amount?: number
+          description?: string
+          end_date?: string
+          icon?: string
+          id?: string
+          kiva_points_reward?: number
+          reward?: number
+          start_date?: string
+          status?: string
+          target_amount?: number
+          teacher_profile_id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collective_challenges_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collective_challenges_teacher_profile_id_fkey"
             columns: ["teacher_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
