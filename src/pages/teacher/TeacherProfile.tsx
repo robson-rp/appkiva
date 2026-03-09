@@ -7,17 +7,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Camera, Save, Loader2, Languages } from 'lucide-react';
+import { Camera, Save, Loader2, Languages, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
-const AVATAR_OPTIONS = ['🧑‍💻', '👩‍💻', '🧑', '👩', '👨', '🧑🏽', '👩🏾', '👨🏻', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰', '🎮', '🎧'];
+const AVATAR_OPTIONS = ['👩‍🏫', '👨‍🏫', '🧑‍🏫', '👩', '👨', '🧑', '🎓', '📚', '🍎', '🌟', '🦉', '🐻'];
 
-export default function TeenProfile() {
+export default function TeacherProfile() {
   const { user } = useAuth();
   const { locale, setLocale, t } = useLanguage();
-  const [avatar, setAvatar] = useState(user?.avatar || '🧑‍💻');
+  const [avatar, setAvatar] = useState(user?.avatar || '👩‍🏫');
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [displayName, setDisplayName] = useState(user?.name || '');
@@ -46,15 +46,14 @@ export default function TeenProfile() {
     if (error) {
       toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: t('profile.updated') + ' 🎉' });
+      toast({ title: t('profile.updated') + ' 🎓' });
     }
   };
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
-      {/* Hero */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-chart-3 via-chart-3/90 to-chart-4 text-primary-foreground">
+        <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary via-primary/90 to-secondary text-primary-foreground">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
           <CardContent className="p-6 relative z-10 flex flex-col items-center gap-3 text-center">
             <motion.div
@@ -70,13 +69,13 @@ export default function TeenProfile() {
             </div>
             <h1 className="font-display text-2xl font-bold">{displayName}</h1>
             <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-3 py-1">
-              <span className="text-xs font-medium">🧑‍💻 {t('role.teen')}</span>
+              <GraduationCap className="h-3 w-3" />
+              <span className="text-xs font-medium">{t('nav.teacher.role')}</span>
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Avatar Picker */}
       {showPicker && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
@@ -104,7 +103,6 @@ export default function TeenProfile() {
         </motion.div>
       )}
 
-      {/* Preferences */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardContent className="p-5 space-y-4">
@@ -126,18 +124,15 @@ export default function TeenProfile() {
                 </SelectContent>
               </Select>
             </div>
-            <p className="text-sm text-muted-foreground">{t('profile.child_hint')}</p>
           </CardContent>
         </Card>
       </motion.div>
 
-      {/* Change Password */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
         <ChangePasswordSection />
       </motion.div>
 
-      {/* Save */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {saving ? t('profile.saving') : t('profile.save_avatar')}

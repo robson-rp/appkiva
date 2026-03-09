@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Building2, Mail, Globe, Languages } from 'lucide-react';
 import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
@@ -160,7 +161,12 @@ export default function PartnerProfile() {
         </Card>
       </motion.div>
 
+      {/* Change Password */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        <ChangePasswordSection />
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
           <Save className="h-4 w-4" /> {saving ? t('partner.profile.saving') : t('partner.profile.save')}
         </Button>

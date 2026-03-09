@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
@@ -308,8 +309,13 @@ export default function ParentProfile() {
         </Card>
       </motion.div>
 
-      {/* Save */}
+      {/* Change Password */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <ChangePasswordSection />
+      </motion.div>
+
+      {/* Save */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
         <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl font-display h-12 text-base gap-2">
           <Save className="h-4 w-4" /> {saving ? t('parent.profile.saving') : t('parent.profile.save')}
         </Button>

@@ -143,8 +143,11 @@ export default function ParentChildren() {
       });
       if (error) throw error;
       setInviteCode(newCode);
-    } catch {
-      toast({ title: t('common.error'), description: t('parent.children.code_error'), variant: 'destructive' });
+    } catch (err: any) {
+      console.error('Invite code error:', err);
+      toast({ title: t('common.error'), description: err?.message || t('parent.children.code_error'), variant: 'destructive' });
+      // Fallback: use code locally even if DB insert fails
+      setInviteCode(newCode);
     } finally {
       setInviteSaving(false);
     }

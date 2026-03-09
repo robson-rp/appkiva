@@ -367,6 +367,7 @@ const en: Record<string, string> = {
   'nav.teacher.classes': 'Classes',
   'nav.teacher.challenges': 'Challenges',
   'nav.teacher.school': 'School',
+  'nav.teacher.profile': 'Profile',
   'nav.teacher.slogan': 'School Mode',
   'nav.teacher.role': 'Teacher',
   'nav.teacher.badge': 'SCHOOL',
@@ -2587,6 +2588,10 @@ const en: Record<string, string> = {
   'password.redirect_login': 'You will be redirected to login shortly…',
   'password.invalid_link': 'Invalid or expired link',
   'password.invalid_link_desc': 'This recovery link is no longer valid. Request a new one from the login page.',
+  'password.change_title': 'Change password',
+  'password.confirm_password': 'Confirm password',
+  'password.mismatch': 'Passwords do not match.',
+  'password.match': 'Passwords match.',
 
   // ─── Wallet Protection ───
   'wallet.frozen': 'Wallet frozen',
