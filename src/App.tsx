@@ -41,6 +41,7 @@ const ParentVaults = lazy(() => import("./pages/parent/ParentVaults"));
 const ParentSubscription = lazy(() => import("./pages/parent/ParentSubscription"));
 const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
 const ParentSupport = lazy(() => import("./pages/parent/ParentSupport"));
+const ParentMissions = lazy(() => import("./pages/parent/ParentMissions"));
 
 // Child
 const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
