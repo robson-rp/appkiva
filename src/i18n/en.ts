@@ -2377,8 +2377,6 @@ const en: Record<string, string> = {
   'interest.show_less': 'Show less',
   'interest.show_all': 'Show all ({count})',
 
-  // ─── LearningProgressMap ───
-  'learn.lessons_count': '{done}/{total} lessons',
 
   // ─── WeeklySparkline ───
   'sparkline.this_week': 'This Week',

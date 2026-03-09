@@ -2377,8 +2377,6 @@ const pt: Record<string, string> = {
   'interest.show_less': 'Mostrar menos',
   'interest.show_all': 'Ver todos ({count})',
 
-  // ─── LearningProgressMap ───
-  'learn.lessons_count': '{done}/{total} lições',
 
   // ─── WeeklySparkline ───
   'sparkline.this_week': 'Esta Semana',
