@@ -391,6 +391,7 @@ const pt: Record<string, string> = {
   'nav.admin.currencies': 'Moedas',
   'nav.admin.audit': 'Auditoria',
   'nav.admin.risk': 'Risco',
+  'nav.admin.auth_security': 'Segurança Auth',
   'nav.admin.compliance': 'Compliance',
   'nav.admin.lessons': 'Lições',
   'nav.admin.onboarding': 'Onboarding',
