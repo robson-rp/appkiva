@@ -767,23 +767,21 @@ export default function Login() {
                       )}
 
                       {contactMethod !== 'phone' && (
-                      <Button
-                        type="submit"
-                        className="w-full font-display font-bold h-13 rounded-xl text-base"
-                        size="lg"
-                        disabled={submitting}
-                      >
-                        {submitting ? (
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : authMode === 'signup' ? (
-                          t('auth.sign_up')
-                        ) : (
-                        ) : authMode === 'signup' ? (
-                          t('auth.sign_up')
-                        ) : (
-                          t('auth.sign_in')
-                        )}
-                      </Button>
+                        <Button
+                          type="submit"
+                          className="w-full font-display font-bold h-13 rounded-xl text-base"
+                          size="lg"
+                          disabled={submitting}
+                        >
+                          {submitting ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : authMode === 'signup' ? (
+                            t('auth.sign_up')
+                          ) : (
+                            t('auth.sign_in')
+                          )}
+                        </Button>
+                      )}
 
                       <p className="text-center text-sm text-muted-foreground">
                         {authMode === 'login' ? (
