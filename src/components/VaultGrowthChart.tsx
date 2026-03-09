@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Vault {
   id: string;
@@ -17,14 +18,12 @@ interface VaultGrowthChartProps {
   vaults: Vault[];
 }
 
-const MONTHS_LABEL = ['Agora', 'Mês 1', 'Mês 2', 'Mês 3', 'Mês 4', 'Mês 5', 'Mês 6', 'Mês 7', 'Mês 8', 'Mês 9', 'Mês 10', 'Mês 11', 'Mês 12'];
-
-function generateProjectionData(vault: Vault, months: number) {
+function generateProjectionData(vault: Vault, months: number, t: (key: string) => string) {
   const data = [];
   let balance = vault.currentAmount;
   for (let i = 0; i <= months; i++) {
     data.push({
-      month: MONTHS_LABEL[i] ?? `Mês ${i}`,
+      month: i === 0 ? t('vault.chart.now') : t('vault.chart.month').replace('{n}', String(i)),
       saldo: Math.round(balance),
       meta: vault.targetAmount,
     });
@@ -42,14 +41,15 @@ const COLORS = [
 ];
 
 export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
+  const t = useT();
   const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null);
 
   const activeVault = vaults.find(v => v.id === selectedVaultId) ?? vaults[0];
 
   const data = useMemo(() => {
     if (!activeVault) return [];
-    return generateProjectionData(activeVault, 12);
-  }, [activeVault]);
+    return generateProjectionData(activeVault, 12, t);
+  }, [activeVault, t]);
 
   if (vaults.length === 0) return null;
 
@@ -71,10 +71,9 @@ export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
       <CardContent className="p-4 space-y-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
-          <h3 className="font-display font-bold text-sm text-foreground">Evolução do Saldo</h3>
+          <h3 className="font-display font-bold text-sm text-foreground">{t('vault.chart.title')}</h3>
         </div>
 
-        {/* Vault selector pills */}
         {vaults.length > 1 && (
           <div className="flex flex-wrap gap-1.5">
             {vaults.map((v) => (
@@ -91,7 +90,6 @@ export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
           </div>
         )}
 
-        {/* Chart */}
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
@@ -123,7 +121,7 @@ export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
                   fontSize: '12px',
                   fontFamily: 'var(--font-display)',
                 }}
-                formatter={(value: number) => [`${value} 🪙`, 'Saldo']}
+                formatter={(value: number) => [`${value} 🪙`, t('vault.chart.balance')]}
                 labelStyle={{ fontWeight: 'bold', color: 'hsl(var(--foreground))' }}
               />
               {activeVault && (
@@ -133,7 +131,7 @@ export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
                   strokeDasharray="5 5"
                   strokeWidth={1.5}
                   label={{
-                    value: `Meta: ${activeVault.targetAmount}`,
+                    value: t('vault.chart.target').replace('{amount}', String(activeVault.targetAmount)),
                     position: 'right',
                     fill: 'hsl(var(--secondary))',
                     fontSize: 10,
@@ -153,22 +151,23 @@ export function VaultGrowthChart({ vaults }: VaultGrowthChartProps) {
           </ResponsiveContainer>
         </div>
 
-        {/* Summary */}
         {activeVault && (
           <div className="flex items-center justify-between bg-muted/40 rounded-xl p-3 border border-border/30">
             <div className="text-xs text-muted-foreground">
               <span className="text-xl mr-1.5">{activeVault.icon}</span>
-              {activeVault.interestRate}%/mês
+              {activeVault.interestRate}%{t('vault.chart.rate_month')}
             </div>
             <div className="text-right">
               {monthsToTarget !== null && monthsToTarget > 0 ? (
                 <p className="text-xs font-display font-bold text-primary">
-                  Meta em ~{monthsToTarget} {monthsToTarget === 1 ? 'mês' : 'meses'}
+                  {t('vault.chart.target_in')
+                    .replace('{months}', String(monthsToTarget))
+                    .replace('{unit}', monthsToTarget === 1 ? t('vault.chart.month_singular') : t('vault.chart.month_plural'))}
                 </p>
               ) : monthsToTarget === 0 ? (
-                <p className="text-xs font-display font-bold text-secondary">Meta atingida! 🎉</p>
+                <p className="text-xs font-display font-bold text-secondary">{t('vault.chart.target_reached')}</p>
               ) : (
-                <p className="text-xs text-muted-foreground">Sem juros configurados</p>
+                <p className="text-xs text-muted-foreground">{t('vault.chart.no_interest')}</p>
               )}
             </div>
           </div>

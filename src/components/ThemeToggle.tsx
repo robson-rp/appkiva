@@ -1,8 +1,10 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
+import { useT } from '@/contexts/LanguageContext';
 
 export function ThemeToggle() {
+  const t = useT();
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -10,7 +12,7 @@ export function ThemeToggle() {
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95"
-      aria-label="Alternar tema"
+      aria-label={t('theme.toggle')}
     >
       <motion.div
         key={isDark ? 'dark' : 'light'}

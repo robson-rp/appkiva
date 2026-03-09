@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { LeagueTier, LEAGUE_TIERS, getLeagueTier } from '@/types/league';
 import { Shield } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface LeagueBadgeProps {
   weeklyPoints: number;
@@ -8,6 +9,7 @@ interface LeagueBadgeProps {
 }
 
 export function LeagueBadge({ weeklyPoints, compact = false }: LeagueBadgeProps) {
+  const t = useT();
   const tier = getLeagueTier(weeklyPoints);
   const config = LEAGUE_TIERS[tier];
 
@@ -34,8 +36,8 @@ export function LeagueBadge({ weeklyPoints, compact = false }: LeagueBadgeProps)
         {config.icon}
       </motion.div>
       <div>
-        <p className={`text-xs font-display font-bold ${config.color}`}>Liga {config.label}</p>
-        <p className="text-[10px] text-muted-foreground">{weeklyPoints} pts esta semana</p>
+        <p className={`text-xs font-display font-bold ${config.color}`}>{t('league.title').replace('{label}', config.label)}</p>
+        <p className="text-[10px] text-muted-foreground">{t('league.weekly_pts').replace('{pts}', String(weeklyPoints))}</p>
       </div>
       <Shield className={`h-4 w-4 ml-auto ${config.color} opacity-50`} />
     </motion.div>

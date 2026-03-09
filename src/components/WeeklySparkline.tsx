@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles } from 'lucide-react';
 import { LineChart, Line, XAxis, ResponsiveContainer } from 'recharts';
 import { DailyPoint } from '@/hooks/use-weekly-sparkline';
+import { useT } from '@/contexts/LanguageContext';
 
 interface WeeklySparklineProps {
   points: DailyPoint[];
@@ -10,6 +11,7 @@ interface WeeklySparklineProps {
 }
 
 export function WeeklySparkline({ points, totalEarned, totalSpent }: WeeklySparklineProps) {
+  const t = useT();
   if (points.length === 0) return null;
 
   return (
@@ -20,7 +22,7 @@ export function WeeklySparkline({ points, totalEarned, totalSpent }: WeeklySpark
             <div className="w-6 h-6 rounded-lg bg-secondary/10 flex items-center justify-center">
               <Sparkles className="h-3 w-3 text-secondary" />
             </div>
-            <span className="text-xs font-display font-bold text-foreground">Esta Semana</span>
+            <span className="text-xs font-display font-bold text-foreground">{t('sparkline.this_week')}</span>
           </div>
           <div className="flex items-center gap-3 text-[10px] font-display">
             <span className="text-secondary font-bold">+{totalEarned} 🪙</span>

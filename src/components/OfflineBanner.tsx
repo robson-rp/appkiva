@@ -1,8 +1,10 @@
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useT } from '@/contexts/LanguageContext';
 
 export function OfflineBanner() {
+  const t = useT();
   const isOnline = useOnlineStatus();
 
   return (
@@ -17,7 +19,7 @@ export function OfflineBanner() {
         >
           <div className="flex items-center justify-center gap-2 py-1.5 px-4">
             <WifiOff className="h-3.5 w-3.5 shrink-0" />
-            <span>Estás offline — os dados podem estar desatualizados</span>
+            <span>{t('offline.message')}</span>
           </div>
         </motion.div>
       )}

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { LESSON_CATEGORIES, LessonCategory, MicroLesson } from '@/types/kivara';
 import { Lock, CheckCircle, Star } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 interface LearningProgressMapProps {
   lessons: MicroLesson[];
@@ -35,6 +36,8 @@ const WORLD_ACTIVE_BG: Record<LessonCategory, string> = {
 };
 
 export function LearningProgressMap({ lessons, completedIds, onStartLesson }: LearningProgressMapProps) {
+  const t = useT();
+
   // Group lessons by category
   const worldLessons = WORLD_ORDER.map(cat => ({
     category: cat,
@@ -80,7 +83,7 @@ export function LearningProgressMap({ lessons, completedIds, onStartLesson }: Le
                     {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
                     {allDone && <CheckCircle className="h-3.5 w-3.5 text-secondary" />}
                   </div>
-                  <p className="text-[10px] text-muted-foreground">{completedCount}/{totalCount} lições</p>
+                  <p className="text-[10px] text-muted-foreground">{t('learn.lessons_count').replace('{done}', String(completedCount)).replace('{total}', String(totalCount))}</p>
                 </div>
                 {/* Mini progress */}
                 <div className="w-12 h-12 relative shrink-0">

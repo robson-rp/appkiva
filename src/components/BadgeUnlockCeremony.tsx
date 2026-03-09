@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CollectibleBadge, BADGE_TIERS, BADGE_CATEGORIES } from '@/types/kivara';
 import { Sparkles } from 'lucide-react';
 import { playSparkleSound, playUnlockFanfare, playConfirmDing, hapticBurst, hapticLight, hapticSuccess } from '@/lib/celebration-effects';
+import { useT } from '@/contexts/LanguageContext';
 
 interface ConfettiPiece {
   id: number;
@@ -47,13 +48,13 @@ interface BadgeUnlockCeremonyProps {
 }
 
 export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyProps) {
+  const t = useT();
   const [phase, setPhase] = useState<'burst' | 'reveal' | 'done'>('burst');
   const [confetti] = useState(() => generateConfetti(40));
   const tierConfig = BADGE_TIERS[badge.tier];
   const catConfig = BADGE_CATEGORIES[badge.category];
 
   useEffect(() => {
-    // Burst phase: sparkle sound + haptic
     playSparkleSound();
     hapticBurst();
 
@@ -82,7 +83,6 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
         >
           <motion.div className="absolute inset-0 bg-background/80 backdrop-blur-md" />
 
-          {/* Confetti */}
           {confetti.map((c) => (
             <motion.div
               key={c.id}
@@ -107,7 +107,6 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
           ))}
 
           <div className="relative z-[62] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            {/* Radial burst */}
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: [0, 2.5, 3], opacity: [0, 0.6, 0] }}
@@ -116,7 +115,6 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
               style={{ background: `radial-gradient(circle, hsl(var(--accent) / 0.5), transparent 70%)` }}
             />
 
-            {/* Sparkle ring */}
             {Array.from({ length: 8 }).map((_, i) => {
               const angle = (360 / 8) * i;
               const rad = (angle * Math.PI) / 180;
@@ -138,7 +136,6 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
               );
             })}
 
-            {/* Badge icon */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{
@@ -157,7 +154,6 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
               </motion.div>
             </motion.div>
 
-            {/* Text */}
             <AnimatePresence>
               {phase === 'reveal' && (
                 <motion.div
@@ -174,7 +170,7 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
                   >
                     <Sparkles className="h-5 w-5 text-accent" />
                     <span className="font-display text-sm font-bold uppercase tracking-widest text-accent">
-                      Badge Desbloqueado!
+                      {t('badge.unlocked')}
                     </span>
                     <Sparkles className="h-5 w-5 text-accent" />
                   </motion.div>
@@ -220,7 +216,7 @@ export function BadgeUnlockCeremony({ badge, onComplete }: BadgeUnlockCeremonyPr
                     onClick={() => { playConfirmDing(); hapticLight(); onComplete(); }}
                     className="mt-5 px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-display font-bold text-sm"
                   >
-                    Incrível! 🎉
+                    {t('badge.awesome')}
                   </motion.button>
                 </motion.div>
               )}

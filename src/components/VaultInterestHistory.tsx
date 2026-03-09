@@ -4,8 +4,10 @@ import { useVaultInterestHistory } from '@/hooks/use-vault-interest-history';
 import { TrendingUp, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/contexts/LanguageContext';
 
 export function VaultInterestHistory({ profileId }: { profileId?: string }) {
+  const t = useT();
   const { data: entries, isLoading } = useVaultInterestHistory(profileId);
   const [expanded, setExpanded] = useState(false);
 
@@ -15,8 +17,8 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
       <Card className="border-border/50">
         <CardContent className="p-4 text-center">
           <TrendingUp className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-          <p className="text-sm text-muted-foreground">Ainda não recebes-te juros.</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">Os juros são creditados mensalmente.</p>
+          <p className="text-sm text-muted-foreground">{t('interest.no_interest')}</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">{t('interest.no_interest_desc')}</p>
         </CardContent>
       </Card>
     );
@@ -34,13 +36,15 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
               <TrendingUp className="h-4 w-4 text-secondary" />
             </div>
             <div>
-              <h3 className="font-display font-bold text-sm text-foreground">Histórico de Juros</h3>
-              <p className="text-[10px] text-muted-foreground">{entries.length} crédito{entries.length !== 1 ? 's' : ''}</p>
+              <h3 className="font-display font-bold text-sm text-foreground">{t('interest.title')}</h3>
+              <p className="text-[10px] text-muted-foreground">
+                {(entries.length !== 1 ? t('interest.credits_plural') : t('interest.credits')).replace('{count}', String(entries.length))}
+              </p>
             </div>
           </div>
           <div className="text-right">
             <p className="font-display font-bold text-secondary text-sm">+{totalInterest} 🪙</p>
-            <p className="text-[10px] text-muted-foreground">total recebido</p>
+            <p className="text-[10px] text-muted-foreground">{t('interest.total_received')}</p>
           </div>
         </div>
 
@@ -60,7 +64,7 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
                     <span className="text-lg shrink-0">📈</span>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-foreground truncate">
-                        {entry.vaultName ?? 'Cofre'}
+                        {entry.vaultName ?? t('interest.vault_fallback')}
                       </p>
                       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                         <Calendar className="h-2.5 w-2.5 shrink-0" />
@@ -88,9 +92,9 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
             onClick={() => setExpanded(!expanded)}
           >
             {expanded ? (
-              <><ChevronUp className="h-3 w-3" /> Mostrar menos</>
+              <><ChevronUp className="h-3 w-3" /> {t('interest.show_less')}</>
             ) : (
-              <><ChevronDown className="h-3 w-3" /> Ver todos ({entries.length})</>
+              <><ChevronDown className="h-3 w-3" /> {t('interest.show_all').replace('{count}', String(entries.length))}</>
             )}
           </Button>
         )}

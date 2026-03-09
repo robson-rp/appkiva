@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import kivaraWhiteLogo from '@/assets/logo-kivara-white.svg';
 import heroFamily from '@/assets/landing/hero-family.png';
+import { useT } from '@/contexts/LanguageContext';
 
 export function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  const t = useT();
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -24,7 +26,6 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
             background: 'linear-gradient(145deg, hsl(214 64% 18%), hsl(214 64% 28%), hsl(160 54% 30%))',
           }}
         >
-          {/* Floating particles */}
           {[
             { size: 120, x: '15%', y: '20%', delay: 0.5, duration: 5 },
             { size: 80, x: '80%', y: '70%', delay: 1.0, duration: 6 },
@@ -55,7 +56,6 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
             />
           ))}
 
-          {/* Background illustration */}
           <motion.img
             src={heroFamily}
             alt=""
@@ -67,7 +67,6 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
             transition={{ duration: 1.2, ease: 'easeOut' }}
           />
 
-          {/* Gradient overlay for readability */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -75,9 +74,7 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
             }}
           />
 
-          {/* Content */}
           <div className="relative z-10 flex flex-col items-center px-6">
-            {/* Logo */}
             <motion.img
               src={kivaraWhiteLogo}
               alt="Kivara"
@@ -87,7 +84,6 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
               transition={{ type: 'spring', stiffness: 180, damping: 18, duration: 0.5 }}
             />
 
-            {/* Brand name */}
             <motion.h1
               className="mt-5 text-4xl sm:text-5xl font-display font-bold text-primary-foreground tracking-tight drop-shadow-md"
               initial={{ opacity: 0, y: 16 }}
@@ -97,7 +93,6 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
               Kivara
             </motion.h1>
 
-            {/* Slogan with gold gradient */}
             <motion.p
               className="mt-3 text-lg sm:text-xl font-display font-semibold tracking-wide"
               style={{
@@ -112,20 +107,18 @@ export function SplashScreen({ onComplete }: { onComplete: () => void }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.65, duration: 0.5 }}
             >
-              Pequenos hábitos. Grandes futuros.
+              {t('splash.tagline')}
             </motion.p>
 
-            {/* Subtitle */}
             <motion.p
               className="text-sm sm:text-base text-primary-foreground/60 mt-1.5"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.95, duration: 0.4 }}
             >
-              Literacia financeira para famílias
+              {t('splash.subtitle')}
             </motion.p>
 
-            {/* Progress bar with glow */}
             <motion.div
               className="mt-10 h-1.5 w-24 rounded-full overflow-hidden"
               style={{

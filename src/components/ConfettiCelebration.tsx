@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playUnlockFanfare, hapticSuccess } from '@/lib/celebration-effects';
+import { useT } from '@/contexts/LanguageContext';
 
 interface Particle {
   x: number;
@@ -45,6 +46,7 @@ interface ConfettiCelebrationProps {
 }
 
 export function ConfettiCelebration({ active, onComplete, vaultName, vaultIcon }: ConfettiCelebrationProps) {
+  const t = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const animRef = useRef<number>(0);
@@ -141,11 +143,11 @@ export function ConfettiCelebration({ active, onComplete, vaultName, vaultIcon }
                 {vaultIcon ?? '🎉'}
               </motion.div>
               <h2 className="font-display text-xl font-bold text-foreground mb-1">
-                Meta atingida! 🏆
+                {t('confetti.goal_reached')}
               </h2>
               {vaultName && (
                 <p className="text-sm text-muted-foreground">
-                  O cofre <span className="font-bold text-primary">"{vaultName}"</span> chegou ao objectivo!
+                  {t('confetti.vault_reached').replace('{name}', vaultName)}
                 </p>
               )}
               <motion.div
@@ -153,7 +155,7 @@ export function ConfettiCelebration({ active, onComplete, vaultName, vaultIcon }
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
               >
-                ✨ Parabéns! ✨
+                {t('confetti.congrats')}
               </motion.div>
             </div>
           </motion.div>

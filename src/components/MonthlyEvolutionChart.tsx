@@ -2,12 +2,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { MonthlySummary } from '@/hooks/use-monthly-summary';
+import { useT } from '@/contexts/LanguageContext';
 
 interface MonthlyEvolutionChartProps {
   data: MonthlySummary[];
 }
 
 export function MonthlyEvolutionChart({ data }: MonthlyEvolutionChartProps) {
+  const t = useT();
   if (data.length === 0) return null;
 
   return (
@@ -18,7 +20,7 @@ export function MonthlyEvolutionChart({ data }: MonthlyEvolutionChartProps) {
           <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
             <BarChart3 className="h-3.5 w-3.5 text-primary" />
           </div>
-          Evolução Mensal
+          {t('chart.monthly_evolution')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pb-4">
@@ -30,8 +32,8 @@ export function MonthlyEvolutionChart({ data }: MonthlyEvolutionChartProps) {
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} width={32} />
               <Tooltip
                 contentStyle={{ borderRadius: 12, border: '1px solid hsl(var(--border))', background: 'hsl(var(--card))', fontSize: 12, fontFamily: 'var(--font-display)' }}
-                formatter={(value: number, name: string) => [`🪙 ${value}`, name === 'income' ? 'Ganho' : 'Gasto']}
-                labelFormatter={(label) => `Mês: ${label}`}
+                formatter={(value: number, name: string) => [`🪙 ${value}`, name === 'income' ? t('chart.earned') : t('chart.spent')]}
+                labelFormatter={(label) => t('chart.month_label').replace('{label}', label)}
               />
               <Bar dataKey="income" name="income" fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} maxBarSize={28} />
               <Bar dataKey="expenses" name="expenses" fill="hsl(var(--destructive))" radius={[6, 6, 0, 0]} maxBarSize={28} />
@@ -41,11 +43,11 @@ export function MonthlyEvolutionChart({ data }: MonthlyEvolutionChartProps) {
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-secondary" />
-            <span className="text-[10px] text-muted-foreground font-medium">Ganho</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{t('chart.earned')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-destructive" />
-            <span className="text-[10px] text-muted-foreground font-medium">Gasto</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{t('chart.spent')}</span>
           </div>
         </div>
       </CardContent>
