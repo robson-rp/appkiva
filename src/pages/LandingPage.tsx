@@ -204,6 +204,14 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <button
+            onClick={toggleLocale}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Change language"
+          >
+            <Globe className="h-4 w-4" />
+            <span className="uppercase">{locale}</span>
+          </button>
           <Button variant="ghost" asChild>
             <Link to="/login">{t('nav.login')}</Link>
           </Button>
