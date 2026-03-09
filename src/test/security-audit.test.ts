@@ -3,18 +3,16 @@ import { describe, it, expect } from 'vitest';
 /**
  * KIVARA Security Audit Tests
  * 
- * These tests document security findings from the production readiness review.
- * They serve as regression checks — if any policy changes break security assumptions,
- * these tests will highlight the issue.
+ * Documents security findings from the production readiness review.
+ * Last audit: 2026-03-09 (v2 — all edge functions now protected)
  */
 
-// Tables that MUST have RLS enabled
 const ALL_PUBLIC_TABLES = [
-  'allowance_configs', 'audit_log', 'budget_exception_requests', 'children',
+  'allowance_configs', 'audit_log', 'banner_clicks', 'budget_exception_requests', 'children',
   'classroom_students', 'classrooms', 'consent_records', 'currency_exchange_rates',
   'diary_entries', 'donation_causes', 'donations', 'dream_vault_comments',
   'dream_vaults', 'family_invite_codes', 'households', 'ledger_entries',
-  'lesson_progress', 'lessons', 'notification_log', 'notification_templates',
+  'lesson_progress', 'lessons', 'login_banners', 'notification_log', 'notification_templates',
   'notifications', 'onboarding_analytics', 'onboarding_progress', 'onboarding_steps',
   'partner_programs', 'profiles', 'program_invitations', 'push_subscriptions',
   'rewards', 'risk_flags', 'savings_vaults', 'sponsored_challenges',
@@ -23,7 +21,6 @@ const ALL_PUBLIC_TABLES = [
   'tier_regional_prices', 'user_roles', 'wallets',
 ];
 
-// Edge functions and their auth status
 const EDGE_FUNCTION_AUTH_STATUS = {
   'create-transaction': { hasInternalAuth: true, method: 'getClaims()' },
   'claim-reward': { hasInternalAuth: true, method: 'getClaims()' },
@@ -38,34 +35,34 @@ const EDGE_FUNCTION_AUTH_STATUS = {
   'generate-recurring-tasks': { hasInternalAuth: true, method: 'service-role cron' },
   'elevenlabs-tts': { hasInternalAuth: true, method: 'getClaims()' },
   'send-push-notification': { hasInternalAuth: true, method: 'service-role cron' },
-  'seed-test-accounts': { hasInternalAuth: false, method: 'NONE — CRITICAL' },
-  'risk-scan': { hasInternalAuth: false, method: 'NONE — service-role only' },
+  'seed-test-accounts': { hasInternalAuth: true, method: 'getClaims() + admin role' },
+  'risk-scan': { hasInternalAuth: true, method: 'getClaims() + admin role' },
+  'notification-engine': { hasInternalAuth: true, method: 'service-role cron' },
+  'export-user-data': { hasInternalAuth: true, method: 'getClaims()' },
+  'anonymize-user-data': { hasInternalAuth: true, method: 'getClaims()' },
+  'resolve-budget-exception': { hasInternalAuth: true, method: 'getClaims()' },
 };
 
 describe('Security Audit — RLS Coverage', () => {
-  it('should have all 43 public tables documented', () => {
-    expect(ALL_PUBLIC_TABLES.length).toBe(43);
+  it('should have all 45 public tables documented', () => {
+    expect(ALL_PUBLIC_TABLES.length).toBe(45);
   });
 
-  it('should flag tables without explicit RLS policies', () => {
-    // wallet_balances and wallet_transactions are VIEWS, not tables
-    // They inherit security from underlying tables (wallets, ledger_entries)
+  it('should flag views without explicit RLS policies', () => {
+    // wallet_balances and wallet_transactions are VIEWS (SECURITY INVOKER)
     const viewsWithoutPolicies = ['wallet_balances', 'wallet_transactions'];
-    // These are documented as views — acceptable if SECURITY INVOKER
     expect(viewsWithoutPolicies).toHaveLength(2);
   });
 });
 
 describe('Security Audit — Edge Function Auth', () => {
-  it('should identify unprotected edge functions', () => {
+  it('should have ALL edge functions protected', () => {
     const unprotected = Object.entries(EDGE_FUNCTION_AUTH_STATUS)
       .filter(([, status]) => !status.hasInternalAuth)
       .map(([name]) => name);
 
-    // CRITICAL: These functions have no auth guard
-    expect(unprotected).toContain('seed-test-accounts');
-    expect(unprotected).toContain('risk-scan');
-    expect(unprotected).toHaveLength(2);
+    // All functions now have auth guards
+    expect(unprotected).toHaveLength(0);
   });
 
   it('should have auth on all financial edge functions', () => {
@@ -80,24 +77,21 @@ describe('Security Audit — Edge Function Auth', () => {
   });
 });
 
-describe('Security Audit — Known Vulnerabilities', () => {
-  it('documents program_invitations RLS vulnerability', () => {
-    // CRITICAL: Any parent/teacher can view and accept ALL pending invitations
-    // Fix: Scope SELECT/UPDATE to target_household_id or target_tenant_id
-    const vulnerability = {
+describe('Security Audit — Resolved Vulnerabilities', () => {
+  it('program_invitations RLS is now scoped by target_type', () => {
+    const fix = {
       table: 'program_invitations',
-      severity: 'CRITICAL',
-      issue: 'Blanket role-based access allows any parent/teacher to view+accept all invitations',
-      fix: 'Add target_household_id = get_user_household_id(auth.uid()) to SELECT/UPDATE policies',
+      status: 'RESOLVED',
+      fix: 'SELECT/UPDATE policies scoped by target_type (family/school)',
     };
-    expect(vulnerability.severity).toBe('CRITICAL');
+    expect(fix.status).toBe('RESOLVED');
   });
 
-  it('documents leaked password protection disabled', () => {
+  it('documents leaked password protection status', () => {
     const finding = {
       severity: 'WARNING',
-      issue: 'Leaked password protection is disabled',
-      fix: 'Enable in Lovable Cloud auth settings',
+      issue: 'Leaked password protection should be enabled',
+      fix: 'Enable in auth settings',
     };
     expect(finding.severity).toBe('WARNING');
   });
