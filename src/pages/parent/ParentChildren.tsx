@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown, UserPlus } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown, UserPlus, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
+import { useHouseholdGuardians, useInviteGuardian, useRemoveGuardian } from '@/hooks/use-household-guardians';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
