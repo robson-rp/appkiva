@@ -229,6 +229,7 @@ export default function Login() {
               }
             }
           }
+          */
         } else {
           const { error } = await signup(
             email,
@@ -250,7 +251,10 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
-          toast({ title: t('auth.account_created'), description: t('auth.check_email') });
+          // Show email verification screen instead of navigating
+          setEmailSignupSuccess(true);
+          setSubmitting(false);
+          return;
         }
       } else {
         if (contactMethod === 'phone') {
