@@ -33,6 +33,7 @@ function useTeacherNav() {
     { title: t('nav.teacher.classes'), url: '/teacher/classes', icon: Users },
     { title: t('nav.teacher.challenges'), url: '/teacher/challenges', icon: Trophy, badge: urgentChallengesCount },
     { title: t('nav.teacher.school'), url: '/teacher/school', icon: School },
+    { title: t('nav.teacher.profile'), url: '/teacher/profile', icon: UserCircle },
   ];
 
   const mobileFixedItems = [
