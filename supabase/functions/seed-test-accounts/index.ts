@@ -78,6 +78,25 @@ Deno.serve(async (req) => {
 
   const results: Record<string, string> = {};
 
+  const findUserByEmail = async (email: string) => {
+    const target = email.toLowerCase();
+    let page = 1;
+
+    while (page <= 20) {
+      const { data: pageData, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) return null;
+
+      const users = pageData?.users ?? [];
+      const found = users.find((u: any) => (u.email ?? '').toLowerCase() === target);
+      if (found) return found;
+
+      if (users.length < 200) break;
+      page += 1;
+    }
+
+    return null;
+  };
+
   // ─── 1. Create or find users ───────────────────────────────
   for (const acc of accounts) {
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -93,14 +112,18 @@ Deno.serve(async (req) => {
 
     if (error) {
       // User already exists – look up by email and force-update password
-      const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = listData?.users?.find((u: any) => u.email === acc.email);
+      const existingUser = await findUserByEmail(acc.email);
 
       if (existingUser) {
         // Force-update password to the new one
         await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
           password,
           email_confirm: true,
+          user_metadata: {
+            display_name: acc.name,
+            role: acc.role,
+            avatar: acc.avatar,
+          },
         });
 
         results[acc.role] = existingUser.id;
