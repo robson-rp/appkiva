@@ -161,7 +161,8 @@ function WaveDivider({ flip = false, className = "" }: { flip?: boolean; classNa
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const t = useT();
+  const { locale, setLocale, t } = useLanguage();
+  const toggleLocale = () => setLocale(locale === 'pt' ? 'en' : 'pt');
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
