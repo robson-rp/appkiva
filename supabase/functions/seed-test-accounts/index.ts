@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
     if (error) {
       // User already exists – look up by display_name in profiles and force-update password
-      const existingUserId = await findUserIdByName(acc.name);
+      const existingUserId = await findUserByEmail(acc.email);
 
       if (existingUserId) {
         // Force-update password to the new one
