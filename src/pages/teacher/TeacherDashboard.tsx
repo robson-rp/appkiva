@@ -228,22 +228,22 @@ export default function TeacherDashboard() {
                   <motion.div
                     key={student.childId}
                     whileHover={{ x: 4 }}
-                    className="flex items-center gap-3 p-3.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50 min-h-[56px]"
+                    className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-2xl bg-muted/40 hover:bg-muted/70 transition-all duration-200 border border-transparent hover:border-border/50 min-h-[48px] sm:min-h-[56px]"
                   >
-                    <span className="text-lg w-7 text-center font-display font-bold">
+                    <span className="text-base sm:text-lg w-6 sm:w-7 text-center font-display font-bold">
                       {i < 3 ? medals[i] : `${i + 1}.`}
                     </span>
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-xl">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-[hsl(var(--kivara-light-blue))] to-[hsl(var(--kivara-light-green))] flex items-center justify-center text-lg sm:text-xl shrink-0">
                       {student.avatar}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-display font-bold text-base">{student.name}</p>
-                      <div className="flex items-center gap-3 text-small text-muted-foreground">
-                        <span>⭐ {student.kivaPoints} pts</span>
+                      <p className="font-display font-bold text-sm sm:text-base truncate">{student.name}</p>
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-small text-muted-foreground">
+                        <span>⭐ {student.kivaPoints}</span>
                         <span>💾 {student.savingsRate}%</span>
                       </div>
                     </div>
-                    <span className="text-small text-muted-foreground font-display">{student.tasksCompleted} {t('teacher.dashboard.tasks')}</span>
+                    <span className="text-xs sm:text-small text-muted-foreground font-display hidden xs:block">{student.tasksCompleted} {t('teacher.dashboard.tasks')}</span>
                   </motion.div>
                 );
               })}
