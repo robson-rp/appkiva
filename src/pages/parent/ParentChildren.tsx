@@ -202,7 +202,6 @@ export default function ParentChildren() {
             }}>
               <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.create_child')}
             </Button>
-            </Button>
           </div>
         </div>
         <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
