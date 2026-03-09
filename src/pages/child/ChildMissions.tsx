@@ -349,8 +349,8 @@ function MissionsTab({
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: t('child.missions.daily'), value: dailyMissions.length, icon: Sparkles },
-                { label: t('child.missions.weekly'), value: weeklyMissions.length, icon: Zap },
+                { label: t('child.missions.available'), value: available.length, icon: Sparkles },
+                { label: t('child.missions.in_progress'), value: inProgress.length, icon: Zap },
                 { label: t('child.missions.completed'), value: completed.length, icon: Trophy },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
@@ -360,38 +360,6 @@ function MissionsTab({
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* Daily Missions */}
-      {dailyMissions.length > 0 && (
-        <motion.div variants={item}>
-          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> {t('child.missions.daily_missions')}
-            <span className="text-[10px] text-muted-foreground font-normal ml-auto">{t('child.missions.renew_24h')}</span>
-          </h2>
-          <div className="space-y-3">
-            {dailyMissions.map((mission) => (
-              <DailyMissionCard key={mission.id} mission={mission} type="daily" />
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Weekly Quests */}
-      {weeklyMissions.length > 0 && (
-        <motion.div variants={item}>
-          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Target className="h-4 w-4 text-primary" /> {t('child.missions.weekly_quests')}
-          </h2>
-          <div className="space-y-3">
-            {weeklyMissions.map((mission) => (
-              <DailyMissionCard key={mission.id} mission={mission} type="weekly" />
-            ))}
-          </div>
-        </motion.div>
-      )}
 
       {/* In Progress */}
       {inProgress.length > 0 && (
