@@ -89,6 +89,17 @@ export default function Login() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Auto-fill invite code from URL query param (?invite=ABC123)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const invite = params.get('invite');
+    if (invite) {
+      setInviteCode(invite.toUpperCase().slice(0, 6));
+      setAuthMode('signup');
+      if (!selectedRole) setSelectedRole('child');
+    }
+  }, []);
+
   // Redirect when user is loaded by AuthContext (pending2FA blocks redirect)
   useEffect(() => {
     if (user && !pending2FA) {
