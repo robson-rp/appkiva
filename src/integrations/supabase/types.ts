@@ -2378,6 +2378,10 @@ export type Database = {
         Returns: undefined
       }
       delete_child_safe: { Args: { _child_id: string }; Returns: undefined }
+      ensure_parent_household: {
+        Args: { _profile_id: string }
+        Returns: string
+      }
       get_money_supply_stats: { Args: never; Returns: Json }
       get_parent_emission_stats: {
         Args: { _parent_profile_id: string }
