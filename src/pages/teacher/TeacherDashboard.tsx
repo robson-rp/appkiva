@@ -254,7 +254,7 @@ export default function TeacherDashboard() {
 
       {/* Class Comparison Panel */}
       <motion.div variants={item}>
-        <Card className="border-border/50 overflow-hidden">
+        <Card className="border-border/50 overflow-hidden w-full">
           <div className="h-0.5 bg-gradient-to-r from-primary via-secondary to-primary" />
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-base font-display flex items-center gap-2">
