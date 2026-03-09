@@ -726,13 +726,21 @@ export default function Login() {
                           <Input
                             id="password"
                             type="password"
-                            placeholder="••••••••"
+                            placeholder="••••••••••••"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             className="h-12 rounded-xl text-base"
-                            minLength={6}
+                            minLength={12}
                             required
                           />
+                          {authMode === 'signup' && <PasswordStrengthMeter password={password} />}
+                          {authMode === 'login' && (
+                            <div className="text-right">
+                              <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                                {t('password.forgot_link')}
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       )}
 
