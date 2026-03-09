@@ -152,6 +152,11 @@ export default function Login() {
 
     try {
       if (authMode === 'signup') {
+        if (contactMethod === 'email' && !isPasswordValid(password)) {
+          toast({ title: t('password.too_weak'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+        }
         if ((selectedRole === 'child' || selectedRole === 'teen') && !inviteValid) {
           toast({ title: t('auth.otp_invalid'), description: t('auth.invite_required'), variant: 'destructive' });
           setSubmitting(false);
