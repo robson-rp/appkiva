@@ -92,22 +92,27 @@ Deno.serve(async (req) => {
     });
 
     if (error) {
-      const { data: signInData } = await lookupClient.auth.signInWithPassword({
-        email: acc.email,
-        password,
-      });
+      // User already exists – look up by email and force-update password
+      const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = listData?.users?.find((u: any) => u.email === acc.email);
 
-      if (signInData?.user) {
-        results[acc.role] = signInData.user.id;
+      if (existingUser) {
+        // Force-update password to the new one
+        await supabaseAdmin.auth.admin.updateUserById(existingUser.id, {
+          password,
+          email_confirm: true,
+        });
+
+        results[acc.role] = existingUser.id;
 
         const { data: existingRoles } = await supabaseAdmin
           .from("user_roles")
           .select("id")
-          .eq("user_id", signInData.user.id)
+          .eq("user_id", existingUser.id)
           .eq("role", acc.role);
 
         if (!existingRoles || existingRoles.length === 0) {
-          await supabaseAdmin.from("user_roles").insert({ user_id: signInData.user.id, role: acc.role });
+          await supabaseAdmin.from("user_roles").insert({ user_id: existingUser.id, role: acc.role });
         }
       } else {
         results[acc.role] = `skipped: ${error.message}`;
