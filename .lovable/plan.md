@@ -1,128 +1,93 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+# Password Security & Authentication Hardening — KIVARA
 
-## Current State Assessment
+## Current State
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+- Password field has `minLength={6}` — far below the requested 12-character minimum
+- No password strength meter exists
+- No "Forgot Password" flow or `/reset-password` page exists
+- No password change functionality in profile pages
+- Supabase handles hashing (bcrypt) server-side — no action needed there
+- Session management is handled by Supabase Auth (auto-refresh, persistent sessions)
+- Rate limiting and account lockout are Supabase-managed (not configurable from client)
+- No 2FA implementation exists
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+## Scope & Constraints
 
-## What Lovable Can and Cannot Build
+Several items in the request are handled at the infrastructure level by Lovable Cloud and cannot be customized from client code:
+- **Password hashing** (bcrypt) — already handled server-side
+- **Rate limiting / account lockout** — managed by the auth infrastructure
+- **Reset token expiry** — managed server-side (default 24h, not configurable via client)
+- **IP logging** — not available from client-side code
+- **2FA / TOTP** — Supabase MFA API exists but requires careful implementation
+- **Password history** — not natively supported; would require a custom table
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+What we **can and should** implement:
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+## Plan
 
-## Implementation Plan (4 Phases)
+### 1. Password Validation Utility (`src/lib/password-validation.ts`)
+Create a shared password validation module:
+- Minimum 12 characters
+- Must contain: uppercase, lowercase, number, special character
+- Returns strength level: `weak | moderate | strong | very_strong`
+- Returns per-rule check results for UI feedback
+- Common password blocklist (password, 12345678, kivara123, etc.)
 
-### Phase 1 — Multi-Tenant Foundation
+### 2. Password Strength Meter Component (`src/components/PasswordStrengthMeter.tsx`)
+- Real-time colored progress bar (red → orange → green → emerald)
+- Shows which rules pass/fail with checkmarks
+- Labels: Fraca / Moderada / Forte / Muito Forte
+- Used in signup form and password reset form
 
-**Database migrations:**
+### 3. Update Login Page (`src/pages/Login.tsx`)
+- Replace `minLength={6}` with validation from the new utility
+- Add `PasswordStrengthMeter` below the password field during signup
+- Block form submission if password doesn't meet minimum "moderate" level
+- Add "Forgot Password?" link below the password field on login mode
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+### 4. Forgot Password Flow (`src/pages/ForgotPassword.tsx`)
+- Simple email input form
+- Calls `supabase.auth.resetPasswordForEmail(email, { redirectTo: origin + '/reset-password' })`
+- Shows confirmation message after submission
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+### 5. Reset Password Page (`src/pages/ResetPassword.tsx`)
+- Checks for `type=recovery` in URL hash
+- Shows new password form with `PasswordStrengthMeter`
+- Calls `supabase.auth.updateUser({ password })`
+- Enforces same strong password policy
+- Redirects to login on success
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+### 6. Update App Router (`src/App.tsx`)
+- Add routes: `/forgot-password` and `/reset-password` (public)
 
-4. Expand `app_role` enum to include `admin`
+### 7. i18n Keys (pt.ts + en.ts)
+Add ~20 keys for password validation rules, strength labels, forgot/reset flow messages.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+### 8. Security Audit Test Update (`src/test/security-audit.test.ts`)
+- Add test documenting strong password policy enforcement
+- Document forgot/reset password flow existence
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+## Files Summary
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+| File | Action |
+|------|--------|
+| `src/lib/password-validation.ts` | **New** — validation logic + strength calculator |
+| `src/components/PasswordStrengthMeter.tsx` | **New** — visual strength indicator |
+| `src/pages/Login.tsx` | **Edit** — add strength meter, forgot password link, enforce policy |
+| `src/pages/ForgotPassword.tsx` | **New** — email-based password reset request |
+| `src/pages/ResetPassword.tsx` | **New** — set new password after email link |
+| `src/App.tsx` | **Edit** — add 2 new routes |
+| `src/i18n/pt.ts` | **Edit** — add ~20 keys |
+| `src/i18n/en.ts` | **Edit** — add ~20 keys |
+| `src/test/security-audit.test.ts` | **Edit** — document new security controls |
 
-**Database:**
-
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+## Out of Scope (Infrastructure-Level)
+These are noted in the report but not implementable from client code:
+- Brute-force rate limiting (Supabase-managed)
+- Password history tracking (would need custom DB table — can be added later)
+- Admin 2FA (Supabase MFA API — separate future task)
+- IP-based anomaly detection (server-side only)
+- Session timeout after inactivity (Supabase manages token refresh)
 
