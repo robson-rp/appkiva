@@ -289,7 +289,7 @@ export default function TeacherChallenges() {
               <Select value={form.classroomId} onValueChange={v => updateForm('classroomId', v)}>
                 <SelectTrigger><SelectValue placeholder={t('teacher.classes.select')} /></SelectTrigger>
                 <SelectContent>
-                  {mockClassrooms.map(c => (
+                  {(classrooms || []).map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
