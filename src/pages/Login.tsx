@@ -172,6 +172,11 @@ export default function Login() {
         }
 
         if (contactMethod === 'phone') {
+          // Phone auth not available without SMS provider
+          toast({ title: t('auth.phone_not_available'), description: t('auth.phone_not_available_desc'), variant: 'destructive' });
+          setSubmitting(false);
+          return;
+          /* Phone signup — reserved for when SMS provider is configured
           if (!otpSent) {
             const { error } = await supabase.auth.signInWithOtp({
               phone: phoneWithPrefix,
@@ -195,6 +200,7 @@ export default function Login() {
               return;
             }
             setOtpSent(true);
+            startOtpCountdown();
             toast({ title: t('auth.otp_sent'), description: `${t('auth.otp_sent_desc')} ${phoneWithPrefix}` });
             setSubmitting(false);
             return;
