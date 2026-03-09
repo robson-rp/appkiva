@@ -130,8 +130,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Check lockout before attempting login
+    try {
+      const { data: lockoutResult } = await supabase.functions.invoke('auth-guard', {
+        body: { action: 'check-lockout', email },
+      });
+      if (lockoutResult?.locked) {
+        return { error: 'auth.generic_login_error', requires2FA: false };
+      }
+    } catch {
+      // If auth-guard is unavailable, proceed with login
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message, requires2FA: false };
+    if (error) {
+      // Record failure (fire-and-forget)
+      supabase.functions.invoke('auth-guard', {
+        body: { action: 'record-failure', email },
+      }).catch(() => {});
+      // Generic error — never reveal specifics
+      return { error: 'auth.generic_login_error', requires2FA: false };
+    }
+
+    // Record success (fire-and-forget)
+    supabase.functions.invoke('auth-guard', {
+      body: { action: 'record-success', email, user_id: data.user.id },
+    }).catch(() => {});
 
     // Check if user's role requires 2FA (parent, admin)
     const { data: roles } = await supabase
