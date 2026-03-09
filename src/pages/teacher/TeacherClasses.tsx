@@ -345,7 +345,7 @@ export default function TeacherClasses() {
               <Plus className="h-4 w-4" /> {t('teacher.classes.new_class')}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg">
             <DialogHeader>
               <DialogTitle className="font-display">{t('teacher.classes.create_title')}</DialogTitle>
             </DialogHeader>
