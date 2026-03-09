@@ -13,6 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Building2, Mail, Globe, Languages } from 'lucide-react';
 import { COUNTRY_CURRENCIES, getCurrencyByCountry } from '@/data/countries-currencies';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
 const avatarOptions = ['🏦', '🏢', '🏛️', '🤝', '🌍', '💼', '🎯', '🏗️'];
 
