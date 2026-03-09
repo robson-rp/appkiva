@@ -31,6 +31,7 @@ function useChildNav() {
     { title: t('nav.child.achievements'), url: '/child/achievements', icon: Trophy },
     { title: t('nav.child.badges'), url: '/child/badges', icon: Award },
     { title: t('nav.child.streaks'), url: '/child/streaks', icon: Flame },
+    { title: t('nav.child.ranking'), url: '/child/ranking', icon: Trophy },
     { title: t('nav.child.diary'), url: '/child/diary', icon: BookOpen },
   ];
 

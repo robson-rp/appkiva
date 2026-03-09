@@ -53,6 +53,7 @@ const ChildStore = lazy(() => import("./pages/child/ChildStore"));
 const ChildDiary = lazy(() => import("./pages/child/ChildDiary"));
 const ChildDreams = lazy(() => import("./pages/child/ChildDreams"));
 const ChildProfile = lazy(() => import("./pages/child/ChildProfile"));
+const ChildRanking = lazy(() => import("./pages/child/ChildRanking"));
 
 // Teacher
 const TeacherDashboard = lazy(() => import("./pages/teacher/TeacherDashboard"));
@@ -229,6 +230,7 @@ function renderRoutes(user: { role: string }) {
       <Route path="/child/store" element={<ChildLayout><S><ChildStore /></S></ChildLayout>} />
       <Route path="/child/diary" element={<ChildLayout><S><ChildDiary /></S></ChildLayout>} />
       <Route path="/child/dreams" element={<ChildLayout><S><ChildDreams /></S></ChildLayout>} />
+      <Route path="/child/ranking" element={<ChildLayout><S><ChildRanking /></S></ChildLayout>} />
         <Route path="/child/learn" element={<ChildLayout><S><LearnPage /></S></ChildLayout>} />
         <Route path="/child/profile" element={<ChildLayout><S><ChildProfile /></S></ChildLayout>} />
         {INSTALL_ROUTE}

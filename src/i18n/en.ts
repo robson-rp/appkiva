@@ -348,6 +348,7 @@ const en: Record<string, string> = {
   'nav.child.achievements': 'Achievements',
   'nav.child.badges': 'Badges',
   'nav.child.streaks': 'Streaks',
+  'nav.child.ranking': 'Ranking',
   'nav.child.diary': 'Diary',
   'nav.child.profile': 'Profile',
   'nav.child.hello': 'Hi,',
@@ -2326,6 +2327,17 @@ const en: Record<string, string> = {
   'child.rankings.saver': '🏆 Saver',
   'child.rankings.planner': '🎯 Planner',
   'child.rankings.donor': '💜 Donor',
+
+  // ─── Ranking Page ───
+  'ranking.title': 'Ranking',
+  'ranking.subtitle': 'Healthy competition between siblings and classmates',
+  'ranking.tab_siblings': 'Siblings',
+  'ranking.tab_classmates': 'Classmates',
+  'ranking.filter_class': 'Class',
+  'ranking.filter_friends': 'Friends',
+  'ranking.cat_savings': 'Savings',
+  'ranking.cat_points': 'KivaPoints',
+  'ranking.cat_donations': 'Donations',
 
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Savings',
