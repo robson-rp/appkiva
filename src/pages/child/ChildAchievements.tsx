@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { mockAchievements } from '@/data/mock-data';
+
 import { useBadgesWithProgress } from '@/hooks/use-badges';
 import { LevelBadge } from '@/components/LevelBadge';
 import { Kivo } from '@/components/Kivo';
