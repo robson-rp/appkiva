@@ -2330,6 +2330,91 @@ const pt: Record<string, string> = {
   'child.savings.title': 'Poupanças',
   'child.savings.view_vaults': 'Ver cofres',
   'child.savings.per_month': '/mês',
+
+  // ─── Kivo ───
+  'kivo.next_tip': 'Outra dica →',
+
+  // ─── LevelBadge ───
+  'level.pts_to': '{pts} pts para {label}',
+
+  // ─── LevelUpCeremony ───
+  'level.unlocked': 'Nível Desbloqueado! 🎉',
+
+  // ─── BadgeUnlockCeremony ───
+  'badge.unlocked': 'Badge Desbloqueado!',
+  'badge.awesome': 'Incrível! 🎉',
+
+  // ─── XPProgressBar ───
+  'xp.to_next': '{remaining} FXP para {label} {avatar}',
+
+  // ─── LeagueBadge ───
+  'league.title': 'Liga {label}',
+  'league.weekly_pts': '{pts} pts esta semana',
+
+  // ─── MonthlyEvolutionChart ───
+  'chart.monthly_evolution': 'Evolução Mensal',
+  'chart.earned': 'Ganho',
+  'chart.spent': 'Gasto',
+  'chart.month_label': 'Mês: {label}',
+
+  // ─── VaultGrowthChart ───
+  'vault.chart.title': 'Evolução do Saldo',
+  'vault.chart.now': 'Agora',
+  'vault.chart.month': 'Mês {n}',
+  'vault.chart.balance': 'Saldo',
+  'vault.chart.target': 'Meta: {amount}',
+  'vault.chart.rate_month': '/mês',
+  'vault.chart.target_in': 'Meta em ~{months} {unit}',
+  'vault.chart.month_singular': 'mês',
+  'vault.chart.month_plural': 'meses',
+  'vault.chart.target_reached': 'Meta atingida! 🎉',
+  'vault.chart.no_interest': 'Sem juros configurados',
+
+  // ─── NotificationDropdown ───
+  'notif.read': 'Lida',
+  'notif.title': 'Notificações',
+  'notif.unread': '{count} por ler',
+  'notif.mute': 'Silenciar',
+  'notif.unmute': 'Ativar som',
+  'notif.mark_all': 'Marcar tudo',
+  'notif.empty_title': 'Sem notificações',
+  'notif.empty_desc': 'Kivo avisará quando houver novidades!',
+  'notif.archive': 'Arquivar',
+  'notif.today': 'Hoje',
+  'notif.yesterday': 'Ontem',
+  'notif.days_ago': 'Há {days} dias',
+
+  // ─── VaultInterestHistory ───
+  'interest.title': 'Histórico de Juros',
+  'interest.credits': '{count} crédito',
+  'interest.credits_plural': '{count} créditos',
+  'interest.total_received': 'total recebido',
+  'interest.no_interest': 'Ainda não recebes-te juros.',
+  'interest.no_interest_desc': 'Os juros são creditados mensalmente.',
+  'interest.vault_fallback': 'Cofre',
+  'interest.show_less': 'Mostrar menos',
+  'interest.show_all': 'Ver todos ({count})',
+
+  // ─── LearningProgressMap ───
+  'learn.lessons_count': '{done}/{total} lições',
+
+  // ─── WeeklySparkline ───
+  'sparkline.this_week': 'Esta Semana',
+
+  // ─── OfflineBanner ───
+  'offline.message': 'Estás offline — os dados podem estar desatualizados',
+
+  // ─── SplashScreen ───
+  'splash.tagline': 'Pequenos hábitos. Grandes futuros.',
+  'splash.subtitle': 'Literacia financeira para famílias',
+
+  // ─── ThemeToggle ───
+  'theme.toggle': 'Alternar tema',
+
+  // ─── ConfettiCelebration ───
+  'confetti.goal_reached': 'Meta atingida! 🏆',
+  'confetti.vault_reached': 'O cofre "{name}" chegou ao objectivo!',
+  'confetti.congrats': '✨ Parabéns! ✨',
 };
 
 export default pt;

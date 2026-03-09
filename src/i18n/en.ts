@@ -2330,6 +2330,91 @@ const en: Record<string, string> = {
   'child.savings.title': 'Savings',
   'child.savings.view_vaults': 'View vaults',
   'child.savings.per_month': '/mo',
+
+  // ─── Kivo ───
+  'kivo.next_tip': 'Another tip →',
+
+  // ─── LevelBadge ───
+  'level.pts_to': '{pts} pts to {label}',
+
+  // ─── LevelUpCeremony ───
+  'level.unlocked': 'Level Unlocked! 🎉',
+
+  // ─── BadgeUnlockCeremony ───
+  'badge.unlocked': 'Badge Unlocked!',
+  'badge.awesome': 'Awesome! 🎉',
+
+  // ─── XPProgressBar ───
+  'xp.to_next': '{remaining} FXP to {label} {avatar}',
+
+  // ─── LeagueBadge ───
+  'league.title': 'League {label}',
+  'league.weekly_pts': '{pts} pts this week',
+
+  // ─── MonthlyEvolutionChart ───
+  'chart.monthly_evolution': 'Monthly Evolution',
+  'chart.earned': 'Earned',
+  'chart.spent': 'Spent',
+  'chart.month_label': 'Month: {label}',
+
+  // ─── VaultGrowthChart ───
+  'vault.chart.title': 'Balance Evolution',
+  'vault.chart.now': 'Now',
+  'vault.chart.month': 'Month {n}',
+  'vault.chart.balance': 'Balance',
+  'vault.chart.target': 'Target: {amount}',
+  'vault.chart.rate_month': '/mo',
+  'vault.chart.target_in': 'Target in ~{months} {unit}',
+  'vault.chart.month_singular': 'month',
+  'vault.chart.month_plural': 'months',
+  'vault.chart.target_reached': 'Target reached! 🎉',
+  'vault.chart.no_interest': 'No interest configured',
+
+  // ─── NotificationDropdown ───
+  'notif.read': 'Read',
+  'notif.title': 'Notifications',
+  'notif.unread': '{count} unread',
+  'notif.mute': 'Mute',
+  'notif.unmute': 'Unmute',
+  'notif.mark_all': 'Mark all',
+  'notif.empty_title': 'No notifications',
+  'notif.empty_desc': 'Kivo will let you know when there\'s news!',
+  'notif.archive': 'Archive',
+  'notif.today': 'Today',
+  'notif.yesterday': 'Yesterday',
+  'notif.days_ago': '{days} days ago',
+
+  // ─── VaultInterestHistory ───
+  'interest.title': 'Interest History',
+  'interest.credits': '{count} credit',
+  'interest.credits_plural': '{count} credits',
+  'interest.total_received': 'total received',
+  'interest.no_interest': 'No interest received yet.',
+  'interest.no_interest_desc': 'Interest is credited monthly.',
+  'interest.vault_fallback': 'Vault',
+  'interest.show_less': 'Show less',
+  'interest.show_all': 'Show all ({count})',
+
+  // ─── LearningProgressMap ───
+  'learn.lessons_count': '{done}/{total} lessons',
+
+  // ─── WeeklySparkline ───
+  'sparkline.this_week': 'This Week',
+
+  // ─── OfflineBanner ───
+  'offline.message': 'You\'re offline — data may be outdated',
+
+  // ─── SplashScreen ───
+  'splash.tagline': 'Small habits. Big futures.',
+  'splash.subtitle': 'Financial literacy for families',
+
+  // ─── ThemeToggle ───
+  'theme.toggle': 'Toggle theme',
+
+  // ─── ConfettiCelebration ───
+  'confetti.goal_reached': 'Goal reached! 🏆',
+  'confetti.vault_reached': 'The vault "{name}" reached its target!',
+  'confetti.congrats': '✨ Congratulations! ✨',
 };
 
 export default en;
