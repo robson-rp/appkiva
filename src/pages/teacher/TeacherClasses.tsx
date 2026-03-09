@@ -463,7 +463,7 @@ export default function TeacherClasses() {
                         </Button>
                         <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl shrink-0">
+                          <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl">
                             <Trash className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
