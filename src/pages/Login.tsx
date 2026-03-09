@@ -769,6 +769,22 @@ export default function Login() {
                             maxLength={6}
                             required
                           />
+                          <div className="flex items-center justify-between">
+                            {otpCountdown > 0 ? (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {t('auth.resend_in')} {otpCountdown}s
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => { setOtpSent(false); setOtpCode(''); }}
+                                className="text-xs text-primary font-semibold hover:underline"
+                              >
+                                {t('auth.resend_otp')}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
 
