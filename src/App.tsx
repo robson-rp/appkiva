@@ -84,6 +84,7 @@ const AdminSubscriptions = lazy(() => import("./pages/admin/AdminSubscriptions")
 const AdminCurrencies = lazy(() => import("./pages/admin/AdminCurrencies"));
 const AdminAudit = lazy(() => import("./pages/admin/AdminAudit"));
 const AdminRisk = lazy(() => import("./pages/admin/AdminRisk"));
+const AdminAuthSecurity = lazy(() => import("./pages/admin/AdminAuthSecurity"));
 const AdminCompliance = lazy(() => import("./pages/admin/AdminCompliance"));
 const AdminSchools = lazy(() => import("./pages/admin/AdminSchools"));
 const AdminFinance = lazy(() => import("./pages/admin/AdminFinance"));
