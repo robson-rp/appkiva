@@ -802,7 +802,7 @@ function TrustSection() {
     { icon: ShieldCheck, text: t('trust.item4.desc'), anim: "glow" as const },
   ];
   return (
-    <Section className="!bg-foreground !text-background">
+    <Section id="seguranca" className="!bg-foreground !text-background">
       <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center min-[420px]:grid-cols-">
         <div>
           <motion.div variants={fadeUp} className="inline-block bg-background/10 rounded-full px-4 py-1.5 text-sm font-semibold mb-5 text-background/80">
