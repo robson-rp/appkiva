@@ -1,19 +1,26 @@
 import { motion } from 'framer-motion';
 import { Level, LEVEL_CONFIG } from '@/types/kivara';
-import { mockChildren, mockTeens } from '@/data/mock-data';
 import { useAuth } from '@/contexts/AuthContext';
+import { useStreakData } from '@/hooks/use-streaks';
 import { Zap } from 'lucide-react';
 import { useT } from '@/contexts/LanguageContext';
 
 export function XPProgressBar() {
   const t = useT();
   const { user } = useAuth();
-  const data = user?.role === 'teen' ? mockTeens[0] : mockChildren[0];
-  const level = data.level;
-  const points = data.kivaPoints;
-  const config = LEVEL_CONFIG[level];
+  const { data: streakData } = useStreakData();
 
-  const levels = Object.entries(LEVEL_CONFIG) as [Level, typeof config][];
+  // Calculate KivaPoints from real streak data
+  const points = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
+
+  // Determine level from points
+  const levels = Object.entries(LEVEL_CONFIG) as [Level, (typeof LEVEL_CONFIG)[Level]][];
+  let level: Level = 'apprentice';
+  for (const [key, cfg] of levels) {
+    if (points >= cfg.minPoints) level = key;
+  }
+
+  const config = LEVEL_CONFIG[level];
   const currentIndex = levels.findIndex(([k]) => k === level);
   const nextLevel = levels[currentIndex + 1];
   const progress = nextLevel

@@ -1,17 +1,43 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { mockAchievements, mockChildren } from '@/data/mock-data';
+import { mockAchievements } from '@/data/mock-data';
+import { useBadgesWithProgress } from '@/hooks/use-badges';
 import { LevelBadge } from '@/components/LevelBadge';
 import { Kivo } from '@/components/Kivo';
 import { Lock, Trophy, Star, Award } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useT } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { useStreakData } from '@/hooks/use-streaks';
+import { LEVEL_CONFIG, Level } from '@/types/kivara';
 
 export default function ChildAchievements() {
   const t = useT();
-  const child = mockChildren[0];
-  const unlocked = mockAchievements.filter((a) => a.childId === child.id && a.unlockedAt);
-  const locked = mockAchievements.filter((a) => !a.unlockedAt || a.childId !== child.id);
+  const { user } = useAuth();
+  const { data: streakData } = useStreakData();
+  const badgesData = useBadgesWithProgress();
+
+  const childKivaPoints = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
+  
+  // Determine level from points
+  const levels = Object.entries(LEVEL_CONFIG) as [Level, (typeof LEVEL_CONFIG)[Level]][];
+  let childLevel: Level = 'apprentice';
+  for (const [key, cfg] of levels) {
+    if (childKivaPoints >= cfg.minPoints) childLevel = key;
+  }
+
+  // Map badges to achievement format
+  const allAchievements = badgesData.map(b => ({
+    id: b.id,
+    title: b.name,
+    description: b.description,
+    icon: b.icon,
+    unlockedAt: b.unlockedAt ? new Date(b.unlockedAt).toLocaleDateString('pt-PT') : undefined,
+    childId: user?.profileId ?? '',
+  }));
+
+  const unlocked = allAchievements.filter((a) => a.unlockedAt);
+  const locked = allAchievements.filter((a) => !a.unlockedAt);
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -27,10 +53,10 @@ export default function ChildAchievements() {
               </div>
               <div>
                 <h1 className="font-display text-xl font-bold">{t('child.achievements.title')}</h1>
-                <p className="text-sm opacity-80">{unlocked.length} {t('child.achievements.of')} {mockAchievements.length} {t('child.achievements.unlocked')}</p>
+                <p className="text-sm opacity-80">{unlocked.length} {t('child.achievements.of')} {allAchievements.length} {t('child.achievements.unlocked')}</p>
               </div>
             </div>
-            <LevelBadge level={child.level} points={child.kivaPoints} showProgress />
+            <LevelBadge level={childLevel} points={childKivaPoints} showProgress />
           </CardContent>
         </Card>
       </motion.div>

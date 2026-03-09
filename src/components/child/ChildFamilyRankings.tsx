@@ -1,27 +1,26 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Crown, PiggyBank, Target, Medal } from 'lucide-react';
-import { mockChildren, mockVaults, mockDonations } from '@/data/mock-data';
+import { useHouseholdRankings } from '@/hooks/use-household-rankings';
 import { useT } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ChildFamilyRankings() {
   const t = useT();
-  const rankings = mockChildren.map((c) => {
-    const childVaults = mockVaults.filter((v) => v.childId === c.id);
-    const totalSaved = childVaults.reduce((s, v) => s + v.currentAmount, 0);
-    const childDonations = mockDonations.filter((d) => d.childId === c.id);
-    const totalDonated = childDonations.reduce((s, d) => s + d.amount, 0);
-    return { ...c, totalSaved, totalDonated };
-  });
+  const { user } = useAuth();
+  const { data: rankings = [], isLoading } = useHouseholdRankings();
 
-  const bestSaver = [...rankings].sort((a, b) => b.totalSaved - a.totalSaved);
-  const bestDonor = [...rankings].sort((a, b) => b.totalDonated - a.totalDonated);
-  const bestPlanner = [...rankings].sort((a, b) => b.kivaPoints - a.kivaPoints);
+  if (isLoading) {
+    return <Skeleton className="h-40 w-full rounded-2xl" />;
+  }
+
+  if (rankings.length < 2) return null;
 
   const categories = [
-    { title: t('child.rankings.saver'), data: bestSaver, metric: (c: any) => `${c.totalSaved} 🪙`, icon: PiggyBank },
-    { title: t('child.rankings.planner'), data: bestPlanner, metric: (c: any) => `${c.kivaPoints} pts`, icon: Target },
-    { title: t('child.rankings.donor'), data: bestDonor, metric: (c: any) => `${c.totalDonated} 🪙`, icon: Medal },
+    { title: t('child.rankings.saver'), data: [...rankings].sort((a, b) => b.totalSaved - a.totalSaved), metric: (c: typeof rankings[0]) => `${c.totalSaved} 🪙`, icon: PiggyBank },
+    { title: t('child.rankings.planner'), data: [...rankings].sort((a, b) => b.balance - a.balance), metric: (c: typeof rankings[0]) => `${c.balance} 🪙`, icon: Target },
+    { title: t('child.rankings.donor'), data: [...rankings].sort((a, b) => b.totalDonated - a.totalDonated), metric: (c: typeof rankings[0]) => `${c.totalDonated} 🪙`, icon: Medal },
   ];
 
   return (
@@ -45,7 +44,7 @@ export function ChildFamilyRankings() {
             >
               <p className="text-[10px] font-display font-bold mb-2">{cat.title}</p>
               {cat.data.slice(0, 2).map((c, i) => (
-                <div key={c.id} className={`flex items-center gap-1.5 justify-center mb-1 ${i === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+                <div key={c.profileId} className={`flex items-center gap-1.5 justify-center mb-1 ${i === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
                   <span className="text-xs">{i === 0 ? '🥇' : '🥈'}</span>
                   <span className="text-lg">{c.avatar}</span>
                   <div className="text-left">
