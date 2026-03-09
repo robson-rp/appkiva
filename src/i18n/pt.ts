@@ -2152,6 +2152,8 @@ const pt: Record<string, string> = {
   'pwa.title': 'Instalar Kivara',
   'pwa.subtitle': 'Acede mais rápido, mesmo offline!',
   'pwa.install': 'Instalar',
+  'pwa.ios_step1': 'Toca em "Partilhar" na barra do Safari',
+  'pwa.ios_step2': 'Seleciona "Adicionar ao ecrã inicial"',
 
   // ─── Weekly Challenges ───
   'challenges.ranking': 'Ranking da Turma',
