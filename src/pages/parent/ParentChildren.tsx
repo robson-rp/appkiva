@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { differenceInYears } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { CoinDisplay } from '@/components/CoinDisplay';
-import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown, UserPlus } from 'lucide-react';
+import { Plus, Edit, Trash2, TrendingUp, Users, Copy, Link2, QrCode, Share2, Check, RefreshCw, Shield, Wallet, Send, CheckCircle2, XCircle, Loader2, Crown, UserPlus, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
+import { useHouseholdGuardians, useInviteGuardian, useRemoveGuardian } from '@/hooks/use-household-guardians';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -61,6 +62,12 @@ export default function ParentChildren() {
   const [newChildAvatar, setNewChildAvatar] = useState('🦊');
   const [newChildDob, setNewChildDob] = useState('');
   const [creatingChild, setCreatingChild] = useState(false);
+  // Co-guardian state
+  const [guardianDialogOpen, setGuardianDialogOpen] = useState(false);
+  const [guardianEmail, setGuardianEmail] = useState('');
+  const { data: guardians = [] } = useHouseholdGuardians();
+  const inviteGuardian = useInviteGuardian();
+  const removeGuardian = useRemoveGuardian();
   const deleteChildMutation = useMutation({
     mutationFn: async (childId: string) => {
       const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
@@ -375,6 +382,92 @@ export default function ParentChildren() {
           ))}
         </motion.div>
       )}
+
+      {/* Co-Guardian Section (Premium) */}
+      {tierName && tierName !== 'Free' && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+          <Card className="border-border/50 overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-accent to-primary" />
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <ShieldCheck className="h-3.5 w-3.5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-display font-bold">{t('guardian.title')}</p>
+                    <p className="text-[10px] text-muted-foreground">{t('guardian.subtitle')}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" className="rounded-xl font-display gap-1.5 text-xs" onClick={() => setGuardianDialogOpen(true)}>
+                  <UserPlus className="h-3.5 w-3.5" /> {t('guardian.invite')}
+                </Button>
+              </div>
+              {guardians.length > 0 && (
+                <div className="space-y-2">
+                  {guardians.map(g => (
+                    <div key={g.id} className="flex items-center justify-between gap-3 bg-muted/40 rounded-xl p-3 border border-border/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{g.avatar}</span>
+                        <div>
+                          <p className="text-xs font-display font-bold">{g.displayName}</p>
+                          <p className="text-[10px] text-muted-foreground">{g.role === 'primary' ? t('guardian.primary') : t('guardian.secondary')}</p>
+                        </div>
+                      </div>
+                      {g.role === 'secondary' && (
+                        <Button size="sm" variant="ghost" className="rounded-xl text-xs text-destructive hover:text-destructive" onClick={() => removeGuardian.mutate(g.id)}>
+                          {t('guardian.remove')}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Guardian Invite Dialog */}
+      <Dialog open={guardianDialogOpen} onOpenChange={setGuardianDialogOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-accent-foreground" /> {t('guardian.invite')}
+            </DialogTitle>
+            <DialogDescription>{t('guardian.invite_desc')}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-display font-bold">{t('guardian.email')}</Label>
+              <Input
+                type="email"
+                placeholder="ex: mae@email.com"
+                value={guardianEmail}
+                onChange={e => setGuardianEmail(e.target.value)}
+                className="rounded-xl"
+              />
+            </div>
+            <Button
+              className="w-full rounded-xl font-display gap-2"
+              disabled={inviteGuardian.isPending || !guardianEmail}
+              onClick={async () => {
+                try {
+                  await inviteGuardian.mutateAsync(guardianEmail);
+                  toast({ title: t('guardian.sent'), description: t('guardian.sent_desc') });
+                  setGuardianDialogOpen(false);
+                  setGuardianEmail('');
+                } catch (err: any) {
+                  toast({ title: t('common.error'), description: err?.message, variant: 'destructive' });
+                }
+              }}
+            >
+              {inviteGuardian.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {inviteGuardian.isPending ? t('guardian.sending') : t('guardian.invite')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Invite Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>

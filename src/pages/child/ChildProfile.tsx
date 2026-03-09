@@ -11,6 +11,7 @@ import { Camera, Save, Loader2, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChangePasswordSection } from '@/components/ChangePasswordSection';
+import ReferralWidget from '@/components/ReferralWidget';
 
 const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', '👦🏻', '👧🏼', '🧒🏿', '👦🏽', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰'];
 
@@ -130,6 +131,9 @@ export default function ChildProfile() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Referral */}
+      <ReferralWidget />
 
       {/* Change Password */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>

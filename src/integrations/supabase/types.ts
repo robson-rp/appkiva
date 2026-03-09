@@ -761,6 +761,55 @@ export type Database = {
           },
         ]
       }
+      household_guardians: {
+        Row: {
+          created_at: string
+          household_id: string
+          id: string
+          invited_by: string | null
+          profile_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          household_id: string
+          id?: string
+          invited_by?: string | null
+          profile_id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          household_id?: string
+          id?: string
+          invited_by?: string | null
+          profile_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "household_guardians_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_guardians_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "household_guardians_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       households: {
         Row: {
           created_at: string
@@ -1563,6 +1612,74 @@ export type Database = {
           },
         ]
       }
+      referral_claims: {
+        Row: {
+          bonus_awarded: boolean
+          created_at: string
+          id: string
+          referral_code_id: string
+          referred_profile_id: string
+        }
+        Insert: {
+          bonus_awarded?: boolean
+          created_at?: string
+          id?: string
+          referral_code_id: string
+          referred_profile_id: string
+        }
+        Update: {
+          bonus_awarded?: boolean
+          created_at?: string
+          id?: string
+          referral_code_id?: string
+          referred_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_claims_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_claims_referred_profile_id_fkey"
+            columns: ["referred_profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rewards: {
         Row: {
           available: boolean
@@ -1919,6 +2036,7 @@ export type Database = {
           is_active: boolean
           max_children: number
           max_classrooms: number
+          max_guardians: number
           max_programs: number
           monthly_emission_limit: number
           name: string
@@ -1936,6 +2054,7 @@ export type Database = {
           is_active?: boolean
           max_children?: number
           max_classrooms?: number
+          max_guardians?: number
           max_programs?: number
           monthly_emission_limit?: number
           name: string
@@ -1953,6 +2072,7 @@ export type Database = {
           is_active?: boolean
           max_children?: number
           max_classrooms?: number
+          max_guardians?: number
           max_programs?: number
           monthly_emission_limit?: number
           name?: string
@@ -2385,6 +2505,7 @@ export type Database = {
         Args: { _profile_id: string }
         Returns: string
       }
+      generate_referral_code: { Args: never; Returns: string }
       get_money_supply_stats: { Args: never; Returns: Json }
       get_parent_emission_stats: {
         Args: { _parent_profile_id: string }

@@ -67,6 +67,7 @@ export default function Login() {
   const [schoolTenantId, setSchoolTenantId] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [inviteValid, setInviteValid] = useState<boolean | null>(null);
+  const [referralCode, setReferralCode] = useState('');
   // Child login with username + PIN
   const [childUsername, setChildUsername] = useState('');
   const [childPin, setChildPin] = useState('');
@@ -100,6 +101,11 @@ export default function Login() {
       setInviteCode(invite.toUpperCase().slice(0, 6));
       setAuthMode('signup');
       if (!selectedRole) setSelectedRole('child');
+    }
+    const ref = params.get('ref');
+    if (ref) {
+      setReferralCode(ref.toUpperCase().slice(0, 8));
+      setAuthMode('signup');
     }
   }, []);
 
@@ -256,6 +262,17 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
+          // If referral code was provided, claim it after signup
+          if (referralCode) {
+            // Fire-and-forget: claim referral after a delay to let profile be created
+            setTimeout(async () => {
+              try {
+                await supabase.functions.invoke('claim-referral', {
+                  body: { referral_code: referralCode },
+                });
+              } catch {}
+            }, 3000);
+          }
           setEmailSignupSuccess(true);
           setSubmitting(false);
           return;
@@ -405,6 +422,7 @@ export default function Login() {
     if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
     setChildUsername('');
     setChildPin('');
+    setReferralCode('');
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
@@ -1000,6 +1018,23 @@ export default function Login() {
                                   </button>
                                 )}
                               </div>
+                            </div>
+                          )}
+
+                          {/* Referral code field (signup only) */}
+                          {authMode === 'signup' && contactMethod !== 'phone' && (
+                            <div className="space-y-2">
+                              <Label htmlFor="referralCode" className="font-semibold text-sm">
+                                {t('referral.code_label')} <span className="text-muted-foreground font-normal">{t('referral.code_optional')}</span>
+                              </Label>
+                              <Input
+                                id="referralCode"
+                                placeholder={t('referral.code_placeholder')}
+                                value={referralCode}
+                                onChange={e => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                                className="h-12 rounded-xl text-base tracking-wider font-mono"
+                                maxLength={8}
+                              />
                             </div>
                           )}
 

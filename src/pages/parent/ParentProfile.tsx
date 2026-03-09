@@ -19,6 +19,7 @@ import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChangePasswordSection } from '@/components/ChangePasswordSection';
+import ReferralWidget from '@/components/ReferralWidget';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
@@ -308,6 +309,9 @@ export default function ParentProfile() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Referral */}
+      <ReferralWidget />
 
       {/* Change Password */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

@@ -2672,6 +2672,39 @@ const pt: Record<string, string> = {
   'parent.children.account_created': 'Conta criada com sucesso!',
   'parent.children.account_created_desc': 'A criança pode entrar com o nome de utilizador e PIN.',
   'parent.children.username_taken': 'Este nome de utilizador já está em uso',
+
+  // ─── Referral System ───
+  'referral.title': 'Convidar amigos',
+  'referral.subtitle': 'Convida amigos e ganha KivaCoins de bónus!',
+  'referral.your_code': 'O teu código',
+  'referral.friends_invited': 'Amigos convidados',
+  'referral.bonus_earned': 'KVC ganhos',
+  'referral.milestone_hint': 'Convida mais {n} amigo(s) para ganhar 100 KVC extra! 🎯',
+  'referral.copied': 'Link copiado!',
+  'referral.copy_link': 'Copiar link',
+  'referral.share': 'Partilhar',
+  'referral.share_title': 'Junta-te à KIVARA!',
+  'referral.share_text': 'Aprende a poupar e a gerir dinheiro de forma divertida! Usa o meu código de convite:',
+  'referral.code_label': 'Código de quem te convidou',
+  'referral.code_placeholder': 'Ex: ABC12345',
+  'referral.code_optional': '(opcional)',
+
+  // ─── Co-Guardian ───
+  'guardian.title': 'Encarregados',
+  'guardian.subtitle': 'Gerir os encarregados do agregado familiar',
+  'guardian.primary': 'Principal',
+  'guardian.secondary': 'Secundário',
+  'guardian.invite': 'Convidar encarregado',
+  'guardian.invite_desc': 'Convida outro encarregado para gerir a família.',
+  'guardian.email': 'Email do encarregado',
+  'guardian.sending': 'A enviar...',
+  'guardian.sent': 'Convite enviado!',
+  'guardian.sent_desc': 'O encarregado pode registar-se e juntar-se à família.',
+  'guardian.remove': 'Remover',
+  'guardian.remove_confirm': 'Tens a certeza que queres remover este encarregado?',
+  'guardian.limit_reached': 'Limite de encarregados atingido',
+  'guardian.upgrade_hint': 'Faz upgrade para o plano Premium para adicionar um co-encarregado.',
+  'guardian.premium_only': 'Funcionalidade Premium',
 };
 
 export default pt;
