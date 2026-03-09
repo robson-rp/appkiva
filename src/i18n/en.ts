@@ -348,6 +348,7 @@ const en: Record<string, string> = {
   'nav.child.achievements': 'Achievements',
   'nav.child.badges': 'Badges',
   'nav.child.streaks': 'Streaks',
+  'nav.child.ranking': 'Ranking',
   'nav.child.diary': 'Diary',
   'nav.child.profile': 'Profile',
   'nav.child.hello': 'Hi,',

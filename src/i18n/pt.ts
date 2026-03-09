@@ -348,6 +348,7 @@ const pt: Record<string, string> = {
   'nav.child.achievements': 'Conquistas',
   'nav.child.badges': 'Badges',
   'nav.child.streaks': 'Streaks',
+  'nav.child.ranking': 'Ranking',
   'nav.child.diary': 'Diário',
   'nav.child.profile': 'Perfil',
   'nav.child.hello': 'Olá,',
