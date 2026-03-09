@@ -6,7 +6,8 @@ import { AvatarGlow } from '@/components/AvatarGlow';
 import { LevelUpCeremony } from '@/components/LevelUpCeremony';
 import { PlayerCard } from '@/components/PlayerCard';
 import { Kivo } from '@/components/Kivo';
-import { mockMissions, mockAchievements } from '@/data/mock-data';
+import { mockAchievements } from '@/data/mock-data';
+import { useChildMissions } from '@/hooks/use-missions';
 import { StreakWidget } from '@/components/StreakWidget';
 import { ListTodo, Target, PiggyBank } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -67,7 +68,8 @@ export default function ChildDashboard() {
 
   const budgetPct = monthlyBudget > 0 ? Math.min((monthlySpent / monthlyBudget) * 100, 100) : 0;
   const pendingTasks = tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress');
-  const activeMissions = mockMissions.filter((m) => m.status === 'available' || m.status === 'in_progress');
+  const { data: missionsList = [] } = useChildMissions();
+  const activeMissions = missionsList.filter((m) => m.status === 'available' || m.status === 'in_progress');
   const vaults = dbVaults ?? [];
   const vaultsMapped = vaults.map(v => ({
     id: v.id,

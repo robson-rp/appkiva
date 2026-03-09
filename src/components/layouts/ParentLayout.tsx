@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones, Target } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -25,6 +25,7 @@ function useNavItems() {
     { title: t('nav.parent.panel'), url: '/parent', icon: LayoutDashboard },
     { title: t('nav.parent.children'), url: '/parent/children', icon: Users },
     { title: t('nav.parent.tasks'), url: '/parent/tasks', icon: ListTodo },
+    { title: t('nav.parent.missions') || 'Missões', url: '/parent/missions', icon: Target },
     { title: t('nav.parent.allowance'), url: '/parent/allowance', icon: Wallet },
     { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
     { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },

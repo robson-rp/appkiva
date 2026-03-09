@@ -325,6 +325,7 @@ const pt: Record<string, string> = {
   'nav.parent.panel': 'Painel',
   'nav.parent.children': 'Crianças',
   'nav.parent.tasks': 'Tarefas',
+  'nav.parent.missions': 'Missões',
   'nav.parent.allowance': 'Mesada',
   'nav.parent.vaults': 'Cofres',
   'nav.parent.rewards': 'Recompensas',

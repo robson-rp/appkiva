@@ -325,6 +325,7 @@ const en: Record<string, string> = {
   'nav.parent.panel': 'Dashboard',
   'nav.parent.children': 'Children',
   'nav.parent.tasks': 'Tasks',
+  'nav.parent.missions': 'Missions',
   'nav.parent.allowance': 'Allowance',
   'nav.parent.vaults': 'Vaults',
   'nav.parent.rewards': 'Rewards',

@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { mockMissions } from '@/data/mock-data';
+import { useChildMissions, useStartMission, useCompleteMission } from '@/hooks/use-missions';
 import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
-import { toast } from 'sonner';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
-import { DailyMissionCard } from '@/components/DailyMissionCard';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useT } from '@/contexts/LanguageContext';
@@ -28,9 +26,13 @@ export default function ChildMissions() {
   const { data: tasks = [], isLoading: loadingTasks } = useChildTasks();
   const completeTask = useCompleteTask();
 
-  const available = mockMissions.filter(m => m.status === 'available');
-  const inProgress = mockMissions.filter(m => m.status === 'in_progress');
-  const completed = mockMissions.filter(m => m.status === 'completed');
+  const { data: missions = [], isLoading: loadingMissions } = useChildMissions();
+  const startMission = useStartMission();
+  const completeMissionMut = useCompleteMission();
+
+  const available = missions.filter(m => m.status === 'available');
+  const inProgress = missions.filter(m => m.status === 'in_progress');
+  const completed = missions.filter(m => m.status === 'completed');
 
   const pendingTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
   const completedTasks = tasks.filter(t => t.status === 'completed');
@@ -91,6 +93,9 @@ export default function ChildMissions() {
           inProgress={inProgress}
           completed={completed}
           statusConfig={statusConfig}
+          loading={loadingMissions}
+          startMission={startMission}
+          completeMission={completeMissionMut}
         />
       )}
     </div>
@@ -301,15 +306,28 @@ function MissionsTab({
   inProgress,
   completed,
   statusConfig,
+  loading,
+  startMission,
+  completeMission,
 }: {
   t: (key: string) => string;
   available: any[];
   inProgress: any[];
   completed: any[];
   statusConfig: any;
+  loading: boolean;
+  startMission: ReturnType<typeof useStartMission>;
+  completeMission: ReturnType<typeof useCompleteMission>;
 }) {
-  const dailyMissions = [...available, ...inProgress].filter((_, i) => i % 2 === 0);
-  const weeklyMissions = [...available, ...inProgress].filter((_, i) => i % 2 !== 0);
+  const allActive = [...available, ...inProgress];
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
@@ -330,8 +348,8 @@ function MissionsTab({
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: t('child.missions.daily'), value: dailyMissions.length, icon: Sparkles },
-                { label: t('child.missions.weekly'), value: weeklyMissions.length, icon: Zap },
+                { label: t('child.missions.available'), value: available.length, icon: Sparkles },
+                { label: t('child.missions.in_progress'), value: inProgress.length, icon: Zap },
                 { label: t('child.missions.completed'), value: completed.length, icon: Trophy },
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
@@ -345,36 +363,16 @@ function MissionsTab({
         </Card>
       </motion.div>
 
-      {/* Daily Missions */}
-      {dailyMissions.length > 0 && (
-        <motion.div variants={item}>
-          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-accent" /> {t('child.missions.daily_missions')}
-            <span className="text-[10px] text-muted-foreground font-normal ml-auto">{t('child.missions.renew_24h')}</span>
-          </h2>
-          <div className="space-y-3">
-            {dailyMissions.map((mission) => (
-              <DailyMissionCard key={mission.id} mission={mission} type="daily" />
-            ))}
-          </div>
-        </motion.div>
+      {allActive.length === 0 && completed.length === 0 && (
+        <Card className="border-border/50">
+          <CardContent className="py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎯</div>
+            <p className="font-display font-bold text-sm">{t('child.tasks.no_tasks')}</p>
+            <p className="text-xs text-muted-foreground mt-1">O teu encarregado ainda não criou missões.</p>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Weekly Quests */}
-      {weeklyMissions.length > 0 && (
-        <motion.div variants={item}>
-          <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
-            <Target className="h-4 w-4 text-primary" /> {t('child.missions.weekly_quests')}
-          </h2>
-          <div className="space-y-3">
-            {weeklyMissions.map((mission) => (
-              <DailyMissionCard key={mission.id} mission={mission} type="weekly" />
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* In Progress */}
       {inProgress.length > 0 && (
         <motion.div variants={item}>
           <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
@@ -383,7 +381,7 @@ function MissionsTab({
           <div className="space-y-3">
             {inProgress.map((mission) => {
               const cfg = statusConfig[mission.status];
-              const progress = mission.targetAmount ? Math.min(Math.round(Math.random() * 80 + 10), 100) : 50;
+              const progress = mission.target_amount ? Math.min(Math.round(Math.random() * 80 + 10), 100) : 50;
               return (
                 <Card key={mission.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-200">
                   <div className="h-1 gradient-gold" />
@@ -401,7 +399,7 @@ function MissionsTab({
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                        <p className="text-[10px] text-muted-foreground">+{mission.kivaPointsReward} pts</p>
+                        <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -411,8 +409,8 @@ function MissionsTab({
                       </div>
                       <Progress value={progress} className="h-2 rounded-full" />
                     </div>
-                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" onClick={() => toast(t('child.missions.coming_soon'))}>
-                        <Zap className="h-3.5 w-3.5" /> {t('child.missions.continue')}
+                      <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
+                        {completeMission.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} {t('child.missions.continue')}
                       </Button>
                   </CardContent>
                 </Card>
@@ -449,16 +447,16 @@ function MissionsTab({
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                          <p className="text-[10px] text-muted-foreground">+{mission.kivaPointsReward} pts</p>
+                          <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                         </div>
                       </div>
-                      {mission.targetAmount && (
+                      {mission.target_amount && (
                         <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 flex items-center gap-2">
                           <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.targetAmount}</strong></span>
+                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
                         </div>
                       )}
-                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" onClick={() => toast(t('child.missions.coming_soon'))}>
+                      <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" disabled={startMission.isPending} onClick={() => startMission.mutate(mission.id)}>
                         <Target className="h-3.5 w-3.5" /> {t('child.missions.start')}
                       </Button>
                     </CardContent>
@@ -494,7 +492,7 @@ function MissionsTab({
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-display font-bold text-xs text-secondary">+{mission.reward} 🪙</p>
-                      <p className="text-[10px] text-muted-foreground">+{mission.kivaPointsReward} pts</p>
+                      <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                     </div>
                   </CardContent>
                 </Card>
