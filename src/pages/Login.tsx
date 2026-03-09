@@ -766,6 +766,7 @@ export default function Login() {
                         </div>
                       )}
 
+                      {contactMethod !== 'phone' && (
                       <Button
                         type="submit"
                         className="w-full font-display font-bold h-13 rounded-xl text-base"
@@ -774,10 +775,9 @@ export default function Login() {
                       >
                         {submitting ? (
                           <Loader2 className="h-5 w-5 animate-spin" />
-                        ) : otpSent ? (
-                          t('auth.verify_code')
-                        ) : contactMethod === 'phone' ? (
-                          t('common.send')
+                        ) : authMode === 'signup' ? (
+                          t('auth.sign_up')
+                        ) : (
                         ) : authMode === 'signup' ? (
                           t('auth.sign_up')
                         ) : (
