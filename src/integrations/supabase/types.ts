@@ -118,6 +118,42 @@ export type Database = {
           },
         ]
       }
+      auth_events: {
+        Row: {
+          created_at: string
+          email: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          risk_level: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          risk_level?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          risk_level?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       banner_clicks: {
         Row: {
           banner_id: string
@@ -991,6 +1027,36 @@ export type Database = {
           is_active?: boolean
           link_url?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      login_lockouts: {
+        Row: {
+          created_at: string
+          email: string
+          failed_attempts: number
+          id: string
+          last_attempt_at: string | null
+          locked_until: string | null
+          lockout_count: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          failed_attempts?: number
+          id?: string
+          last_attempt_at?: string | null
+          locked_until?: string | null
+          lockout_count?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          failed_attempts?: number
+          id?: string
+          last_attempt_at?: string | null
+          locked_until?: string | null
+          lockout_count?: number
         }
         Relationships: []
       }
