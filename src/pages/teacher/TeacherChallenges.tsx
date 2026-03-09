@@ -182,7 +182,7 @@ export default function TeacherChallenges() {
             <div className="flex items-start justify-between flex-wrap gap-2">
               <div className="flex items-center gap-3">
                 <motion.div
-                  className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl"
+                  className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-muted/50 flex items-center justify-center text-2xl sm:text-3xl shrink-0"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   transition={{ type: 'spring' as const, stiffness: 400 }}
                 >
