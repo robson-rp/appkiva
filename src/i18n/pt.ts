@@ -4,6 +4,7 @@ const pt: Record<string, string> = {
   'nav.universe': 'Universo',
   'nav.families': 'Famílias',
   'nav.schools': 'Escolas',
+  'nav.security': 'Segurança',
   'nav.pricing': 'Preços',
   'nav.login': 'Entrar',
   'nav.start': 'Começar grátis',
