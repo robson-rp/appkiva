@@ -11,6 +11,7 @@ import { useLessons } from '@/hooks/use-lessons';
 import { useLessonProgress, useCompleteLessonMutation } from '@/hooks/use-lesson-progress';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/contexts/LanguageContext';
 
 import savingImg from '@/assets/lessons/saving.png';
 import budgetingImg from '@/assets/lessons/budgeting.png';
@@ -30,66 +31,29 @@ function PaginatedGrid({ lessons, completedIds, scoreMap, onStart }: {
   const totalPages = Math.max(1, Math.ceil(lessons.length / ITEMS_PER_PAGE));
   const paginated = lessons.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
-  // Reset page when lessons change (e.g. tab switch)
   useMemo(() => setPage(0), [lessons.length]);
 
   return (
     <div>
       <AnimatePresence mode="wait">
-        <motion.div
-          key={page}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -30 }}
-          transition={{ duration: 0.2 }}
-          className="grid grid-cols-2 gap-3"
-        >
+        <motion.div key={page} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.2 }} className="grid grid-cols-2 gap-3">
           {paginated.map((lesson, i) => (
-            <LessonCard
-              key={lesson.id}
-              lesson={lesson}
-              index={i}
-              completed={completedIds.has(lesson.id)}
-              score={scoreMap.get(lesson.id) ?? 0}
-              onStart={() => onStart(lesson)}
-            />
+            <LessonCard key={lesson.id} lesson={lesson} index={i} completed={completedIds.has(lesson.id)} score={scoreMap.get(lesson.id) ?? 0} onStart={() => onStart(lesson)} />
           ))}
         </motion.div>
       </AnimatePresence>
 
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            disabled={page === 0}
-            onClick={() => setPage(p => p - 1)}
-          >
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-
           <div className="flex items-center gap-1.5">
             {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i)}
-                className={`h-2 rounded-full transition-all duration-200 ${
-                  i === page
-                    ? 'w-6 bg-primary'
-                    : 'w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40'
-                }`}
-              />
+              <button key={i} onClick={() => setPage(i)} className={`h-2 rounded-full transition-all duration-200 ${i === page ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/25 hover:bg-muted-foreground/40'}`} />
             ))}
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
-            disabled={page === totalPages - 1}
-            onClick={() => setPage(p => p + 1)}
-          >
+          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" disabled={page === totalPages - 1} onClick={() => setPage(p => p + 1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -99,6 +63,7 @@ function PaginatedGrid({ lessons, completedIds, scoreMap, onStart }: {
 }
 
 export default function LearnPage() {
+  const t = useT();
   const { data: lessons = [], isLoading } = useLessons();
   const { completedIds, totalPoints, scoreMap, isLoading: progressLoading } = useLessonProgress();
   const completeLesson = useCompleteLessonMutation();
@@ -112,10 +77,7 @@ export default function LearnPage() {
         { lessonId: activeLesson.id, score, kivaPoints: activeLesson.kivaPointsReward },
         {
           onSuccess: () => {
-            toast({
-              title: '🎉 Lição concluída!',
-              description: `Ganhaste ${activeLesson.kivaPointsReward} KivaPoints!`,
-            });
+            toast({ title: t('learn.completed_toast'), description: t('learn.completed_desc').replace('{points}', String(activeLesson.kivaPointsReward)) });
             setActiveLesson(null);
           },
         }
@@ -144,9 +106,9 @@ export default function LearnPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl font-display font-bold text-foreground flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" /> Aprender
+          <BookOpen className="h-6 w-6 text-primary" /> {t('learn.title')}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">Micro-lições de educação financeira</p>
+        <p className="text-muted-foreground text-sm mt-1">{t('learn.subtitle')}</p>
       </motion.div>
 
       {/* Progress Summary */}
@@ -154,8 +116,8 @@ export default function LearnPage() {
         <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
           <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Progresso</p>
-              <p className="text-lg font-display font-bold text-foreground">{completedCount}/{lessons.length} lições</p>
+              <p className="text-sm text-muted-foreground">{t('learn.progress')}</p>
+              <p className="text-lg font-display font-bold text-foreground">{t('learn.lessons_count').replace('{completed}', String(completedCount)).replace('{done}', String(completedCount)).replace('{total}', String(lessons.length))}</p>
             </div>
             <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -170,9 +132,9 @@ export default function LearnPage() {
         <TabsList className="w-full h-auto flex-wrap gap-1 bg-muted/50 p-1 rounded-xl">
           <TabsTrigger value="map" className="text-xs rounded-lg gap-1">
             <Map className="h-3 w-3" />
-            <span>Mapa</span>
+            <span>{t('learn.map')}</span>
           </TabsTrigger>
-          <TabsTrigger value="all" className="text-xs rounded-lg">Todas</TabsTrigger>
+          <TabsTrigger value="all" className="text-xs rounded-lg">{t('learn.all')}</TabsTrigger>
           {categories.map(([key, cat]) => (
             <TabsTrigger key={key} value={key} className="text-xs rounded-lg gap-1">
               <span>{cat.icon}</span>
@@ -182,11 +144,7 @@ export default function LearnPage() {
         </TabsList>
 
         <TabsContent value="map" className="mt-4">
-          <LearningProgressMap
-            lessons={lessons}
-            completedIds={completedIds}
-            onStartLesson={setActiveLesson}
-          />
+          <LearningProgressMap lessons={lessons} completedIds={completedIds} onStartLesson={setActiveLesson} />
         </TabsContent>
 
         <TabsContent value="all" className="mt-4">
@@ -220,6 +178,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
 };
 
 function LessonCard({ lesson, index, completed, score, onStart }: { lesson: MicroLesson; index: number; completed: boolean; score: number; onStart: () => void }) {
+  const t = useT();
   const gradient = CATEGORY_GRADIENTS[lesson.category] || 'from-primary/60 to-primary/80';
   const categoryImage = CATEGORY_IMAGES[lesson.category];
   const quizTotal = lesson.quiz.length;
@@ -229,18 +188,8 @@ function LessonCard({ lesson, index, completed, score, onStart }: { lesson: Micr
   const hasVideo = lesson.blocks.some(b => b.type === 'video');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <Card
-        className={`border-border/50 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg ${completed ? 'opacity-75' : ''}`}
-        onClick={onStart}
-      >
-        {/* Illustration area */}
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      <Card className={`border-border/50 cursor-pointer overflow-hidden transition-shadow hover:shadow-lg ${completed ? 'opacity-75' : ''}`} onClick={onStart}>
         <div className={`relative h-28 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
           {categoryImage ? (
             <img src={categoryImage} alt={lesson.category} className="h-24 w-24 object-contain drop-shadow-md" />
@@ -263,36 +212,25 @@ function LessonCard({ lesson, index, completed, score, onStart }: { lesson: Micr
           )}
         </div>
 
-        {/* Content */}
         <CardContent className="p-3">
-          <h3 className="font-display font-bold text-foreground text-xs leading-tight line-clamp-2 min-h-[2rem]">
-            {lesson.title}
-          </h3>
+          <h3 className="font-display font-bold text-foreground text-xs leading-tight line-clamp-2 min-h-[2rem]">{lesson.title}</h3>
           <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{lesson.description}</p>
           <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-            <span className="flex items-center gap-0.5">
-              <Clock className="h-3 w-3" /> {lesson.estimatedMinutes}min
-            </span>
-            <span className="flex items-center gap-0.5">
-              <Star className="h-3 w-3 text-chart-2" /> {lesson.kivaPointsReward}
-            </span>
+            <span className="flex items-center gap-0.5"><Clock className="h-3 w-3" /> {lesson.estimatedMinutes}min</span>
+            <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-chart-2" /> {lesson.kivaPointsReward}</span>
           </div>
 
-          {/* Progress bar */}
           <div className="mt-2.5">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[9px] text-muted-foreground">
-                {completed ? `${correctCount}/${quizTotal} corretas` : `0/${quizTotal} perguntas`}
+                {completed
+                  ? t('learn.correct_count').replace('{correct}', String(correctCount)).replace('{total}', String(quizTotal))
+                  : t('learn.questions_count').replace('{total}', String(quizTotal))}
               </span>
               <span className="text-[9px] font-semibold text-foreground">{pct}%</span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <motion.div
-                className={`h-full rounded-full ${pct === 100 ? 'bg-chart-3' : pct > 0 ? 'bg-primary' : 'bg-muted-foreground/20'}`}
-                initial={{ width: 0 }}
-                animate={{ width: `${pct}%` }}
-                transition={{ duration: 0.6, delay: index * 0.03 + 0.2 }}
-              />
+              <motion.div className={`h-full rounded-full ${pct === 100 ? 'bg-chart-3' : pct > 0 ? 'bg-primary' : 'bg-muted-foreground/20'}`} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: index * 0.03 + 0.2 }} />
             </div>
           </div>
         </CardContent>

@@ -921,24 +921,6 @@ const pt: Record<string, string> = {
   'teen.profile.title': 'Perfil',
 
 
-  // ─── Learn Page ───
-  'learn.title': 'Aprender',
-  'learn.subtitle': 'Lições interactivas sobre educação financeira',
-
-  // ─── Badges Page ───
-  'badges.title': 'Badges',
-  'badges.subtitle': 'As tuas conquistas',
-
-  // ─── Streaks Page ───
-  'streaks.title': 'Streaks',
-  'streaks.subtitle': 'Mantém a tua sequência activa',
-
-  // ─── Install Page ───
-  'install.title': 'Instalar KIVARA',
-
-  // ─── Not Found ───
-  'notfound.title': 'Página não encontrada',
-  'notfound.back': 'Voltar ao início',
 
   // ─── Notifications ───
   'notifications.title': 'Notificações',
@@ -2395,8 +2377,6 @@ const pt: Record<string, string> = {
   'interest.show_less': 'Mostrar menos',
   'interest.show_all': 'Ver todos ({count})',
 
-  // ─── LearningProgressMap ───
-  'learn.lessons_count': '{done}/{total} lições',
 
   // ─── WeeklySparkline ───
   'sparkline.this_week': 'Esta Semana',
@@ -2415,6 +2395,90 @@ const pt: Record<string, string> = {
   'confetti.goal_reached': 'Meta atingida! 🏆',
   'confetti.vault_reached': 'O cofre "{name}" chegou ao objectivo!',
   'confetti.congrats': '✨ Parabéns! ✨',
+
+  // ─── BadgesPage ───
+  'badges.title': 'Badges',
+  'badges.subtitle': 'Colecciona badges e mostra o teu progresso',
+  'badges.collection': 'Colecção',
+  'badges.all': 'Todas',
+  'badges.how_to_unlock': 'Como desbloquear',
+  'badges.unlocked_at': 'Desbloqueado em {date}',
+  'badges.close': 'Fechar',
+
+  // ─── NotFound ───
+  'notfound.title': '404',
+  'notfound.message': 'Oops! Página não encontrada',
+  'notfound.back': 'Voltar ao início',
+
+  // ─── Install Page ───
+  'install.installed_title': 'Kivara instalada!',
+  'install.install_title': 'Instalar Kivara',
+  'install.installed_desc': 'A app já está instalada no teu dispositivo.',
+  'install.install_desc': 'Instala a Kivara para acesso rápido e funcionalidades offline.',
+  'install.instant': 'Abertura instantânea',
+  'install.offline': 'Funciona offline',
+  'install.native': 'Experiência nativa',
+  'install.now': 'Instalar agora',
+  'install.how_to': 'Como instalar:',
+  'install.step1': 'Abre o menu do browser (⋮ ou ⋯)',
+  'install.step2': 'Seleciona "Adicionar ao ecrã inicial"',
+  'install.step3': 'Confirma a instalação',
+
+  // ─── JoinFamily ───
+  'join.validating': 'A validar convite...',
+  'join.valid_title': 'Convite Válido! 🎉',
+  'join.valid_desc': 'Cria a tua conta para te juntares à família. Usa o código {code} no registo.',
+  'join.create_account': 'Criar Conta',
+  'join.invalid_title': 'Convite Inválido',
+  'join.invalid_desc': 'Este código expirou ou já foi utilizado. Pede um novo convite ao teu encarregado.',
+  'join.go_login': 'Ir para Login',
+
+  // ─── StreaksPage ───
+  'streaks.title': 'Sequências Diárias',
+  'streaks.subtitle': 'Consistência traz grandes recompensas',
+  'streaks.current': 'Actual',
+  'streaks.record': 'Recorde',
+  'streaks.active_days': 'Dias activos',
+  'streaks.next_milestone': 'Próximo marco',
+  'streaks.days_label': '{count} dias',
+  'streaks.calendar': 'Calendário',
+  'streaks.active': 'Activo',
+  'streaks.inactive': 'Inactivo',
+  'streaks.today': 'Hoje',
+  'streaks.rewards_title': 'Recompensas de Sequência',
+  'streaks.claim': 'Reclamar',
+  'streaks.claimed_toast': 'Recompensa reclamada!',
+  'streaks.claimed_desc': '+{points} KivaPoints pelo marco de {label}!',
+  'streaks.error_claim': 'Não foi possível reclamar a recompensa. Tenta novamente.',
+  'streaks.weekdays': 'Seg,Ter,Qua,Qui,Sex,Sáb,Dom',
+
+  // ─── LearnPage ───
+  'learn.title': 'Aprender',
+  'learn.subtitle': 'Micro-lições de educação financeira',
+  'learn.progress': 'Progresso',
+  'learn.lessons_count': '{completed}/{total} lições',
+  'learn.map': 'Mapa',
+  'learn.all': 'Todas',
+  'learn.completed_toast': '🎉 Lição concluída!',
+  'learn.completed_desc': 'Ganhaste {points} KivaPoints!',
+  'learn.correct_count': '{correct}/{total} corretas',
+  'learn.questions_count': '0/{total} perguntas',
+
+  // ─── AcceptProgramInvite ───
+  'invite.accepted_title': 'Adesão confirmada!',
+  'invite.accepted_desc': 'Agora faz parte do programa {name}.',
+  'invite.go_panel': 'Ir para o painel',
+  'invite.invalid_title': 'Convite inválido',
+  'invite.invalid_desc': 'Este convite não é válido ou já expirou.',
+  'invite.back': 'Voltar',
+  'invite.program_title': 'Convite de Programa',
+  'invite.program_desc': 'Foi convidado para aderir ao programa:',
+  'invite.family': '👨‍👩‍👧 Família',
+  'invite.school': '🏫 Escola',
+  'invite.decline': 'Recusar',
+  'invite.accept': 'Aceitar',
+  'invite.success': 'Convite aceite com sucesso!',
+  'invite.error': 'Erro ao aceitar convite',
 };
 
 export default pt;

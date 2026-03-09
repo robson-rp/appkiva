@@ -5,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useT } from '@/contexts/LanguageContext';
 
 export default function JoinFamily() {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const t = useT();
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading');
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function JoinFamily() {
             {status === 'loading' && (
               <>
                 <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-                <p className="font-display font-bold">A validar convite...</p>
+                <p className="font-display font-bold">{t('join.validating')}</p>
               </>
             )}
             {status === 'valid' && (
@@ -39,12 +41,12 @@ export default function JoinFamily() {
                 <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mx-auto">
                   <CheckCircle className="h-8 w-8 text-secondary" />
                 </div>
-                <h2 className="font-display font-bold text-xl">Convite Válido! 🎉</h2>
+                <h2 className="font-display font-bold text-xl">{t('join.valid_title')}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Cria a tua conta para te juntares à família. Usa o código <strong className="text-foreground">{code?.toUpperCase()}</strong> no registo.
+                  {t('join.valid_desc').replace('{code}', code?.toUpperCase() ?? '')}
                 </p>
                 <Button className="w-full rounded-xl font-display" onClick={() => navigate(`/login?invite=${code}`)}>
-                  Criar Conta
+                  {t('join.create_account')}
                 </Button>
               </>
             )}
@@ -53,12 +55,10 @@ export default function JoinFamily() {
                 <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto">
                   <XCircle className="h-8 w-8 text-destructive" />
                 </div>
-                <h2 className="font-display font-bold text-xl">Convite Inválido</h2>
-                <p className="text-sm text-muted-foreground">
-                  Este código expirou ou já foi utilizado. Pede um novo convite ao teu encarregado.
-                </p>
+                <h2 className="font-display font-bold text-xl">{t('join.invalid_title')}</h2>
+                <p className="text-sm text-muted-foreground">{t('join.invalid_desc')}</p>
                 <Button variant="outline" className="w-full rounded-xl font-display" onClick={() => navigate('/login')}>
-                  Ir para Login
+                  {t('join.go_login')}
                 </Button>
               </>
             )}
