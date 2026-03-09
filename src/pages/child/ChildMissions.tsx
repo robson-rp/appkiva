@@ -308,12 +308,18 @@ function MissionsTab({
   inProgress,
   completed,
   statusConfig,
+  loading,
+  startMission,
+  completeMission,
 }: {
   t: (key: string) => string;
   available: any[];
   inProgress: any[];
   completed: any[];
   statusConfig: any;
+  loading: boolean;
+  startMission: ReturnType<typeof useStartMission>;
+  completeMission: ReturnType<typeof useCompleteMission>;
 }) {
   const dailyMissions = [...available, ...inProgress].filter((_, i) => i % 2 === 0);
   const weeklyMissions = [...available, ...inProgress].filter((_, i) => i % 2 !== 0);
