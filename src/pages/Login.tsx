@@ -74,6 +74,7 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
   const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
+  const [honeypot, setHoneypot] = useState('');
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 2FA state
