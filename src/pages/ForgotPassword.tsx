@@ -18,9 +18,31 @@ export default function ForgotPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+
+    // Check rate limit before sending
+    try {
+      const { data: rateResult } = await supabase.functions.invoke('auth-guard', {
+        body: { action: 'check-reset-rate', email },
+      });
+      if (rateResult && !rateResult.allowed) {
+        // Still show generic success to prevent enumeration
+        setSent(true);
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      // If auth-guard unavailable, proceed
+    }
+
+    // Log the reset request
+    supabase.functions.invoke('auth-guard', {
+      body: { action: 'log-event', event_type: 'password_reset_requested', email },
+    }).catch(() => {});
+
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
+    // Always show generic success regardless of whether email exists
     setSent(true);
     setSubmitting(false);
   };

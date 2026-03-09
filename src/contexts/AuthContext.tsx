@@ -252,6 +252,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPending2FA(false);
   };
 
+  // ── Idle timeout ──
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    if (!user) return;
+
+    const timeout = user.role === 'admin' ? IDLE_TIMEOUT_ADMIN
+      : user.role === 'parent' ? IDLE_TIMEOUT_PARENT
+      : null;
+
+    if (!timeout) return;
+
+    idleTimerRef.current = setTimeout(() => {
+      logout();
+    }, timeout);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || (user.role !== 'parent' && user.role !== 'admin')) return;
+
+    resetIdleTimer();
+    ACTIVITY_EVENTS.forEach(evt => window.addEventListener(evt, resetIdleTimer, { passive: true }));
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      ACTIVITY_EVENTS.forEach(evt => window.removeEventListener(evt, resetIdleTimer));
+    };
+  }, [user, resetIdleTimer]);
+
   return (
     <AuthContext.Provider value={{
       user: pending2FA ? null : user,

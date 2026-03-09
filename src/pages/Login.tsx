@@ -254,7 +254,7 @@ export default function Login() {
         } else {
           const { error, requires2FA } = await login(email, password);
           if (error) {
-            toast({ title: t('auth.error_login'), description: error, variant: 'destructive' });
+            toast({ title: t(error), variant: 'destructive' });
             setSubmitting(false);
             return;
           }
