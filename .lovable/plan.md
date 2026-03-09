@@ -1,47 +1,128 @@
 
 
-## Child Progress Simulator — Landing Page Section
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### What
-A new interactive section (`ChildProgressSimulator`) placed between `SocialProof` and `PricingSection` in the Landing Page. Parents select their child's age via a slider and instantly see a visual progression timeline with milestones, icons, and a personalized message.
+## Current State Assessment
 
-### Component: `src/components/ChildProgressSimulator.tsx`
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-**Structure:**
-1. **Header** — Title + subtitle (i18n keys `sim.title`, `sim.subtitle`)
-2. **Age Slider** — Large, touch-friendly slider (5–17), displaying selected age dynamically with animated number
-3. **Age Band Card** — Based on selected age, show one of 3 bands:
-   - **6–10**: "Hábitos financeiros" — 4 milestones (poupar, missões, metas, recompensas) with icons (Coins, Target, TrendingUp, Trophy)
-   - **11–14**: "Responsabilidade financeira" — 3 milestones (mesada, gastos, disciplina) with icons (Wallet, BarChart3, ListChecks)
-   - **15–17**: "Independência financeira" — 3 milestones (dinheiro real, carteira digital, decisões) with icons (Banknote, Smartphone, Brain)
-4. **Horizontal Timeline** — 4 points: "Hoje → 1 ano → 3 anos → Futuro" with milestone labels and icons at each point, connected by an animated progress line
-5. **Dynamic Message** — Personalized text interpolated with age (e.g., `sim.message_habits`, `sim.message_responsibility`, `sim.message_independence`)
-6. **CTA** — "Comece hoje a jornada financeira do seu filho" + "Criar conta familiar" button linking to `/login`
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-**Visual approach:**
-- Cards with `rounded-2xl border` consistent with existing design
-- Framer Motion `fadeUp` / `stagger` animations matching other sections
-- Slider uses existing `@radix-ui/react-slider` component, sized up for touch (h-3 track, h-7 thumb)
-- Timeline uses flexbox with connecting line (`bg-primary` bar) and circular milestone dots
-- Age band transitions with `AnimatePresence` for smooth card swap
+## What Lovable Can and Cannot Build
 
-### i18n Keys (~25 new keys)
-Added to both `src/i18n/pt.ts` and `src/i18n/en.ts` under `sim.*` domain covering title, subtitle, age label, band titles, milestones, timeline points, dynamic messages, and CTA text.
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-### Landing Page Integration
-In `src/pages/LandingPage.tsx`:
-- Import `ChildProgressSimulator`
-- Insert `<ChildProgressSimulator />` between `<SocialProof />` and `<PricingSection />` in the page composition
-- Add `nav` link for the section if desired
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-### Analytics
-Fire-and-forget tracking calls to `onboarding_analytics` (existing table) with event types: `simulator_open`, `simulator_age_select`, `simulator_cta_click`.
+## Implementation Plan (4 Phases)
 
-### Files to create/modify
-| File | Action |
-|------|--------|
-| `src/components/ChildProgressSimulator.tsx` | Create |
-| `src/i18n/pt.ts` | Add ~25 `sim.*` keys |
-| `src/i18n/en.ts` | Add ~25 `sim.*` keys |
-| `src/pages/LandingPage.tsx` | Import + place component |
+### Phase 1 — Multi-Tenant Foundation
+
+**Database migrations:**
+
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+
+4. Expand `app_role` enum to include `admin`
+
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
+
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 
