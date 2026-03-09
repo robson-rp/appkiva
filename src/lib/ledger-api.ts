@@ -21,6 +21,7 @@ export interface CreateTransactionRequest {
   reference_id?: string;
   reference_type?: string;
   metadata?: Record<string, unknown>;
+  idempotency_key?: string;
 }
 
 export interface CreateTransactionResponse {
@@ -28,11 +29,22 @@ export interface CreateTransactionResponse {
   entry: Record<string, unknown>;
   requires_approval: boolean;
   new_balance: number | null;
+  idempotent_hit?: boolean;
+}
+
+function generateIdempotencyKey(): string {
+  return crypto.randomUUID();
 }
 
 export async function createTransaction(req: CreateTransactionRequest): Promise<CreateTransactionResponse> {
+  // Auto-generate idempotency key if not provided
+  const requestWithKey = {
+    ...req,
+    idempotency_key: req.idempotency_key || generateIdempotencyKey(),
+  };
+
   const { data, error } = await supabase.functions.invoke('create-transaction', {
-    body: req,
+    body: requestWithKey,
   });
 
   if (error) {

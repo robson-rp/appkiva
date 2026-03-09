@@ -72,10 +72,20 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Get caller roles
+    const { data: callerRoles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+
+    const roles = (callerRoles ?? []).map((r) => r.role);
+    const isParent = roles.includes("parent");
+    const isAdmin = roles.includes("admin");
+
     // Get vault and verify ownership
     const { data: vault } = await supabaseAdmin
       .from("savings_vaults")
-      .select("id, profile_id, current_amount, name, household_id")
+      .select("id, profile_id, current_amount, name, household_id, requires_parent_approval")
       .eq("id", body.vault_id)
       .single();
 
@@ -94,21 +104,56 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Check vault has enough funds
-    const vaultBalance = Number(vault.current_amount);
-    const withdrawAmount = Math.min(body.amount, vaultBalance);
+    // Parental approval gate: if vault requires approval and caller is child/teen
+    if (vault.requires_parent_approval && !isParent && !isAdmin) {
+      // Find the parent in the household
+      const { data: parentProfiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("household_id", callerProfile.household_id)
+        .neq("id", callerProfile.id);
 
-    if (withdrawAmount <= 0) {
+      const { data: callerProfileName } = await supabaseAdmin
+        .from("profiles")
+        .select("display_name")
+        .eq("id", callerProfile.id)
+        .single();
+
+      const childName = callerProfileName?.display_name ?? "O teu filho(a)";
+
+      // Notify all parents in household
+      if (parentProfiles && parentProfiles.length > 0) {
+        const notifications = parentProfiles.map((p) => ({
+          profile_id: p.id,
+          title: "🔒 Pedido de levantamento do cofre",
+          message: `${childName} quer levantar ${body.amount} KVC do cofre "${vault.name}". Aprova na secção de cofres.`,
+          type: "vault_approval",
+          urgent: true,
+          metadata: {
+            vault_id: vault.id,
+            vault_name: vault.name,
+            amount: body.amount,
+            child_profile_id: callerProfile.id,
+          },
+        }));
+
+        await supabaseAdmin.from("notifications").insert(notifications);
+      }
+
       return new Response(
-        JSON.stringify({ error: "O cofre está vazio" }),
-        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({
+          success: false,
+          requires_parent_approval: true,
+          message: "Levantamento requer aprovação parental. O teu encarregado foi notificado.",
+        }),
+        { status: 202, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get caller's wallet
+    // Check caller's wallet is not frozen
     const { data: callerWallet } = await supabaseAdmin
       .from("wallets")
-      .select("id")
+      .select("id, is_frozen")
       .eq("profile_id", callerProfile.id)
       .eq("wallet_type", "virtual")
       .eq("currency", "KVC")
@@ -121,7 +166,25 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 1. Create ledger entry (self-transfer, vault_withdraw type credits wallet in view)
+    if (callerWallet.is_frozen) {
+      return new Response(
+        JSON.stringify({ error: "A tua carteira está congelada. Contacta o teu encarregado." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Check vault has enough funds
+    const vaultBalance = Number(vault.current_amount);
+    const withdrawAmount = Math.min(body.amount, vaultBalance);
+
+    if (withdrawAmount <= 0) {
+      return new Response(
+        JSON.stringify({ error: "O cofre está vazio" }),
+        { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 1. Create ledger entry
     const { error: ledgerError } = await supabaseAdmin
       .from("ledger_entries")
       .insert({
