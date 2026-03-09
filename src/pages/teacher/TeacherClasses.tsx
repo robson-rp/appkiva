@@ -439,26 +439,29 @@ export default function TeacherClasses() {
                 <Card className="border-border/50 overflow-hidden hover:shadow-lg transition-all duration-300">
                   <div className="h-0.5 bg-gradient-to-r from-primary to-secondary" />
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-display flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl">
-                        {classroom.icon}
+                    <CardTitle className="text-base font-display flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-xl sm:text-2xl shrink-0">
+                          {classroom.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="block truncate">{classroom.name}</span>
+                          <span className="text-[10px] sm:text-xs text-muted-foreground font-normal line-clamp-1">
+                            {classroom.grade}
+                            {classroom.subject ? ` · ${classroom.subject}` : ''}
+                            {classroom.schedule ? ` · ${classroom.schedule}` : ''}
+                            {` · ${t('teacher.classes.created_at')} `}{format(new Date(classroom.created_at), 'dd/MM/yyyy')}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="block">{classroom.name}</span>
-                        <span className="text-xs text-muted-foreground font-normal">
-                          {classroom.grade}
-                          {classroom.subject ? ` · ${classroom.subject}` : ''}
-                          {classroom.schedule ? ` · ${classroom.schedule}` : ''}
-                          {` · ${t('teacher.classes.created_at')} `}{format(new Date(classroom.created_at), 'dd/MM/yyyy')}
-                        </span>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl shrink-0" onClick={() => openEditDialog(classroom)}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl shrink-0" onClick={() => handleDuplicateClass(classroom)}>
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                      <AlertDialog>
+                      <div className="flex items-center gap-1 shrink-0 self-end sm:self-auto">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={() => openEditDialog(classroom)}>
+                          <Pencil className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={() => handleDuplicateClass(classroom)}>
+                          <Copy className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+                        </Button>
+                        <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl shrink-0">
                             <Trash className="h-3.5 w-3.5" />
