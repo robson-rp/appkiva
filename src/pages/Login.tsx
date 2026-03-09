@@ -645,6 +645,17 @@ export default function Login() {
                 </div>
 
                 <form key={authMode} onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+                  {/* Honeypot anti-bot field */}
+                  <div className="absolute -left-[9999px]" aria-hidden="true">
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={honeypot}
+                      onChange={e => setHoneypot(e.target.value)}
+                    />
+                  </div>
                   {authMode === 'signup' && (
                     <>
                       {isChildOrTeen && (
