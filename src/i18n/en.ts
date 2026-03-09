@@ -2586,6 +2586,29 @@ const en: Record<string, string> = {
   'password.redirect_login': 'You will be redirected to login shortly…',
   'password.invalid_link': 'Invalid or expired link',
   'password.invalid_link_desc': 'This recovery link is no longer valid. Request a new one from the login page.',
+
+  // ─── Wallet Protection ───
+  'wallet.frozen': 'Wallet frozen',
+  'wallet.frozen_desc': 'Your wallet is frozen. Contact your parent.',
+  'wallet.freeze': 'Freeze wallet',
+  'wallet.unfreeze': 'Unfreeze wallet',
+  'wallet.freeze_reason': 'Freeze reason',
+  'wallet.freeze_success': 'Wallet frozen successfully',
+  'wallet.unfreeze_success': 'Wallet unfrozen successfully',
+  'wallet.velocity_limit': 'Hourly transaction limit exceeded',
+  'wallet.velocity_limit_desc': 'Wait before trying again.',
+  'wallet.idempotent_hit': 'Transaction already processed',
+  'wallet.requires_approval': 'Requires parental approval',
+  'wallet.requires_approval_desc': 'Your parent has been notified.',
+  'admin.finance.wallet_security': 'Wallet Security',
+  'admin.finance.frozen_wallets': 'Frozen wallets',
+  'admin.finance.no_frozen': 'No frozen wallets',
+  'admin.finance.risk_flags': 'Risk alerts',
+  'admin.finance.no_risk_flags': 'No active alerts',
+  'admin.finance.freeze_reason': 'Reason',
+  'admin.finance.frozen_at': 'Frozen at',
+  'admin.finance.frozen_by': 'By',
+  'admin.finance.wallet_owner': 'Owner',
 };
 
 export default en;

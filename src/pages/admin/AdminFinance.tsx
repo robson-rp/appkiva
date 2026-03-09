@@ -415,6 +415,96 @@ export default function AdminFinance() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6 mt-4">
+          {/* Frozen Wallets */}
+          <Card className="border-destructive/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <Lock className="h-4 w-4 text-destructive" /> {t('admin.finance.frozen_wallets')}
+                {frozenWallets && frozenWallets.length > 0 && (
+                  <Badge variant="destructive" className="ml-auto text-xs">{frozenWallets.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {!frozenWallets || frozenWallets.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-4">{t('admin.finance.no_frozen')}</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('admin.finance.wallet_owner')}</TableHead>
+                      <TableHead>{t('admin.finance.freeze_reason')}</TableHead>
+                      <TableHead>{t('admin.finance.frozen_at')}</TableHead>
+                      <TableHead>{t('admin.finance.frozen_by')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {frozenWallets.map((w) => (
+                      <TableRow key={w.id}>
+                        <TableCell className="font-medium">{w.owner_name}</TableCell>
+                        <TableCell className="text-sm">{w.freeze_reason ?? '—'}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {w.frozen_at ? new Date(w.frozen_at).toLocaleString('pt-PT') : '—'}
+                        </TableCell>
+                        <TableCell className="text-sm">{w.frozen_by_name}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Risk Flags */}
+          <Card className="border-amber-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" /> {t('admin.finance.risk_flags')}
+                {riskFlags && riskFlags.length > 0 && (
+                  <Badge className="ml-auto text-xs bg-amber-500">{riskFlags.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {!riskFlags || riskFlags.length === 0 ? (
+                <p className="text-sm text-muted-foreground p-4">{t('admin.finance.no_risk_flags')}</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Severidade</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Data</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {riskFlags.map((flag) => (
+                      <TableRow key={flag.id}>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{flag.flag_type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={flag.severity === 'critical' || flag.severity === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                            {flag.severity}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[300px] truncate">{flag.description}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(flag.created_at).toLocaleString('pt-PT')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

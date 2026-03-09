@@ -2586,6 +2586,29 @@ const pt: Record<string, string> = {
   'password.redirect_login': 'Será redirecionado para o login em instantes…',
   'password.invalid_link': 'Link inválido ou expirado',
   'password.invalid_link_desc': 'Este link de recuperação já não é válido. Solicite um novo na página de login.',
+
+  // ─── Wallet Protection ───
+  'wallet.frozen': 'Carteira congelada',
+  'wallet.frozen_desc': 'A tua carteira está congelada. Contacta o teu encarregado.',
+  'wallet.freeze': 'Congelar carteira',
+  'wallet.unfreeze': 'Descongelar carteira',
+  'wallet.freeze_reason': 'Motivo do congelamento',
+  'wallet.freeze_success': 'Carteira congelada com sucesso',
+  'wallet.unfreeze_success': 'Carteira desbloqueada com sucesso',
+  'wallet.velocity_limit': 'Limite de transacções por hora excedido',
+  'wallet.velocity_limit_desc': 'Aguarda antes de tentar novamente.',
+  'wallet.idempotent_hit': 'Transacção já processada',
+  'wallet.requires_approval': 'Requer aprovação parental',
+  'wallet.requires_approval_desc': 'O teu encarregado foi notificado.',
+  'admin.finance.wallet_security': 'Segurança de Carteiras',
+  'admin.finance.frozen_wallets': 'Carteiras congeladas',
+  'admin.finance.no_frozen': 'Nenhuma carteira congelada',
+  'admin.finance.risk_flags': 'Alertas de risco',
+  'admin.finance.no_risk_flags': 'Sem alertas activos',
+  'admin.finance.freeze_reason': 'Motivo',
+  'admin.finance.frozen_at': 'Congelada em',
+  'admin.finance.frozen_by': 'Por',
+  'admin.finance.wallet_owner': 'Proprietário',
 };
 
 export default pt;
