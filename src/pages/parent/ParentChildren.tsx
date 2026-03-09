@@ -305,8 +305,8 @@ export default function ParentChildren() {
             <div className="text-5xl mb-4">👶</div>
             <h3 className="font-display font-bold text-lg mb-2">{t('parent.children.no_children')}</h3>
             <p className="text-sm text-muted-foreground mb-4">{t('parent.children.add_hint')}</p>
-            <Button className="rounded-xl font-display gap-1.5" onClick={async () => { await generateAndPersistCode(); setInviteOpen(true); }}>
-              <Link2 className="h-4 w-4" /> {t('parent.children.invite_child')}
+            <Button className="rounded-xl font-display gap-1.5" onClick={() => setCreateOpen(true)}>
+              <UserPlus className="h-4 w-4" /> {t('parent.children.create_child')}
             </Button>
           </CardContent>
         </Card>
