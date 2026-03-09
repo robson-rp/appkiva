@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen, Sparkles, Bell, Image } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen, Sparkles, Bell, Image, ShieldAlert } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
