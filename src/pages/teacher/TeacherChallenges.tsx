@@ -170,7 +170,7 @@ export default function TeacherChallenges() {
   };
 
   const renderChallenge = (challenge: CollectiveChallenge) => {
-    const classroom = mockClassrooms.find(c => c.id === challenge.classroomId);
+    const classroom = (classrooms || []).find(c => c.id === challenge.classroomId);
     const pct = Math.round((challenge.currentAmount / challenge.targetAmount) * 100);
     const status = statusConfig[challenge.status];
     const StatusIcon = status.icon;
