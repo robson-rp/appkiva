@@ -67,6 +67,9 @@ export default function Login() {
   const [schoolTenantId, setSchoolTenantId] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [inviteValid, setInviteValid] = useState<boolean | null>(null);
+  // Child login with username + PIN
+  const [childUsername, setChildUsername] = useState('');
+  const [childPin, setChildPin] = useState('');
   const [inviteData, setInviteData] = useState<{ household_id: string; parent_profile_id: string; code_id: string } | null>(null);
   const [schools, setSchools] = useState<{ id: string; name: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
