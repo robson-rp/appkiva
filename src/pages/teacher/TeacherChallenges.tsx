@@ -65,7 +65,9 @@ export default function TeacherChallenges() {
     teamwork: t('teacher.challenges.type_teamwork'),
   };
 
-  const [challenges, setChallenges] = useState<CollectiveChallenge[]>([...mockChallenges]);
+  const { data: dbChallenges } = useCollectiveChallenges();
+  const { data: classrooms } = useClassrooms();
+  const [challenges, setChallenges] = useState<CollectiveChallenge[]>([]);
   const [form, setForm] = useState<ChallengeFormData>({ ...emptyForm });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -168,7 +170,7 @@ export default function TeacherChallenges() {
   };
 
   const renderChallenge = (challenge: CollectiveChallenge) => {
-    const classroom = mockClassrooms.find(c => c.id === challenge.classroomId);
+    const classroom = (classrooms || []).find(c => c.id === challenge.classroomId);
     const pct = Math.round((challenge.currentAmount / challenge.targetAmount) * 100);
     const status = statusConfig[challenge.status];
     const StatusIcon = status.icon;
@@ -287,7 +289,7 @@ export default function TeacherChallenges() {
               <Select value={form.classroomId} onValueChange={v => updateForm('classroomId', v)}>
                 <SelectTrigger><SelectValue placeholder={t('teacher.classes.select')} /></SelectTrigger>
                 <SelectContent>
-                  {mockClassrooms.map(c => (
+                  {(classrooms || []).map(c => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                   ))}
                 </SelectContent>
