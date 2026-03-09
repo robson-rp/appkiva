@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { ChangePasswordSection } from '@/components/ChangePasswordSection';
 
 const avatarOptions = ['👩', '👨', '👩‍💼', '👨‍💼', '🧑', '👩‍🏫', '👨‍🏫', '🦸‍♀️'];
 
