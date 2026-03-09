@@ -11,6 +11,7 @@ import { Camera, Save, Loader2, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChangePasswordSection } from '@/components/ChangePasswordSection';
+import ReferralWidget from '@/components/ReferralWidget';
 
 const AVATAR_OPTIONS = ['🧑‍💻', '👩‍💻', '🧑', '👩', '👨', '🧑🏽', '👩🏾', '👨🏻', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰', '🎮', '🎧'];
 
