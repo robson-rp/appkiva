@@ -123,16 +123,23 @@ export default function ParentChildren() {
 
   const generateAndPersistCode = async () => {
     const newCode = generateCode();
-    if (!user?.profileId || !user?.householdId) {
+    if (!user?.profileId) {
       setInviteCode(newCode);
       return;
     }
     setInviteSaving(true);
     try {
+      // Ensure parent has a household (creates one if missing)
+      let householdId = user.householdId;
+      if (!householdId) {
+        const { data: hId, error: hErr } = await supabase.rpc('ensure_parent_household', { _profile_id: user.profileId } as any);
+        if (hErr || !hId) throw new Error('Could not create household');
+        householdId = hId as string;
+      }
       const { error } = await supabase.from('family_invite_codes').insert({
         code: newCode,
         parent_profile_id: user.profileId,
-        household_id: user.householdId,
+        household_id: householdId,
       });
       if (error) throw error;
       setInviteCode(newCode);
