@@ -34,15 +34,25 @@ Deno.serve(async (req) => {
 
   const results: Record<string, string> = {};
 
-  // Build a map of display_name -> user_id from profiles to find existing users
-  const findUserIdByName = async (name: string): Promise<string | null> => {
-    const { data } = await supabaseAdmin
+  // Build email->user_id map by iterating all profiles and checking via getUserById
+  const findUserByEmail = async (email: string): Promise<string | null> => {
+    const target = email.toLowerCase();
+    const { data: profiles } = await supabaseAdmin
       .from("profiles")
       .select("user_id")
-      .eq("display_name", name)
-      .limit(1)
-      .maybeSingle();
-    return data?.user_id ?? null;
+      .limit(500);
+    
+    if (!profiles) return null;
+    
+    for (const p of profiles) {
+      try {
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(p.user_id);
+        if (userData?.user?.email?.toLowerCase() === target) {
+          return p.user_id;
+        }
+      } catch (_) { /* skip */ }
+    }
+    return null;
   };
 
   // ─── 1. Create or find users ───────────────────────────────
