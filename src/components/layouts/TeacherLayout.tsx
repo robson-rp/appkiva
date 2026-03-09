@@ -44,6 +44,7 @@ function useTeacherNav() {
 
   const mobileMoreItems = [
     { title: t('nav.teacher.school'), url: '/teacher/school', icon: School },
+    { title: t('nav.teacher.profile'), url: '/teacher/profile', icon: UserCircle },
   ];
 
   return { navItems, mobileFixedItems, mobileMoreItems };
