@@ -48,6 +48,45 @@ export default function AdminFinance() {
   const [simCount, setSimCount] = useState('10');
   const [simPeriod, setSimPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
+  // Frozen wallets query
+  const { data: frozenWallets } = useQuery({
+    queryKey: ['admin_frozen_wallets'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('wallets')
+        .select('id, profile_id, is_frozen, frozen_at, frozen_by, freeze_reason')
+        .eq('is_frozen', true);
+      if (error) throw error;
+      // Get profile names for display
+      const profileIds = [...new Set((data ?? []).flatMap(w => [w.profile_id, w.frozen_by].filter(Boolean)))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('id', profileIds);
+      const profileMap = new Map((profiles ?? []).map(p => [p.id, p.display_name]));
+      return (data ?? []).map(w => ({
+        ...w,
+        owner_name: profileMap.get(w.profile_id) ?? w.profile_id,
+        frozen_by_name: w.frozen_by ? (profileMap.get(w.frozen_by) ?? w.frozen_by) : '—',
+      }));
+    },
+  });
+
+  // Risk flags query
+  const { data: riskFlags } = useQuery({
+    queryKey: ['admin_risk_flags_active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('risk_flags')
+        .select('*')
+        .is('resolved_at', null)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const revenueByCurrency = useMemo(() => {
     const map = new Map<string, { symbol: string; monthly: number; yearly: number; tenantCount: number }>();
     tenants.forEach(tn => {
