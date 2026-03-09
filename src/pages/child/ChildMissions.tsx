@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
-import { mockMissions } from '@/data/mock-data';
+import { useChildMissions, useStartMission, useCompleteMission } from '@/hooks/use-missions';
 import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
