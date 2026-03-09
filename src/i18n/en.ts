@@ -2672,6 +2672,39 @@ const en: Record<string, string> = {
   'parent.children.account_created': 'Account created successfully!',
   'parent.children.account_created_desc': 'The child can sign in with their username and PIN.',
   'parent.children.username_taken': 'This username is already taken',
+
+  // ─── Referral System ───
+  'referral.title': 'Invite friends',
+  'referral.subtitle': 'Invite friends and earn bonus KivaCoins!',
+  'referral.your_code': 'Your code',
+  'referral.friends_invited': 'Friends invited',
+  'referral.bonus_earned': 'KVC earned',
+  'referral.milestone_hint': 'Invite {n} more friend(s) to earn 100 extra KVC! 🎯',
+  'referral.copied': 'Link copied!',
+  'referral.copy_link': 'Copy link',
+  'referral.share': 'Share',
+  'referral.share_title': 'Join KIVARA!',
+  'referral.share_text': 'Learn to save and manage money in a fun way! Use my invite code:',
+  'referral.code_label': 'Referral code',
+  'referral.code_placeholder': 'e.g. ABC12345',
+  'referral.code_optional': '(optional)',
+
+  // ─── Co-Guardian ───
+  'guardian.title': 'Guardians',
+  'guardian.subtitle': 'Manage household guardians',
+  'guardian.primary': 'Primary',
+  'guardian.secondary': 'Secondary',
+  'guardian.invite': 'Invite guardian',
+  'guardian.invite_desc': 'Invite another guardian to manage the family.',
+  'guardian.email': 'Guardian email',
+  'guardian.sending': 'Sending...',
+  'guardian.sent': 'Invite sent!',
+  'guardian.sent_desc': 'The guardian can sign up and join the family.',
+  'guardian.remove': 'Remove',
+  'guardian.remove_confirm': 'Are you sure you want to remove this guardian?',
+  'guardian.limit_reached': 'Guardian limit reached',
+  'guardian.upgrade_hint': 'Upgrade to Premium to add a co-guardian.',
+  'guardian.premium_only': 'Premium feature',
 };
 
 export default en;
