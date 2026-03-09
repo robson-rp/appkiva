@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCollectiveChallenges, useCreateCollectiveChallenge, useUpdateCollectiveChallenge, useDeleteCollectiveChallenge } from '@/hooks/use-collective-challenges';
 import { useClassrooms } from '@/hooks/use-classrooms';
 import { Plus, Target, Trophy, Clock, Sparkles, Users, Pencil, Trash2, Calendar, AlertTriangle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { CollectiveChallenge, ChallengeStatus } from '@/types/kivara';
+import { ChallengeStatus } from '@/types/kivara';
 import { useT } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -52,6 +53,11 @@ const typeIcons: Record<string, string> = { saving: '🐷', budgeting: '📊', t
 
 export default function TeacherChallenges() {
   const t = useT();
+  const { data: dbChallenges = [], isLoading } = useCollectiveChallenges();
+  const { data: classrooms = [] } = useClassrooms();
+  const createMutation = useCreateCollectiveChallenge();
+  const updateMutation = useUpdateCollectiveChallenge();
+  const deleteMutation = useDeleteCollectiveChallenge();
 
   const statusConfig = {
     active: { label: t('teacher.challenges.status_active'), icon: Target, className: 'bg-primary/10 text-primary border-primary/20' },
@@ -65,17 +71,31 @@ export default function TeacherChallenges() {
     teamwork: t('teacher.challenges.type_teamwork'),
   };
 
-  const { data: dbChallenges } = useCollectiveChallenges();
-  const { data: classrooms } = useClassrooms();
-  const [challenges, setChallenges] = useState<CollectiveChallenge[]>([]);
   const [form, setForm] = useState<ChallengeFormData>({ ...emptyForm });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogId, setDeleteDialogId] = useState<string | null>(null);
   const [showUrgentOnly, setShowUrgentOnly] = useState(false);
 
+  // Map DB rows to view model
+  const challenges = useMemo(() => dbChallenges.map(c => ({
+    id: c.id,
+    title: c.title,
+    description: c.description,
+    classroomId: c.classroom_id,
+    type: c.type as 'saving' | 'budgeting' | 'teamwork',
+    icon: c.icon,
+    targetAmount: Number(c.target_amount),
+    currentAmount: Number(c.current_amount),
+    reward: Number(c.reward),
+    kivaPointsReward: Number(c.kiva_points_reward),
+    status: c.status as ChallengeStatus,
+    startDate: c.start_date,
+    endDate: c.end_date,
+  })), [dbChallenges]);
+
   const activeChallenges = challenges.filter(c => c.status === 'active');
-  const urgentActive = activeChallenges.filter(c => (c.currentAmount / c.targetAmount) >= 0.5);
+  const urgentActive = activeChallenges.filter(c => c.targetAmount > 0 && (c.currentAmount / c.targetAmount) >= 0.5);
   const displayedActive = showUrgentOnly ? urgentActive : activeChallenges;
   const upcomingChallenges = challenges.filter(c => c.status === 'upcoming');
   const completedChallenges = challenges.filter(c => c.status === 'completed');
@@ -94,7 +114,7 @@ export default function TeacherChallenges() {
     setDialogOpen(true);
   };
 
-  const openEdit = (challenge: CollectiveChallenge) => {
+  const openEdit = (challenge: typeof challenges[0]) => {
     setEditingId(challenge.id);
     setForm({
       title: challenge.title,
@@ -112,67 +132,57 @@ export default function TeacherChallenges() {
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.title || !form.classroomId || !form.targetAmount) {
       toast({ title: t('teacher.challenges.required_fields'), description: t('teacher.challenges.required_hint'), variant: 'destructive' });
       return;
     }
 
-    if (editingId) {
-      setChallenges(prev => prev.map(c =>
-        c.id === editingId ? {
-          ...c,
-          title: form.title,
-          description: form.description,
-          classroomId: form.classroomId,
-          type: form.type,
-          icon: form.icon,
-          targetAmount: Number(form.targetAmount),
-          reward: Number(form.reward) || 0,
-          kivaPointsReward: Number(form.kivaPointsReward) || 0,
-          startDate: form.startDate,
-          endDate: form.endDate,
-          status: form.status,
-        } : c
-      ));
-      toast({ title: t('teacher.challenges.updated'), description: `"${form.title}"` });
-    } else {
-      const newChallenge: CollectiveChallenge = {
-        id: `challenge-${Date.now()}`,
-        title: form.title,
-        description: form.description,
-        classroomId: form.classroomId,
-        type: form.type,
-        icon: form.icon,
-        targetAmount: Number(form.targetAmount),
-        currentAmount: 0,
-        reward: Number(form.reward) || 0,
-        kivaPointsReward: Number(form.kivaPointsReward) || 0,
-        status: form.status,
-        participants: [],
-        startDate: form.startDate,
-        endDate: form.endDate,
-      };
-      setChallenges(prev => [newChallenge, ...prev]);
-      toast({ title: t('teacher.challenges.created'), description: `"${form.title}"` });
+    const payload = {
+      title: form.title,
+      description: form.description,
+      classroom_id: form.classroomId,
+      type: form.type,
+      icon: form.icon,
+      target_amount: Number(form.targetAmount),
+      reward: Number(form.reward) || 0,
+      kiva_points_reward: Number(form.kivaPointsReward) || 0,
+      start_date: form.startDate,
+      end_date: form.endDate || form.startDate,
+      status: form.status,
+    };
+
+    try {
+      if (editingId) {
+        await updateMutation.mutateAsync({ id: editingId, ...payload });
+        toast({ title: t('teacher.challenges.updated'), description: `"${form.title}"` });
+      } else {
+        await createMutation.mutateAsync(payload);
+        toast({ title: t('teacher.challenges.created'), description: `"${form.title}"` });
+      }
+      setDialogOpen(false);
+      setForm({ ...emptyForm });
+      setEditingId(null);
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
     }
-
-    setDialogOpen(false);
-    setForm({ ...emptyForm });
-    setEditingId(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     const challenge = challenges.find(c => c.id === id);
-    setChallenges(prev => prev.filter(c => c.id !== id));
+    try {
+      await deleteMutation.mutateAsync(id);
+      toast({ title: t('teacher.challenges.deleted'), description: `"${challenge?.title}"` });
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    }
     setDeleteDialogId(null);
-    toast({ title: t('teacher.challenges.deleted'), description: `"${challenge?.title}"` });
   };
 
-  const renderChallenge = (challenge: CollectiveChallenge) => {
-    const classroom = (classrooms || []).find(c => c.id === challenge.classroomId);
-    const pct = Math.round((challenge.currentAmount / challenge.targetAmount) * 100);
-    const status = statusConfig[challenge.status];
+  const renderChallenge = (challenge: typeof challenges[0]) => {
+    const classroom = classrooms.find(c => c.id === challenge.classroomId);
+    const pct = challenge.targetAmount > 0 ? Math.round((challenge.currentAmount / challenge.targetAmount) * 100) : 0;
+    const status = statusConfig[challenge.status] ?? statusConfig.upcoming;
     const StatusIcon = status.icon;
     const canEdit = challenge.status !== 'completed';
     const isCritical = challenge.status === 'active' && pct >= 80;
@@ -228,22 +238,6 @@ export default function TeacherChallenges() {
                 <Progress value={pct} className="h-3" />
                 <div className="flex justify-between text-[10px] text-muted-foreground">
                   <span>🪙 {challenge.currentAmount} / {challenge.targetAmount}</span>
-                  <span>{challenge.participants.length} {t('teacher.dashboard.participants')}</span>
-                </div>
-              </div>
-            )}
-
-            {challenge.participants.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-display font-semibold text-muted-foreground flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" /> {t('teacher.challenges.contributions')}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {challenge.participants.map((p) => (
-                    <div key={p.childId} className="flex items-center gap-1.5 bg-muted/30 rounded-xl px-3 py-1.5 text-xs">
-                      <span className="font-display font-bold">🪙 {p.contribution}</span>
-                    </div>
-                  ))}
                 </div>
               </div>
             )}
@@ -266,126 +260,124 @@ export default function TeacherChallenges() {
     );
   };
 
-  const formDialog = (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-[95vw] sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-display">
-            {editingId ? t('teacher.challenges.edit_title') : t('teacher.challenges.create_title')}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-          <div className="space-y-2">
-            <Label>{t('teacher.challenges.form_title')} *</Label>
-            <Input placeholder={t('teacher.challenges.form_title_placeholder')} value={form.title} onChange={e => updateForm('title', e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>{t('teacher.challenges.form_desc')}</Label>
-            <Textarea placeholder={t('teacher.challenges.form_desc_placeholder')} value={form.description} onChange={e => updateForm('description', e.target.value)} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_class')} *</Label>
-              <Select value={form.classroomId} onValueChange={v => updateForm('classroomId', v)}>
-                <SelectTrigger><SelectValue placeholder={t('teacher.classes.select')} /></SelectTrigger>
-                <SelectContent>
-                  {(classrooms || []).map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_type')}</Label>
-              <Select value={form.type} onValueChange={v => updateForm('type', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="saving">🐷 {t('teacher.challenges.type_saving')}</SelectItem>
-                  <SelectItem value="budgeting">📊 {t('teacher.challenges.type_budgeting')}</SelectItem>
-                  <SelectItem value="teamwork">🤝 {t('teacher.challenges.type_teamwork')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_target')} *</Label>
-              <Input type="number" placeholder="1000" value={form.targetAmount} onChange={e => updateForm('targetAmount', e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_reward')}</Label>
-              <Input type="number" placeholder="50" value={form.reward} onChange={e => updateForm('reward', e.target.value)} />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_points')}</Label>
-              <Input type="number" placeholder="20" value={form.kivaPointsReward} onChange={e => updateForm('kivaPointsReward', e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_status')}</Label>
-              <Select value={form.status} onValueChange={v => updateForm('status', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="upcoming">🕐 {t('teacher.challenges.status_upcoming')}</SelectItem>
-                  <SelectItem value="active">🎯 {t('teacher.challenges.status_active')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_start')}</Label>
-              <Input type="date" value={form.startDate} onChange={e => updateForm('startDate', e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>{t('teacher.challenges.form_end')}</Label>
-              <Input type="date" value={form.endDate} onChange={e => updateForm('endDate', e.target.value)} />
-            </div>
-          </div>
-
-          {/* Icon preview */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
-            <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center text-2xl">
-              {form.icon}
-            </div>
-            <div>
-              <p className="text-sm font-display font-bold">{form.title || t('teacher.challenges.new')}</p>
-              <p className="text-[11px] text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `${t('teacher.challenges.form_target').split(' ')[0]}: ${form.targetAmount} 🪙` : ''}</p>
-            </div>
-          </div>
-
-          <Button className="w-full rounded-xl font-display" onClick={handleSave}>
-            {editingId ? t('teacher.challenges.save') : t('teacher.challenges.create')}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-
-  const deleteDialog = (
-    <Dialog open={!!deleteDialogId} onOpenChange={open => !open && setDeleteDialogId(null)}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="font-display">{t('teacher.challenges.delete_title')}</DialogTitle>
-        </DialogHeader>
-        <p className="text-sm text-muted-foreground">
-          {t('teacher.challenges.delete_desc')}
-        </p>
-        <div className="flex gap-2 justify-end pt-2">
-          <Button variant="outline" className="rounded-xl" onClick={() => setDeleteDialogId(null)}>{t('common.cancel')}</Button>
-          <Button variant="destructive" className="rounded-xl" onClick={() => deleteDialogId && handleDelete(deleteDialogId)}>
-            <Trash2 className="h-4 w-4 mr-1" /> {t('common.delete')}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  if (isLoading) {
+    return (
+      <div className="space-y-4 max-w-5xl mx-auto">
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 sm:space-y-6 max-w-5xl mx-auto w-full min-w-0">
-      {formDialog}
-      {deleteDialog}
+      {/* Form Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">
+              {editingId ? t('teacher.challenges.edit_title') : t('teacher.challenges.create_title')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            <div className="space-y-2">
+              <Label>{t('teacher.challenges.form_title')} *</Label>
+              <Input placeholder={t('teacher.challenges.form_title_placeholder')} value={form.title} onChange={e => updateForm('title', e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('teacher.challenges.form_desc')}</Label>
+              <Textarea placeholder={t('teacher.challenges.form_desc_placeholder')} value={form.description} onChange={e => updateForm('description', e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_class')} *</Label>
+                <Select value={form.classroomId} onValueChange={v => updateForm('classroomId', v)}>
+                  <SelectTrigger><SelectValue placeholder={t('teacher.classes.select')} /></SelectTrigger>
+                  <SelectContent>
+                    {classrooms.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_type')}</Label>
+                <Select value={form.type} onValueChange={v => updateForm('type', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="saving">🐷 {t('teacher.challenges.type_saving')}</SelectItem>
+                    <SelectItem value="budgeting">📊 {t('teacher.challenges.type_budgeting')}</SelectItem>
+                    <SelectItem value="teamwork">🤝 {t('teacher.challenges.type_teamwork')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_target')} *</Label>
+                <Input type="number" placeholder="1000" value={form.targetAmount} onChange={e => updateForm('targetAmount', e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_reward')}</Label>
+                <Input type="number" placeholder="50" value={form.reward} onChange={e => updateForm('reward', e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_points')}</Label>
+                <Input type="number" placeholder="20" value={form.kivaPointsReward} onChange={e => updateForm('kivaPointsReward', e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_status')}</Label>
+                <Select value={form.status} onValueChange={v => updateForm('status', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">🕐 {t('teacher.challenges.status_upcoming')}</SelectItem>
+                    <SelectItem value="active">🎯 {t('teacher.challenges.status_active')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_start')}</Label>
+                <Input type="date" value={form.startDate} onChange={e => updateForm('startDate', e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('teacher.challenges.form_end')}</Label>
+                <Input type="date" value={form.endDate} onChange={e => updateForm('endDate', e.target.value)} />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+              <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center text-2xl">{form.icon}</div>
+              <div>
+                <p className="text-sm font-display font-bold">{form.title || t('teacher.challenges.new')}</p>
+                <p className="text-[11px] text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `${t('teacher.challenges.form_target').split(' ')[0]}: ${form.targetAmount} 🪙` : ''}</p>
+              </div>
+            </div>
+            <Button className="w-full rounded-xl font-display" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
+              {editingId ? t('teacher.challenges.save') : t('teacher.challenges.create')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={!!deleteDialogId} onOpenChange={open => !open && setDeleteDialogId(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display">{t('teacher.challenges.delete_title')}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">{t('teacher.challenges.delete_desc')}</p>
+          <div className="flex gap-2 justify-end pt-2">
+            <Button variant="outline" className="rounded-xl" onClick={() => setDeleteDialogId(null)}>{t('common.cancel')}</Button>
+            <Button variant="destructive" className="rounded-xl" disabled={deleteMutation.isPending} onClick={() => deleteDialogId && handleDelete(deleteDialogId)}>
+              <Trash2 className="h-4 w-4 mr-1" /> {t('common.delete')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Hero */}
       <motion.div variants={item}>
@@ -424,11 +416,9 @@ export default function TeacherChallenges() {
 
       {/* Add Challenge */}
       <motion.div variants={item} className="flex justify-between items-center">
-        <div>
-          <h2 className="font-display text-lg font-bold flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-primary" /> {t('teacher.challenges.title')}
-          </h2>
-        </div>
+        <h2 className="font-display text-lg font-bold flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-primary" /> {t('teacher.challenges.title')}
+        </h2>
         <Button size="sm" className="rounded-xl font-display gap-1" onClick={openCreate}>
           <Plus className="h-4 w-4" /> {t('teacher.challenges.new')}
         </Button>
