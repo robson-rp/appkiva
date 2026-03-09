@@ -2178,9 +2178,15 @@ const pt: Record<string, string> = {
   'challenges.type_tasks': 'Tarefas',
   'challenges.type_learning': 'Aprendizagem',
   'challenges.type_mixed': 'Misto',
+  'challenges.type_social': 'Social',
   'challenges.status_active': 'Em Curso',
   'challenges.status_completed': 'Completo',
   'challenges.status_expired': 'Expirado',
+  'challenges.filter_all': 'Todos',
+  'challenges.filter_friends': 'Amigos',
+  'challenges.filter_class': 'Turma',
+  'challenges.friends_ranking': 'Ranking de Amigos',
+  'challenges.social_hint': 'Partilha o teu código e ganha KVC!',
 
   // ─── Lesson Viewer ───
   'lesson.blocks': 'blocos',
