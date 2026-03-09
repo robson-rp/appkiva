@@ -1109,6 +1109,82 @@ export type Database = {
         }
         Relationships: []
       }
+      missions: {
+        Row: {
+          child_profile_id: string
+          completed_at: string | null
+          created_at: string
+          description: string
+          household_id: string | null
+          id: string
+          kiva_points_reward: number
+          parent_profile_id: string
+          reward: number
+          status: Database["public"]["Enums"]["mission_status"]
+          target_amount: number | null
+          title: string
+          type: Database["public"]["Enums"]["mission_type"]
+          updated_at: string
+          week: number
+        }
+        Insert: {
+          child_profile_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          household_id?: string | null
+          id?: string
+          kiva_points_reward?: number
+          parent_profile_id: string
+          reward?: number
+          status?: Database["public"]["Enums"]["mission_status"]
+          target_amount?: number | null
+          title: string
+          type?: Database["public"]["Enums"]["mission_type"]
+          updated_at?: string
+          week?: number
+        }
+        Update: {
+          child_profile_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          household_id?: string | null
+          id?: string
+          kiva_points_reward?: number
+          parent_profile_id?: string
+          reward?: number
+          status?: Database["public"]["Enums"]["mission_status"]
+          target_amount?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["mission_type"]
+          updated_at?: string
+          week?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_child_profile_id_fkey"
+            columns: ["child_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_parent_profile_id_fkey"
+            columns: ["parent_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_log: {
         Row: {
           created_at: string
@@ -2564,6 +2640,8 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      mission_status: "available" | "in_progress" | "completed"
+      mission_type: "saving" | "budgeting" | "planning" | "custom"
       notification_event:
         | "task_created"
         | "task_completed"
@@ -2750,6 +2828,8 @@ export const Constants = {
         "adjustment",
         "refund",
       ],
+      mission_status: ["available", "in_progress", "completed"],
+      mission_type: ["saving", "budgeting", "planning", "custom"],
       notification_event: [
         "task_created",
         "task_completed",
