@@ -197,7 +197,7 @@ export default function TeacherDashboard() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-center">
                 <p className="text-primary-foreground/60 text-[10px] sm:text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
-                <p className="font-display text-sm sm:text-base font-bold text-primary-foreground mt-1">{user?.institutionName ?? 'Escola'}</p>
+                <p className="font-display text-sm sm:text-base font-bold text-primary-foreground mt-1">Escola</p>
               </div>
             </div>
           </CardContent>
