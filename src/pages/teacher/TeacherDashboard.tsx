@@ -301,8 +301,8 @@ export default function TeacherDashboard() {
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
                     <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 13, fill: 'hsl(var(--muted-foreground))' }} />
-                    <PolarRadiusAxis tick={{ fontSize: 11 }} stroke="hsl(var(--border))" />
+                    <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+                    <PolarRadiusAxis tick={{ fontSize: 9 }} stroke="hsl(var(--border))" />
                     {classComparison.map((cls, i) => (
                       <Radar
                         key={cls.name}
