@@ -403,6 +403,8 @@ export default function Login() {
     setTwoFAResendCountdown(0);
     setTwoFALocked(false);
     if (twoFATimerRef.current) clearInterval(twoFATimerRef.current);
+    setChildUsername('');
+    setChildPin('');
   };
 
   const isChildOrTeen = selectedRole === 'child' || selectedRole === 'teen';
