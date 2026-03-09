@@ -377,7 +377,7 @@ export interface CollectibleBadge {
 
 // ── Weekly Challenges ──
 
-export type WeeklyChallengeType = 'saving' | 'tasks' | 'learning' | 'mixed';
+export type WeeklyChallengeType = 'saving' | 'tasks' | 'learning' | 'mixed' | 'social';
 export type WeeklyChallengeStatus = 'active' | 'completed' | 'expired';
 
 export interface WeeklyChallenge {

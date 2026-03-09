@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Clock, CheckCircle2, Flame, Users, Medal, Crown, ChevronRight } from 'lucide-react';
-import { mockWeeklyChallenges, mockClassLeaderboard } from '@/data/weekly-challenges-data';
+import { Trophy, Clock, CheckCircle2, Flame, Users, Medal, Crown, Share2, Heart } from 'lucide-react';
+import { mockWeeklyChallenges, mockClassLeaderboard, mockFriendsLeaderboard } from '@/data/weekly-challenges-data';
 import { WeeklyChallenge, WeeklyChallengeStatus } from '@/types/kivara';
 import { LeagueBadge } from '@/components/LeagueBadge';
 import { useT } from '@/contexts/LanguageContext';
@@ -16,6 +17,7 @@ const typeConfig: Record<string, { bg: string; key: string }> = {
   tasks: { bg: 'bg-[hsl(var(--kivara-light-blue))]', key: 'challenges.type_tasks' },
   learning: { bg: 'bg-[hsl(var(--kivara-light-gold))]', key: 'challenges.type_learning' },
   mixed: { bg: 'bg-[hsl(var(--kivara-purple))]/15', key: 'challenges.type_mixed' },
+  social: { bg: 'bg-[hsl(var(--kivara-pink))]/15', key: 'challenges.type_social' },
 };
 
 const statusConfig: Record<WeeklyChallengeStatus, { key: string; badge: string; icon: typeof Clock }> = {
@@ -34,26 +36,45 @@ function daysLeft(endDate: string): number {
   return Math.max(0, Math.ceil((new Date(endDate).getTime() - Date.now()) / 86400000));
 }
 
+type RankingFilter = 'class' | 'friends';
+
 export function WeeklyChallenges() {
   const t = useT();
+  const [rankFilter, setRankFilter] = useState<RankingFilter>('class');
   const active = mockWeeklyChallenges.filter(c => c.status === 'active');
   const past = mockWeeklyChallenges.filter(c => c.status !== 'active');
-  const currentUser = mockClassLeaderboard.find(e => e.isCurrentUser);
+  const leaderboard = rankFilter === 'friends' ? mockFriendsLeaderboard : mockClassLeaderboard;
+  const currentUser = leaderboard.find(e => e.isCurrentUser);
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
       <motion.div variants={item}><LeagueBadge weeklyPoints={currentUser?.score ?? 0} /></motion.div>
 
-      {/* Leaderboard Summary */}
+      {/* Leaderboard with filter */}
       <motion.div variants={item}>
         <Card className="border-0 overflow-hidden shadow-kivara">
           <div className="absolute inset-0 gradient-kivara" />
           <CardContent className="relative z-10 p-5">
-            <div className="flex items-center gap-2 mb-4"><Trophy className="h-5 w-5 text-white" /><h2 className="font-display font-bold text-white">{t('challenges.ranking')}</h2></div>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2"><Trophy className="h-5 w-5 text-white" /><h2 className="font-display font-bold text-white">{rankFilter === 'friends' ? t('challenges.friends_ranking') : t('challenges.ranking')}</h2></div>
+              <div className="flex gap-1 bg-white/10 rounded-xl p-0.5">
+                {(['class', 'friends'] as RankingFilter[]).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setRankFilter(f)}
+                    className={`px-3 py-1 rounded-lg text-[10px] font-display font-bold transition-all ${rankFilter === f ? 'bg-white/25 text-white' : 'text-white/50 hover:text-white/80'}`}
+                  >
+                    {f === 'class' ? t('challenges.filter_class') : t('challenges.filter_friends')}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="flex justify-center items-end gap-3 mb-4">
-              {mockClassLeaderboard.slice(0, 3).map((_, i) => {
+              {leaderboard.slice(0, 3).map((_, i) => {
                 const order = [1, 0, 2];
-                const e = mockClassLeaderboard[order[i]];
+                const idx = order[i];
+                if (idx >= leaderboard.length) return null;
+                const e = leaderboard[idx];
                 const heights = ['h-20', 'h-24', 'h-16'];
                 const MedalIcon = rankMedals[e.rank]?.icon || Medal;
                 const medalColor = rankMedals[e.rank]?.color || 'text-muted-foreground';
@@ -92,7 +113,7 @@ export function WeeklyChallenges() {
         <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2"><Users className="h-4 w-4 text-primary" /> {t('challenges.full_ranking')}</h2>
         <Card className="border-border/50">
           <CardContent className="p-0 divide-y divide-border/30">
-            {mockClassLeaderboard.map((entry) => {
+            {leaderboard.map((entry) => {
               const MedalIcon = rankMedals[entry.rank]?.icon;
               const medalColor = rankMedals[entry.rank]?.color;
               return (
@@ -123,7 +144,7 @@ export function WeeklyChallenges() {
 
 function ChallengeCard({ challenge: ch }: { challenge: WeeklyChallenge }) {
   const t = useT();
-  const type = typeConfig[ch.type];
+  const type = typeConfig[ch.type] || typeConfig.mixed;
   const status = statusConfig[ch.status];
   const progress = Math.min(Math.round((ch.currentValue / ch.targetValue) * 100), 100);
   const remaining = daysLeft(ch.weekEnd);
@@ -140,6 +161,7 @@ function ChallengeCard({ challenge: ch }: { challenge: WeeklyChallenge }) {
               <div className="flex items-center gap-2 mb-0.5">
                 <h3 className="font-display font-bold text-sm truncate">{ch.title}</h3>
                 <Badge className={`text-[9px] ${status.badge} border-0 rounded-lg shrink-0`}>{t(status.key)}</Badge>
+                {ch.type === 'social' && <Badge className="text-[9px] bg-[hsl(var(--kivara-pink))]/15 text-[hsl(var(--kivara-pink))] border-0 rounded-lg shrink-0">{t('challenges.type_social')}</Badge>}
               </div>
               <p className="text-[11px] text-muted-foreground line-clamp-2">{ch.description}</p>
             </div>
@@ -158,6 +180,12 @@ function ChallengeCard({ challenge: ch }: { challenge: WeeklyChallenge }) {
                 <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {ch.participantCount} {t('challenges.participants')}</span>
                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {remaining} {t('challenges.days_left')}</span>
               </div>
+              {ch.type === 'social' && (
+                <div className="mt-2 bg-[hsl(var(--kivara-pink))]/10 rounded-xl p-2.5 flex items-center gap-2">
+                  <Share2 className="h-3.5 w-3.5 text-[hsl(var(--kivara-pink))]" />
+                  <p className="text-[10px] text-muted-foreground font-medium">{t('challenges.social_hint')}</p>
+                </div>
+              )}
             </>
           )}
           {ch.status === 'completed' && (
