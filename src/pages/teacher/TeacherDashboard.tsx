@@ -285,7 +285,7 @@ export default function TeacherDashboard() {
                         fontSize: '13px',
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: '13px' }} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
                     <Bar dataKey="poupança" name={t('teacher.dashboard.savings_pct')} fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="pontos" name={t('teacher.dashboard.points_avg')} fill="hsl(var(--secondary))" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="tarefas" name={t('teacher.dashboard.tasks_avg')} fill="hsl(var(--accent))" radius={[6, 6, 0, 0]} />
