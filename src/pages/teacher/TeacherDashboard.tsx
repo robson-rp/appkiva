@@ -273,7 +273,7 @@ export default function TeacherDashboard() {
               <p className="text-small font-display font-semibold text-muted-foreground mb-3">{t('teacher.dashboard.averages')}</p>
               <div className="h-52 sm:h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={classComparison} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+                  <BarChart data={classComparison} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
                     <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
