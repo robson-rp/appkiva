@@ -462,7 +462,7 @@ function MissionsTab({
                         </div>
                         <div className="text-right shrink-0">
                           <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                          <p className="text-[10px] text-muted-foreground">+{mission.kivaPointsReward} pts</p>
+                          <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                         </div>
                       </div>
                       {mission.targetAmount && (
