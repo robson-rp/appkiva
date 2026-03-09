@@ -8,6 +8,7 @@ import { Kivo } from '@/components/Kivo';
 import { useChildMissions, useStartMission, useCompleteMission } from '@/hooks/use-missions';
 import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { DailyMissionCard } from '@/components/DailyMissionCard';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
