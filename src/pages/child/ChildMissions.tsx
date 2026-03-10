@@ -458,12 +458,19 @@ function MissionsTab({
                           <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                         </div>
                       </div>
-                      {mission.target_amount && (
-                        <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 flex items-center gap-2">
-                          <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
-                        </div>
-                      )}
+                      {mission.target_amount && (() => {
+                         const avProgress = Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100);
+                         return (
+                           <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 space-y-1.5">
+                             <div className="flex items-center gap-2">
+                               <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                               <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
+                               <span className="text-[10px] font-display font-bold text-accent-foreground ml-auto">{walletBalance}/{mission.target_amount} ({avProgress}%)</span>
+                             </div>
+                             <Progress value={avProgress} className="h-1.5 rounded-full" />
+                           </div>
+                         );
+                       })()}
                       <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" disabled={startMission.isPending} onClick={() => startMission.mutate(mission.id)}>
                         <Target className="h-3.5 w-3.5" /> {t('child.missions.start')}
                       </Button>
