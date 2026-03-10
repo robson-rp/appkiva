@@ -66,23 +66,34 @@ export function useStartMission() {
   });
 }
 
-// ─── Child/Teen: complete a mission ───
+// ─── Child/Teen: complete a mission (via edge function for atomic rewards) ───
 export function useCompleteMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (missionId: string) => {
-      const { error } = await supabase
-        .from('missions')
-        .update({ status: 'completed' as any, completed_at: new Date().toISOString() } as any)
-        .eq('id', missionId);
+      const { data, error } = await supabase.functions.invoke('complete-mission', {
+        body: { mission_id: missionId },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as { success: boolean; reward_coins: number; reward_points: number; new_balance: number | null };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
-      toast.success('Missão concluída! 🎉');
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['kiva-points'] });
+      toast.success(`Missão concluída! +${data.reward_coins} KVC e +${data.reward_points} pts 🎉`);
     },
-    onError: () => toast.error('Não foi possível concluir a missão.'),
+    onError: (err: any) => {
+      if (err?.message?.includes('already completed')) {
+        toast.info('Esta missão já foi concluída.');
+      } else if (err?.message?.includes('expired')) {
+        toast.error('Esta missão expirou.');
+      } else {
+        toast.error('Não foi possível concluir a missão.');
+      }
+    },
   });
 }
 
