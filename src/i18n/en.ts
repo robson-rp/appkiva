@@ -967,6 +967,14 @@ const en: Record<string, string> = {
   'parent.missions.ai_suggestions': 'AI Mission Suggestions',
   'parent.missions.ai_loading': 'Generating suggestions...',
 
+  // ─── Parent Insights ───
+  'parent.insights.title': 'Behavioral Insights',
+  'parent.insights.description': 'Discover personalized tips based on your children\'s financial habits.',
+  'parent.insights.generate': 'Generate AI Insights',
+  'parent.insights.loading': 'Analyzing behavior...',
+  'parent.insights.refresh': 'Refresh',
+  'parent.insights.error': 'Error generating insights. Please try again.',
+
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Wallet',
 

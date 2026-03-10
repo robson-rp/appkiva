@@ -12,6 +12,7 @@ import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
+import { ParentInsightsWidget } from '@/components/parent/ParentInsightsWidget';
 import { useEmissionStats } from '@/hooks/use-emission-stats';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
@@ -201,6 +202,18 @@ export default function ParentDashboard() {
       {children.length > 0 && (
         <motion.div variants={item}>
           <ParentChildrenStreaks children={children} />
+        </motion.div>
+      )}
+
+      {/* AI Behavioral Insights */}
+      {children.length > 0 && (
+        <motion.div variants={item}>
+          <ParentInsightsWidget children={children.map(c => ({
+            childId: c.childId,
+            profileId: c.profileId,
+            displayName: c.displayName,
+            dateOfBirth: c.dateOfBirth,
+          }))} />
         </motion.div>
       )}
 
