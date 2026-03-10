@@ -41,7 +41,7 @@ export function useHouseholdRankings() {
       const childProfiles = profiles.filter(p => childUserIds.has(p.user_id));
       if (childProfiles.length === 0) return [];
 
-      const profileIds = profiles.map(p => p.id);
+      const profileIds = childProfiles.map(p => p.id);
 
       // Get wallet balances
       const { data: wallets } = await supabase
