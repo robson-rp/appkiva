@@ -57,8 +57,8 @@ export default function TeenMissions() {
         <Card className="border-border/50">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎯</div>
-            <p className="font-display font-bold text-sm">Sem missões</p>
-            <p className="text-xs text-muted-foreground mt-1">O teu encarregado ainda não criou missões.</p>
+            <p className="font-display font-bold text-sm">{t('teen.missions.empty.title')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('teen.missions.empty.subtitle')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -89,12 +89,12 @@ export default function TeenMissions() {
                     <span>⭐ {mission.kiva_points_reward} {t('common.points')}</span>
                     {mission.status === 'available' && (
                       <Button size="sm" variant="outline" className="ml-auto rounded-xl text-xs h-7 gap-1" disabled={startMission.isPending} onClick={() => startMission.mutate(mission.id)}>
-                        {startMission.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />} Iniciar
+                        {startMission.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />} {t('teen.missions.btn.start')}
                       </Button>
                     )}
                     {mission.status === 'in_progress' && (
                       <Button size="sm" className="ml-auto rounded-xl text-xs h-7 gap-1" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
-                        {completeMission.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />} Concluir
+                        {completeMission.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle className="h-3 w-3" />} {t('teen.missions.btn.complete')}
                       </Button>
                     )}
                   </div>

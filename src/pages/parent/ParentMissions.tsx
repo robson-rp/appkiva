@@ -39,16 +39,16 @@ export default function ParentMissions() {
   const [selectedChild, setSelectedChild] = useState('');
 
   const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
-    available: { label: 'Disponível', icon: Sparkles, className: 'bg-secondary/15 text-secondary border-0' },
-    in_progress: { label: 'Em Curso', icon: Clock, className: 'bg-accent/15 text-accent-foreground border-0' },
-    completed: { label: 'Concluída', icon: CheckCircle, className: 'bg-primary/15 text-primary border-0' },
+    available: { label: t('parent.missions.status.available'), icon: Sparkles, className: 'bg-secondary/15 text-secondary border-0' },
+    in_progress: { label: t('parent.missions.status.in_progress'), icon: Clock, className: 'bg-accent/15 text-accent-foreground border-0' },
+    completed: { label: t('parent.missions.status.completed'), icon: CheckCircle, className: 'bg-primary/15 text-primary border-0' },
   };
 
   const typeLabels: Record<string, string> = {
-    saving: 'Poupança',
-    budgeting: 'Orçamento',
-    planning: 'Planeamento',
-    custom: 'Personalizada',
+    saving: t('parent.missions.type.saving'),
+    budgeting: t('parent.missions.type.budgeting'),
+    planning: t('parent.missions.type.planning'),
+    custom: t('parent.missions.type.custom'),
   };
 
   function openCreate() {
@@ -100,11 +100,11 @@ export default function ParentMissions() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Missões</h1>
-          <p className="text-muted-foreground text-sm">Cria missões personalizadas para as crianças</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">{t('parent.missions.title')}</h1>
+          <p className="text-muted-foreground text-sm">{t('parent.missions.subtitle')}</p>
         </div>
         <Button onClick={openCreate} className="rounded-xl gap-1.5 font-display" disabled={children.length === 0}>
-          <Plus className="h-4 w-4" /> Nova Missão
+          <Plus className="h-4 w-4" /> {t('parent.missions.btn.new')}
         </Button>
       </div>
 
@@ -116,8 +116,8 @@ export default function ParentMissions() {
         <Card className="border-border/50">
           <CardContent className="py-16 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl mx-auto mb-4">🎯</div>
-            <p className="font-display font-bold text-sm">Sem missões criadas</p>
-            <p className="text-xs text-muted-foreground mt-1">Cria a primeira missão para motivar as crianças!</p>
+            <p className="font-display font-bold text-sm">{t('parent.missions.empty.title')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('parent.missions.empty.subtitle')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -147,7 +147,7 @@ export default function ParentMissions() {
                         <div className="flex gap-3 mt-1.5 text-xs text-muted-foreground">
                           <span>🪙 {m.reward}</span>
                           <span>⭐ {m.kiva_points_reward} pts</span>
-                          {m.target_amount && <span>🎯 Meta: {m.target_amount}</span>}
+                          {m.target_amount && <span>🎯 {t('parent.missions.target').replace('{value}', m.target_amount)}</span>}
                           <span className="ml-auto text-[10px]">{typeLabels[m.type] ?? m.type}</span>
                         </div>
                       </div>
@@ -163,12 +163,12 @@ export default function ParentMissions() {
                           </AlertDialogTrigger>
                           <AlertDialogContent className="rounded-2xl">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Eliminar missão?</AlertDialogTitle>
-                              <AlertDialogDescription>Esta acção não pode ser revertida.</AlertDialogDescription>
+                              <AlertDialogTitle>{t('parent.missions.delete.title')}</AlertDialogTitle>
+                              <AlertDialogDescription>{t('parent.missions.delete.description')}</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => deleteMission.mutate(m.id)} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
+                              <AlertDialogCancel>{t('parent.missions.delete.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteMission.mutate(m.id)} className="bg-destructive text-destructive-foreground">{t('parent.missions.delete.confirm')}</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -186,35 +186,35 @@ export default function ParentMissions() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-display">{editId ? 'Editar Missão' : 'Nova Missão'}</DialogTitle>
+            <DialogTitle className="font-display">{editId ? t('parent.missions.dialog.title.edit') : t('parent.missions.dialog.title.create')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Título</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Poupar 50 moedas" className="rounded-xl" />
+              <Label>{t('parent.missions.dialog.label.title')}</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('parent.missions.dialog.placeholder.title')} className="rounded-xl" />
             </div>
             <div>
-              <Label>Descrição</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Descreve o objectivo da missão" rows={2} className="rounded-xl" />
+              <Label>{t('parent.missions.dialog.label.description')}</Label>
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('parent.missions.dialog.placeholder.description')} rows={2} className="rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Tipo</Label>
+                <Label>{t('parent.missions.dialog.label.type')}</Label>
                 <Select value={type} onValueChange={(v) => setType(v as MissionType)}>
                   <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="saving">🏦 Poupança</SelectItem>
-                    <SelectItem value="budgeting">📊 Orçamento</SelectItem>
-                    <SelectItem value="planning">📋 Planeamento</SelectItem>
-                    <SelectItem value="custom">🎯 Personalizada</SelectItem>
+                    <SelectItem value="saving">🏦 {t('parent.missions.type.saving')}</SelectItem>
+                    <SelectItem value="budgeting">📊 {t('parent.missions.type.budgeting')}</SelectItem>
+                    <SelectItem value="planning">📋 {t('parent.missions.type.planning')}</SelectItem>
+                    <SelectItem value="custom">🎯 {t('parent.missions.type.custom')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {!editId && (
                 <div>
-                  <Label>Criança</Label>
+                  <Label>{t('parent.missions.dialog.label.child')}</Label>
                   <Select value={selectedChild} onValueChange={setSelectedChild}>
-                    <SelectTrigger className="rounded-xl"><SelectValue placeholder="Escolher" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl"><SelectValue placeholder={t('parent.missions.dialog.placeholder.child')} /></SelectTrigger>
                     <SelectContent>
                       {children.map((c) => (
                         <SelectItem key={c.profileId} value={c.profileId}>
@@ -228,24 +228,24 @@ export default function ParentMissions() {
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <Label>Moedas 🪙</Label>
+                <Label>{t('parent.missions.dialog.label.coins')}</Label>
                 <Input type="number" min="0" value={reward} onChange={(e) => setReward(e.target.value)} className="rounded-xl" />
               </div>
               <div>
-                <Label>Pontos ⭐</Label>
+                <Label>{t('parent.missions.dialog.label.points')}</Label>
                 <Input type="number" min="0" value={kivaPoints} onChange={(e) => setKivaPoints(e.target.value)} className="rounded-xl" />
               </div>
               <div>
-                <Label>Meta 🎯</Label>
-                <Input type="number" min="0" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="Opcional" className="rounded-xl" />
+                <Label>{t('parent.missions.dialog.label.target')}</Label>
+                <Input type="number" min="0" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder={t('parent.missions.dialog.placeholder.target')} className="rounded-xl" />
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t('parent.missions.dialog.btn.cancel')}</Button>
             <Button onClick={handleSubmit} disabled={saving || !title.trim()}>
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-              {editId ? 'Guardar' : 'Criar Missão'}
+              {editId ? t('parent.missions.dialog.btn.save') : t('parent.missions.dialog.btn.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
