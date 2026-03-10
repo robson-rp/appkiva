@@ -1189,6 +1189,7 @@ const en: Record<string, string> = {
   'teacher.dashboard.tip_tasks_low': '⚠️ Few tasks completed. Simplify initial tasks to build momentum.',
   'teacher.dashboard.tip_class_small': '💡 Small class — ideal for personalised activities and individual mentoring.',
   'teacher.dashboard.tip_class_big': '💡 Large class — try group dynamics and team challenges.',
+  'teacher.dashboard.no_students': 'No students in classes yet',
 
   // ─── Teacher Classes ───
   'teacher.classes.management': 'Management',
