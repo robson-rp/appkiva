@@ -46,6 +46,7 @@ const itemVariants = {
 
 export default function ChildDashboard() {
   const t = useT();
+  usePrefetchRoutes('child');
   const { user } = useAuth();
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
