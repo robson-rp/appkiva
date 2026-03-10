@@ -99,6 +99,7 @@ export default function ChildMissions() {
           loading={loadingMissions}
           startMission={startMission}
           completeMission={completeMissionMut}
+          walletBalance={bal}
         />
       )}
     </div>
