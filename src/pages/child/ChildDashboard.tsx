@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
@@ -45,6 +46,7 @@ const itemVariants = {
 
 export default function ChildDashboard() {
   const t = useT();
+  usePrefetchRoutes('child');
   const { user } = useAuth();
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTransactions } = useWalletTransactions(undefined, 4);
