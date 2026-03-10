@@ -12,6 +12,7 @@ export interface ChildWithBalance {
   monthlyBudget: number;
   dailySpendLimit: number;
   dateOfBirth: string | null;
+  schoolTenantId: string | null;
 }
 
 export function useChildren() {
