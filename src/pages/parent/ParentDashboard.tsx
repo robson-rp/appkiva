@@ -218,6 +218,13 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
+      {/* Weekly Summary */}
+      {children.length > 0 && (
+        <motion.div variants={item}>
+          <ParentWeeklySummary householdId={user?.householdId || null} />
+        </motion.div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
         <motion.div variants={item} data-onboarding="vaults">
