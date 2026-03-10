@@ -28,6 +28,8 @@ export default function ChildMissions() {
   const completeTask = useCompleteTask();
 
   const { data: missions = [], isLoading: loadingMissions } = useChildMissions();
+  const { data: walletData } = useWalletBalance();
+  const walletBalance = walletData?.balance ?? 0;
   const startMission = useStartMission();
   const completeMissionMut = useCompleteMission();
 
