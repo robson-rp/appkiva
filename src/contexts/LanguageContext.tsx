@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import pt from '@/i18n/pt';
 import en from '@/i18n/en';
+import fr from '@/i18n/fr';
 
-type Locale = 'pt' | 'en';
+type Locale = 'pt' | 'en' | 'fr';
 
-const dictionaries: Record<Locale, Record<string, string>> = { pt, en };
+const dictionaries: Record<Locale, Record<string, string>> = { pt, en, fr };
 
 interface LanguageContextType {
   locale: Locale;
