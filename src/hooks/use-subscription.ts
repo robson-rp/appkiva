@@ -4,6 +4,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
+export interface SubscriptionInvoice {
+  id: string;
+  tenant_id: string;
+  tier_id: string;
+  amount: number;
+  currency: string;
+  billing_period: string;
+  status: string;
+  due_date: string;
+  paid_at: string | null;
+  payment_method: string | null;
+  payment_reference: string | null;
+  created_at: string;
+}
+
 interface SubscriptionTier {
   id: string;
   name: string;
