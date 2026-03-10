@@ -35,6 +35,8 @@ import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { useStreakData } from '@/hooks/use-streaks';
 import { useKivaPoints } from '@/hooks/use-kiva-points';
 import { useT } from '@/contexts/LanguageContext';
+import { TodayLoop } from '@/components/TodayLoop';
+import { BehaviorNudge } from '@/components/BehaviorNudge';
 
 const containerVariants = {
   hidden: { opacity: 0 },
