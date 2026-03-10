@@ -33,6 +33,7 @@ import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { useChildTasks } from '@/hooks/use-child-tasks';
 import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { useStreakData } from '@/hooks/use-streaks';
+import { useKivaPoints } from '@/hooks/use-kiva-points';
 import { useT } from '@/contexts/LanguageContext';
 
 const containerVariants = {
