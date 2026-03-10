@@ -2815,9 +2815,6 @@ const pt: Record<string, string> = {
   'admin.missions.engine.description': 'O motor analisa o comportamento de cada criança (gastos, poupanças, streaks, lições) e gera missões personalizadas usando IA. Pode ser executado manualmente ou agendado via cron.',
   'admin.missions.engine.run_daily': 'Gerar diárias',
   'admin.missions.engine.run_weekly': 'Gerar semanais',
-  'mission.expired': 'Expirada',
-  'mission.daily': 'Diária',
-  'mission.weekly': 'Semanal',
 };
 
 export default pt;
