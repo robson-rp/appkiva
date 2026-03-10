@@ -14,6 +14,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useHouseholdMissions, useCreateMission, useUpdateMission, useDeleteMission, type MissionType } from '@/hooks/use-missions';
 import { useChildren } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const item = { hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -22,6 +24,7 @@ const typeEmoji: Record<string, string> = { saving: '🏦', budgeting: '📊', p
 
 export default function ParentMissions() {
   const t = useT();
+  const { toast } = useToast();
   const { data: missions = [], isLoading } = useHouseholdMissions();
   const { data: children = [] } = useChildren();
   const createMission = useCreateMission();
@@ -37,6 +40,11 @@ export default function ParentMissions() {
   const [kivaPoints, setKivaPoints] = useState('15');
   const [targetAmount, setTargetAmount] = useState('');
   const [selectedChild, setSelectedChild] = useState('');
+
+  // AI suggestions state
+  const [aiSuggestOpen, setAiSuggestOpen] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
 
   const statusConfig: Record<string, { label: string; icon: any; className: string }> = {
     available: { label: t('parent.missions.status.available'), icon: Sparkles, className: 'bg-secondary/15 text-secondary border-0' },
@@ -94,6 +102,35 @@ export default function ParentMissions() {
     }
   }
 
+  const handleAiSuggest = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-missions', {
+        body: { childAge: '8-12', missionType: type !== 'custom' ? type : undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiSuggestions(data.suggestions || []);
+      setAiSuggestOpen(true);
+    } catch (e: any) {
+      toast({ title: '❌ ' + t('common.error'), description: e.message, variant: 'destructive' });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const applySuggestion = (s: any) => {
+    setTitle(s.title);
+    setDescription(s.description || '');
+    setType(s.type || 'custom');
+    setReward(String(s.reward || 20));
+    setKivaPoints(String(s.kiva_points_reward || 15));
+    setTargetAmount(s.target_amount ? String(s.target_amount) : '');
+    setSelectedChild(children[0]?.profileId ?? '');
+    setAiSuggestOpen(false);
+    setDialogOpen(true);
+  };
+
   const saving = createMission.isPending || updateMission.isPending;
 
   return (
@@ -103,9 +140,20 @@ export default function ParentMissions() {
           <h1 className="text-2xl font-display font-bold text-foreground">{t('parent.missions.title')}</h1>
           <p className="text-muted-foreground text-sm">{t('parent.missions.subtitle')}</p>
         </div>
-        <Button onClick={openCreate} className="rounded-xl gap-1.5 font-display" disabled={children.length === 0}>
-          <Plus className="h-4 w-4" /> {t('parent.missions.btn.new')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleAiSuggest}
+            disabled={aiLoading || children.length === 0}
+            variant="outline"
+            className="rounded-xl gap-1.5 font-display"
+          >
+            {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {t('parent.missions.suggest_ai')} IA
+          </Button>
+          <Button onClick={openCreate} className="rounded-xl gap-1.5 font-display" disabled={children.length === 0}>
+            <Plus className="h-4 w-4" /> {t('parent.missions.btn.new')}
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -247,6 +295,43 @@ export default function ParentMissions() {
               {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               {editId ? t('parent.missions.dialog.btn.save') : t('parent.missions.dialog.btn.create')}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Suggestions Dialog */}
+      <Dialog open={aiSuggestOpen} onOpenChange={setAiSuggestOpen}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> {t('parent.missions.ai_suggestions')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {aiSuggestions.map((s, i) => (
+              <motion.button
+                key={i}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => applySuggestion(s)}
+                className="w-full p-3 rounded-xl border border-border/50 text-left hover:border-primary/50 hover:bg-primary/5 transition-all"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <p className="font-display font-bold text-sm">{s.title}</p>
+                  <div className="flex gap-1.5">
+                    <Badge variant="outline" className="text-[10px]">🪙 {s.reward}</Badge>
+                    <Badge variant="outline" className="text-[10px]">⭐ {s.kiva_points_reward}</Badge>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">{s.description}</p>
+                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                  {typeEmoji[s.type] || '🎯'} {typeLabels[s.type] || s.type}
+                  {s.target_amount && ` · 🎯 ${s.target_amount}`}
+                </span>
+              </motion.button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiSuggestOpen(false)}>{t('parent.missions.dialog.btn.cancel')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
