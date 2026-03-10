@@ -265,13 +265,20 @@ function Navbar() {
               {link.label}
             </a>
           ))}
-          <button
-            onClick={toggleLocale}
-            className="flex items-center gap-2 py-3 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors border-b border-border/30"
-          >
-            <Globe className="h-4 w-4" />
-            {locale === 'pt' ? '🇬🇧 English' : '🇵🇹 Português'}
-          </button>
+          <div className="flex items-center gap-2 py-3 border-b border-border/30">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            {(['pt', 'en', 'fr'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => { setLocale(l); setMobileOpen(false); }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  locale === l ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {localeFlag[l]} {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-3 pt-4">
             <Button variant="outline" size="lg" className="flex-1" asChild>
               <Link to="/login">{t('nav.login')}</Link>
