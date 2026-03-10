@@ -412,7 +412,7 @@ function MissionsTab({
                        <div className="space-y-1.5">
                          <div className="flex justify-between">
                            <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
-                           <span className="text-[10px] font-display font-bold text-accent-foreground">{bal}/{mission.target_amount} 🪙 ({progress}%)</span>
+                           <span className="text-[10px] font-display font-bold text-accent-foreground">{walletBalance}/{mission.target_amount} 🪙 ({progress}%)</span>
                          </div>
                          <Progress value={progress} className="h-2 rounded-full" />
                        </div>
