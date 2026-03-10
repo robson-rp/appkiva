@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren } from '@/data/mock-data';
+
 import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
