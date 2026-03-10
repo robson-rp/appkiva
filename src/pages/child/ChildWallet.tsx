@@ -51,7 +51,7 @@ export default function ChildWallet() {
         .filter(tx => tx.entry_type !== 'vault_interest')
         .map(tx => ({
           id: tx.id,
-          childId: child.id,
+          childId: '',
           description: tx.entry_type === 'vault_deposit'
             ? `${t('child.wallet.saving_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.entry_type === 'vault_withdraw'
