@@ -96,12 +96,24 @@ export function useHouseholdLeaderboard() {
     queryFn: async () => {
       if (!user?.householdId) return [];
 
-      const { data: profiles } = await supabase
+      const { data: allProfiles } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar')
+        .select('id, display_name, avatar, user_id')
         .eq('household_id', user.householdId);
 
-      if (!profiles || profiles.length === 0) return [];
+      if (!allProfiles || allProfiles.length === 0) return [];
+
+      // Filter out parents
+      const userIds = allProfiles.map(p => p.user_id);
+      const { data: roles } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+        .in('user_id', userIds);
+      const childUserIds = new Set(
+        (roles ?? []).filter(r => r.role === 'child' || r.role === 'teen').map(r => r.user_id)
+      );
+      const profiles = allProfiles.filter(p => childUserIds.has(p.user_id));
+      if (profiles.length === 0) return [];
 
       const profileIds = profiles.map(p => p.id);
 

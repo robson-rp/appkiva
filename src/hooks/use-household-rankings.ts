@@ -63,7 +63,7 @@ export function useHouseholdRankings() {
         .select('profile_id, amount')
         .in('profile_id', profileIds);
 
-      const rankings: HouseholdMemberRanking[] = profiles.map(p => ({
+      const rankings: HouseholdMemberRanking[] = childProfiles.map(p => ({
         profileId: p.id,
         name: p.display_name,
         avatar: p.avatar ?? '👤',
