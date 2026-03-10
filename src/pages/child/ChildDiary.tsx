@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren, mockDiaryEntries } from '@/data/mock-data';
+
 import { DiaryMood } from '@/types/kivara';
 import { BookOpen, Flame, PenLine, CalendarDays, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
