@@ -975,6 +975,17 @@ const en: Record<string, string> = {
   'parent.insights.refresh': 'Refresh',
   'parent.insights.error': 'Error generating insights. Please try again.',
 
+  // ─── Parent Weekly Summary ───
+  'parent.weekly.title': 'Weekly Summary',
+  'parent.weekly.refresh': 'Refresh',
+  'parent.weekly.no_data': 'No data for this week.',
+  'parent.weekly.error': 'Error loading weekly summary.',
+  'parent.weekly.days_streak': 'day streak',
+  'parent.weekly.tasks': 'Tasks',
+  'parent.weekly.missions': 'Missions',
+  'parent.weekly.saved': 'Saved',
+  'parent.weekly.earned_this_week': 'Earned this week',
+
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Wallet',
 

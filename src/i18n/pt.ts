@@ -975,6 +975,17 @@ const pt: Record<string, string> = {
   'parent.insights.refresh': 'Actualizar',
   'parent.insights.error': 'Erro ao gerar insights. Tenta novamente.',
 
+  // ─── Parent Weekly Summary ───
+  'parent.weekly.title': 'Resumo Semanal',
+  'parent.weekly.refresh': 'Actualizar',
+  'parent.weekly.no_data': 'Sem dados para esta semana.',
+  'parent.weekly.error': 'Erro ao carregar resumo semanal.',
+  'parent.weekly.days_streak': 'dias consecutivos',
+  'parent.weekly.tasks': 'Tarefas',
+  'parent.weekly.missions': 'Missões',
+  'parent.weekly.saved': 'Poupado',
+  'parent.weekly.earned_this_week': 'Ganho esta semana',
+
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Carteira',
 

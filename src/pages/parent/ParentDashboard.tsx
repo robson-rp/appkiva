@@ -13,6 +13,7 @@ import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
 import { ParentInsightsWidget } from '@/components/parent/ParentInsightsWidget';
+import { ParentWeeklySummary } from '@/components/parent/ParentWeeklySummary';
 import { useEmissionStats } from '@/hooks/use-emission-stats';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
@@ -214,6 +215,13 @@ export default function ParentDashboard() {
             displayName: c.displayName,
             dateOfBirth: c.dateOfBirth,
           }))} />
+        </motion.div>
+      )}
+
+      {/* Weekly Summary */}
+      {children.length > 0 && (
+        <motion.div variants={item}>
+          <ParentWeeklySummary householdId={user?.householdId || null} />
         </motion.div>
       )}
 
