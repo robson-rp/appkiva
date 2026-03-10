@@ -963,6 +963,9 @@ const en: Record<string, string> = {
   'parent.missions.dialog.btn.cancel': 'Cancel',
   'parent.missions.dialog.btn.save': 'Save',
   'parent.missions.dialog.btn.create': 'Create Mission',
+  'parent.missions.suggest_ai': 'Suggest with',
+  'parent.missions.ai_suggestions': 'AI Mission Suggestions',
+  'parent.missions.ai_loading': 'Generating suggestions...',
 
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Wallet',

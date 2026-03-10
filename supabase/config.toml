@@ -1,1 +1,4 @@
 project_id = "rflgjdpfisfuyowtrcil"
+
+[functions.suggest-missions]
+verify_jwt = false
