@@ -28,6 +28,7 @@ import PricingSection from "@/components/PricingSection";
 import ChildProgressSimulator from "@/components/ChildProgressSimulator";
 import FinancialHabitsQuiz from "@/components/FinancialHabitsQuiz";
 import { useT, useLanguage } from "@/contexts/LanguageContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /* ─── animation variants ─── */
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -163,7 +164,8 @@ function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { locale, setLocale, t } = useLanguage();
-  const toggleLocale = () => setLocale(locale === 'pt' ? 'en' : 'pt');
+  const localeFlag: Record<string, string> = { pt: '🇵🇹', en: '🇬🇧', fr: '🇫🇷' };
+  const localeLabel: Record<string, string> = { pt: 'Português', en: 'English', fr: 'Français' };
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -209,14 +211,26 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={toggleLocale}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Change language"
-          >
-            <Globe className="h-4 w-4" />
-            <span className="uppercase">{locale}</span>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Change language"
+              >
+                <Globe className="h-4 w-4" />
+                <span>{localeFlag[locale]} {locale.toUpperCase()}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[140px]">
+              {(['pt', 'en', 'fr'] as const).map((l) => (
+                <DropdownMenuItem key={l} onClick={() => setLocale(l)} className="gap-2 cursor-pointer">
+                  <span>{localeFlag[l]}</span>
+                  <span>{localeLabel[l]}</span>
+                  {locale === l && <Check className="h-4 w-4 ml-auto text-primary" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" asChild>
             <Link to="/login">{t('nav.login')}</Link>
           </Button>
@@ -252,13 +266,20 @@ function Navbar() {
               {link.label}
             </a>
           ))}
-          <button
-            onClick={toggleLocale}
-            className="flex items-center gap-2 py-3 text-base font-semibold text-muted-foreground hover:text-foreground transition-colors border-b border-border/30"
-          >
-            <Globe className="h-4 w-4" />
-            {locale === 'pt' ? '🇬🇧 English' : '🇵🇹 Português'}
-          </button>
+          <div className="flex items-center gap-2 py-3 border-b border-border/30">
+            <Globe className="h-4 w-4 text-muted-foreground" />
+            {(['pt', 'en', 'fr'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => { setLocale(l); setMobileOpen(false); }}
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                  locale === l ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {localeFlag[l]} {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-3 pt-4">
             <Button variant="outline" size="lg" className="flex-1" asChild>
               <Link to="/login">{t('nav.login')}</Link>
