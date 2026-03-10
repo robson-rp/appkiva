@@ -470,7 +470,7 @@ function MissionsTab({
                              <div className="flex items-center gap-2">
                                <Target className="h-3.5 w-3.5 text-muted-foreground" />
                                <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
-                               <span className="text-[10px] font-display font-bold text-accent-foreground ml-auto">{bal}/{mission.target_amount} ({avProgress}%)</span>
+                               <span className="text-[10px] font-display font-bold text-accent-foreground ml-auto">{walletBalance}/{mission.target_amount} ({avProgress}%)</span>
                              </div>
                              <Progress value={avProgress} className="h-1.5 rounded-full" />
                            </div>
