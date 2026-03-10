@@ -2,8 +2,34 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+/** Fire a web push notification via the send-push-notification function */
+async function sendPush(
+  supabaseUrl: string,
+  serviceRoleKey: string,
+  profileId: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+) {
+  try {
+    const res = await fetch(`${supabaseUrl}/functions/v1/send-push-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify({ action: 'send', profileId, title, body, data }),
+    });
+    const result = await res.json();
+    return result;
+  } catch (e) {
+    console.error('[notification-engine] push send failed:', e);
+    return null;
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
