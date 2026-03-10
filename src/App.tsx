@@ -118,8 +118,14 @@ const queryClient = new QueryClient({
 
 function LazyFallback() {
   return (
-    <div className="flex items-center justify-center min-h-[200px]" role="status" aria-label="A carregar">
-      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+    <div className="min-h-[200px] p-4 space-y-4" role="status" aria-label="A carregar">
+      <div className="h-8 w-48 rounded-xl bg-muted animate-pulse" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="h-24 rounded-2xl bg-muted animate-pulse" />
+        <div className="h-24 rounded-2xl bg-muted animate-pulse" />
+      </div>
+      <div className="h-32 rounded-2xl bg-muted animate-pulse" />
+      <div className="h-20 rounded-2xl bg-muted animate-pulse" />
     </div>
   );
 }
