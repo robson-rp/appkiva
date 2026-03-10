@@ -2816,6 +2816,21 @@ const en: Record<string, string> = {
   'admin.missions.engine.run_daily': 'Generate daily',
   'admin.missions.engine.run_weekly': 'Generate weekly',
   'mission.expired': 'Expired',
+
+  // ─── Today Loop ───
+  'today.title': 'Your day',
+  'today.streak': 'Streak',
+  'today.next_reward': 'Next reward',
+  'today.next_level': 'Next level',
+  'today.max_level': 'Max level',
+
+  // ─── Behavior Nudges ───
+  'nudge.streak_risk': 'Complete a mission to keep your streak! 🔥',
+  'nudge.comeback': 'Welcome back! Complete a mission today for a bonus!',
+  'nudge.goal_close': 'Just {amount} more coins to reach your "{goal}" goal!',
+  'nudge.mission_pending': 'You have a mission in progress — finish it to earn rewards!',
+  'nudge.keep_going': "You're on a {streak}-day streak — keep going! 💪",
+  'nudge.surprise_bonus': 'Surprise bonus from Kivo! 🎁',
 };
 
 export default en;

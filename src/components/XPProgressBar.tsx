@@ -1,17 +1,16 @@
 import { motion } from 'framer-motion';
 import { Level, LEVEL_CONFIG } from '@/types/kivara';
 import { useAuth } from '@/contexts/AuthContext';
-import { useStreakData } from '@/hooks/use-streaks';
+import { useKivaPoints } from '@/hooks/use-kiva-points';
 import { Zap } from 'lucide-react';
 import { useT } from '@/contexts/LanguageContext';
 
 export function XPProgressBar() {
   const t = useT();
   const { user } = useAuth();
-  const { data: streakData } = useStreakData();
+  const { data: kivaPoints = 0 } = useKivaPoints();
 
-  // Calculate KivaPoints from real streak data
-  const points = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
+  const points = kivaPoints;
 
   // Determine level from points
   const levels = Object.entries(LEVEL_CONFIG) as [Level, (typeof LEVEL_CONFIG)[Level]][];

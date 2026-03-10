@@ -2816,6 +2816,21 @@ const pt: Record<string, string> = {
   'admin.missions.engine.run_daily': 'Gerar diárias',
   'admin.missions.engine.run_weekly': 'Gerar semanais',
   'mission.expired': 'Expirada',
+
+  // ─── Today Loop ───
+  'today.title': 'O teu dia',
+  'today.streak': 'Sequência',
+  'today.next_reward': 'Próx. prémio',
+  'today.next_level': 'Próx. nível',
+  'today.max_level': 'Nível máximo',
+
+  // ─── Behavior Nudges ───
+  'nudge.streak_risk': 'Completa uma missão para manter a tua sequência! 🔥',
+  'nudge.comeback': 'Bem-vindo de volta! Completa uma missão hoje para bónus!',
+  'nudge.goal_close': 'Mais {amount} moedas e atinges a meta "{goal}"!',
+  'nudge.mission_pending': 'Tens uma missão em curso — termina-a para ganhar recompensas!',
+  'nudge.keep_going': 'Estás com {streak} dias seguidos — continua assim! 💪',
+  'nudge.surprise_bonus': 'Bónus surpresa do Kivo! 🎁',
 };
 
 export default pt;

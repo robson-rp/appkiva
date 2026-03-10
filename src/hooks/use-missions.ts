@@ -77,13 +77,14 @@ export function useCompleteMission() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      return data as { success: boolean; reward_coins: number; reward_points: number; new_balance: number | null };
+      return data as { success: boolean; reward_coins: number; reward_points: number; new_balance: number | null; surprise_bonus?: number };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
       queryClient.invalidateQueries({ queryKey: ['kiva-points'] });
-      toast.success(`Missão concluída! +${data.reward_coins} KVC e +${data.reward_points} pts 🎉`);
+      const bonusMsg = data.surprise_bonus ? ` + Bónus surpresa: ${data.surprise_bonus} KVC! 🎁` : '';
+      toast.success(`Missão concluída! +${data.reward_coins} KVC e +${data.reward_points} pts 🎉${bonusMsg}`);
     },
     onError: (err: any) => {
       if (err?.message?.includes('already completed')) {

@@ -35,6 +35,8 @@ import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { useStreakData } from '@/hooks/use-streaks';
 import { useKivaPoints } from '@/hooks/use-kiva-points';
 import { useT } from '@/contexts/LanguageContext';
+import { TodayLoop } from '@/components/TodayLoop';
+import { BehaviorNudge } from '@/components/BehaviorNudge';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -62,9 +64,12 @@ export default function ChildDashboard() {
   const childName = user?.name ?? t('child.dashboard.explorer');
   const childAvatar = user?.avatar ?? '🦊';
   const balance = walletBalance?.balance ?? 0;
-  const childLevel: Level = 'saver';
   const { data: kivaPoints = 0 } = useKivaPoints();
   const childKivaPoints = kivaPoints;
+
+  // Dynamic level calculation from KivaPoints
+  const levels = Object.keys(LEVEL_CONFIG) as Level[];
+  const childLevel: Level = [...levels].reverse().find(l => kivaPoints >= LEVEL_CONFIG[l].minPoints) ?? 'apprentice';
   const streakDays = streakData?.currentStreak ?? 0;
 
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -101,7 +106,6 @@ export default function ChildDashboard() {
     .filter(b => b.unlockedAt)
     .map(b => ({ id: b.id, icon: b.icon, title: b.name }));
 
-  const levels = Object.keys(LEVEL_CONFIG) as Level[];
   const currentLevelIndex = levels.indexOf(childLevel);
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
@@ -116,6 +120,29 @@ export default function ChildDashboard() {
       {showLevelUp && (
         <LevelUpCeremony fromLevel={previousLevel} toLevel={childLevel} onComplete={() => setShowLevelUp(false)} />
       )}
+
+      {/* Today's Loop — Central engagement card */}
+      <motion.div variants={itemVariants}>
+        <TodayLoop
+          missions={missionsList}
+          streakData={streakData}
+          kivaPoints={childKivaPoints}
+          weeklyPoints={childKivaPoints}
+          vaults={vaults}
+          level={childLevel}
+        />
+      </motion.div>
+
+      {/* Behavior Nudge */}
+      <motion.div variants={itemVariants}>
+        <BehaviorNudge
+          streakData={streakData}
+          missions={missionsList}
+          vaults={vaults}
+          weeklyPoints={childKivaPoints}
+          kivaPoints={childKivaPoints}
+        />
+      </motion.div>
 
       {/* Player Card (Hero) */}
       <motion.div variants={itemVariants} data-onboarding="wallet">

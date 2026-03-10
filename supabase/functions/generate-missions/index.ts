@@ -101,10 +101,10 @@ serve(async (req) => {
           .select("id", { count: "exact", head: true })
           .eq("profile_id", profileId);
 
-        // Dream vaults
+        // Dream vaults (with titles for goal-linked missions)
         const { data: vaults } = await supabase
           .from("dream_vaults")
-          .select("target_amount, current_amount")
+          .select("title, icon, target_amount, current_amount")
           .eq("profile_id", profileId);
 
         // Recent mission titles (avoid repetition)
@@ -169,6 +169,7 @@ serve(async (req) => {
 - Streak actual: ${streakData?.current_streak ?? 0} dias
 - Lições concluídas: ${lessonsCompleted ?? 0}
 - Cofres: ${(vaults ?? []).length} activos
+${(vaults ?? []).filter((v: any) => v.current_amount < v.target_amount).map((v: any) => `  · "${v.title}" ${v.icon}: ${v.current_amount}/${v.target_amount} KVC (${Math.round((v.current_amount / v.target_amount) * 100)}%)`).join("\n")}
 
 Contexto comportamental:
 ${behaviorContext.length ? behaviorContext.map(c => `- ${c}`).join("\n") : "- Comportamento normal"}
