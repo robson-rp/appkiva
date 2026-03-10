@@ -105,7 +105,16 @@ const PartnerReports = lazy(() => import("./pages/partner/PartnerReports"));
 const PartnerProfile = lazy(() => import("./pages/partner/PartnerProfile"));
 const PartnerSubscriptionPage = lazy(() => import("./pages/partner/PartnerSubscription"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function LazyFallback() {
   return (
