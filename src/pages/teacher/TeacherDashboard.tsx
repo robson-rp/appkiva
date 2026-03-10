@@ -283,7 +283,7 @@ export default function TeacherDashboard() {
             </CardHeader>
             <CardContent className="space-y-2">
               {topStudents.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">{t('teacher.dashboard.no_students') ?? 'Ainda sem alunos nas turmas.'}</p>
+                <p className="text-sm text-muted-foreground text-center py-4">{t('teacher.dashboard.no_students')}</p>
               )}
               {topStudents.map((student, i) => {
                 const medals = ['🥇', '🥈', '🥉'];

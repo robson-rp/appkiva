@@ -1189,6 +1189,7 @@ const en: Record<string, string> = {
   'teacher.dashboard.tip_tasks_low': '⚠️ Few tasks completed. Simplify initial tasks to build momentum.',
   'teacher.dashboard.tip_class_small': '💡 Small class — ideal for personalised activities and individual mentoring.',
   'teacher.dashboard.tip_class_big': '💡 Large class — try group dynamics and team challenges.',
+  'teacher.dashboard.no_students': 'No students in classes yet',
 
   // ─── Teacher Classes ───
   'teacher.classes.management': 'Management',
@@ -2189,6 +2190,7 @@ const en: Record<string, string> = {
   'challenges.filter_class': 'Class',
   'challenges.friends_ranking': 'Friends Ranking',
   'challenges.social_hint': 'Share your code and earn KVC!',
+  'challenges.no_challenges': 'No weekly challenges yet. Check back soon!',
 
   // ─── Lesson Viewer ───
   'lesson.blocks': 'blocks',
@@ -2339,6 +2341,8 @@ const en: Record<string, string> = {
   'ranking.cat_savings': 'Savings',
   'ranking.cat_points': 'KivaPoints',
   'ranking.cat_donations': 'Donations',
+  'ranking.no_siblings': 'No sibling rankings yet',
+  'ranking.classmates_coming_soon': 'Classmate rankings coming soon',
 
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Savings',

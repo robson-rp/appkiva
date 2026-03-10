@@ -128,7 +128,7 @@ function ClassmatesTab() {
   const t = useT();
   return (
     <div className="text-center py-8">
-      <p className="text-sm text-muted-foreground">{t('ranking.classmates_coming_soon') ?? 'Rankings de colegas em breve'}</p>
+      <p className="text-sm text-muted-foreground">{t('ranking.classmates_coming_soon')}</p>
     </div>
   );
 }

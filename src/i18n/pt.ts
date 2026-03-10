@@ -1189,6 +1189,7 @@ const pt: Record<string, string> = {
   'teacher.dashboard.tip_tasks_low': '⚠️ Poucas tarefas concluídas. Simplifique as tarefas iniciais para criar momentum.',
   'teacher.dashboard.tip_class_small': '💡 Turma pequena — ideal para atividades personalizadas e mentorias individuais.',
   'teacher.dashboard.tip_class_big': '💡 Turma grande — experimente dinâmicas de grupo e desafios por equipas.',
+  'teacher.dashboard.no_students': 'Ainda sem alunos nas turmas',
 
   // ─── Teacher Classes ───
   'teacher.classes.management': 'Gestão',
@@ -2189,6 +2190,7 @@ const pt: Record<string, string> = {
   'challenges.filter_class': 'Turma',
   'challenges.friends_ranking': 'Ranking de Amigos',
   'challenges.social_hint': 'Partilha o teu código e ganha KVC!',
+  'challenges.no_challenges': 'Ainda não há desafios semanais. Volta em breve!',
 
   // ─── Lesson Viewer ───
   'lesson.blocks': 'blocos',
@@ -2339,6 +2341,8 @@ const pt: Record<string, string> = {
   'ranking.cat_savings': 'Poupança',
   'ranking.cat_points': 'KivaPoints',
   'ranking.cat_donations': 'Doações',
+  'ranking.no_siblings': 'Ainda sem rankings entre irmãos',
+  'ranking.classmates_coming_soon': 'Rankings de colegas em breve',
 
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Poupanças',
