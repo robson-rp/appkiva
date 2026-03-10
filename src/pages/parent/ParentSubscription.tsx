@@ -34,6 +34,7 @@ export default function ParentSubscription() {
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
   const { data: regionalPrices = [] } = useRegionalPrices();
+  const { data: invoices = [] } = useInvoices();
 
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const code = tenantCurrency?.code ?? 'AOA';
