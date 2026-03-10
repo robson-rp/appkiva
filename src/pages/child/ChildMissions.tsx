@@ -28,8 +28,8 @@ export default function ChildMissions() {
   const completeTask = useCompleteTask();
 
   const { data: missions = [], isLoading: loadingMissions } = useChildMissions();
-  const { data: walletData } = useWalletBalance();
-  const walletBalance = walletData?.balance ?? 0;
+  const walletQuery = useWalletBalance();
+  const bal = walletQuery.data?.balance ?? 0;
   const startMission = useStartMission();
   const completeMissionMut = useCompleteMission();
 
@@ -99,6 +99,7 @@ export default function ChildMissions() {
           loading={loadingMissions}
           startMission={startMission}
           completeMission={completeMissionMut}
+          walletBalance={bal}
         />
       )}
     </div>
@@ -312,6 +313,7 @@ function MissionsTab({
   loading,
   startMission,
   completeMission,
+  walletBalance,
 }: {
   t: (key: string) => string;
   available: any[];
@@ -321,6 +323,7 @@ function MissionsTab({
   loading: boolean;
   startMission: ReturnType<typeof useStartMission>;
   completeMission: ReturnType<typeof useCompleteMission>;
+  walletBalance: number;
 }) {
   const allActive = [...available, ...inProgress];
 
@@ -384,8 +387,8 @@ function MissionsTab({
           <div className="space-y-3">
             {inProgress.map((mission) => {
               const cfg = statusConfig[mission.status];
-               const progress = mission.target_amount ? Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100) : null;
-               return (
+              const progress = mission.target_amount ? Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100) : null;
+              return (
                 <Card key={mission.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-200">
                   <div className="h-1 gradient-gold" />
                   <CardContent className="p-5">
