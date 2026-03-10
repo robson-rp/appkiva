@@ -126,6 +126,16 @@ Deno.serve(async (req) => {
             notification_id: notif.id,
           });
           streakCount++;
+
+          // Also send web push notification
+          await sendPush(
+            supabaseUrl,
+            serviceRoleKey,
+            streak.profile_id,
+            '⚡ A tua sequência está em risco!',
+            `Kivo diz: A tua sequência de ${streak.current_streak} dias está prestes a acabar! Completa uma missão para a manter.`,
+            { type: 'streak_at_risk', current_streak: streak.current_streak }
+          );
         }
       }
       results.streak_at_risk = streakCount;
