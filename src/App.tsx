@@ -137,8 +137,14 @@ const INVITE_ROUTE = <Route path="/invite/program/:code" element={<Suspense fall
 const INSTALL_ROUTE = <Route path="/install" element={<Suspense fallback={<LazyFallback />}><Install /></Suspense>} />;
 
 function renderRoutes(user: { role: string }) {
+  const fallbackFor = (role: string) => {
+    if (role === 'child') return <ChildPortalSkeleton />;
+    if (role === 'teen') return <TeenPortalSkeleton />;
+    if (role === 'parent') return <ParentPortalSkeleton />;
+    return <LazyFallback />;
+  };
   const S = ({ children }: { children: React.ReactNode }) => (
-    <Suspense fallback={<LazyFallback />}>{children}</Suspense>
+    <Suspense fallback={fallbackFor(user.role)}>{children}</Suspense>
   );
 
   if (user.role === 'admin') {
