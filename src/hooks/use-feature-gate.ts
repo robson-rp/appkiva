@@ -116,40 +116,7 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
  * Hook to get all enabled features at once (avoids multiple queries).
  */
 export function useAllFeatures() {
-  const { user } = useAuth();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['feature-gate', user?.id],
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (!profile?.tenant_id) {
-        return { features: [] as string[], tierName: 'Free' };
-      }
-
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('subscription_tier_id, subscription_tiers(name, features)')
-        .eq('id', profile.tenant_id)
-        .single();
-
-      if (!tenant?.subscription_tiers) {
-        return { features: [] as string[], tierName: 'Free' };
-      }
-
-      const tier = tenant.subscription_tiers as unknown as { name: string; features: string[] };
-      return {
-        features: Array.isArray(tier.features) ? tier.features : [],
-        tierName: tier.name,
-      };
-    },
-  });
+  const { data, isLoading } = useFeatureQuery();
 
   const hasFeature = (feature: FeatureKey) => data?.features.includes(feature) ?? false;
 
