@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen, Sparkles, Bell, Image, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen, Sparkles, Bell, Image, ShieldAlert, Target } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
@@ -33,6 +33,7 @@ function useAdminNav() {
     { title: t('nav.admin.onboarding'), url: '/admin/onboarding', icon: Sparkles },
     { title: t('nav.admin.notifications'), url: '/admin/notifications', icon: Bell },
     { title: t('nav.admin.banners'), url: '/admin/banners', icon: Image },
+    { title: t('nav.admin.missions'), url: '/admin/missions', icon: Target },
   ];
 
   const mobileNavItems = [

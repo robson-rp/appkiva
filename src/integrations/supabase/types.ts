@@ -1266,17 +1266,80 @@ export type Database = {
         }
         Relationships: []
       }
+      mission_templates: {
+        Row: {
+          age_group: string | null
+          conditions: Json | null
+          created_at: string
+          created_by: string | null
+          description: string
+          difficulty: Database["public"]["Enums"]["mission_difficulty"]
+          id: string
+          is_active: boolean
+          reward_coins: number
+          reward_points: number
+          target_amount: number | null
+          title: string
+          type: Database["public"]["Enums"]["mission_type"]
+          updated_at: string
+        }
+        Insert: {
+          age_group?: string | null
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          difficulty?: Database["public"]["Enums"]["mission_difficulty"]
+          id?: string
+          is_active?: boolean
+          reward_coins?: number
+          reward_points?: number
+          target_amount?: number | null
+          title: string
+          type?: Database["public"]["Enums"]["mission_type"]
+          updated_at?: string
+        }
+        Update: {
+          age_group?: string | null
+          conditions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          difficulty?: Database["public"]["Enums"]["mission_difficulty"]
+          id?: string
+          is_active?: boolean
+          reward_coins?: number
+          reward_points?: number
+          target_amount?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["mission_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       missions: {
         Row: {
           child_profile_id: string
           completed_at: string | null
           created_at: string
           description: string
+          difficulty: Database["public"]["Enums"]["mission_difficulty"]
+          expires_at: string | null
           household_id: string | null
           id: string
+          is_auto_generated: boolean
           kiva_points_reward: number
           parent_profile_id: string
           reward: number
+          source: Database["public"]["Enums"]["mission_source"]
           status: Database["public"]["Enums"]["mission_status"]
           target_amount: number | null
           title: string
@@ -1289,11 +1352,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           description?: string
+          difficulty?: Database["public"]["Enums"]["mission_difficulty"]
+          expires_at?: string | null
           household_id?: string | null
           id?: string
+          is_auto_generated?: boolean
           kiva_points_reward?: number
           parent_profile_id: string
           reward?: number
+          source?: Database["public"]["Enums"]["mission_source"]
           status?: Database["public"]["Enums"]["mission_status"]
           target_amount?: number | null
           title: string
@@ -1306,11 +1373,15 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           description?: string
+          difficulty?: Database["public"]["Enums"]["mission_difficulty"]
+          expires_at?: string | null
           household_id?: string | null
           id?: string
+          is_auto_generated?: boolean
           kiva_points_reward?: number
           parent_profile_id?: string
           reward?: number
+          source?: Database["public"]["Enums"]["mission_source"]
           status?: Database["public"]["Enums"]["mission_status"]
           target_amount?: number | null
           title?: string
@@ -2862,8 +2933,24 @@ export type Database = {
         | "transfer"
         | "adjustment"
         | "refund"
+      mission_difficulty:
+        | "beginner"
+        | "explorer"
+        | "saver"
+        | "strategist"
+        | "master"
+      mission_source: "parent" | "engine" | "admin" | "teacher"
       mission_status: "available" | "in_progress" | "completed"
-      mission_type: "saving" | "budgeting" | "planning" | "custom"
+      mission_type:
+        | "saving"
+        | "budgeting"
+        | "planning"
+        | "custom"
+        | "learning"
+        | "social"
+        | "goal"
+        | "daily"
+        | "weekly"
       notification_event:
         | "task_created"
         | "task_completed"
@@ -3050,8 +3137,26 @@ export const Constants = {
         "adjustment",
         "refund",
       ],
+      mission_difficulty: [
+        "beginner",
+        "explorer",
+        "saver",
+        "strategist",
+        "master",
+      ],
+      mission_source: ["parent", "engine", "admin", "teacher"],
       mission_status: ["available", "in_progress", "completed"],
-      mission_type: ["saving", "budgeting", "planning", "custom"],
+      mission_type: [
+        "saving",
+        "budgeting",
+        "planning",
+        "custom",
+        "learning",
+        "social",
+        "goal",
+        "daily",
+        "weekly",
+      ],
       notification_event: [
         "task_created",
         "task_completed",

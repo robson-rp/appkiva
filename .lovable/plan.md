@@ -1,101 +1,128 @@
 
 
-## Plano: Motor de Missões Inteligente — KIVARA
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Contexto actual
+## Current State Assessment
 
-Já existe:
-- Tabela `missions` (types: saving/budgeting/planning/custom, statuses: available/in_progress/completed)
-- CRUD de missões pelos pais (`ParentMissions.tsx`)
-- Visualização e interacção pelas crianças/teens
-- Edge function `suggest-missions` com IA para sugestões
-- Sistema de streaks, badges, notificações e desafios colectivos
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-O que falta para o motor inteligente: geração automática baseada em comportamento, novos tipos de missão, dificuldade progressiva, recompensas automáticas, agendamento, templates admin e analytics.
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
----
+## What Lovable Can and Cannot Build
 
-### Implementação em 4 fases
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-#### Fase 1 — Schema e tipos expandidos
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-| Acção | Detalhe |
-|---|---|
-| **Migração SQL** | Expandir enum `mission_type` com `learning`, `social`, `goal`, `daily`, `weekly`. Adicionar colunas à tabela `missions`: `difficulty` (enum: beginner/explorer/saver/strategist/master), `source` (enum: parent/engine/admin/teacher), `expires_at` (timestamptz), `is_auto_generated` (boolean). |
-| **Nova tabela `mission_templates`** | `id`, `title`, `description`, `type`, `difficulty`, `reward_coins`, `reward_points`, `target_amount`, `conditions` (jsonb — regras de quando gerar), `is_active`, `created_by`, `created_at`. Templates reutilizáveis pelo motor e admin. |
+## Implementation Plan (4 Phases)
 
-#### Fase 2 — Edge Function `generate-missions` (Motor de Geração)
+### Phase 1 — Multi-Tenant Foundation
 
-Nova edge function agendada que corre diariamente (07:00 UTC) e semanalmente (segunda 07:00):
+**Database migrations:**
 
-1. **Recolhe dados comportamentais** por criança:
-   - Saldo actual (wallet_balances)
-   - Histórico de transacções recentes (ledger_entries — gastos vs poupanças)
-   - Missões concluídas (contagem, tipos, dificuldade)
-   - Streak actual
-   - Lições concluídas (lesson_progress)
-   - Frequência de acesso (streak_activities)
-   - Metas de poupança (dream_vaults)
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-2. **Aplica regras de adaptação**:
-   - Gasta muito → missão de poupança
-   - Raramente abre a app → missão de re-engagement com bónus
-   - Poupa consistentemente → missão avançada
-   - Conclui muitas missões → aumentar dificuldade
-   - Nunca fez quiz → missão de aprendizagem
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-3. **Chama IA** (Gemini Flash) com contexto comportamental para gerar missões personalizadas, evitando repetição (envia títulos das últimas 20 missões)
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-4. **Insere missões** na tabela com `source = 'engine'`, `is_auto_generated = true`, `expires_at` definido (24h para daily, 7d para weekly)
+4. Expand `app_role` enum to include `admin`
 
-5. **Dispara notificação** "As tuas novas missões estão prontas! 🎯"
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-| Ficheiro | Acção |
-|---|---|
-| `supabase/functions/generate-missions/index.ts` | **Novo** — Motor de geração com análise comportamental + IA |
-| `supabase/config.toml` | Registar função |
-| Cron job (via insert SQL) | Agendar execução diária e semanal |
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-#### Fase 3 — Recompensas automáticas e validação
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-| Ficheiro | Acção |
-|---|---|
-| `supabase/functions/complete-mission/index.ts` | **Novo** — Valida conclusão, credita KVC e KivaPoints via ledger, actualiza badge progress, previne duplicados (idempotency_key) |
-| `src/hooks/use-missions.ts` | `useCompleteMission` passa a chamar a edge function em vez de update directo, para garantir recompensa atómica |
-| Validação | Missões de task requerem aprovação parental; missões de poupança verificam saldo real; missões de aprendizagem verificam lesson_progress |
+**Database:**
 
-#### Fase 4 — Admin Mission Control + Analytics + UI
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-| Ficheiro | Acção |
-|---|---|
-| `src/pages/admin/AdminMissions.tsx` | **Novo** — Painel com: gestão de templates CRUD, lançamento de missões sazonais/nacionais, ajuste de recompensas, analytics (taxa de conclusão, missões populares, engagement por idade) |
-| `src/components/layouts/AdminLayout.tsx` | Adicionar link "Missões" ao nav |
-| `src/App.tsx` | Registar rota `/admin/missions` |
-| `src/pages/child/ChildMissions.tsx` | Separar missões auto-geradas (daily/weekly) das missões dos pais. Mostrar expiração com countdown. Mostrar nível de dificuldade com badge visual |
-| `src/pages/parent/ParentDashboard.tsx` | Widget de progresso de missões dos filhos |
+2. Add `real_money_enabled` flag to tenants
 
----
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
-### Resumo de ficheiros
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-| Ficheiro | Acção |
-|---|---|
-| Migração SQL | Expandir enums, adicionar colunas, criar `mission_templates` |
-| `supabase/functions/generate-missions/index.ts` | **Novo** — Motor de geração inteligente |
-| `supabase/functions/complete-mission/index.ts` | **Novo** — Recompensa atómica com validação |
-| `supabase/config.toml` | Registar novas funções |
-| SQL insert (cron) | Agendar geração diária/semanal |
-| `src/hooks/use-missions.ts` | Actualizar completeMission para usar edge function |
-| `src/pages/admin/AdminMissions.tsx` | **Novo** — Painel admin de missões |
-| `src/components/layouts/AdminLayout.tsx` | Nav link |
-| `src/App.tsx` | Rota admin/missions |
-| `src/pages/child/ChildMissions.tsx` | UI para daily/weekly com countdown e dificuldade |
-| `src/i18n/pt.ts` + `src/i18n/en.ts` | Novas chaves de tradução |
+### Phase 3 — Audit Logging & Compliance
 
-### Segurança
+**Database:**
 
-- RLS na `mission_templates`: apenas admin pode CRUD
-- `generate-missions` usa service_role_key internamente
-- `complete-mission` valida que a criança é dona da missão, verifica duplicados, e usa transacção atómica no ledger
-- Missões auto-geradas são pedagógicas e adequadas à idade (validado pelo prompt IA)
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

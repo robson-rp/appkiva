@@ -99,6 +99,7 @@ const AdminLessons = lazy(() => import("./pages/admin/AdminLessons"));
 const AdminOnboarding = lazy(() => import("./pages/admin/AdminOnboarding"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
 const AdminBanners = lazy(() => import("./pages/admin/AdminBanners"));
+const AdminMissions = lazy(() => import("./pages/admin/AdminMissions"));
 
 // Partner
 const PartnerDashboard = lazy(() => import("./pages/partner/PartnerDashboard"));
@@ -165,6 +166,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/admin/onboarding" element={<AdminLayout><S><AdminOnboarding /></S></AdminLayout>} />
         <Route path="/admin/notifications" element={<AdminLayout><S><AdminNotifications /></S></AdminLayout>} />
         <Route path="/admin/banners" element={<AdminLayout><S><AdminBanners /></S></AdminLayout>} />
+        <Route path="/admin/missions" element={<AdminLayout><S><AdminMissions /></S></AdminLayout>} />
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
