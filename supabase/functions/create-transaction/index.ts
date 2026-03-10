@@ -29,7 +29,7 @@ const EMISSION_TYPES = ["allowance", "task_reward", "mission_reward", "vault_int
 const PARENT_ONLY_TYPES = ["allowance", "task_reward", "mission_reward", "adjustment", "refund"];
 
 // Types that require approval
-const REQUIRES_APPROVAL_TYPES = ["purchase", "donation", "transfer"];
+const REQUIRES_APPROVAL_TYPES = ["purchase", "transfer"];
 
 // Max transactions per hour for non-parent/admin users
 const HOURLY_VELOCITY_LIMIT = 20;
