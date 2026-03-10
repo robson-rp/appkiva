@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
 import { useDreamVaults, useCreateDreamVault, useDepositToDream } from '@/hooks/use-dream-vaults';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDreamVaults, mockChildren } from '@/data/mock-data';
+
 import { Plus, MessageCircle, Sparkles, Heart, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
