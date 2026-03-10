@@ -163,7 +163,8 @@ function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { locale, setLocale, t } = useLanguage();
-  const toggleLocale = () => setLocale(locale === 'pt' ? 'en' : 'pt');
+  const localeFlag: Record<string, string> = { pt: '🇵🇹', en: '🇬🇧', fr: '🇫🇷' };
+  const localeLabel: Record<string, string> = { pt: 'Português', en: 'English', fr: 'Français' };
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
