@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -33,23 +34,18 @@ interface FeatureGateResult {
 }
 
 /**
- * Hook to check if a specific feature is enabled for the current user's tenant subscription.
- *
- * Usage:
- * ```tsx
- * const { allowed, tierName } = useFeatureGate('advanced_analytics');
- * if (!allowed) return <UpgradePrompt tier={tierName} />;
- * ```
+ * Shared hook that fetches features + subscribes to realtime tenant changes.
  */
-export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
+function useFeatureQuery() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [tenantId, setTenantId] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['feature-gate', user?.id],
     enabled: !!user,
-    staleTime: 5 * 60 * 1000, // cache for 5 min
+    staleTime: 30 * 1000, // 30 seconds
     queryFn: async () => {
-      // 1. Get the user's profile to find tenant_id
       const { data: profile } = await supabase
         .from('profiles')
         .select('tenant_id')
@@ -57,11 +53,12 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
         .single();
 
       if (!profile?.tenant_id) {
-        // No tenant — default to free tier (basic features only)
+        setTenantId(null);
         return { features: [] as string[], tierName: 'Free' };
       }
 
-      // 2. Get tenant with its subscription tier
+      setTenantId(profile.tenant_id);
+
       const { data: tenant } = await supabase
         .from('tenants')
         .select('subscription_tier_id, subscription_tiers(name, features)')
@@ -80,6 +77,32 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
       };
     },
   });
+
+  // Realtime: invalidate cache when tenant's subscription changes
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase
+      .channel(`tenant-sub-${tenantId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'tenants',
+        filter: `id=eq.${tenantId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [tenantId, queryClient]);
+
+  return { data, isLoading };
+}
+
+/**
+ * Hook to check if a specific feature is enabled for the current user's tenant subscription.
+ */
+export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
+  const { data, isLoading } = useFeatureQuery();
 
   return {
     allowed: data?.features.includes(feature) ?? false,
@@ -93,40 +116,7 @@ export function useFeatureGate(feature: FeatureKey): FeatureGateResult {
  * Hook to get all enabled features at once (avoids multiple queries).
  */
 export function useAllFeatures() {
-  const { user } = useAuth();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['feature-gate', user?.id],
-    enabled: !!user,
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (!profile?.tenant_id) {
-        return { features: [] as string[], tierName: 'Free' };
-      }
-
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('subscription_tier_id, subscription_tiers(name, features)')
-        .eq('id', profile.tenant_id)
-        .single();
-
-      if (!tenant?.subscription_tiers) {
-        return { features: [] as string[], tierName: 'Free' };
-      }
-
-      const tier = tenant.subscription_tiers as unknown as { name: string; features: string[] };
-      return {
-        features: Array.isArray(tier.features) ? tier.features : [],
-        tierName: tier.name,
-      };
-    },
-  });
+  const { data, isLoading } = useFeatureQuery();
 
   const hasFeature = (feature: FeatureKey) => data?.features.includes(feature) ?? false;
 
