@@ -18,7 +18,7 @@ export const LanguageContext = createContext<LanguageContextType | undefined>(un
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
     const saved = localStorage.getItem('kivara-locale');
-    if (saved === 'en' || saved === 'pt') return saved;
+    if (saved === 'en' || saved === 'pt' || saved === 'fr') return saved;
     return 'pt';
   });
 

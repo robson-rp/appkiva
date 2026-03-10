@@ -117,13 +117,14 @@ export default function TeenProfile() {
               <Label className="flex items-center gap-1.5">
                 <Languages className="h-3.5 w-3.5 text-muted-foreground" /> {t('profile.language')}
               </Label>
-              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en')}>
+              <Select value={locale} onValueChange={(v) => setLocale(v as 'pt' | 'en' | 'fr')}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="pt">🇵🇹 Português</SelectItem>
                   <SelectItem value="en">🇬🇧 English</SelectItem>
+                  <SelectItem value="fr">🇫🇷 Français</SelectItem>
                 </SelectContent>
               </Select>
             </div>
