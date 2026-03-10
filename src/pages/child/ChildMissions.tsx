@@ -461,7 +461,7 @@ function MissionsTab({
                         </div>
                       </div>
                       {mission.target_amount && (() => {
-                         const avProgress = Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100);
+                         const avProgress = Math.min(Math.round((bal / mission.target_amount) * 100), 100);
                          return (
                            <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 space-y-1.5">
                              <div className="flex items-center gap-2">
