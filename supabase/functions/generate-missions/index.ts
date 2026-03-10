@@ -101,10 +101,10 @@ serve(async (req) => {
           .select("id", { count: "exact", head: true })
           .eq("profile_id", profileId);
 
-        // Dream vaults
+        // Dream vaults (with titles for goal-linked missions)
         const { data: vaults } = await supabase
           .from("dream_vaults")
-          .select("target_amount, current_amount")
+          .select("title, icon, target_amount, current_amount")
           .eq("profile_id", profileId);
 
         // Recent mission titles (avoid repetition)
