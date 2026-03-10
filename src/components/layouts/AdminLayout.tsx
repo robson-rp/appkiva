@@ -33,6 +33,7 @@ function useAdminNav() {
     { title: t('nav.admin.onboarding'), url: '/admin/onboarding', icon: Sparkles },
     { title: t('nav.admin.notifications'), url: '/admin/notifications', icon: Bell },
     { title: t('nav.admin.banners'), url: '/admin/banners', icon: Image },
+    { title: t('nav.admin.missions'), url: '/admin/missions', icon: Target },
   ];
 
   const mobileNavItems = [
