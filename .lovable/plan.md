@@ -1,128 +1,41 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+## Plano: Sugestões de Missões via IA + Outras Automações
 
-## Current State Assessment
+### 1. Sugestões de Missões com IA (prioridade)
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+Replicar o padrão já existente em `suggest-tasks` para missões.
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+**Alterações:**
 
-## What Lovable Can and Cannot Build
+| Ficheiro | Acção |
+|---|---|
+| `supabase/functions/suggest-missions/index.ts` | Nova edge function que usa Lovable AI (Gemini 3 Flash) com tool calling para retornar 4-5 missões estruturadas (título, descrição, tipo, recompensa, kivaPoints, meta) |
+| `src/pages/parent/ParentMissions.tsx` | Adicionar botão "✨ Sugerir com IA" no header (igual ao ParentTasks), dialog de sugestões, e função `applySuggestion` que preenche o formulário |
+| `src/i18n/pt.ts` / `src/i18n/en.ts` | Chaves para "Sugerir com IA", "Carregando sugestões...", etc. |
+| `supabase/config.toml` | Registar `suggest-missions` com `verify_jwt = false` |
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+A edge function recebe `{ childAge, missionType, context }` e devolve sugestões com campos alinhados ao schema da tabela `missions`.
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+---
 
-## Implementation Plan (4 Phases)
+### 2. Outras automações viáveis com IA
 
-### Phase 1 — Multi-Tenant Foundation
+Além das missões, há vários pontos do sistema que beneficiariam de automação inteligente:
 
-**Database migrations:**
+**a) Insights Comportamentais Automáticos** — Edge function `generate-insights` que analisa o histórico de transacções, tarefas concluídas e poupança de uma criança e gera 2-3 insights personalizados (ex: "A Maria poupou 30% mais esta semana" ou "O João não completou tarefas de estudo há 2 semanas"). Mostraria no dashboard do pai.
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+**b) Resumo Semanal para Pais** — Edge function `weekly-summary` que compila automaticamente: tarefas concluídas, missões em curso, variação de saldo, streak actual. Pode ser mostrado como card no ParentDashboard ou enviado como notificação.
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+**c) Sugestão de Recompensas Personalizadas** — Com base na idade e interesses da criança, sugerir recompensas adequadas para o catálogo de `ParentRewards`.
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+**d) Dicas do Kivo Contextuais** — O mascote Kivo já tem dicas estáticas (`kivo-tips.ts`). Poderia ter dicas geradas dinamicamente com base no comportamento recente da criança.
 
-4. Expand `app_role` enum to include `admin`
+---
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+### Próximo passo recomendado
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+Implementar primeiro a **sugestão de missões com IA** (item 1), que é o mais directo e segue exactamente o padrão comprovado do `suggest-tasks`. Os restantes itens podem ser feitos incrementalmente depois.
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
-
-**Database:**
-
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+Queres que avance com a implementação do item 1, ou preferes incluir algum dos outros itens nesta iteração?
 
