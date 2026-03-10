@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,7 +39,7 @@ interface FeatureGateResult {
 function useFeatureQuery() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [tenantId, setTenantId] = useState<string | null>(null);
+  const tenantIdRef = useRef<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['feature-gate', user?.id],
@@ -53,11 +53,11 @@ function useFeatureQuery() {
         .single();
 
       if (!profile?.tenant_id) {
-        setTenantId(null);
-        return { features: [] as string[], tierName: 'Free' };
+        tenantIdRef.current = null;
+        return { features: [] as string[], tierName: 'Free', tenantId: null as string | null };
       }
 
-      setTenantId(profile.tenant_id);
+      tenantIdRef.current = profile.tenant_id;
 
       const { data: tenant } = await supabase
         .from('tenants')
@@ -66,7 +66,7 @@ function useFeatureQuery() {
         .single();
 
       if (!tenant?.subscription_tiers) {
-        return { features: [] as string[], tierName: 'Free' };
+        return { features: [] as string[], tierName: 'Free', tenantId: profile.tenant_id };
       }
 
       const tier = tenant.subscription_tiers as unknown as { name: string; features: string[] };
@@ -74,26 +74,28 @@ function useFeatureQuery() {
       return {
         features: Array.isArray(tier.features) ? tier.features : [],
         tierName: tier.name,
+        tenantId: profile.tenant_id,
       };
     },
   });
 
   // Realtime: invalidate cache when tenant's subscription changes
+  const resolvedTenantId = data?.tenantId ?? tenantIdRef.current;
   useEffect(() => {
-    if (!tenantId) return;
+    if (!resolvedTenantId) return;
     const channel = supabase
-      .channel(`tenant-sub-${tenantId}`)
+      .channel(`tenant-sub-${resolvedTenantId}`)
       .on('postgres_changes', {
         event: 'UPDATE',
         schema: 'public',
         table: 'tenants',
-        filter: `id=eq.${tenantId}`,
+        filter: `id=eq.${resolvedTenantId}`,
       }, () => {
         queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [tenantId, queryClient]);
+  }, [resolvedTenantId, queryClient]);
 
   return { data, isLoading };
 }
