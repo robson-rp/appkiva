@@ -1,10 +1,12 @@
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useT } from '@/contexts/LanguageContext';
+import { useContext } from 'react';
+import { LanguageContext } from '@/contexts/LanguageContext';
 
 export function OfflineBanner() {
-  const t = useT();
+  const ctx = useContext(LanguageContext);
+  const t = ctx?.t ?? ((key: string) => key === 'offline.message' ? 'Estás offline. Algumas funcionalidades podem não funcionar.' : key);
   const isOnline = useOnlineStatus();
 
   return (
