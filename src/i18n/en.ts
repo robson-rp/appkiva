@@ -2815,6 +2815,7 @@ const en: Record<string, string> = {
   'admin.missions.engine.description': 'The engine analyzes each child\'s behavior (spending, savings, streaks, lessons) and generates personalized missions using AI. Can be run manually or scheduled via cron.',
   'admin.missions.engine.run_daily': 'Generate daily',
   'admin.missions.engine.run_weekly': 'Generate weekly',
+  'mission.expired': 'Expired',
 };
 
 export default en;
