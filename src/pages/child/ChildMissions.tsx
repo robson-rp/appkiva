@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
 import { useChildMissions, useStartMission, useCompleteMission } from '@/hooks/use-missions';
+import { useWalletBalance } from '@/hooks/use-wallet';
 import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
@@ -27,6 +28,8 @@ export default function ChildMissions() {
   const completeTask = useCompleteTask();
 
   const { data: missions = [], isLoading: loadingMissions } = useChildMissions();
+  const { data: walletData } = useWalletBalance();
+  const walletBalance = walletData?.balance ?? 0;
   const startMission = useStartMission();
   const completeMissionMut = useCompleteMission();
 
@@ -381,8 +384,8 @@ function MissionsTab({
           <div className="space-y-3">
             {inProgress.map((mission) => {
               const cfg = statusConfig[mission.status];
-              const progress = mission.target_amount ? Math.min(Math.round(Math.random() * 80 + 10), 100) : 50;
-              return (
+               const progress = mission.target_amount ? Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100) : null;
+               return (
                 <Card key={mission.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-200">
                   <div className="h-1 gradient-gold" />
                   <CardContent className="p-5">
@@ -402,13 +405,20 @@ function MissionsTab({
                         <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between">
-                        <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
-                        <span className="text-[10px] font-display font-bold text-accent-foreground">{progress}%</span>
-                      </div>
-                      <Progress value={progress} className="h-2 rounded-full" />
-                    </div>
+                    {progress !== null ? (
+                       <div className="space-y-1.5">
+                         <div className="flex justify-between">
+                           <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                           <span className="text-[10px] font-display font-bold text-accent-foreground">{walletBalance}/{mission.target_amount} 🪙 ({progress}%)</span>
+                         </div>
+                         <Progress value={progress} className="h-2 rounded-full" />
+                       </div>
+                     ) : (
+                       <div className="flex justify-between">
+                         <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                         <span className="text-[10px] font-display font-bold text-accent-foreground">—</span>
+                       </div>
+                     )}
                       <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
                         {completeMission.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} {t('child.missions.continue')}
                       </Button>
@@ -450,12 +460,19 @@ function MissionsTab({
                           <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                         </div>
                       </div>
-                      {mission.target_amount && (
-                        <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 flex items-center gap-2">
-                          <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
-                        </div>
-                      )}
+                      {mission.target_amount && (() => {
+                         const avProgress = Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100);
+                         return (
+                           <div className="bg-muted/40 rounded-xl px-3 py-2 mb-3 space-y-1.5">
+                             <div className="flex items-center gap-2">
+                               <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                               <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
+                               <span className="text-[10px] font-display font-bold text-accent-foreground ml-auto">{walletBalance}/{mission.target_amount} ({avProgress}%)</span>
+                             </div>
+                             <Progress value={avProgress} className="h-1.5 rounded-full" />
+                           </div>
+                         );
+                       })()}
                       <Button size="sm" className="w-full rounded-xl font-display gap-1.5 shadow-sm" disabled={startMission.isPending} onClick={() => startMission.mutate(mission.id)}>
                         <Target className="h-3.5 w-3.5" /> {t('child.missions.start')}
                       </Button>
@@ -484,12 +501,15 @@ function MissionsTab({
                       {typeEmoji[mission.type]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display font-semibold text-sm">{mission.title}</h3>
-                        <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-                      </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{mission.description}</p>
-                    </div>
+                       <div className="flex items-center gap-2">
+                         <h3 className="font-display font-semibold text-sm">{mission.title}</h3>
+                         <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
+                       </div>
+                       <p className="text-[11px] text-muted-foreground truncate">{mission.description}</p>
+                       {mission.target_amount && (
+                         <Progress value={100} className="h-1.5 rounded-full mt-1.5" />
+                       )}
+                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-display font-bold text-xs text-secondary">+{mission.reward} 🪙</p>
                       <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
