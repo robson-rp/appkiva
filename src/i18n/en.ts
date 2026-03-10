@@ -180,6 +180,7 @@ const en: Record<string, string> = {
   // ─── Features labels ───
   'feature.basic_wallet': 'Digital wallet',
   'feature.basic_tasks': 'Tasks & allowance',
+  'feature.basic_rewards': 'Basic rewards',
   'feature.savings_vaults': 'Savings vaults',
   'feature.dream_vaults': 'Dream vaults',
   'feature.custom_rewards': 'Custom rewards',
@@ -1089,6 +1090,11 @@ const en: Record<string, string> = {
   'parent.subscription.cancel': 'Cancel',
   'parent.subscription.processing': 'Processing...',
   'parent.subscription.confirm': 'Confirm Downgrade',
+  'parent.subscription.billing_history': 'Billing history',
+  'parent.subscription.status_paid': 'Paid',
+  'parent.subscription.status_pending': 'Pending',
+  'parent.subscription.status_failed': 'Failed',
+  'parent.subscription.status_cancelled': 'Cancelled',
 
   // ─── Parent Profile ───
   'parent.profile.guardian': 'Guardian',

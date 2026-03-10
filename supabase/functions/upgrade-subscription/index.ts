@@ -153,6 +153,61 @@ Deno.serve(async (req) => {
       new_values: { subscription_tier_id: tier_id },
     });
 
+    // Create first invoice if paid tier
+    const { data: tierFull } = await supabaseAdmin
+      .from("subscription_tiers")
+      .select("price_monthly")
+      .eq("id", tier_id)
+      .single();
+
+    const priceMonthly = Number(tierFull?.price_monthly ?? 0);
+    if (priceMonthly > 0) {
+      // Get tenant currency
+      const { data: tenantData } = await supabaseAdmin
+        .from("tenants")
+        .select("currency")
+        .eq("id", tenantId)
+        .single();
+
+      const currency = tenantData?.currency ?? "USD";
+      let amount = priceMonthly;
+
+      // Check regional price
+      const { data: regional } = await supabaseAdmin
+        .from("tier_regional_prices")
+        .select("price_monthly")
+        .eq("tier_id", tier_id)
+        .eq("currency_code", currency)
+        .single();
+
+      if (regional) {
+        amount = Number(regional.price_monthly);
+      } else if (currency !== "USD") {
+        const { data: rate } = await supabaseAdmin
+          .from("currency_exchange_rates")
+          .select("rate")
+          .eq("base_currency", "USD")
+          .eq("target_currency", currency)
+          .single();
+        if (rate) amount = amount * Number(rate.rate);
+      }
+
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 30);
+
+      await supabaseAdmin.from("subscription_invoices").insert({
+        tenant_id: tenantId,
+        tier_id: tier_id,
+        amount,
+        currency,
+        billing_period: "monthly",
+        status: "paid",
+        due_date: dueDate.toISOString().split("T")[0],
+        paid_at: new Date().toISOString(),
+        payment_method: "simulated",
+      });
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

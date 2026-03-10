@@ -4,9 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle } from 'lucide-react';
+import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
-import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
+import { useSubscriptionTiers, useUpgradeSubscription, useInvoices } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -18,7 +18,7 @@ import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices
 import { useT } from '@/contexts/LanguageContext';
 
 const ALL_FEATURE_KEYS = [
-  'basic_wallet', 'basic_tasks', 'savings_vaults', 'dream_vaults',
+  'basic_wallet', 'basic_tasks', 'basic_rewards', 'savings_vaults', 'dream_vaults',
   'custom_rewards', 'budget_exceptions', 'multi_child', 'advanced_analytics',
   'export_reports', 'real_money_wallet', 'priority_support',
 ];
@@ -34,6 +34,7 @@ export default function ParentSubscription() {
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
   const { data: regionalPrices = [] } = useRegionalPrices();
+  const { data: invoices = [] } = useInvoices();
 
   const sym = tenantCurrency?.symbol ?? 'Kz';
   const code = tenantCurrency?.code ?? 'AOA';
@@ -174,6 +175,56 @@ export default function ParentSubscription() {
           </div>
         )}
       </motion.div>
+
+      {/* Billing History */}
+      {invoices.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Receipt className="h-4 w-4 text-primary" />
+                <h2 className="font-display font-semibold">{t('parent.subscription.billing_history')}</h2>
+              </div>
+              <div className="space-y-2">
+                {invoices.slice(0, 6).map((inv) => {
+                  const statusIcon = inv.status === 'paid'
+                    ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    : inv.status === 'pending'
+                    ? <Clock className="h-4 w-4 text-amber-500" />
+                    : <XCircle className="h-4 w-4 text-destructive" />;
+
+                  return (
+                    <div key={inv.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        {statusIcon}
+                        <div>
+                          <p className="text-sm font-medium">
+                            {formatPrice(inv.amount, sym, dec)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(inv.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          'text-[10px]',
+                          inv.status === 'paid' && 'border-green-300 text-green-700',
+                          inv.status === 'pending' && 'border-amber-300 text-amber-700',
+                          inv.status === 'failed' && 'border-destructive text-destructive',
+                        )}
+                      >
+                        {t(`parent.subscription.status_${inv.status}`)}
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       <PaymentSimulator
         open={paymentOpen}

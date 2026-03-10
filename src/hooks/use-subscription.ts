@@ -4,6 +4,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
+export interface SubscriptionInvoice {
+  id: string;
+  tenant_id: string;
+  tier_id: string;
+  amount: number;
+  currency: string;
+  billing_period: string;
+  status: string;
+  due_date: string;
+  paid_at: string | null;
+  payment_method: string | null;
+  payment_reference: string | null;
+  created_at: string;
+}
+
 interface SubscriptionTier {
   id: string;
   name: string;
@@ -82,4 +97,32 @@ export function useUpgradeSubscription() {
   };
 
   return { upgrade, loading };
+}
+
+export function useInvoices() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['subscription-invoices', user?.id],
+    enabled: !!user,
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('user_id', user!.id)
+        .single();
+
+      if (!profile?.tenant_id) return [] as SubscriptionInvoice[];
+
+      const { data, error } = await supabase
+        .from('subscription_invoices')
+        .select('*')
+        .eq('tenant_id', profile.tenant_id)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (error) throw error;
+      return (data ?? []) as unknown as SubscriptionInvoice[];
+    },
+  });
 }
