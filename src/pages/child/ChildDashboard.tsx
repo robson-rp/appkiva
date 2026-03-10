@@ -33,6 +33,7 @@ import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { useChildTasks } from '@/hooks/use-child-tasks';
 import { useDreamVaults } from '@/hooks/use-dream-vaults';
 import { useStreakData } from '@/hooks/use-streaks';
+import { useKivaPoints } from '@/hooks/use-kiva-points';
 import { useT } from '@/contexts/LanguageContext';
 
 const containerVariants = {
@@ -62,7 +63,8 @@ export default function ChildDashboard() {
   const childAvatar = user?.avatar ?? '🦊';
   const balance = walletBalance?.balance ?? 0;
   const childLevel: Level = 'saver';
-  const childKivaPoints = streakData?.totalActiveDays ? streakData.totalActiveDays * 15 : 0;
+  const { data: kivaPoints = 0 } = useKivaPoints();
+  const childKivaPoints = kivaPoints;
   const streakDays = streakData?.currentStreak ?? 0;
 
   const [showLevelUp, setShowLevelUp] = useState(false);

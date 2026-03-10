@@ -340,6 +340,7 @@ export type Database = {
           parent_profile_id: string
           pin_hash: string | null
           profile_id: string
+          school_tenant_id: string | null
           updated_at: string
         }
         Insert: {
@@ -352,6 +353,7 @@ export type Database = {
           parent_profile_id: string
           pin_hash?: string | null
           profile_id: string
+          school_tenant_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -364,6 +366,7 @@ export type Database = {
           parent_profile_id?: string
           pin_hash?: string | null
           profile_id?: string
+          school_tenant_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -379,6 +382,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "children_school_tenant_id_fkey"
+            columns: ["school_tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]

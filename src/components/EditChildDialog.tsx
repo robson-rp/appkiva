@@ -5,13 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CalendarIcon, Loader2, School } from 'lucide-react';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { useUpdateChild } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', '👦🏻', '👧🏼', '🧒🏿', '👦🏽', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰'];
 
@@ -25,6 +28,7 @@ interface EditChildDialogProps {
     nickname: string | null;
     avatar: string;
     dateOfBirth: string | null;
+    schoolTenantId?: string | null;
   } | null;
 }
 
@@ -34,6 +38,21 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
   const [nickname, setNickname] = useState('');
   const [avatar, setAvatar] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
+  const [schoolTenantId, setSchoolTenantId] = useState<string | null>(null);
+
+  // Fetch school tenants
+  const { data: schools = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ['school-tenants'],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('tenants')
+        .select('id, name')
+        .eq('type', 'school')
+        .order('name');
+      if (error) throw error;
+      return (data ?? []) as { id: string; name: string }[];
+    },
+  });
 
   const [lastChildId, setLastChildId] = useState<string | null>(null);
   if (child && child.childId !== lastChildId) {
@@ -41,6 +60,7 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
     setNickname(child.nickname ?? '');
     setAvatar(child.avatar);
     setDateOfBirth(child.dateOfBirth ? new Date(child.dateOfBirth) : undefined);
+    setSchoolTenantId(child.schoolTenantId ?? null);
   }
 
   const handleSave = async () => {
@@ -52,6 +72,7 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
         nickname: nickname.trim() || null,
         avatar,
         dateOfBirth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : null,
+        schoolTenantId,
       });
       toast({
         title: t('dialog.edit_child.saved'),
@@ -131,6 +152,25 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          {/* School selector */}
+          <div className="space-y-2">
+            <Label className="text-xs font-display font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <School className="h-3.5 w-3.5" />
+              Escola
+            </Label>
+            <Select value={schoolTenantId ?? 'none'} onValueChange={(v) => setSchoolTenantId(v === 'none' ? null : v)}>
+              <SelectTrigger className="rounded-xl">
+                <SelectValue placeholder="Selecionar escola" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nenhuma escola</SelectItem>
+                {schools.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

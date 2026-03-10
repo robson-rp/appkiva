@@ -12,6 +12,7 @@ export interface ChildWithBalance {
   monthlyBudget: number;
   dailySpendLimit: number;
   dateOfBirth: string | null;
+  schoolTenantId: string | null;
 }
 
 export function useChildren() {
@@ -31,6 +32,7 @@ export function useChildren() {
           monthly_budget,
           daily_spend_limit,
           date_of_birth,
+          school_tenant_id,
           profiles!children_profile_id_fkey (
             id,
             display_name,
@@ -64,6 +66,7 @@ export function useChildren() {
         monthlyBudget: Number(c.monthly_budget) || 0,
         dailySpendLimit: Number(c.daily_spend_limit) || 50,
         dateOfBirth: c.date_of_birth ?? null,
+        schoolTenantId: c.school_tenant_id ?? null,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
@@ -117,12 +120,14 @@ export function useUpdateChild() {
       nickname,
       avatar,
       dateOfBirth,
+      schoolTenantId,
     }: {
       childId: string;
       profileId: string;
       nickname: string | null;
       avatar: string;
       dateOfBirth: string | null;
+      schoolTenantId?: string | null;
     }) => {
       const { error } = await supabase.rpc('update_child_profile', {
         _child_id: childId,
@@ -131,6 +136,15 @@ export function useUpdateChild() {
         _date_of_birth: dateOfBirth,
       });
       if (error) throw error;
+
+      // Update school_tenant_id separately (not in RPC)
+      if (schoolTenantId !== undefined) {
+        const { error: schoolErr } = await supabase
+          .from('children')
+          .update({ school_tenant_id: schoolTenantId })
+          .eq('id', childId);
+        if (schoolErr) throw schoolErr;
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });
