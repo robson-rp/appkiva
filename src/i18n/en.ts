@@ -180,6 +180,7 @@ const en: Record<string, string> = {
   // ─── Features labels ───
   'feature.basic_wallet': 'Digital wallet',
   'feature.basic_tasks': 'Tasks & allowance',
+  'feature.basic_rewards': 'Basic rewards',
   'feature.savings_vaults': 'Savings vaults',
   'feature.dream_vaults': 'Dream vaults',
   'feature.custom_rewards': 'Custom rewards',
