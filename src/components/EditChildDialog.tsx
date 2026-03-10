@@ -41,16 +41,16 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
   const [schoolTenantId, setSchoolTenantId] = useState<string | null>(null);
 
   // Fetch school tenants
-  const { data: schools = [] } = useQuery({
+  const { data: schools = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ['school-tenants'],
-    queryFn: async (): Promise<{ id: string; name: string }[]> => {
-      const { data, error } = await supabase
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
         .from('tenants')
         .select('id, name')
         .eq('type', 'school')
         .order('name');
       if (error) throw error;
-      return (data as any[])?.map(d => ({ id: d.id, name: d.name })) ?? [];
+      return (data ?? []) as { id: string; name: string }[];
     },
   });
 
