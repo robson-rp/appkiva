@@ -122,6 +122,29 @@ export default function ChildDashboard() {
         <LevelUpCeremony fromLevel={previousLevel} toLevel={childLevel} onComplete={() => setShowLevelUp(false)} />
       )}
 
+      {/* Today's Loop — Central engagement card */}
+      <motion.div variants={itemVariants}>
+        <TodayLoop
+          missions={missionsList}
+          streakData={streakData}
+          kivaPoints={childKivaPoints}
+          weeklyPoints={childKivaPoints}
+          vaults={vaults}
+          level={childLevel}
+        />
+      </motion.div>
+
+      {/* Behavior Nudge */}
+      <motion.div variants={itemVariants}>
+        <BehaviorNudge
+          streakData={streakData}
+          missions={missionsList}
+          vaults={vaults}
+          weeklyPoints={childKivaPoints}
+          kivaPoints={childKivaPoints}
+        />
+      </motion.div>
+
       {/* Player Card (Hero) */}
       <motion.div variants={itemVariants} data-onboarding="wallet">
         <PlayerCard
