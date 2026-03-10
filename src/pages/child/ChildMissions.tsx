@@ -483,18 +483,24 @@ function MissionsTab({
                     <CardContent className="p-5">
                       <div className="flex items-start gap-3 mb-3">
                         <div className={`w-12 h-12 rounded-2xl ${cfg.bg} flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-                          {typeEmoji[mission.type]}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="font-display font-bold text-sm">{mission.title}</h3>
-                            <Badge className={`text-[9px] ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground">{mission.description}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                          <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
+                         {typeEmoji[mission.type] || '🎯'}
+                       </div>
+                       <div className="flex-1">
+                         <div className="flex items-center gap-2 mb-0.5">
+                           <h3 className="font-display font-bold text-sm">{mission.title}</h3>
+                           <Badge className={`text-[9px] ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
+                           {(mission as any).difficulty && difficultyLabel[(mission as any).difficulty] && (
+                             <Badge className={`text-[9px] border-0 rounded-lg ${difficultyLabel[(mission as any).difficulty].cls}`}>
+                               {difficultyLabel[(mission as any).difficulty].label}
+                             </Badge>
+                           )}
+                         </div>
+                         <p className="text-xs text-muted-foreground">{mission.description}</p>
+                       </div>
+                       <div className="text-right shrink-0">
+                         <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
+                         <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
+                         <ExpiresIn expiresAt={(mission as any).expires_at} />
                         </div>
                       </div>
                       {mission.target_amount && (() => {
