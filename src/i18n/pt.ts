@@ -1189,6 +1189,7 @@ const pt: Record<string, string> = {
   'teacher.dashboard.tip_tasks_low': '⚠️ Poucas tarefas concluídas. Simplifique as tarefas iniciais para criar momentum.',
   'teacher.dashboard.tip_class_small': '💡 Turma pequena — ideal para atividades personalizadas e mentorias individuais.',
   'teacher.dashboard.tip_class_big': '💡 Turma grande — experimente dinâmicas de grupo e desafios por equipas.',
+  'teacher.dashboard.no_students': 'Ainda sem alunos nas turmas',
 
   // ─── Teacher Classes ───
   'teacher.classes.management': 'Gestão',

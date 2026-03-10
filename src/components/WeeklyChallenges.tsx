@@ -161,7 +161,7 @@ export function WeeklyChallenges() {
       {challenges.length === 0 && leaderboard.length === 0 && (
         <motion.div variants={item} className="text-center py-12">
           <span className="text-4xl block mb-3">🏆</span>
-          <p className="text-sm text-muted-foreground">{t('challenges.no_challenges') ?? 'Ainda não há desafios semanais. Volta em breve!'}</p>
+          <p className="text-sm text-muted-foreground">{t('challenges.no_challenges')}</p>
         </motion.div>
       )}
     </motion.div>
