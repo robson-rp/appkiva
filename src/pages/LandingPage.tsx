@@ -28,6 +28,7 @@ import PricingSection from "@/components/PricingSection";
 import ChildProgressSimulator from "@/components/ChildProgressSimulator";
 import FinancialHabitsQuiz from "@/components/FinancialHabitsQuiz";
 import { useT, useLanguage } from "@/contexts/LanguageContext";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 /* ─── animation variants ─── */
 const easeOut = [0.22, 1, 0.36, 1] as const;
