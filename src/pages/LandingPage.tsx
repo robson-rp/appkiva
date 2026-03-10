@@ -210,14 +210,26 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={toggleLocale}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-            aria-label="Change language"
-          >
-            <Globe className="h-4 w-4" />
-            <span className="uppercase">{locale}</span>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Change language"
+              >
+                <Globe className="h-4 w-4" />
+                <span>{localeFlag[locale]} {locale.toUpperCase()}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[140px]">
+              {(['pt', 'en', 'fr'] as const).map((l) => (
+                <DropdownMenuItem key={l} onClick={() => setLocale(l)} className="gap-2 cursor-pointer">
+                  <span>{localeFlag[l]}</span>
+                  <span>{localeLabel[l]}</span>
+                  {locale === l && <Check className="h-4 w-4 ml-auto text-primary" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" asChild>
             <Link to="/login">{t('nav.login')}</Link>
           </Button>
