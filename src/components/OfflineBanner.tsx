@@ -1,17 +1,24 @@
 import { useOnlineStatus } from '@/hooks/use-online-status';
 import { WifiOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useContext } from 'react';
+import { createContext, useContext } from 'react';
+
+// Import the context directly to avoid the throw in useLanguage
+// This makes OfflineBanner resilient to HMR module duplication
+function useSafeT() {
+  // We access LanguageContext via dynamic import-like pattern
+  // but since we can't, we'll just use a hardcoded fallback
+  try {
+    // eslint-disable-next-line
+    const { useT } = require('@/contexts/LanguageContext');
+    return useT();
+  } catch {
+    return (key: string) => key === 'offline.message' ? 'Estás offline. Algumas funcionalidades podem não funcionar.' : key;
+  }
+}
 
 export function OfflineBanner() {
-  let t = (key: string) => key;
-  try {
-    const ctx = useLanguage();
-    t = ctx.t;
-  } catch {
-    // Fallback if rendered outside LanguageProvider during HMR
-  }
+  const t = useSafeT();
   const isOnline = useOnlineStatus();
 
   return (
