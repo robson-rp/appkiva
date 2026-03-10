@@ -384,7 +384,7 @@ function MissionsTab({
           <div className="space-y-3">
             {inProgress.map((mission) => {
               const cfg = statusConfig[mission.status];
-              const progress = mission.target_amount ? Math.min(Math.round((walletBalance / mission.target_amount) * 100), 100) : null;
+              const progress = mission.target_amount ? Math.min(Math.round((bal / mission.target_amount) * 100), 100) : null;
               return (
                 <Card key={mission.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all duration-200">
                   <div className="h-1 gradient-gold" />
