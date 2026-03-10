@@ -205,6 +205,18 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
+      {/* AI Behavioral Insights */}
+      {children.length > 0 && (
+        <motion.div variants={item}>
+          <ParentInsightsWidget children={children.map(c => ({
+            childId: c.childId,
+            profileId: c.profileId,
+            displayName: c.displayName,
+            dateOfBirth: c.dateOfBirth,
+          }))} />
+        </motion.div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Children Overview */}
         <motion.div variants={item} data-onboarding="vaults">
