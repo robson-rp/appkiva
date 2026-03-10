@@ -169,6 +169,7 @@ serve(async (req) => {
 - Streak actual: ${streakData?.current_streak ?? 0} dias
 - Lições concluídas: ${lessonsCompleted ?? 0}
 - Cofres: ${(vaults ?? []).length} activos
+${(vaults ?? []).filter((v: any) => v.current_amount < v.target_amount).map((v: any) => `  · "${v.title}" ${v.icon}: ${v.current_amount}/${v.target_amount} KVC (${Math.round((v.current_amount / v.target_amount) * 100)}%)`).join("\n")}
 
 Contexto comportamental:
 ${behaviorContext.length ? behaviorContext.map(c => `- ${c}`).join("\n") : "- Comportamento normal"}

@@ -155,11 +155,55 @@ serve(async (req) => {
       }
     }
 
+    // Surprise reward (10% chance)
+    let surpriseBonus = 0;
+    if (Math.random() < 0.1 && reward > 0) {
+      surpriseBonus = Math.ceil(reward * 0.5);
+      try {
+        const { data: systemWallet } = await admin.rpc("get_system_wallet_id");
+        const { data: childWallet } = await admin
+          .from("wallets")
+          .select("id")
+          .eq("profile_id", callerProfile.id)
+          .eq("wallet_type", "virtual")
+          .eq("currency", "KVC")
+          .maybeSingle();
+
+        if (systemWallet && childWallet) {
+          const bonusKey = `mission-bonus-${mission_id}`;
+          const { data: existingBonus } = await admin
+            .from("ledger_entries")
+            .select("id")
+            .eq("idempotency_key", bonusKey)
+            .maybeSingle();
+
+          if (!existingBonus) {
+            await admin.from("ledger_entries").insert({
+              entry_type: "mission_reward",
+              amount: surpriseBonus,
+              description: `Bónus surpresa do Kivo! 🎁`,
+              debit_wallet_id: systemWallet,
+              credit_wallet_id: childWallet.id,
+              created_by: callerProfile.id,
+              idempotency_key: bonusKey,
+              reference_id: mission_id,
+              reference_type: "mission_bonus",
+              metadata: { surprise: true },
+            });
+          }
+        }
+      } catch (bonusErr) {
+        console.error("Surprise bonus error:", bonusErr);
+        surpriseBonus = 0;
+      }
+    }
+
     // Send notification
+    const bonusText = surpriseBonus > 0 ? ` + Bónus surpresa: ${surpriseBonus} KVC! 🎁` : '';
     await admin.from("notifications").insert({
       profile_id: callerProfile.id,
-      title: "Missão concluída! 🎉",
-      message: `Completaste "${mission.title}" e ganhaste ${reward} KVC e ${kivaPoints} pontos!`,
+      title: surpriseBonus > 0 ? "Missão concluída + Bónus Kivo! 🎁🎉" : "Missão concluída! 🎉",
+      message: `Completaste "${mission.title}" e ganhaste ${reward} KVC e ${kivaPoints} pontos!${bonusText}`,
       type: "achievement",
     });
 
@@ -168,6 +212,7 @@ serve(async (req) => {
       reward_coins: reward,
       reward_points: kivaPoints,
       new_balance: newBalance,
+      surprise_bonus: surpriseBonus,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

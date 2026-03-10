@@ -106,7 +106,6 @@ export default function ChildDashboard() {
     .filter(b => b.unlockedAt)
     .map(b => ({ id: b.id, icon: b.icon, title: b.name }));
 
-  const levels = Object.keys(LEVEL_CONFIG) as Level[];
   const currentLevelIndex = levels.indexOf(childLevel);
   const previousLevel = currentLevelIndex > 0 ? levels[currentLevelIndex - 1] : levels[0];
 
