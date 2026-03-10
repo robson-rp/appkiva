@@ -88,7 +88,7 @@ export function TodayLoop({ missions, streakData, kivaPoints, weeklyPoints, vaul
             className="flex flex-col items-center p-2 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
             onClick={() => navigate('/child/streaks')}
           >
-            <Flame className="h-4 w-4 text-orange-500 mb-0.5" />
+            <Flame className="h-4 w-4 text-destructive mb-0.5" />
             <span className="text-sm font-display font-bold text-foreground">{streak}</span>
             <span className="text-[9px] text-muted-foreground">{t('today.streak')}</span>
           </div>
