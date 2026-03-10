@@ -2340,6 +2340,8 @@ const en: Record<string, string> = {
   'ranking.cat_savings': 'Savings',
   'ranking.cat_points': 'KivaPoints',
   'ranking.cat_donations': 'Donations',
+  'ranking.no_siblings': 'No sibling rankings yet',
+  'ranking.classmates_coming_soon': 'Classmate rankings coming soon',
 
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Savings',
