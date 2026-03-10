@@ -2,3 +2,6 @@ project_id = "rflgjdpfisfuyowtrcil"
 
 [functions.suggest-missions]
 verify_jwt = false
+
+[functions.generate-insights]
+verify_jwt = false

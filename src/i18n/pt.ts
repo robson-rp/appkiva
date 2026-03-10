@@ -967,6 +967,14 @@ const pt: Record<string, string> = {
   'parent.missions.ai_suggestions': 'Sugestões de Missões IA',
   'parent.missions.ai_loading': 'A gerar sugestões...',
 
+  // ─── Parent Insights ───
+  'parent.insights.title': 'Insights Comportamentais',
+  'parent.insights.description': 'Descobre dicas personalizadas com base nos hábitos financeiros dos teus filhos.',
+  'parent.insights.generate': 'Gerar Insights com IA',
+  'parent.insights.loading': 'A analisar comportamento...',
+  'parent.insights.refresh': 'Actualizar',
+  'parent.insights.error': 'Erro ao gerar insights. Tenta novamente.',
+
   // ─── Teen Wallet ───
   'teen.wallet.title': 'Carteira',
 
