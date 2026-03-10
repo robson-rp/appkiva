@@ -18,7 +18,7 @@ import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices
 import { useT } from '@/contexts/LanguageContext';
 
 const ALL_FEATURE_KEYS = [
-  'basic_wallet', 'basic_tasks', 'savings_vaults', 'dream_vaults',
+  'basic_wallet', 'basic_tasks', 'basic_rewards', 'savings_vaults', 'dream_vaults',
   'custom_rewards', 'budget_exceptions', 'multi_child', 'advanced_analytics',
   'export_reports', 'real_money_wallet', 'priority_support',
 ];
