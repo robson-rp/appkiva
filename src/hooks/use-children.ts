@@ -120,12 +120,14 @@ export function useUpdateChild() {
       nickname,
       avatar,
       dateOfBirth,
+      schoolTenantId,
     }: {
       childId: string;
       profileId: string;
       nickname: string | null;
       avatar: string;
       dateOfBirth: string | null;
+      schoolTenantId?: string | null;
     }) => {
       const { error } = await supabase.rpc('update_child_profile', {
         _child_id: childId,
@@ -134,6 +136,15 @@ export function useUpdateChild() {
         _date_of_birth: dateOfBirth,
       });
       if (error) throw error;
+
+      // Update school_tenant_id separately (not in RPC)
+      if (schoolTenantId !== undefined) {
+        const { error: schoolErr } = await supabase
+          .from('children')
+          .update({ school_tenant_id: schoolTenantId })
+          .eq('id', childId);
+        if (schoolErr) throw schoolErr;
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['children'] }),
   });

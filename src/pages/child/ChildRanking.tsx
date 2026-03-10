@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Medal, Users, Home as HomeIcon } from 'lucide-react';
+import { Crown, Users, Home as HomeIcon } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useHouseholdRankings } from '@/hooks/use-household-rankings';
+import { useClassmateRankings } from '@/hooks/use-classmate-rankings';
 import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/LanguageContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -123,12 +124,49 @@ function SiblingsTab() {
   );
 }
 
-/* ── Classmates Tab (placeholder - needs classroom leaderboard query) ── */
+/* ── Classmates Tab ── */
 function ClassmatesTab() {
   const t = useT();
+  const { user } = useAuth();
+  const { data: rankings = [], isLoading } = useClassmateRankings();
+
+  const categories: { label: string; key: 'totalSaved' | 'balance' | 'totalDonated'; icon: string }[] = [
+    { label: t('ranking.cat_savings'), key: 'totalSaved', icon: '🐷' },
+    { label: t('ranking.cat_points'), key: 'balance', icon: '⭐' },
+    { label: t('ranking.cat_donations'), key: 'totalDonated', icon: '💝' },
+  ];
+
+  const [cat, setCat] = useState(0);
+
+  if (isLoading) return <Skeleton className="h-40 w-full" />;
+  if (rankings.length === 0) return <p className="text-sm text-muted-foreground text-center py-8">{t('ranking.no_classmates') ?? 'Ainda não estás inscrito em nenhuma turma.'}</p>;
+
+  const sorted = [...rankings].sort((a, b) => (b as any)[categories[cat].key] - (a as any)[categories[cat].key]);
+
+  const entries: ClassLeaderboardEntry[] = sorted.map((s, i) => ({
+    rank: i + 1,
+    name: s.name,
+    avatar: s.avatar,
+    score: (s as any)[categories[cat].key],
+    challengesCompleted: 0,
+    isCurrentUser: s.profileId === user?.profileId,
+  }));
+
   return (
-    <div className="text-center py-8">
-      <p className="text-sm text-muted-foreground">{t('ranking.classmates_coming_soon')}</p>
+    <div>
+      <div className="flex gap-2 mb-2 overflow-x-auto pb-1">
+        {categories.map((c, i) => (
+          <button
+            key={c.key}
+            onClick={() => setCat(i)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${cat === i ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
+          >
+            <span>{c.icon}</span> {c.label}
+          </button>
+        ))}
+      </div>
+      {entries.length >= 2 && <Podium entries={entries} />}
+      <LeaderboardList entries={entries} />
     </div>
   );
 }
