@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
 import { useChildMissions, useStartMission, useCompleteMission } from '@/hooks/use-missions';
 import { useWalletBalance } from '@/hooks/use-wallet';
-import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award, Shield } from 'lucide-react';
+import { Target, CheckCircle2, Clock, Sparkles, Zap, Trophy, Swords, ListTodo, Loader2, Award } from 'lucide-react';
 import { WeeklyChallenges } from '@/components/WeeklyChallenges';
 import { useChildTasks, useCompleteTask } from '@/hooks/use-child-tasks';
 import { Skeleton } from '@/components/ui/skeleton';
