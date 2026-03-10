@@ -384,7 +384,7 @@ export default function ParentChildren() {
       )}
 
       {/* Co-Guardian Section (Premium) */}
-      {tierName && tierName !== 'Free' && (
+      {hasFeature(FEATURES.MULTI_CHILD) && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-accent to-primary" />

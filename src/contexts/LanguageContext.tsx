@@ -1,10 +1,11 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import pt from '@/i18n/pt';
 import en from '@/i18n/en';
+import fr from '@/i18n/fr';
 
-type Locale = 'pt' | 'en';
+type Locale = 'pt' | 'en' | 'fr';
 
-const dictionaries: Record<Locale, Record<string, string>> = { pt, en };
+const dictionaries: Record<Locale, Record<string, string>> = { pt, en, fr };
 
 interface LanguageContextType {
   locale: Locale;
@@ -17,7 +18,7 @@ export const LanguageContext = createContext<LanguageContextType | undefined>(un
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => {
     const saved = localStorage.getItem('kivara-locale');
-    if (saved === 'en' || saved === 'pt') return saved;
+    if (saved === 'en' || saved === 'pt' || saved === 'fr') return saved;
     return 'pt';
   });
 
