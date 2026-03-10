@@ -57,11 +57,7 @@ export default function ChildDiary() {
     return date.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
   }
 
-  const child = mockChildren[0];
-  const mockFallback = mockDiaryEntries.filter((e) => e.childId === child.id).map(e => ({
-    id: e.id, profileId: '', text: e.text, mood: e.mood, tags: e.tags ?? [], createdAt: e.date,
-  }));
-  const entries = dbEntries.length > 0 ? dbEntries : mockFallback;
+  const entries = dbEntries;
 
   const streak = calcStreak(entries);
   const totalEntries = entries.length;

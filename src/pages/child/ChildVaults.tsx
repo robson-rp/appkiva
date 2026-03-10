@@ -45,12 +45,7 @@ export default function ChildVaults() {
 
   const balance = walletBalance?.balance ?? 0;
 
-  const child = mockChildren[0];
-  const mockFallback = mockVaults.filter((v) => v.childId === child.id).map(v => ({
-    id: v.id, profileId: '', householdId: null, name: v.name, icon: v.icon,
-    targetAmount: v.targetAmount, currentAmount: v.currentAmount, interestRate: v.interestRate, createdAt: v.createdAt,
-  }));
-  const vaults = (dbVaults && dbVaults.length > 0) ? dbVaults : mockFallback;
+  const vaults = dbVaults ?? [];
 
   const totalSaved = vaults.reduce((s, v) => s + v.currentAmount, 0);
   const totalTarget = vaults.reduce((s, v) => s + v.targetAmount, 0);

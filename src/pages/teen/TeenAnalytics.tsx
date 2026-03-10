@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
 import { useTeenBudget } from '@/hooks/use-teen-budget';
+import { useMonthlySpending } from '@/hooks/use-monthly-spending';
+import { useWalletTransactions } from '@/hooks/use-wallet';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, CalendarDays } from 'lucide-react';
@@ -23,17 +24,37 @@ export default function TeenAnalytics() {
   const [summaryMonths, setSummaryMonths] = useState<3 | 6 | 12>(6);
   const { data: monthlySummary } = useMonthlySummary(summaryMonths);
   const { data: realBudget } = useTeenBudget();
-  const teen = mockTeens[0];
-  const monthlyBudget = realBudget && realBudget > 0 ? realBudget : teen.monthlyBudget;
-  const totalSpent = mockTeenTransactions.filter(tx => tx.type === 'spent').reduce((s, tx) => s + tx.amount, 0);
-  const totalSaved = mockTeenTransactions.filter(tx => tx.type === 'saved').reduce((s, tx) => s + tx.amount, 0);
-  const totalIncome = mockTeenTransactions.filter(tx => tx.type === 'earned' || tx.type === 'allowance').reduce((s, tx) => s + tx.amount, 0);
-  const totalDonated = mockTeenTransactions.filter(tx => tx.type === 'donated').reduce((s, tx) => s + tx.amount, 0);
+  const { data: ledgerTx = [] } = useWalletTransactions(undefined, 100);
+
+  const monthlyBudget = realBudget && realBudget > 0 ? realBudget : 0;
+
+  // Derive totals from real ledger transactions
+  const mapType = (tx: { entry_type: string; direction: string }) => {
+    switch (tx.entry_type) {
+      case 'allowance': return 'allowance';
+      case 'task_reward': case 'mission_reward': return 'earned';
+      case 'purchase': return 'spent';
+      case 'vault_deposit': case 'vault_interest': return 'saved';
+      case 'donation': return 'donated';
+      default: return tx.direction === 'credit' ? 'earned' : 'spent';
+    }
+  };
+
+  const transactions = ledgerTx.map(tx => ({
+    ...tx,
+    mappedType: mapType(tx),
+    category: (tx.metadata as any)?.category as SpendingCategory | undefined,
+  }));
+
+  const totalSpent = transactions.filter(tx => tx.mappedType === 'spent').reduce((s, tx) => s + tx.amount, 0);
+  const totalSaved = transactions.filter(tx => tx.mappedType === 'saved').reduce((s, tx) => s + tx.amount, 0);
+  const totalIncome = transactions.filter(tx => tx.mappedType === 'earned' || tx.mappedType === 'allowance').reduce((s, tx) => s + tx.amount, 0);
+  const totalDonated = transactions.filter(tx => tx.mappedType === 'donated').reduce((s, tx) => s + tx.amount, 0);
   const savingsRate = totalIncome > 0 ? Math.round((totalSaved / totalIncome) * 100) : 0;
   const budgetUsed = monthlyBudget > 0 ? Math.round((totalSpent / monthlyBudget) * 100) : 0;
 
-  const categorySpend = mockTeenTransactions
-    .filter(tx => tx.type === 'spent' && tx.category)
+  const categorySpend = transactions
+    .filter(tx => tx.mappedType === 'spent' && tx.category)
     .reduce((acc, tx) => { acc[tx.category!] = (acc[tx.category!] || 0) + tx.amount; return acc; }, {} as Record<string, number>);
 
   const sortedCategories = Object.entries(categorySpend).sort(([, a], [, b]) => b - a);
@@ -57,9 +78,11 @@ export default function TeenAnalytics() {
     savingsRate >= 30
       ? { icon: CheckCircle, text: t('teen.analytics.savings_excellent').replace('{rate}', String(savingsRate)), color: 'text-chart-3' }
       : { icon: AlertTriangle, text: t('teen.analytics.savings_improve').replace('{rate}', String(savingsRate)), color: 'text-chart-1' },
-    budgetUsed > 80
+    monthlyBudget > 0 && budgetUsed > 80
       ? { icon: TrendingDown, text: t('teen.analytics.budget_over').replace('{used}', String(budgetUsed)), color: 'text-destructive' }
-      : { icon: TrendingUp, text: t('teen.analytics.budget_ok').replace('{used}', String(budgetUsed)), color: 'text-chart-3' },
+      : monthlyBudget > 0
+      ? { icon: TrendingUp, text: t('teen.analytics.budget_ok').replace('{used}', String(budgetUsed)), color: 'text-chart-3' }
+      : null,
     sortedCategories[0]
       ? { icon: TrendingUp, text: t('teen.analytics.top_spend').replace('{category}', SPENDING_CATEGORIES[sortedCategories[0][0] as SpendingCategory]?.label).replace('{amount}', String(sortedCategories[0][1])), color: 'text-primary' }
       : null,
@@ -106,33 +129,35 @@ export default function TeenAnalytics() {
       </div>
 
       {/* Pie Chart */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display">{t('teen.analytics.category_chart')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[220px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value" label={CustomPieLabel} labelLine={false} animationBegin={200} animationDuration={800}>
-                    {pieData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={0} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '12px' }} formatter={(value: number, name: string) => [`${value} 🪙`, name]} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 justify-center">
-              {pieData.map((entry, i) => (
-                <div key={entry.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
-                  <span>{entry.icon} {entry.name}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {pieData.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display">{t('teen.analytics.category_chart')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value" label={CustomPieLabel} labelLine={false} animationBegin={200} animationDuration={800}>
+                      {pieData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={0} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: '12px' }} formatter={(value: number, name: string) => [`${value} 🪙`, name]} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 justify-center">
+                {pieData.map((entry, i) => (
+                  <div key={entry.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    <span>{entry.icon} {entry.name}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Bar Chart */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
@@ -226,21 +251,23 @@ export default function TeenAnalytics() {
       </motion.div>
 
       {/* Insights */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-display">{t('teen.analytics.insights')}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {insights.map((insight, i) => insight && (
-              <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-muted/50">
-                <insight.icon className={`h-5 w-5 ${insight.color} shrink-0`} />
-                <p className="text-sm text-foreground">{insight.text}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </motion.div>
+      {insights.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-display">{t('teen.analytics.insights')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {insights.map((insight, i) => insight && (
+                <div key={i} className="flex items-center gap-3 p-2 rounded-xl bg-muted/50">
+                  <insight.icon className={`h-5 w-5 ${insight.color} shrink-0`} />
+                  <p className="text-sm text-foreground">{insight.text}</p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
     </FeatureGateWrapper>
   );

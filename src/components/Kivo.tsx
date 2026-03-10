@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { KIVO_TIPS } from '@/data/mock-data';
+import { KIVO_TIPS } from '@/data/kivo-tips';
 import kivoImg from '@/assets/kivo.svg';
 import { useT } from '@/contexts/LanguageContext';
 

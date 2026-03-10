@@ -19,10 +19,9 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transiti
 
 export default function ChildWallet() {
   const t = useT();
-  const child = mockChildren[0];
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTx } = useWalletTransactions();
-  const balance = walletBalance?.balance ?? child.balance;
+  const balance = walletBalance?.balance ?? 0;
 
   // Real donations data
   const { data: causes = [] } = useDonationCauses();

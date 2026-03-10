@@ -1,24 +1,47 @@
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockTeens, mockTeenTransactions } from '@/data/mock-data';
 import { SPENDING_CATEGORIES, SpendingCategory } from '@/types/kivara';
 import { ArrowUpRight, ArrowDownRight, PiggyBank, Filter } from 'lucide-react';
 import { useState } from 'react';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 
 export default function TeenWallet() {
-  const teen = mockTeens[0];
   const { t } = useLanguage();
+  const { data: walletBalance } = useWalletBalance();
+  const { data: ledgerTx = [] } = useWalletTransactions(undefined, 50);
   const [categoryFilter, setCategoryFilter] = useState<SpendingCategory | 'all'>('all');
 
-  const filtered = categoryFilter === 'all'
-    ? mockTeenTransactions
-    : mockTeenTransactions.filter(t => t.category === categoryFilter);
+  const balance = walletBalance?.balance ?? 0;
 
-  const income = mockTeenTransactions.filter(t => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
-  const expenses = mockTeenTransactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
-  const saved = mockTeenTransactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
+  const mapType = (tx: { entry_type: string; direction: string }) => {
+    switch (tx.entry_type) {
+      case 'allowance': return 'allowance';
+      case 'task_reward': case 'mission_reward': return 'earned';
+      case 'purchase': return 'spent';
+      case 'vault_deposit': case 'vault_interest': return 'saved';
+      case 'donation': return 'donated';
+      default: return tx.direction === 'credit' ? 'earned' : 'spent';
+    }
+  };
+
+  const transactions = ledgerTx.map(tx => ({
+    id: tx.id,
+    description: tx.description,
+    amount: tx.amount,
+    type: mapType(tx) as 'earned' | 'allowance' | 'spent' | 'saved' | 'donated',
+    date: new Date(tx.created_at).toLocaleDateString('pt-PT'),
+    category: (tx.metadata as any)?.category as SpendingCategory | undefined,
+  }));
+
+  const filtered = categoryFilter === 'all'
+    ? transactions
+    : transactions.filter(t => t.category === categoryFilter);
+
+  const income = transactions.filter(t => t.type === 'earned' || t.type === 'allowance').reduce((s, t) => s + t.amount, 0);
+  const expenses = transactions.filter(t => t.type === 'spent').reduce((s, t) => s + t.amount, 0);
+  const saved = transactions.filter(t => t.type === 'saved').reduce((s, t) => s + t.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -32,7 +55,7 @@ export default function TeenWallet() {
         <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
           <CardContent className="p-6 text-center">
             <p className="text-sm text-muted-foreground">{t('child.wallet.balance')}</p>
-            <CurrencyDisplay amount={teen.balance} size="xl" className="mt-1" />
+            <CurrencyDisplay amount={balance} size="xl" className="mt-1" />
             <div className="flex justify-center gap-6 mt-4 text-sm">
               <div><CurrencyDisplay amount={income} size="sm" className="text-chart-3 font-bold" /> <span className="text-muted-foreground">{t('common.balance')}</span></div>
               <div><CurrencyDisplay amount={expenses} size="sm" className="text-destructive font-bold" /> <span className="text-muted-foreground">{t('tx.purchase')}</span></div>
