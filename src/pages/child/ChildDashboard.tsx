@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { LevelBadge } from '@/components/LevelBadge';
