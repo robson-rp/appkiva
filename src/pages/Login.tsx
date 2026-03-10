@@ -50,7 +50,7 @@ const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
 };
 
 export default function Login() {
-  const t = useT();
+  const { t, locale, setLocale } = useLanguage();
   const ROLE_CONFIG = useRoleConfig();
   const GENDER_OPTIONS = [
     { value: 'male', label: t('auth.gender_male') },
