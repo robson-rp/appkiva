@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Kivo } from '@/components/Kivo';
-import { mockChildren } from '@/data/mock-data';
+
 import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -19,10 +19,9 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transiti
 
 export default function ChildWallet() {
   const t = useT();
-  const child = mockChildren[0];
   const { data: walletBalance } = useWalletBalance();
   const { data: ledgerTx } = useWalletTransactions();
-  const balance = walletBalance?.balance ?? child.balance;
+  const balance = walletBalance?.balance ?? 0;
 
   // Real donations data
   const { data: causes = [] } = useDonationCauses();
@@ -52,7 +51,7 @@ export default function ChildWallet() {
         .filter(tx => tx.entry_type !== 'vault_interest')
         .map(tx => ({
           id: tx.id,
-          childId: child.id,
+          childId: '',
           description: tx.entry_type === 'vault_deposit'
             ? `${t('child.wallet.saving_vault')}: ${(tx.metadata as any)?.vault_name ?? 'Cofre'}`
             : tx.entry_type === 'vault_withdraw'

@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Kivo } from '@/components/Kivo';
 import { useDreamVaults, useCreateDreamVault, useDepositToDream } from '@/hooks/use-dream-vaults';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDreamVaults, mockChildren } from '@/data/mock-data';
+
 import { Plus, MessageCircle, Sparkles, Heart, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -42,14 +42,7 @@ export default function ChildDreams() {
     low: { label: t('child.dreams.priority.low'), className: 'bg-muted text-muted-foreground border-muted' },
   };
 
-  const child = mockChildren[0];
-  const mockFallback = mockDreamVaults.filter(d => d.childId === child.id).map(d => ({
-    id: d.id, profileId: '', householdId: null, title: d.title, description: d.description,
-    icon: d.icon, targetAmount: d.targetAmount, currentAmount: d.currentAmount,
-    priority: d.priority as 'high' | 'medium' | 'low', createdAt: d.createdAt,
-    parentComments: d.parentComments.map(c => ({ id: c.id, text: c.text, emoji: c.emoji ?? '💬', createdAt: c.date })),
-  }));
-  const dreams = (dbDreams && dbDreams.length > 0) ? dbDreams : mockFallback;
+  const dreams = dbDreams ?? [];
 
   const totalTarget = dreams.reduce((s, d) => s + d.targetAmount, 0);
   const totalSaved = dreams.reduce((s, d) => s + d.currentAmount, 0);

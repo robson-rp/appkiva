@@ -7,7 +7,7 @@ import { Kivo } from '@/components/Kivo';
 import { useSavingsVaults, useCreateSavingsVault, useDepositToVault, useWithdrawFromVault, useDeleteSavingsVault } from '@/hooks/use-savings-vaults';
 import { useWalletBalance } from '@/hooks/use-wallet';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockVaults, mockChildren } from '@/data/mock-data';
+
 import { Plus, PiggyBank, Target, TrendingUp, Sparkles, ArrowDownToLine, ArrowUpFromLine, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -45,12 +45,7 @@ export default function ChildVaults() {
 
   const balance = walletBalance?.balance ?? 0;
 
-  const child = mockChildren[0];
-  const mockFallback = mockVaults.filter((v) => v.childId === child.id).map(v => ({
-    id: v.id, profileId: '', householdId: null, name: v.name, icon: v.icon,
-    targetAmount: v.targetAmount, currentAmount: v.currentAmount, interestRate: v.interestRate, createdAt: v.createdAt,
-  }));
-  const vaults = (dbVaults && dbVaults.length > 0) ? dbVaults : mockFallback;
+  const vaults = dbVaults ?? [];
 
   const totalSaved = vaults.reduce((s, v) => s + v.currentAmount, 0);
   const totalTarget = vaults.reduce((s, v) => s + v.targetAmount, 0);
