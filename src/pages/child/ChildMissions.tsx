@@ -499,12 +499,15 @@ function MissionsTab({
                       {typeEmoji[mission.type]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-display font-semibold text-sm">{mission.title}</h3>
-                        <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
-                      </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{mission.description}</p>
-                    </div>
+                       <div className="flex items-center gap-2">
+                         <h3 className="font-display font-semibold text-sm">{mission.title}</h3>
+                         <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
+                       </div>
+                       <p className="text-[11px] text-muted-foreground truncate">{mission.description}</p>
+                       {mission.target_amount && (
+                         <Progress value={100} className="h-1.5 rounded-full mt-1.5" />
+                       )}
+                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-display font-bold text-xs text-secondary">+{mission.reward} 🪙</p>
                       <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
