@@ -10,7 +10,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -19,7 +19,11 @@ import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
 import { supabase } from '@/integrations/supabase/client';
 import LoginBannerCarousel from '@/components/LoginBannerCarousel';
-import { useT } from '@/contexts/LanguageContext';
+import { useT, useLanguage } from '@/contexts/LanguageContext';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
+const localeFlag: Record<string, string> = { pt: '🇵🇹', en: '🇬🇧', fr: '🇫🇷' };
+const localeLabel: Record<string, string> = { pt: 'Português', en: 'English', fr: 'Français' };
 
 type AuthMode = 'login' | 'signup';
 type ContactMethod = 'email' | 'phone';
@@ -46,7 +50,7 @@ const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
 };
 
 export default function Login() {
-  const t = useT();
+  const { t, locale, setLocale } = useLanguage();
   const ROLE_CONFIG = useRoleConfig();
   const GENDER_OPTIONS = [
     { value: 'male', label: t('auth.gender_male') },
@@ -518,7 +522,28 @@ export default function Login() {
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-16 bg-background overflow-y-auto">
+      <div className="flex-1 flex items-start sm:items-center justify-center p-4 sm:p-6 lg:p-16 bg-background overflow-y-auto relative">
+        <div className="absolute top-3 right-3 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
+                <Globe className="h-4 w-4" />
+                {localeFlag[locale]} {locale.toUpperCase()}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[140px]">
+              {(['pt', 'en', 'fr'] as const).map((l) => (
+                <DropdownMenuItem
+                  key={l}
+                  onClick={() => setLocale(l)}
+                  className={locale === l ? 'bg-primary/10 text-primary font-semibold' : ''}
+                >
+                  {localeFlag[l]} {localeLabel[l]}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
