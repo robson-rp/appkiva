@@ -2189,6 +2189,7 @@ const en: Record<string, string> = {
   'challenges.filter_class': 'Class',
   'challenges.friends_ranking': 'Friends Ranking',
   'challenges.social_hint': 'Share your code and earn KVC!',
+  'challenges.no_challenges': 'No weekly challenges yet. Check back soon!',
 
   // ─── Lesson Viewer ───
   'lesson.blocks': 'blocks',
