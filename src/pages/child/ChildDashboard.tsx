@@ -64,9 +64,12 @@ export default function ChildDashboard() {
   const childName = user?.name ?? t('child.dashboard.explorer');
   const childAvatar = user?.avatar ?? '🦊';
   const balance = walletBalance?.balance ?? 0;
-  const childLevel: Level = 'saver';
   const { data: kivaPoints = 0 } = useKivaPoints();
   const childKivaPoints = kivaPoints;
+
+  // Dynamic level calculation from KivaPoints
+  const levels = Object.keys(LEVEL_CONFIG) as Level[];
+  const childLevel: Level = [...levels].reverse().find(l => kivaPoints >= LEVEL_CONFIG[l].minPoints) ?? 'apprentice';
   const streakDays = streakData?.currentStreak ?? 0;
 
   const [showLevelUp, setShowLevelUp] = useState(false);
