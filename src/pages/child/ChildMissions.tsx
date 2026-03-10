@@ -403,13 +403,20 @@ function MissionsTab({
                         <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between">
-                        <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
-                        <span className="text-[10px] font-display font-bold text-accent-foreground">{progress}%</span>
-                      </div>
-                      <Progress value={progress} className="h-2 rounded-full" />
-                    </div>
+                    {progress !== null ? (
+                       <div className="space-y-1.5">
+                         <div className="flex justify-between">
+                           <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                           <span className="text-[10px] font-display font-bold text-accent-foreground">{walletBalance}/{mission.target_amount} 🪙 ({progress}%)</span>
+                         </div>
+                         <Progress value={progress} className="h-2 rounded-full" />
+                       </div>
+                     ) : (
+                       <div className="flex justify-between">
+                         <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                         <span className="text-[10px] font-display font-bold text-accent-foreground">—</span>
+                       </div>
+                     )}
                       <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
                         {completeMission.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />} {t('child.missions.continue')}
                       </Button>
