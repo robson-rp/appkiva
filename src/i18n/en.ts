@@ -1089,6 +1089,11 @@ const en: Record<string, string> = {
   'parent.subscription.cancel': 'Cancel',
   'parent.subscription.processing': 'Processing...',
   'parent.subscription.confirm': 'Confirm Downgrade',
+  'parent.subscription.billing_history': 'Billing history',
+  'parent.subscription.status_paid': 'Paid',
+  'parent.subscription.status_pending': 'Pending',
+  'parent.subscription.status_failed': 'Failed',
+  'parent.subscription.status_cancelled': 'Cancelled',
 
   // ─── Parent Profile ───
   'parent.profile.guardian': 'Guardian',

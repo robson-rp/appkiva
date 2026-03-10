@@ -98,3 +98,31 @@ export function useUpgradeSubscription() {
 
   return { upgrade, loading };
 }
+
+export function useInvoices() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['subscription-invoices', user?.id],
+    enabled: !!user,
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('user_id', user!.id)
+        .single();
+
+      if (!profile?.tenant_id) return [] as SubscriptionInvoice[];
+
+      const { data, error } = await supabase
+        .from('subscription_invoices')
+        .select('*')
+        .eq('tenant_id', profile.tenant_id)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (error) throw error;
+      return (data ?? []) as unknown as SubscriptionInvoice[];
+    },
+  });
+}
