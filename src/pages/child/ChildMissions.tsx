@@ -27,19 +27,12 @@ const difficultyLabel: Record<string, { label: string; cls: string }> = {
 };
 
 function ExpiresIn({ expiresAt }: { expiresAt?: string | null }) {
-  const [label, setLabel] = useState('');
   const t = useT();
-  
-  useState; // using useEffect below
-  
   if (!expiresAt) return null;
-  
-  // Simple countdown
   const diff = new Date(expiresAt).getTime() - Date.now();
   if (diff <= 0) return <span className="text-[10px] text-destructive font-medium">{t('mission.expired')}</span>;
   const hours = Math.floor(diff / 3600000);
   const display = hours >= 24 ? `${Math.ceil(hours / 24)}d` : `${hours}h`;
-  
   return (
     <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
       <Clock className="h-3 w-3" /> {display}
