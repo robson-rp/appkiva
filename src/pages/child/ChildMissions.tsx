@@ -313,6 +313,7 @@ function MissionsTab({
   loading,
   startMission,
   completeMission,
+  walletBalance,
 }: {
   t: (key: string) => string;
   available: any[];
@@ -322,6 +323,7 @@ function MissionsTab({
   loading: boolean;
   startMission: ReturnType<typeof useStartMission>;
   completeMission: ReturnType<typeof useCompleteMission>;
+  walletBalance: number;
 }) {
   const allActive = [...available, ...inProgress];
 
