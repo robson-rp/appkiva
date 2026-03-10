@@ -2340,6 +2340,8 @@ const pt: Record<string, string> = {
   'ranking.cat_savings': 'Poupança',
   'ranking.cat_points': 'KivaPoints',
   'ranking.cat_donations': 'Doações',
+  'ranking.no_siblings': 'Ainda sem rankings entre irmãos',
+  'ranking.classmates_coming_soon': 'Rankings de colegas em breve',
 
   // ─── ChildSavingsProgress ───
   'child.savings.title': 'Poupanças',
