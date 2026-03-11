@@ -398,7 +398,7 @@ export default function ParentTasks() {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-display">{t('parent.tasks.edit_task')}</DialogTitle>
           </DialogHeader>
