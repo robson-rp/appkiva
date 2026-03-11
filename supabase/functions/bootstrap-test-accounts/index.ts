@@ -24,9 +24,21 @@ Deno.serve(async (req) => {
     .eq("tier_type", "free")
     .single();
 
-  const freeTierId = freeTier?.id;
+  // Delete orphaned auth users (no profile)
+  const emails = ["encarregado@kivara.com", "crianca@kivara.com", "admin@kivara.com"];
+  const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 100 });
+  
+  for (const u of authUsers?.users || []) {
+    if (emails.includes(u.email || "")) {
+      await supabase.auth.admin.deleteUser(u.id);
+      results[`deleted_${u.email}`] = u.id;
+    }
+  }
 
-  // 1. Create parent
+  // Wait for cleanup
+  await new Promise(r => setTimeout(r, 1000));
+
+  // 1. Create parent (trigger will auto-create profile, wallet, role, household)
   const { data: parentAuth, error: parentErr } = await supabase.auth.admin.createUser({
     email: "encarregado@kivara.com",
     password,
@@ -35,42 +47,33 @@ Deno.serve(async (req) => {
   });
 
   if (parentErr) {
-    results.parent_error = parentErr.message;
-    // Try to find existing
-    const { data: profiles } = await supabase.from("profiles").select("id, user_id, household_id, tenant_id").limit(100);
-    for (const p of profiles || []) {
-      const { data: u } = await supabase.auth.admin.getUserById(p.user_id);
-      if (u?.user?.email === "encarregado@kivara.com") {
-        results.parent_existing = p;
-        break;
-      }
-    }
-  } else {
-    results.parent_id = parentAuth.user.id;
-  }
-
-  // Wait for trigger to create profile
-  await new Promise(r => setTimeout(r, 2000));
-
-  // Get parent profile
-  const parentUserId = (parentAuth?.user?.id || (results.parent_existing as any)?.user_id) as string;
-  const { data: parentProfile } = await supabase.from("profiles").select("*").eq("user_id", parentUserId).single();
-  results.parent_profile = parentProfile;
-
-  if (!parentProfile) {
-    return new Response(JSON.stringify({ error: "Parent profile not created", results }), {
+    return new Response(JSON.stringify({ error: "Failed to create parent", detail: parentErr.message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  results.parent_user_id = parentAuth.user.id;
 
-  // Create tenant for parent
+  // Wait for trigger
+  await new Promise(r => setTimeout(r, 3000));
+
+  // Get parent profile
+  const { data: parentProfile } = await supabase.from("profiles").select("*").eq("user_id", parentAuth.user.id).single();
+  if (!parentProfile) {
+    return new Response(JSON.stringify({ error: "Parent profile not auto-created by trigger" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  results.parent_profile_id = parentProfile.id;
+  results.household_id = parentProfile.household_id;
+
+  // Create tenant and link
   let tenantId = parentProfile.tenant_id;
-  if (!tenantId && freeTierId) {
+  if (!tenantId && freeTier) {
     const { data: tenant } = await supabase.from("tenants").insert({
       name: "Família Teste",
       tenant_type: "family",
       currency: "AOA",
-      subscription_tier_id: freeTierId,
+      subscription_tier_id: freeTier.id,
     }).select("id").single();
     tenantId = tenant?.id;
 
@@ -85,10 +88,11 @@ Deno.serve(async (req) => {
 
   // Add parent as household guardian
   if (parentProfile.household_id) {
-    await supabase.from("household_guardians").upsert(
-      { household_id: parentProfile.household_id, profile_id: parentProfile.id, role: "primary" },
-      { onConflict: "household_id,profile_id" }
-    ).select();
+    await supabase.from("household_guardians").insert({
+      household_id: parentProfile.household_id,
+      profile_id: parentProfile.id,
+      role: "primary",
+    });
   }
 
   // 2. Create child
@@ -102,49 +106,43 @@ Deno.serve(async (req) => {
   if (childErr) {
     results.child_error = childErr.message;
   } else {
-    results.child_id = childAuth.user.id;
-  }
+    results.child_user_id = childAuth.user.id;
+    await new Promise(r => setTimeout(r, 3000));
 
-  await new Promise(r => setTimeout(r, 2000));
-
-  const childUserId = childAuth?.user?.id;
-  if (childUserId) {
-    const { data: childProfile } = await supabase.from("profiles").select("*").eq("user_id", childUserId).single();
-    results.child_profile = childProfile;
-
+    const { data: childProfile } = await supabase.from("profiles").select("*").eq("user_id", childAuth.user.id).single();
     if (childProfile) {
-      // Link child to parent's household and tenant
+      results.child_profile_id = childProfile.id;
+
+      // Link to parent's household and tenant
       await supabase.from("profiles").update({
         household_id: parentProfile.household_id,
         tenant_id: tenantId,
       }).eq("id", childProfile.id);
 
       // Create children record
-      await supabase.from("children").upsert(
-        { parent_profile_id: parentProfile.id, profile_id: childProfile.id, nickname: "Criança Teste" },
-        { onConflict: "profile_id" }
-      );
+      await supabase.from("children").insert({
+        parent_profile_id: parentProfile.id,
+        profile_id: childProfile.id,
+        nickname: "Criança Teste",
+      });
 
-      // Give initial balance via system wallet
-      const { data: systemWallet } = await supabase.rpc("get_system_wallet_id");
+      // Give initial balance
+      const { data: systemWalletId } = await supabase.rpc("get_system_wallet_id");
       const { data: childWallet } = await supabase
         .from("wallets").select("id").eq("profile_id", childProfile.id).eq("wallet_type", "virtual").single();
 
-      if (systemWallet && childWallet) {
-        const { data: existing } = await supabase.from("ledger_entries")
-          .select("id").eq("credit_wallet_id", childWallet.id).eq("description", "Saldo inicial de teste").maybeSingle();
-
-        if (!existing) {
-          await supabase.from("ledger_entries").insert({
-            debit_wallet_id: systemWallet,
-            credit_wallet_id: childWallet.id,
-            amount: 100,
-            entry_type: "allowance",
-            description: "Saldo inicial de teste",
-            created_by: parentProfile.id,
-          });
-          results.initial_balance = "100 KVC credited";
-        }
+      if (systemWalletId && childWallet) {
+        await supabase.from("ledger_entries").insert({
+          debit_wallet_id: systemWalletId,
+          credit_wallet_id: childWallet.id,
+          amount: 100,
+          entry_type: "allowance",
+          description: "Saldo inicial de teste",
+          created_by: parentProfile.id,
+        });
+        results.initial_balance = "100 KVC";
+      } else {
+        results.balance_note = { systemWalletId, childWallet };
       }
     }
   }
@@ -157,8 +155,6 @@ Deno.serve(async (req) => {
     user_metadata: { display_name: "Admin KIVARA", role: "admin", avatar: "🛡️" },
   });
   results.admin = adminErr ? adminErr.message : adminAuth?.user?.id;
-
-  await new Promise(r => setTimeout(r, 1000));
 
   results.credentials = {
     parent: { email: "encarregado@kivara.com", password },
