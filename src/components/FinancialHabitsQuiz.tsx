@@ -101,7 +101,7 @@ export default function FinancialHabitsQuiz() {
 
   return (
     <motion.section
-      id="teste"
+      
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}

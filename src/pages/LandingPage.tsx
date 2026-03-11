@@ -179,7 +179,6 @@ function Navbar() {
     { label: t('nav.families'), href: "#familias" },
     { label: t('nav.schools'), href: "#escolas" },
     { label: t('nav.simulator'), href: "#simulador" },
-    { label: t('nav.quiz'), href: "#teste" },
     { label: t('nav.security'), href: "#seguranca" },
     { label: t('nav.pricing'), href: "#precos" },
   ];
