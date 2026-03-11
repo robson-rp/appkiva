@@ -367,7 +367,7 @@ export default function ParentTasks() {
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="font-display">{t('parent.tasks.delete_task')}</AlertDialogTitle>
                                 <AlertDialogDescription>
