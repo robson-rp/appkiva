@@ -254,6 +254,6 @@ export default function ChildProgressSimulator() {
           </Button>
         </motion.div>
       </div>
-    </motion.section>
+    </motion.div>
   );
 }

@@ -294,6 +294,6 @@ export default function FinancialHabitsQuiz() {
           )}
         </AnimatePresence>
       </div>
-    </motion.section>
+    </motion.div>
   );
 }
