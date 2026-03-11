@@ -113,7 +113,7 @@ export default function LoginBannerCarousel() {
     >
       <div ref={emblaRef} className="overflow-hidden rounded-2xl">
         <div className="flex">
-          {banners.map((b) => (
+          {banners.map((b, idx) => (
             <div key={b.id} className="min-w-0 shrink-0 grow-0 basis-full">
               <Wrapper href={b.link_url} bannerId={b.id}>
                 <AspectRatio ratio={1.5}>
@@ -121,7 +121,9 @@ export default function LoginBannerCarousel() {
                     src={b.image_url}
                     alt={b.title}
                     className="h-full w-full object-cover rounded-2xl"
-                    loading="lazy"
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    fetchPriority={idx === 0 ? "high" : "auto"}
+                    decoding={idx === 0 ? "sync" : "async"}
                   />
                 </AspectRatio>
               </Wrapper>
