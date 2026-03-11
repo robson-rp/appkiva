@@ -13,6 +13,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 export default function PartnerDashboard() {
   const { user } = useAuth();
   const t = useT();
+  usePrefetchRoutes('partner');
   const { data: programs, isLoading: loadingPrograms } = usePartnerPrograms();
   const { data: challenges, isLoading: loadingChallenges } = useSponsoredChallenges();
 

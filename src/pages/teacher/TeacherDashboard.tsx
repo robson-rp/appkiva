@@ -47,6 +47,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  usePrefetchRoutes('teacher');
   const { user } = useAuth();
   const t = useT();
 
