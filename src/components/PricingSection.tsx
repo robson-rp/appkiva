@@ -45,7 +45,7 @@ const FEATURE_LABELS: Record<string, string> = {
 export default function PricingSection() {
   const { t } = useLanguage();
   const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('AOA');
   const { data: tiers = [] } = useSubscriptionTiers();
   const { data: rates = [] } = useExchangeRates();
   const { data: regionalPrices = [] } = useRegionalPrices();
