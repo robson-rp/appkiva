@@ -86,7 +86,13 @@ export default function LoginBannerCarousel() {
     }).then(() => {});
   }, []);
 
-  if (!banners.length) return null;
+  if (!banners.length) return (
+    <div className="w-full">
+      <AspectRatio ratio={1.5}>
+        <Skeleton className="h-full w-full rounded-2xl" />
+      </AspectRatio>
+    </div>
+  );
 
   const Wrapper = ({ href, bannerId, children, className }: { href: string | null; bannerId: string; children: React.ReactNode; className?: string }) =>
     href ? (
