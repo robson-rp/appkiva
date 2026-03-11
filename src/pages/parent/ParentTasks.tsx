@@ -166,7 +166,7 @@ export default function ParentTasks() {
                   <Plus className="h-4 w-4" /> {t('parent.tasks.new_task')}
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-[95vw] sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle className="font-display">{t('parent.tasks.create_task')}</DialogTitle>
                 </DialogHeader>
