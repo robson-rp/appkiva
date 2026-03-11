@@ -4,6 +4,7 @@ import { useAdminStats } from '@/hooks/use-tenants';
 import { useT } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };

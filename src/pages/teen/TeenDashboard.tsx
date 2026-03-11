@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import { useStreakData } from '@/hooks/use-streaks';
 import { useMonthlySpending } from '@/hooks/use-monthly-spending';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 
 export default function TeenDashboard() {
   const { t } = useLanguage();
