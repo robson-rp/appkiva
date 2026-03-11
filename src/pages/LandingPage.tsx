@@ -194,7 +194,7 @@ function Navbar() {
     >
       <div className="mx-auto max-w-7xl flex items-center justify-between px-5 sm:px-8 h-[4.5rem] md:h-20">
         <Link to="/" className="flex items-center gap-2">
-          <img src={kivaraLogo} alt="KIVARA" className="h-10 md:h-12" />
+          <img src={kivaraLogo} alt="KIVARA" className="h-8 md:h-9" />
         </Link>
 
         <div className="hidden md:flex items-center gap-10 ml-10">
