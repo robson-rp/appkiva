@@ -41,6 +41,17 @@ const ROUTE_MAP: Record<string, (() => Promise<unknown>)[]> = {
     () => import('@/pages/admin/AdminTenants'),
     () => import('@/pages/admin/AdminSubscriptions'),
     () => import('@/pages/admin/AdminFinance'),
+    () => import('@/pages/admin/AdminSchools'),
+    () => import('@/pages/admin/AdminBanners'),
+    () => import('@/pages/admin/AdminMissions'),
+    () => import('@/pages/admin/AdminLessons'),
+    () => import('@/pages/admin/AdminCurrencies'),
+    () => import('@/pages/admin/AdminCompliance'),
+    () => import('@/pages/admin/AdminAuthSecurity'),
+    () => import('@/pages/admin/AdminRisk'),
+    () => import('@/pages/admin/AdminAudit'),
+    () => import('@/pages/admin/AdminNotifications'),
+    () => import('@/pages/admin/AdminOnboarding'),
   ],
 };
 
