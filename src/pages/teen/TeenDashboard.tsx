@@ -25,6 +25,7 @@ export default function TeenDashboard() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  usePrefetchRoutes('teen');
 
   // Real data hooks
   const { data: walletData } = useWalletBalance();

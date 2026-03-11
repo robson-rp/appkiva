@@ -12,6 +12,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 export default function AdminDashboard() {
   const t = useT();
   const { data: stats, isLoading } = useAdminStats();
+  usePrefetchRoutes('admin');
 
   const platformCards = [
     { title: t('admin.dash.total_tenants'), value: stats?.totalTenants ?? 0, icon: Building2, color: 'text-primary', bg: 'bg-[hsl(var(--kivara-light-blue))]' },

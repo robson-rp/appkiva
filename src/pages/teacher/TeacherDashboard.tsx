@@ -15,6 +15,7 @@ import { useT } from '@/contexts/LanguageContext';
 import { useClassrooms, useAllClassroomStudents } from '@/hooks/use-classrooms';
 import { useCollectiveChallenges } from '@/hooks/use-collective-challenges';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 
 interface ClassComparison {
   name: string;
