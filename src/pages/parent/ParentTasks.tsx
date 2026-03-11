@@ -332,7 +332,7 @@ export default function ParentTasks() {
                         {task.status === 'completed' && (
                           <Button
                             size="sm"
-                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9"
+                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9 flex-1 sm:flex-none"
                             disabled={approveTask.isPending}
                             onClick={() => approveTask.mutate(task.id)}
                           >
