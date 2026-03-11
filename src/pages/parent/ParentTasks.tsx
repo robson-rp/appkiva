@@ -323,12 +323,12 @@ export default function ParentTasks() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30 sm:border-0 sm:pt-0 sm:mt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-3 border-t border-border/30 sm:border-0 sm:pt-0 sm:mt-2 gap-2">
                       <Badge variant="secondary" className={`text-caption font-display gap-1 rounded-xl px-2.5 py-1 hidden sm:inline-flex ${config.className}`}>
                         <StatusIcon className="h-3 w-3" />
                         {config.label}
                       </Badge>
-                      <div className="flex items-center gap-1.5 ml-auto">
+                      <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
                         {task.status === 'completed' && (
                           <Button
                             size="sm"
