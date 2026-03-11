@@ -158,7 +158,7 @@ export default function ParentTasks() {
               className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm"
             >
               {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span className="hidden xs:inline">{t('parent.tasks.suggest_ai')}</span> IA
+              <span className="hidden sm:inline">{t('parent.tasks.suggest_ai')}</span> IA
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
