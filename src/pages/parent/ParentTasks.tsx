@@ -150,7 +150,7 @@ export default function ParentTasks() {
             <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">{t('parent.tasks.title')}</h1>
             <p className="text-small text-primary-foreground/60 mt-1">{t('parent.tasks.subtitle')}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleAiSuggest}
               disabled={aiLoading}
@@ -158,7 +158,7 @@ export default function ParentTasks() {
               className="rounded-2xl font-display gap-2 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm"
             >
               {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              <span className="hidden xs:inline">{t('parent.tasks.suggest_ai')}</span> IA
+              <span className="hidden sm:inline">{t('parent.tasks.suggest_ai')}</span> IA
             </Button>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
@@ -166,7 +166,7 @@ export default function ParentTasks() {
                   <Plus className="h-4 w-4" /> {t('parent.tasks.new_task')}
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-[95vw] sm:max-w-lg">
                 <DialogHeader>
                   <DialogTitle className="font-display">{t('parent.tasks.create_task')}</DialogTitle>
                 </DialogHeader>
@@ -323,16 +323,16 @@ export default function ParentTasks() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30 sm:border-0 sm:pt-0 sm:mt-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 pt-3 border-t border-border/30 sm:border-0 sm:pt-0 sm:mt-2 gap-2">
                       <Badge variant="secondary" className={`text-caption font-display gap-1 rounded-xl px-2.5 py-1 hidden sm:inline-flex ${config.className}`}>
                         <StatusIcon className="h-3 w-3" />
                         {config.label}
                       </Badge>
-                      <div className="flex items-center gap-1.5 ml-auto">
+                      <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto sm:ml-auto">
                         {task.status === 'completed' && (
                           <Button
                             size="sm"
-                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9"
+                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9 flex-1 sm:flex-none"
                             disabled={approveTask.isPending}
                             onClick={() => approveTask.mutate(task.id)}
                           >
@@ -367,7 +367,7 @@ export default function ParentTasks() {
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="max-w-[95vw] sm:max-w-lg">
                               <AlertDialogHeader>
                                 <AlertDialogTitle className="font-display">{t('parent.tasks.delete_task')}</AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -398,7 +398,7 @@ export default function ParentTasks() {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="font-display">{t('parent.tasks.edit_task')}</DialogTitle>
           </DialogHeader>
@@ -438,7 +438,7 @@ export default function ParentTasks() {
 
       {/* AI Suggestions Dialog */}
       <Dialog open={aiSuggestOpen} onOpenChange={setAiSuggestOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" /> {t('parent.tasks.ai_suggestions')}
