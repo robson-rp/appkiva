@@ -438,7 +438,7 @@ export default function ParentTasks() {
 
       {/* AI Suggestions Dialog */}
       <Dialog open={aiSuggestOpen} onOpenChange={setAiSuggestOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" /> {t('parent.tasks.ai_suggestions')}
