@@ -100,13 +100,11 @@ export default function FinancialHabitsQuiz() {
   const progress = phase === "quiz" ? ((currentQ) / QUESTIONS.length) * 100 : 0;
 
   return (
-    <motion.section
-      
+    <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="px-5 sm:px-8 lg:px-12 py-16 md:py-24"
     >
       <div className="mx-auto max-w-2xl">
         <AnimatePresence mode="wait">
@@ -296,6 +294,6 @@ export default function FinancialHabitsQuiz() {
           )}
         </AnimatePresence>
       </div>
-    </motion.section>
+    </motion.div>
   );
 }

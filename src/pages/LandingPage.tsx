@@ -1075,8 +1075,14 @@ export default function LandingPage() {
         <GamificationSection />
         <TrustSection />
         <SocialProof />
-        <ChildProgressSimulator />
-        <FinancialHabitsQuiz />
+        {/* ─── Secção unificada: Simulador + Quiz ─── */}
+        <section id="simulador" className="px-5 sm:px-8 lg:px-12 py-16 md:py-24">
+          <div className="mx-auto max-w-4xl space-y-16 md:space-y-20">
+            <ChildProgressSimulator />
+            <div className="mx-auto h-px w-24 rounded-full bg-border" />
+            <FinancialHabitsQuiz />
+          </div>
+        </section>
         <PricingSection />
         <FinalCTA />
       </main>
