@@ -175,7 +175,7 @@ const fr: Record<string, string> = {
   'footer.cookies': 'Cookies',
   'footer.rights': 'Tous droits réservés.',
   'footer.made_with': 'Fait avec',
-  'footer.for_children': 'pour les enfants d\'Afrique',
+  'footer.for_children': 'pour les familles',
 
   // ─── Features labels ───
   'feature.basic_wallet': 'Portefeuille numérique',
