@@ -27,6 +27,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function ParentDashboard() {
   const navigate = useNavigate();
+  usePrefetchRoutes('parent');
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: children = [], isLoading: childrenLoading } = useChildren();
