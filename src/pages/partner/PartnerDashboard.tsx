@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-data';
 import { motion } from 'framer-motion';
 import { useT } from '@/contexts/LanguageContext';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -12,6 +13,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 export default function PartnerDashboard() {
   const { user } = useAuth();
   const t = useT();
+  usePrefetchRoutes('partner');
   const { data: programs, isLoading: loadingPrograms } = usePartnerPrograms();
   const { data: challenges, isLoading: loadingChallenges } = useSponsoredChallenges();
 

@@ -15,6 +15,7 @@ import { useT } from '@/contexts/LanguageContext';
 import { useClassrooms, useAllClassroomStudents } from '@/hooks/use-classrooms';
 import { useCollectiveChallenges } from '@/hooks/use-collective-challenges';
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePrefetchRoutes } from '@/hooks/use-prefetch-routes';
 
 interface ClassComparison {
   name: string;
@@ -46,6 +47,7 @@ const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transiti
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
+  usePrefetchRoutes('teacher');
   const { user } = useAuth();
   const t = useT();
 
