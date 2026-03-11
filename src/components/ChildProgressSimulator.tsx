@@ -81,13 +81,11 @@ export default function ChildProgressSimulator() {
   const message = t(`sim.message.${band}`).replace("{age}", String(age));
 
   return (
-    <motion.section
-      id="simulador"
+    <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="px-5 sm:px-8 lg:px-12 py-16 md:py-24"
     >
       <div className="mx-auto max-w-4xl">
         {/* Header */}
