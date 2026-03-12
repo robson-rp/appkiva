@@ -254,7 +254,7 @@ export default function ParentTasks() {
                   <s.icon className={`h-4 w-4 ${s.color}`} />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
                   <p className="font-display font-bold text-xl">{s.value}</p>
                 </div>
               </CardContent>
