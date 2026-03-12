@@ -624,6 +624,14 @@ const en: Record<string, string> = {
   'parent.rewards.no_rewards_hint': 'Click "New Reward" to get started!',
   'parent.rewards.remove': 'Remove',
   'parent.rewards.count': 'rewards created',
+  'parent.rewards.ai_title': 'AI Suggestions',
+  'parent.rewards.ai_loading': 'Generating rewards with AI...',
+  'parent.rewards.ai_empty': 'No suggestions available',
+  'parent.rewards.ai_retry': 'Try again',
+  'parent.rewards.ai_more': 'Generate more suggestions',
+  'parent.rewards.ai_error': 'Error generating suggestions',
+  'parent.rewards.add': 'Add',
+  'parent.rewards.added': 'Reward added!',
 
   // ─── Parent Reports ───
   'parent.reports.title': 'Educational Reports',
