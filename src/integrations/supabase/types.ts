@@ -2946,6 +2946,18 @@ export type Database = {
       get_profile_balance: { Args: { _profile_id: string }; Returns: number }
       get_system_wallet_id: { Args: never; Returns: string }
       get_user_household_id: { Args: { _user_id: string }; Returns: string }
+      get_wallet_transactions: {
+        Args: { _limit?: number; _profile_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          description: string
+          direction: string
+          entry_type: string
+          id: string
+          metadata: Json
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

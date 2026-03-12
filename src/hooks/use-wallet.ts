@@ -55,16 +55,20 @@ export function useWalletBalance(profileId?: string) {
     queryKey: ['wallet-balance', id],
     queryFn: async () => {
       if (!id) return null;
+      
+      // Use security definer function to bypass RLS
       const { data, error } = await supabase
-        .from('wallet_balances')
-        .select('*')
-        .eq('profile_id', id)
-        .eq('wallet_type', 'virtual')
-        .eq('currency', 'KVC')
-        .maybeSingle();
+        .rpc('get_profile_balance', { _profile_id: id });
 
       if (error) throw error;
-      return (data as WalletBalance | null);
+      
+      return {
+        wallet_id: '',
+        profile_id: id,
+        wallet_type: 'virtual',
+        currency: 'KVC',
+        balance: (data as number) ?? 0,
+      } as WalletBalance;
     },
     enabled: !!id,
     refetchInterval: 30000,
@@ -80,22 +84,9 @@ export function useWalletTransactions(profileId?: string, limit = 20) {
     queryFn: async () => {
       if (!id) return [];
       
-      const { data: wallet } = await supabase
-        .from('wallets')
-        .select('id')
-        .eq('profile_id', id)
-        .eq('wallet_type', 'virtual')
-        .eq('currency', 'KVC')
-        .maybeSingle();
-
-      if (!wallet) return [];
-
+      // Use security definer function to bypass RLS
       const { data, error } = await supabase
-        .from('wallet_transactions')
-        .select('*')
-        .eq('wallet_id', wallet.id)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+        .rpc('get_wallet_transactions', { _profile_id: id, _limit: limit });
 
       if (error) throw error;
       return (data as WalletTransaction[]) ?? [];
