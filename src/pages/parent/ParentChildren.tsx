@@ -632,7 +632,47 @@ export default function ParentChildren() {
         </DialogContent>
       </Dialog>
 
-      {/* Upgrade Payment for extra children */}
+      {/* Extra Child / Upgrade Choice Dialog */}
+      <Dialog open={extraChildOpen} onOpenChange={setExtraChildOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Crown className="h-5 w-5 text-accent-foreground" />
+              {t('parent.children.limit_reached_title')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('parent.children.limit_reached_desc').replace('{max}', String(maxChildren))}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {extraChildPrice > 0 && (
+              <Button
+                className="w-full rounded-xl font-display gap-2"
+                disabled={addingExtra}
+                onClick={async () => {
+                  try {
+                    await addExtraChild();
+                    setExtraChildOpen(false);
+                  } catch {}
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+                {addingExtra ? t('parent.subscription.processing') : `${t('parent.children.add_extra_child')} (${currentTier?.extraChildPrice ?? 0} USD)`}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="w-full rounded-xl font-display gap-2"
+              onClick={() => { setExtraChildOpen(false); setPaymentOpen(true); }}
+            >
+              <Crown className="h-4 w-4" />
+              {t('parent.subscription.upgrade')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Payment for plan change */}
       <PaymentSimulator
         open={paymentOpen}
         onOpenChange={setPaymentOpen}
