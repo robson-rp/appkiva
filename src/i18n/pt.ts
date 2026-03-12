@@ -303,6 +303,7 @@ const pt: Record<string, string> = {
   'common.view_all': 'Ver todas',
   'common.logout': 'Sair',
   'common.more_options': 'Mais opções',
+  'common.month_short': 'mês',
   'common.requires_upgrade': 'Requer upgrade',
   'common.copied': 'Copiado! 📋',
   'common.share': 'Partilhar',
