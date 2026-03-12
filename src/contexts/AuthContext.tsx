@@ -195,8 +195,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginAsChild = async (username: string, pin: string) => {
     const syntheticEmail = `${username.toLowerCase()}@child.kivara.local`;
-    const { error } = await supabase.auth.signInWithPassword({ email: syntheticEmail, password: pin });
+    // Pad PIN to match the 6-char minimum used during account creation
+    const childPassword = pin.padEnd(6, '0');
+    const { error } = await supabase.auth.signInWithPassword({ email: syntheticEmail, password: childPassword });
     if (error) {
+      console.error('Child login error:', error.message);
       return { error: 'auth.generic_login_error' };
     }
     return { error: null };
