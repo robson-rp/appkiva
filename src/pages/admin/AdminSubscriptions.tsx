@@ -37,7 +37,6 @@ function useTierTypeLabels() {
     family_premium: t('admin.subs.type_family'),
     school_institutional: t('admin.subs.type_school'),
     partner_program: t('admin.subs.type_partner'),
-    teacher: t('admin.subs.type_teacher'),
   } as Record<string, string>;
 }
 
