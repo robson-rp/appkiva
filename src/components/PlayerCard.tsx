@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Level, LEVEL_CONFIG } from '@/types/kivara';
 import { getLeagueTier, LEAGUE_TIERS } from '@/types/league';
 import { AvatarGlow } from '@/components/AvatarGlow';
 import { LeagueBadge } from '@/components/LeagueBadge';
-import { Flame, Trophy, Star, Zap } from 'lucide-react';
+import { Flame, Trophy, Star, Zap, RefreshCw } from 'lucide-react';
 import { useT } from '@/contexts/LanguageContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PlayerCardProps {
   name: string;
@@ -29,6 +31,16 @@ export function PlayerCard({
   onLevelUpClick,
 }: PlayerCardProps) {
   const t = useT();
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
+    queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['children'] });
+    setTimeout(() => setIsRefreshing(false), 1500);
+  };
   const config = LEVEL_CONFIG[level];
   const levels = Object.entries(LEVEL_CONFIG) as [Level, typeof config][];
   const currentIndex = levels.findIndex(([k]) => k === level);
@@ -56,7 +68,14 @@ export function PlayerCard({
               <LeagueBadge weeklyPoints={weeklyPoints} compact />
             </div>
           </div>
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 flex flex-col items-end gap-1">
+            <button
+              onClick={handleRefresh}
+              className="bg-white/15 backdrop-blur-sm rounded-xl p-1.5 hover:bg-white/25 transition-colors"
+              aria-label={t('child.wallet.refresh') ?? 'Atualizar'}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
             <motion.span
               key={balance}
               initial={{ scale: 1.2, opacity: 0 }}
