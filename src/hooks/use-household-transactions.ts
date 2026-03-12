@@ -35,7 +35,7 @@ export function useHouseholdTransactions(initialLimit?: number) {
 
       // Add parent to map
       profileMap.set(user.profileId, {
-        name: user.displayName ?? 'Encarregado',
+        name: user.name ?? 'Encarregado',
         avatar: user.avatar ?? '👤',
       });
 
