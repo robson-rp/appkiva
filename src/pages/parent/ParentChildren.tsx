@@ -757,8 +757,10 @@ export default function ParentChildren() {
                 return;
               }
               qc.invalidateQueries({ queryKey: ['children'] });
-              toast({ title: t('parent.children.account_created'), description: t('parent.children.account_created_desc') });
+              // Show credentials dialog
+              setCreatedCredentials({ username: newChildUsername.toLowerCase(), pin: newChildPin, displayName: newChildName });
               setCreateOpen(false);
+              setSuccessOpen(true);
               setNewChildName('');
               setNewChildUsername('');
               setNewChildPin('');
