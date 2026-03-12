@@ -239,7 +239,8 @@ Deno.serve(async (req) => {
     let debitWalletId: string;
     let creditWalletId: string;
     const requiresApproval = REQUIRES_APPROVAL_TYPES.includes(body.entry_type) && !isParent && !isAdmin;
-    const isEmission = EMISSION_TYPES.includes(body.entry_type);
+    const isEmission = EMISSION_TYPES.includes(body.entry_type) || 
+      (body.entry_type === "vault_deposit" && (isParent || isAdmin) && !!targetWallet);
 
     // 8b. Emission limit check (for parents emitting KVC)
     if (isEmission && (isParent || isAdmin) && body.entry_type !== "vault_interest") {
