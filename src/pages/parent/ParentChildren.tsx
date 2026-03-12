@@ -760,8 +760,20 @@ export default function ParentChildren() {
                   date_of_birth: newChildDob || null,
                 },
               });
-              if (error || data?.error) {
-                toast({ title: t('common.error'), description: data?.error || error?.message, variant: 'destructive' });
+              if (error) {
+                // Extract the actual error message from the response context
+                let errorMsg = error.message;
+                try {
+                  if ('context' in error && (error as any).context?.json) {
+                    const body = await (error as any).context.json();
+                    errorMsg = body?.error || errorMsg;
+                  }
+                } catch {}
+                toast({ title: t('common.error'), description: errorMsg, variant: 'destructive' });
+                return;
+              }
+              if (data?.error) {
+                toast({ title: t('common.error'), description: data.error, variant: 'destructive' });
                 return;
               }
               qc.invalidateQueries({ queryKey: ['children'] });
