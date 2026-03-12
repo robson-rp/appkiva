@@ -39,8 +39,8 @@ Deno.serve(async (req) => {
     if (!username || typeof username !== 'string' || !/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
       return new Response(JSON.stringify({ error: 'Username inválido (3-20 caracteres alfanuméricos)' }), { status: 400, headers: corsHeaders });
     }
-    if (!pin || typeof pin !== 'string' || !/^\d{4,6}$/.test(pin)) {
-      return new Response(JSON.stringify({ error: 'PIN inválido (4-6 dígitos)' }), { status: 400, headers: corsHeaders });
+    if (!pin || typeof pin !== 'string' || !/^\d{4}$/.test(pin)) {
+      return new Response(JSON.stringify({ error: 'PIN inválido (4 dígitos)' }), { status: 400, headers: corsHeaders });
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);

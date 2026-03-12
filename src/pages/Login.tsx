@@ -922,20 +922,20 @@ export default function Login() {
                               inputMode="numeric"
                               placeholder="••••"
                               value={childPin}
-                              onChange={e => setChildPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              onChange={e => setChildPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                               className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
-                              maxLength={6}
+                              maxLength={4}
                               minLength={4}
                               required
                               autoComplete="current-password"
                             />
-                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4-6 dígitos definido pelo encarregado'}</p>
+                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4 dígitos definido pelo encarregado'}</p>
                           </div>
                           <Button
                             type="submit"
                             className="w-full font-display font-bold h-13 rounded-xl text-base"
                             size="lg"
-                            disabled={submitting || childUsername.length < 3 || childPin.length < 4}
+                            disabled={submitting || childUsername.length < 3 || childPin.length !== 4}
                           >
                             {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : t('auth.sign_in')}
                           </Button>
