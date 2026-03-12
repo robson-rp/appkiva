@@ -286,17 +286,8 @@ export default function ParentSubscription() {
                          >
                            {t(`parent.subscription.status_${inv.status}`)}
                          </Badge>
-                       </div>
-                        className={cn(
-                          'text-[10px]',
-                          inv.status === 'paid' && 'border-green-300 text-green-700',
-                          inv.status === 'pending' && 'border-amber-300 text-amber-700',
-                          inv.status === 'failed' && 'border-destructive text-destructive',
-                        )}
-                      >
-                        {t(`parent.subscription.status_${inv.status}`)}
-                      </Badge>
-                    </div>
+                     </div>
+                   );
                   );
                 })}
               </div>
