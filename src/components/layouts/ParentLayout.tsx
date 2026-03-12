@@ -46,6 +46,7 @@ function useNavItems() {
 
   const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
     { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.parent.dreams'), url: '/parent/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
     { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
     { title: t('nav.parent.reports'), url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
     { title: t('nav.parent.profile'), url: '/parent/profile', icon: UserCircle },

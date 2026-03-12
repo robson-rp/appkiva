@@ -330,6 +330,7 @@ const en: Record<string, string> = {
   'nav.parent.missions': 'Missions',
   'nav.parent.allowance': 'Allowance',
   'nav.parent.vaults': 'Vaults',
+  'nav.parent.dreams': 'Dreams',
   'nav.parent.rewards': 'Rewards',
   'nav.parent.reports': 'Reports',
   'nav.parent.profile': 'Profile',
