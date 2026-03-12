@@ -247,25 +247,46 @@ export default function ParentSubscription() {
                     : <XCircle className="h-4 w-4 text-destructive" />;
 
                   return (
-                    <div key={inv.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30">
-                      <div className="flex items-center gap-3">
-                        {statusIcon}
-                        <div>
-                          <p className="text-sm font-medium">
-                            {formatPrice(inv.amount, sym, dec)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(inv.created_at).toLocaleDateString()}
-                            {inv.billing_period && (
-                              <span className="ml-1.5 text-muted-foreground/70">
-                                · {inv.billing_period === 'monthly' ? t('parent.subscription.monthly') : t('parent.subscription.yearly')}
-                              </span>
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="outline"
+                     <div key={inv.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30">
+                       <div className="flex items-center gap-3">
+                         {statusIcon}
+                         <div>
+                           <p className="text-sm font-medium">
+                             {inv.tier_name && <span className="text-muted-foreground mr-1.5">{inv.tier_name} ·</span>}
+                             {formatPrice(inv.amount, sym, dec)}
+                           </p>
+                           <p className="text-xs text-muted-foreground">
+                             {new Date(inv.created_at).toLocaleDateString()}
+                             {inv.billing_period && (
+                               <span className="ml-1.5 text-muted-foreground/70">
+                                 · {inv.billing_period === 'monthly' ? t('parent.subscription.monthly') : inv.billing_period === 'yearly' ? t('parent.subscription.yearly') : inv.billing_period === 'one_time' ? t('parent.subscription.one_time') : inv.billing_period}
+                               </span>
+                             )}
+                           </p>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           className="h-7 w-7"
+                           onClick={() => generateInvoicePdf(inv, tierName ?? 'Cliente', sym, dec)}
+                           title={t('parent.subscription.download_pdf')}
+                         >
+                           <Download className="h-3.5 w-3.5" />
+                         </Button>
+                         <Badge
+                           variant="outline"
+                           className={cn(
+                             'text-[10px]',
+                             inv.status === 'paid' && 'border-green-300 text-green-700',
+                             inv.status === 'pending' && 'border-amber-300 text-amber-700',
+                             inv.status === 'failed' && 'border-destructive text-destructive',
+                           )}
+                         >
+                           {t(`parent.subscription.status_${inv.status}`)}
+                         </Badge>
+                       </div>
                         className={cn(
                           'text-[10px]',
                           inv.status === 'paid' && 'border-green-300 text-green-700',
