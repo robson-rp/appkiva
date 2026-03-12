@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Clock, CheckCircle2, XCircle, CalendarClock, Star } from 'lucide-react';
+import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Clock, CheckCircle2, XCircle, CalendarClock, Star, Download } from 'lucide-react';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { useSubscriptionTiers, useUpgradeSubscription, useInvoices } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';

@@ -83,12 +83,12 @@ Deno.serve(async (req) => {
       .select('id')
       .eq('parent_profile_id', callerProfile.id);
 
-    // Get max from subscription tier
+    // Get max from subscription tier + extra purchased
     let maxChildren = 2;
     if (callerProfile.tenant_id) {
       const { data: tenant } = await adminClient
         .from('tenants')
-        .select('subscription_tier_id')
+        .select('subscription_tier_id, extra_children_purchased')
         .eq('id', callerProfile.tenant_id)
         .single();
       if (tenant?.subscription_tier_id) {
@@ -99,6 +99,7 @@ Deno.serve(async (req) => {
           .single();
         if (tier?.max_children) maxChildren = tier.max_children;
       }
+      maxChildren += (tenant?.extra_children_purchased ?? 0);
     }
 
     if ((existingChildren?.length ?? 0) >= maxChildren) {
