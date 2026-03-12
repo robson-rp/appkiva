@@ -353,22 +353,6 @@ export default function ParentDashboard() {
                   );
                 })
               )}
-              {hasNextPage && (
-                <div className="pt-3 flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary text-small gap-1.5"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : null}
-                    {isFetchingNextPage ? 'A carregar...' : 'Carregar mais'}
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         </motion.div>
