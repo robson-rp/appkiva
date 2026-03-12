@@ -237,6 +237,7 @@ export default function AdminSubscriptions() {
                 <SelectItem value="family_premium">{t('admin.subs.type_family')}</SelectItem>
                 <SelectItem value="school_institutional">{t('admin.subs.type_school')}</SelectItem>
                 <SelectItem value="partner_program">{t('admin.subs.type_partner')}</SelectItem>
+                <SelectItem value="teacher">{t('admin.subs.type_teacher')}</SelectItem>
               </SelectContent>
             </Select>
           </div>

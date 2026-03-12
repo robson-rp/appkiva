@@ -220,6 +220,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teacher/student/:studentId" element={<TeacherLayout><S><TeacherStudentProfile /></S></TeacherLayout>} />
         <Route path="/teacher/school" element={<TeacherLayout><S><TeacherSchoolProfile /></S></TeacherLayout>} />
         <Route path="/teacher/profile" element={<TeacherLayout><S><TeacherProfile /></S></TeacherLayout>} />
+        <Route path="/teacher/subscription" element={<TeacherLayout><S><TeacherSubscription /></S></TeacherLayout>} />
         {INVITE_ROUTE}
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teacher" replace />} />
