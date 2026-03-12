@@ -63,6 +63,10 @@ export default function ParentChildren() {
   const [newChildAvatar, setNewChildAvatar] = useState('🦊');
   const [newChildDob, setNewChildDob] = useState('');
   const [creatingChild, setCreatingChild] = useState(false);
+  // Success credentials display
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{ username: string; pin: string; displayName: string } | null>(null);
+  const [credsCopied, setCredsCopied] = useState(false);
   // Co-guardian state
   const [guardianDialogOpen, setGuardianDialogOpen] = useState(false);
   const [guardianEmail, setGuardianEmail] = useState('');
