@@ -137,25 +137,15 @@ export default function LoginBannerCarousel() {
         </AspectRatio>
       </div>
 
-      {/* Segmented dot indicators */}
       {banners.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5 mt-3">
-          {banners.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className="relative h-1.5 rounded-full overflow-hidden bg-muted-foreground/15 transition-all duration-300 cursor-pointer"
-              style={{ width: i === activeIndex ? 28 : 10 }}
-              aria-label={`Banner ${i + 1}`}
-            >
-              {i === activeIndex && (
-                <span
-                  className="absolute inset-y-0 left-0 rounded-full bg-primary/70"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              )}
-            </button>
-          ))}
+        <div className="relative h-[1.5px] mt-2 mx-12 rounded-full bg-muted-foreground/8">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
+            style={{
+              width: `${100 / banners.length}%`,
+              left: `${(activeIndex / banners.length) * 100}%`,
+            }}
+          />
         </div>
       )}
     </div>
