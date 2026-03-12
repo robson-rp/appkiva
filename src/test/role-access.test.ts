@@ -20,7 +20,7 @@ const ROLE_ROUTES = {
     dashboard: '/teen',
   },
   teacher: {
-    allowed: ['/teacher', '/teacher/classes', '/teacher/challenges', '/teacher/school-profile', '/teacher/subscription'],
+    allowed: ['/teacher', '/teacher/classes', '/teacher/challenges', '/teacher/school-profile'],
     dashboard: '/teacher',
   },
   admin: {
