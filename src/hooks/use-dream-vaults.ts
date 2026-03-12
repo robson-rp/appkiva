@@ -120,6 +120,18 @@ export function useDepositToDream() {
         .single();
       if (fetchErr) throw fetchErr;
 
+      // Use the ledger to deduct KVC from the caller's wallet
+      const { createTransaction } = await import('@/lib/ledger-api');
+      await createTransaction({
+        entry_type: 'vault_deposit',
+        amount,
+        description: `Depósito no sonho: ${dream.title}`,
+        target_profile_id: dream.profile_id,
+        reference_id: dreamId,
+        reference_type: 'dream_vault',
+      });
+
+      // Update dream vault amount
       const newAmount = Number(dream.current_amount) + amount;
       const { error } = await supabase
         .from('dream_vaults')
@@ -142,6 +154,10 @@ export function useDepositToDream() {
         }
       }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['dream-vaults'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dream-vaults'] });
+      qc.invalidateQueries({ queryKey: ['wallet'] });
+      qc.invalidateQueries({ queryKey: ['profile-balance'] });
+    },
   });
 }
