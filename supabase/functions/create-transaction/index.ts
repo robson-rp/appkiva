@@ -280,8 +280,15 @@ Deno.serve(async (req) => {
         break;
 
       case "vault_deposit":
-        debitWalletId = callerWallet.id;
-        creditWalletId = targetWallet?.id ?? callerWallet.id;
+        if ((isParent || isAdmin) && targetWallet) {
+          // Parent/admin depositing into child's dream = emission from system
+          debitWalletId = systemWalletId;
+          creditWalletId = targetWallet.id;
+        } else {
+          // Child depositing own funds
+          debitWalletId = callerWallet.id;
+          creditWalletId = targetWallet?.id ?? callerWallet.id;
+        }
         break;
 
       case "vault_withdraw":
