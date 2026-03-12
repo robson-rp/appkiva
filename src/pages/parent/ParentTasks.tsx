@@ -454,7 +454,7 @@ export default function ParentTasks() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-display font-bold text-sm">{s.title}</p>
-                  <Badge variant="outline" className="text-[10px]">🪙 {s.reward}</Badge>
+                  <Badge variant="outline" className="text-xs">🪙 {s.reward}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{s.description}</p>
                 <span className="text-[10px] text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
