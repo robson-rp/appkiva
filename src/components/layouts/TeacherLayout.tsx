@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap, School, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap, School, MoreHorizontal, CreditCard } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
