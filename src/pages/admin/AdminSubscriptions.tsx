@@ -68,7 +68,7 @@ export default function AdminSubscriptions() {
 
   const tierSchema = useMemo(() => z.object({
     name: z.string().trim().min(1, t('admin.subs.name_required')).max(100),
-    tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program', 'teacher']),
+    tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program']),
     price_monthly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
     price_yearly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
     max_children: z.number().int().min(0),
