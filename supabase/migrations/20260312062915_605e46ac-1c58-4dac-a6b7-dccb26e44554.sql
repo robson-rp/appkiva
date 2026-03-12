@@ -1,0 +1,1 @@
+ALTER TABLE public.tenants ADD COLUMN extra_children_purchased integer NOT NULL DEFAULT 0;
