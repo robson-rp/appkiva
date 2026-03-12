@@ -93,13 +93,27 @@ Deno.serve(async (req) => {
     // If no tenant exists, create one
     if (!tenantId) {
       const tenantType = role === "partner" ? "institutional_partner" : "family";
+
+      // Derive currency from user's country instead of hardcoding EUR
+      const countryToCurrency: Record<string, string> = {
+        AO: "AOA", MZ: "MZN", BR: "BRL", PT: "EUR", CV: "CVE",
+        ST: "STN", GW: "XOF", TL: "USD", NG: "NGN", KE: "KES",
+        ZA: "ZAR", US: "USD", GB: "GBP",
+      };
+      const { data: profileFull } = await supabaseAdmin
+        .from("profiles")
+        .select("country")
+        .eq("id", profile.id)
+        .single();
+      const tenantCurrency = countryToCurrency[profileFull?.country ?? "AO"] ?? "AOA";
+
       const { data: newTenant, error: createError } = await supabaseAdmin
         .from("tenants")
         .insert({
           name: `Tenant de ${user.email}`,
           tenant_type: tenantType,
           subscription_tier_id: tier_id,
-          currency: "EUR",
+          currency: tenantCurrency,
         })
         .select("id")
         .single();

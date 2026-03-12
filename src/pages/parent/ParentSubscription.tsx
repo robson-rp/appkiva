@@ -250,11 +250,22 @@ export default function ParentSubscription() {
                      <div key={inv.id} className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30">
                        <div className="flex items-center gap-3">
                          {statusIcon}
-                         <div>
-                           <p className="text-sm font-medium">
-                             {inv.tier_name && <span className="text-muted-foreground mr-1.5">{inv.tier_name} ·</span>}
-                             {formatPrice(inv.amount, sym, dec)}
-                           </p>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {inv.tier_name && <span className="text-muted-foreground mr-1.5">{inv.tier_name} ·</span>}
+                              {(() => {
+                                let displayAmount = inv.amount;
+                                // Convert if invoice currency differs from tenant display currency
+                                if (inv.currency && inv.currency !== code && rates.length > 0) {
+                                  const fromRate = inv.currency === 'USD' ? 1 : rates.find(r => r.base_currency === 'USD' && r.target_currency === inv.currency)?.rate;
+                                  const toRate = code === 'USD' ? 1 : rates.find(r => r.base_currency === 'USD' && r.target_currency === code)?.rate;
+                                  if (fromRate && toRate) {
+                                    displayAmount = (inv.amount / fromRate) * toRate;
+                                  }
+                                }
+                                return formatPrice(displayAmount, sym, dec);
+                              })()}
+                            </p>
                            <p className="text-xs text-muted-foreground">
                              {new Date(inv.created_at).toLocaleDateString()}
                              {inv.billing_period && (
