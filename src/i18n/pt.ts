@@ -1521,6 +1521,18 @@ const pt: Record<string, string> = {
   'partner.subscription.upgrade': 'Upgrade',
   'partner.subscription.current': 'Plano Actual',
 
+  // ─── Teacher Subscription ───
+  'teacher.subscription.current_plan': 'Plano actual',
+  'teacher.subscription.free': 'Gratuito',
+  'teacher.subscription.active': 'Activo',
+  'teacher.subscription.classrooms': 'Turmas',
+  'teacher.subscription.students': 'Alunos',
+  'teacher.subscription.compare_plans': 'Comparar Planos',
+  'teacher.subscription.up_to_students': 'Até {count} alunos',
+  'teacher.subscription.up_to_classrooms': 'Até {count} turmas',
+  'teacher.subscription.upgrade': 'Upgrade',
+  'teacher.subscription.current': 'Plano Actual',
+
   // ─── Shared: SendAllowanceDialog ───
   'dialog.allowance.title': 'Enviar Mesada',
   'dialog.allowance.child': 'Criança',
