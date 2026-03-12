@@ -127,12 +127,21 @@ export default function ChildWallet() {
                   <span className="text-lg text-white/70 font-display font-medium">KivaCoins</span>
                 </div>
               </div>
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <img src={kivoImg} alt="Kivo" className="w-16 h-16 drop-shadow-2xl" />
-              </motion.div>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={handleRefresh}
+                  className="bg-white/15 backdrop-blur-sm rounded-xl p-2 hover:bg-white/25 transition-colors"
+                  aria-label={t('child.wallet.refresh') ?? 'Refresh'}
+                >
+                  <RefreshCw className={`h-4 w-4 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <img src={kivoImg} alt="Kivo" className="w-16 h-16 drop-shadow-2xl" />
+                </motion.div>
+              </div>
             </div>
 
             {/* Stats Row */}
