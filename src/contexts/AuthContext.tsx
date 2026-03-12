@@ -194,15 +194,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const complete2FA = () => setPending2FA(false);
 
   const loginAsChild = async (username: string, pin: string) => {
-    const syntheticEmail = `${username.toLowerCase()}@child.kivara.local`;
-    // Pad PIN to match the 6-char minimum used during account creation
-    const childPassword = pin.padEnd(6, '0');
-    const { error } = await supabase.auth.signInWithPassword({ email: syntheticEmail, password: childPassword });
-    if (error) {
-      console.error('Child login error:', error.message);
-      return { error: 'auth.generic_login_error' };
+    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedPin = pin.trim();
+    const syntheticEmail = `${normalizedUsername}@child.kivara.local`;
+
+    // Backward compatibility: old children were created with raw 4-digit PIN,
+    // newer ones are padded to meet auth password minimum length.
+    const pinCandidates = normalizedPin.length < 6
+      ? [normalizedPin, normalizedPin.padEnd(6, '0')]
+      : [normalizedPin];
+
+    for (const candidate of pinCandidates) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: syntheticEmail,
+        password: candidate,
+      });
+      if (!error) {
+        return { error: null };
+      }
     }
-    return { error: null };
+
+    return { error: 'auth.generic_login_error' };
   };
 
   const signup = async (
