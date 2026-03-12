@@ -21,16 +21,23 @@ export interface WalletTransaction {
   metadata: Record<string, unknown>;
 }
 
-/** Subscribe to ledger_entries changes and invalidate wallet queries */
-function useWalletRealtime() {
+function toNumber(value: unknown): number {
+  const num = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(num) ? num : 0;
+}
+
+/** Subscribe to ledger changes and invalidate wallet queries */
+function useWalletRealtime(enabled: boolean) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    if (!enabled) return;
+
     const channel = supabase
       .channel('wallet-realtime')
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'ledger_entries' },
+        { event: '*', schema: 'public', table: 'ledger_entries' },
         () => {
           queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
           queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
@@ -42,36 +49,61 @@ function useWalletRealtime() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [enabled, queryClient]);
 }
 
 export function useWalletBalance(profileId?: string) {
   const { user } = useAuth();
   const id = profileId || user?.profileId;
 
-  useWalletRealtime();
+  useWalletRealtime(!!id);
 
   return useQuery({
     queryKey: ['wallet-balance', id],
     queryFn: async () => {
       if (!id) return null;
-      
-      // Use security definer function to bypass RLS
-      const { data, error } = await supabase
-        .rpc('get_profile_balance', { _profile_id: id });
 
-      if (error) throw error;
-      
+      let balance = 0;
+
+      const { data: rpcData } = await supabase.rpc('get_profile_balance', { _profile_id: id });
+      balance = toNumber(rpcData);
+
+      if (balance === 0) {
+        const { data: fallbackRow } = await supabase
+          .from('wallet_balances')
+          .select('wallet_id, profile_id, wallet_type, currency, balance')
+          .eq('profile_id', id)
+          .eq('wallet_type', 'virtual')
+          .eq('currency', 'KVC')
+          .maybeSingle();
+
+        if (fallbackRow) {
+          return {
+            wallet_id: fallbackRow.wallet_id,
+            profile_id: fallbackRow.profile_id,
+            wallet_type: fallbackRow.wallet_type,
+            currency: fallbackRow.currency,
+            balance: toNumber(fallbackRow.balance),
+          } as WalletBalance;
+        }
+      }
+
       return {
         wallet_id: '',
         profile_id: id,
         wallet_type: 'virtual',
         currency: 'KVC',
-        balance: (data as number) ?? 0,
+        balance,
       } as WalletBalance;
     },
     enabled: !!id,
-    refetchInterval: 30000,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
+    retry: 2,
   });
 }
 
@@ -83,15 +115,26 @@ export function useWalletTransactions(profileId?: string, limit = 20) {
     queryKey: ['wallet-transactions', id, limit],
     queryFn: async () => {
       if (!id) return [];
-      
-      // Use security definer function to bypass RLS
-      const { data, error } = await supabase
-        .rpc('get_wallet_transactions', { _profile_id: id, _limit: limit });
 
-      if (error) throw error;
-      return (data as WalletTransaction[]) ?? [];
+      const { data: rpcData } = await supabase.rpc('get_wallet_transactions', {
+        _profile_id: id,
+        _limit: limit,
+      });
+
+      return ((rpcData as WalletTransaction[]) ?? []).map((tx) => ({
+        ...tx,
+        amount: toNumber(tx.amount),
+        metadata: (tx.metadata ?? {}) as Record<string, unknown>,
+      }));
     },
     enabled: !!id,
-    refetchInterval: 30000,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
+    retry: 2,
   });
 }
+
