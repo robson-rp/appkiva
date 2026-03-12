@@ -8,6 +8,7 @@ import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Cloc
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { useSubscriptionTiers, useUpgradeSubscription, useInvoices } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
+import { generateInvoicePdf } from '@/lib/invoice-pdf';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
