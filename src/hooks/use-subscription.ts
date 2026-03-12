@@ -17,6 +17,8 @@ export interface SubscriptionInvoice {
   payment_method: string | null;
   payment_reference: string | null;
   created_at: string;
+  tier_name: string | null;
+  tier_type: string | null;
 }
 
 interface SubscriptionTier {
@@ -27,6 +29,7 @@ interface SubscriptionTier {
   priceYearly: number;
   features: string[];
   maxChildren: number;
+  extraChildPrice: number;
 }
 
 export function useSubscriptionTiers() {
@@ -50,6 +53,7 @@ export function useSubscriptionTiers() {
         priceYearly: Number(t.price_yearly),
         features: Array.isArray(t.features) ? (t.features as string[]) : [],
         maxChildren: t.max_children,
+        extraChildPrice: Number(t.extra_child_price ?? 0),
       })) as SubscriptionTier[];
     },
   });
@@ -72,7 +76,6 @@ export function useUpgradeSubscription() {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Invalidate feature gate and currency caches
       queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
       queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
       queryClient.invalidateQueries({ queryKey: ['subscription-tiers'] });
@@ -116,13 +119,76 @@ export function useInvoices() {
 
       const { data, error } = await supabase
         .from('subscription_invoices')
-        .select('*')
+        .select('*, subscription_tiers(name, tier_type)')
         .eq('tenant_id', profile.tenant_id)
         .order('created_at', { ascending: false })
         .limit(12);
 
       if (error) throw error;
-      return (data ?? []) as unknown as SubscriptionInvoice[];
+      return (data ?? []).map((inv: any) => ({
+        ...inv,
+        tier_name: inv.subscription_tiers?.name ?? null,
+        tier_type: inv.subscription_tiers?.tier_type ?? null,
+      })) as SubscriptionInvoice[];
     },
   });
+}
+
+export function useAdminInvoices() {
+  return useQuery({
+    queryKey: ['admin-invoices'],
+    staleTime: 30 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subscription_invoices')
+        .select('*, subscription_tiers(name, tier_type), tenants(name)')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+      return (data ?? []).map((inv: any) => ({
+        ...inv,
+        tier_name: inv.subscription_tiers?.name ?? null,
+        tier_type: inv.subscription_tiers?.tier_type ?? null,
+        tenant_name: inv.tenants?.name ?? null,
+      }));
+    },
+  });
+}
+
+export function useAddExtraChild() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+
+  const addExtraChild = async () => {
+    if (!user) throw new Error('Not authenticated');
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('add-extra-child-slot', {});
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      queryClient.invalidateQueries({ queryKey: ['children'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
+
+      toast({
+        title: 'Criança extra adicionada! 🎉',
+        description: 'Podes agora adicionar mais uma criança à tua família.',
+      });
+      return data;
+    } catch (err) {
+      toast({
+        title: 'Erro',
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: 'destructive',
+      });
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { addExtraChild, loading };
 }
