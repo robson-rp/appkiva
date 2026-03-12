@@ -361,7 +361,7 @@ export default function ParentTasks() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-xl h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                className="rounded-xl h-11 w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                 aria-label={t('parent.tasks.delete_task')}
                               >
                                 <Trash2 className="h-4 w-4" />
