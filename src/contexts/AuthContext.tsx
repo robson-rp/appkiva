@@ -153,19 +153,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: 'auth.generic_login_error', requires2FA: false };
     }
 
+    // Immediately check role from user_metadata to prevent race condition
+    const metadataRole = data.user?.user_metadata?.role;
+    const needs2FACheck = metadataRole === 'parent' || metadataRole === 'admin';
+
+    // Set pending2FA IMMEDIATELY before any async work, so onAuthStateChange
+    // won't expose the user to AppRoutes before 2FA is resolved
+    if (needs2FACheck) {
+      setPending2FA(true);
+    }
+
     // Record success (fire-and-forget)
     supabase.functions.invoke('auth-guard', {
       body: { action: 'record-success', email, user_id: data.user.id },
     }).catch(() => {});
 
-    // Check if user's role requires 2FA (parent, admin)
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', data.user.id);
-
-    const role = roles?.[0]?.role;
-    if (role === 'parent' || role === 'admin') {
+    if (needs2FACheck) {
       // Check for trusted device
       const deviceToken = localStorage.getItem('kivara_trusted_device');
       if (deviceToken) {
@@ -174,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             body: { action: 'check-trust', device_token: deviceToken },
           });
           if (trustResult?.trusted) {
+            setPending2FA(false);
             return { error: null, requires2FA: false };
           }
         } catch {
@@ -181,7 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         localStorage.removeItem('kivara_trusted_device');
       }
-      setPending2FA(true);
       return { error: null, requires2FA: true };
     }
 
