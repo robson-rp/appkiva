@@ -146,7 +146,7 @@ export default function ParentTasks() {
         <div className="absolute top-0 left-1/3 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.tasks.management')}</p>
+            <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.tasks.management')}</p>
             <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">{t('parent.tasks.title')}</h1>
             <p className="text-small text-primary-foreground/60 mt-1">{t('parent.tasks.subtitle')}</p>
           </div>
