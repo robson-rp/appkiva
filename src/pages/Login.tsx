@@ -929,7 +929,7 @@ export default function Login() {
                               required
                               autoComplete="current-password"
                             />
-                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4-6 dígitos definido pelo encarregado'}</p>
+                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4 dígitos definido pelo encarregado'}</p>
                           </div>
                           <Button
                             type="submit"

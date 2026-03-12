@@ -841,11 +841,11 @@ export default function ParentChildren() {
                   inputMode="numeric"
                   placeholder="••••"
                   value={newChildPinConfirm}
-                  onChange={e => setNewChildPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={e => setNewChildPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   className="rounded-xl text-center tracking-widest font-mono"
                   required
                   minLength={4}
-                  maxLength={6}
+                  maxLength={4}
                 />
               </div>
             </div>
