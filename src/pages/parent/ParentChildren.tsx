@@ -226,7 +226,7 @@ export default function ParentChildren() {
             <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.children.total_balance')}</span>
           </div>
           {!canAddChild && (
-            <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setPaymentOpen(true)}>
+            <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setExtraChildOpen(true)}>
               <Crown className="h-4 w-4 text-accent-foreground" />
               <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">{t('parent.children.upgrade_more')}</span>
             </div>
