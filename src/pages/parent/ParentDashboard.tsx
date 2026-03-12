@@ -167,12 +167,6 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-      {/* Subscription Plan Summary */}
-      {!featuresLoading && (
-        <motion.div variants={item}>
-          <PlanSummaryWidget onClick={() => navigate('/parent/subscription')} upgradeLabel={t('parent.dashboard.upgrade_hint')} />
-        </motion.div>
-      )}
 
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4" data-onboarding="tasks">
         {stats.map((stat, i) => (
