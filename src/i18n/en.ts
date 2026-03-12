@@ -758,6 +758,7 @@ const en: Record<string, string> = {
   'child.wallet.history': '📜 History',
   'child.wallet.movements': 'movements',
   'child.wallet.no_movements': 'No movements yet',
+  'child.wallet.refresh': 'Refresh',
   'child.wallet.saving_vault': 'Savings',
   'child.wallet.withdrawal_vault': 'Withdrawal',
 

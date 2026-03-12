@@ -4,12 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Kivo } from '@/components/Kivo';
 
-import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart, Loader2 } from 'lucide-react';
+import { ArrowUpCircle, ArrowDownCircle, PiggyBank, Coins, TrendingUp, TrendingDown, Wallet, Heart, HandHeart, Loader2, RefreshCw } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
+import { useQueryClient } from '@tanstack/react-query';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { useDonationCauses, useMyDonations, useDonate } from '@/hooks/use-donations';
 import { useT } from '@/contexts/LanguageContext';
@@ -19,9 +20,16 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transiti
 
 export default function ChildWallet() {
   const t = useT();
-  const { data: walletBalance } = useWalletBalance();
-  const { data: ledgerTx } = useWalletTransactions();
+  const queryClient = useQueryClient();
+  const { data: walletBalance, isFetching: isBalanceFetching } = useWalletBalance();
+  const { data: ledgerTx, isFetching: isTxFetching } = useWalletTransactions();
   const balance = walletBalance?.balance ?? 0;
+  const isRefreshing = isBalanceFetching || isTxFetching;
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
+    queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+  };
 
   // Real donations data
   const { data: causes = [] } = useDonationCauses();
@@ -119,12 +127,21 @@ export default function ChildWallet() {
                   <span className="text-lg text-white/70 font-display font-medium">KivaCoins</span>
                 </div>
               </div>
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <img src={kivoImg} alt="Kivo" className="w-16 h-16 drop-shadow-2xl" />
-              </motion.div>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  onClick={handleRefresh}
+                  className="bg-white/15 backdrop-blur-sm rounded-xl p-2 hover:bg-white/25 transition-colors"
+                  aria-label={t('child.wallet.refresh') ?? 'Refresh'}
+                >
+                  <RefreshCw className={`h-4 w-4 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+                <motion.div
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <img src={kivoImg} alt="Kivo" className="w-16 h-16 drop-shadow-2xl" />
+                </motion.div>
+              </div>
             </div>
 
             {/* Stats Row */}
