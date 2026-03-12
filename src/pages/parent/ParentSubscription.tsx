@@ -286,9 +286,9 @@ export default function ParentSubscription() {
                          >
                            {t(`parent.subscription.status_${inv.status}`)}
                          </Badge>
+                       </div>
                      </div>
                    );
-                  );
                 })}
               </div>
             )}
