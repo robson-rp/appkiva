@@ -330,6 +330,11 @@ const fr: Record<string, string> = {
   'parent.children.credentials_copied': 'Identifiants copiés dans le presse-papiers',
   'parent.children.credentials_warning': 'Conservez le nom d\'utilisateur et le PIN en lieu sûr. Partagez-les avec l\'enfant pour qu\'il puisse accéder à la plateforme.',
   'common.done': 'Terminé',
+  'nav.parent.insights': 'Insights',
+  'nav.parent.activity': 'Activités',
+  'parent.activity.subtitle': 'Historique complet des transactions familiales.',
+  'parent.insights.title': 'Insights Comportementaux',
+  'parent.insights.description': 'Découvrez des conseils personnalisés basés sur les habitudes financières de vos enfants.',
 };
 
 export default fr;
