@@ -22,7 +22,7 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 20% 94%;
-    --muted-foreground: 214 25% 40%;
+    --muted-foreground: 214 25% 35%;
 
     --accent: 39 89% 57%;
     --accent-foreground: 30 60% 15%;
@@ -72,7 +72,7 @@
     --secondary-foreground: 0 0% 100%;
 
     --muted: 214 30% 18%;
-    --muted-foreground: 214 15% 65%;
+    --muted-foreground: 214 15% 70%;
 
     --accent: 39 89% 50%;
     --accent-foreground: 30 60% 10%;
@@ -132,8 +132,8 @@
 
   /* Small text floor: never below 12px */
   .text-xs {
-    font-size: 0.8125rem; /* 13px */
-    line-height: 1.25rem;
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.375rem;
   }
 }
 

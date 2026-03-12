@@ -26,8 +26,8 @@ export default {
         "section-lg": ["1.5rem", { lineHeight: "2rem", fontWeight: "600" }],        /* 24px - desktop */
         "body": ["1rem", { lineHeight: "1.5rem" }],                                 /* 16px */
         "body-lg": ["1.125rem", { lineHeight: "1.75rem" }],                         /* 18px */
-        "small": ["0.875rem", { lineHeight: "1.25rem" }],                           /* 14px - minimum small */
-        "caption": ["0.8125rem", { lineHeight: "1.125rem" }],                       /* 13px - absolute floor */
+        "small": ["0.9375rem", { lineHeight: "1.5rem" }],                           /* 15px - minimum small */
+        "caption": ["0.875rem", { lineHeight: "1.375rem" }],                        /* 14px - absolute floor */
       },
       spacing: {
         "touch": "2.75rem",  /* 44px - minimum touch target */
