@@ -3039,6 +3039,7 @@ export type Database = {
         | "family_premium"
         | "school_institutional"
         | "partner_program"
+        | "teacher"
       task_category: "cleaning" | "studying" | "helping" | "other"
       task_status: "pending" | "in_progress" | "completed" | "approved"
       tenant_type: "family" | "school" | "institutional_partner"
@@ -3247,6 +3248,7 @@ export const Constants = {
         "family_premium",
         "school_institutional",
         "partner_program",
+        "teacher",
       ],
       task_category: ["cleaning", "studying", "helping", "other"],
       task_status: ["pending", "in_progress", "completed", "approved"],
