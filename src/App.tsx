@@ -45,6 +45,7 @@ const ParentSubscription = lazy(() => import("./pages/parent/ParentSubscription"
 const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
 const ParentSupport = lazy(() => import("./pages/parent/ParentSupport"));
 const ParentMissions = lazy(() => import("./pages/parent/ParentMissions"));
+const ParentDreams = lazy(() => import("./pages/parent/ParentDreams"));
 
 // Child
 const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
@@ -198,6 +199,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/parent/allowance" element={<ParentLayout><S><ParentAllowance /></S></ParentLayout>} />
         <Route path="/parent/reports" element={<ParentLayout><S><ParentReports /></S></ParentLayout>} />
         <Route path="/parent/vaults" element={<ParentLayout><S><ParentVaults /></S></ParentLayout>} />
+        <Route path="/parent/dreams" element={<ParentLayout><S><ParentDreams /></S></ParentLayout>} />
         <Route path="/parent/rewards" element={<ParentLayout><S><ParentRewards /></S></ParentLayout>} />
         <Route path="/parent/profile" element={<ParentLayout><S><ParentProfile /></S></ParentLayout>} />
         <Route path="/parent/subscription" element={<ParentLayout><S><ParentSubscription /></S></ParentLayout>} />

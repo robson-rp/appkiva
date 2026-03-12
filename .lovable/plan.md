@@ -1,43 +1,128 @@
 
 
-## Sonhos (Dreams) na Conta do Encarregado
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Problema
-A funcionalidade "Sonhos" (Dream Vaults) existe apenas no portal da crianca. O encarregado nao tem acesso para ver, comentar ou gerir os sonhos dos filhos. Nao existe pagina, rota nem item de navegacao no portal do encarregado.
+## Current State Assessment
 
-### Solucao
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
-Criar uma pagina `ParentDreams` no portal do encarregado que permita:
-- Ver todos os sonhos de cada filho (agrupados por crianca)
-- Ver o progresso de cada sonho (barra de progresso, montante atual vs. objetivo)
-- Deixar comentarios/mensagens de encorajamento nos sonhos
-- Depositar moedas nos sonhos dos filhos
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-### Alteracoes
+## What Lovable Can and Cannot Build
 
-1. **Nova pagina `src/pages/parent/ParentDreams.tsx`**
-   - Lista sonhos de todos os filhos (via `useDreamVaults()` sem filtro de profileId, que ja retorna sonhos do household)
-   - Agrupa por crianca usando dados de `useChildren()`
-   - Card para cada sonho com icone, titulo, progresso, comentarios
-   - Botao para adicionar comentario (usa `useAddDreamComment`)
-   - Botao para depositar moedas (usa `useDepositToDream`)
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-2. **Atualizar `src/App.tsx`**
-   - Importar `ParentDreams` (lazy)
-   - Adicionar rota `/parent/dreams`
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-3. **Atualizar `src/components/layouts/ParentLayout.tsx`**
-   - Adicionar item "Sonhos" na navegacao (icone `Sparkles`) com `requiredFeature: FEATURES.DREAM_VAULTS`
-   - Posicionar apos "Cofres" na lista
+## Implementation Plan (4 Phases)
 
-4. **Adicionar traducoes em `src/i18n/pt.ts` e `src/i18n/en.ts`**
-   - `nav.parent.dreams`: "Sonhos" / "Dreams"
-   - Labels para a pagina (titulo, comentar, depositar, etc.)
+### Phase 1 — Multi-Tenant Foundation
 
-### Detalhes Tecnicos
-- O hook `useDreamVaults()` sem argumento ja carrega todos os sonhos visiveis via RLS (household-based)
-- O hook `useAddDreamComment` ja existe e permite pais comentarem
-- O hook `useDepositToDream` ja existe para depositos
-- RLS das tabelas `dream_vaults` e `dream_vault_comments` ja permite acesso ao household e insercao por pais
-- Nao e necessaria migracao de base de dados
+**Database migrations:**
+
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+
+4. Expand `app_role` enum to include `admin`
+
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
+
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+
+### Phase 2 — Currency Localization & Real Money Domain Separation
+
+**Database:**
+
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
+
+2. Add `real_money_enabled` flag to tenants
+
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
+
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
+
+### Phase 3 — Audit Logging & Compliance
+
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

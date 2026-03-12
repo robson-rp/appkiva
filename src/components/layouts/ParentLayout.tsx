@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones, Target } from 'lucide-react';
+import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones, Target, Sparkles } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -28,6 +28,7 @@ function useNavItems() {
     { title: t('nav.parent.missions') || 'Missões', url: '/parent/missions', icon: Target },
     { title: t('nav.parent.allowance'), url: '/parent/allowance', icon: Wallet },
     { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.parent.dreams'), url: '/parent/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
     { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
     { title: t('nav.parent.reports'), url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
     { title: t('nav.parent.profile'), url: '/parent/profile', icon: UserCircle },
@@ -45,6 +46,7 @@ function useNavItems() {
 
   const mobileMoreItems: { title: string; url: string; icon: any; requiredFeature?: FeatureKey }[] = [
     { title: t('nav.parent.vaults'), url: '/parent/vaults', icon: PiggyBank, requiredFeature: FEATURES.SAVINGS_VAULTS },
+    { title: t('nav.parent.dreams'), url: '/parent/dreams', icon: Sparkles, requiredFeature: FEATURES.DREAM_VAULTS },
     { title: t('nav.parent.rewards'), url: '/parent/rewards', icon: Gift, requiredFeature: FEATURES.CUSTOM_REWARDS },
     { title: t('nav.parent.reports'), url: '/parent/reports', icon: BarChart3, requiredFeature: FEATURES.ADVANCED_ANALYTICS },
     { title: t('nav.parent.profile'), url: '/parent/profile', icon: UserCircle },
