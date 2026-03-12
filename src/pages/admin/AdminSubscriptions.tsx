@@ -199,6 +199,18 @@ export default function AdminSubscriptions() {
         <p className="text-sm text-muted-foreground">{t('admin.subs.subtitle')}</p>
       </div>
 
+      <Tabs defaultValue="plans" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="plans" className="gap-1.5"><Package className="h-3.5 w-3.5" /> {t('admin.subs.tab_plans')}</TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> {t('admin.subs.tab_invoices')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="invoices">
+          <AdminInvoicesTab />
+        </TabsContent>
+
+        <TabsContent value="plans" className="space-y-6">
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
