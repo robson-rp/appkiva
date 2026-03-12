@@ -2799,7 +2799,7 @@ const en: Record<string, string> = {
   'parent.children.child_username_hint': '3-20 characters, letters, numbers and _ only',
   'parent.children.child_pin': 'PIN',
   'parent.children.child_pin_confirm': 'Confirm PIN',
-  'parent.children.child_pin_hint': '4-6 numeric digits',
+  'parent.children.child_pin_hint': '4 numeric digits',
   'parent.children.child_pin_mismatch': 'PINs do not match',
   'parent.children.child_dob': 'Date of birth',
   'parent.children.child_avatar': 'Avatar',

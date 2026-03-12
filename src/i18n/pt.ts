@@ -2803,7 +2803,7 @@ const pt: Record<string, string> = {
   'parent.children.child_username_hint': '3-20 caracteres, apenas letras, números e _',
   'parent.children.child_pin': 'PIN',
   'parent.children.child_pin_confirm': 'Confirmar PIN',
-  'parent.children.child_pin_hint': '4-6 dígitos numéricos',
+  'parent.children.child_pin_hint': '4 dígitos numéricos',
   'parent.children.child_pin_mismatch': 'Os PINs não coincidem',
   'parent.children.child_dob': 'Data de nascimento',
   'parent.children.child_avatar': 'Avatar',
