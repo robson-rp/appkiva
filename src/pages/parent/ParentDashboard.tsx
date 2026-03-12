@@ -32,7 +32,6 @@ export default function ParentDashboard() {
   const realTransactions = (txData?.pages?.flat() ?? []).slice(0, 4);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const { data: emissionStats } = useEmissionStats();
-  const { loading: featuresLoading } = useAllFeatures();
 
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
 
