@@ -79,7 +79,7 @@ export function useHouseholdTransactions(initialLimit?: number) {
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length < pageSize) return undefined;
+      if (!lastPage || lastPage.length < pageSize) return undefined;
       return allPages.length;
     },
     enabled: !!user?.profileId && user?.role === 'parent',
