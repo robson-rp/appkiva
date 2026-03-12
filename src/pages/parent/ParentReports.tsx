@@ -30,7 +30,8 @@ export default function ParentReports() {
   const { allowed: reportsAllowed, tierName, loading: gateLoading } = useFeatureGate(FEATURES.ADVANCED_ANALYTICS);
   const { data: children = [], isLoading: loadingChildren } = useChildren();
   const { data: householdTasks = [], isLoading: loadingTasks } = useHouseholdTasks();
-  const { data: householdTx = [], isLoading: loadingTx } = useHouseholdTransactions(100);
+  const { data: txData, isLoading: loadingTx } = useHouseholdTransactions(100);
+  const householdTx = txData?.pages?.flat() ?? [];
 
   const isLoading = loadingChildren || loadingTasks || loadingTx;
 

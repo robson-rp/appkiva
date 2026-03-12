@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send, Gauge } from 'lucide-react';
+import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send, Gauge, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
@@ -31,7 +31,8 @@ export default function ParentDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: children = [], isLoading: childrenLoading } = useChildren();
-  const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
+  const { data: txData, isLoading: txLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHouseholdTransactions(8);
+  const realTransactions = txData?.pages?.flat() ?? [];
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const { data: emissionStats } = useEmissionStats();
   const { loading: featuresLoading } = useAllFeatures();
@@ -347,6 +348,22 @@ export default function ParentDashboard() {
                     </div>
                   );
                 })
+              )}
+              {hasNextPage && (
+                <div className="pt-3 flex justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-primary text-small gap-1.5"
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : null}
+                    {isFetchingNextPage ? 'A carregar...' : 'Carregar mais'}
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

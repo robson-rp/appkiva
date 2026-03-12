@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -14,12 +14,15 @@ export interface HouseholdTransaction {
   avatar: string;
 }
 
-export function useHouseholdTransactions(limit = 10) {
-  const { user } = useAuth();
+const PAGE_SIZE = 10;
 
-  return useQuery({
-    queryKey: ['household-transactions', user?.profileId, limit],
-    queryFn: async (): Promise<HouseholdTransaction[]> => {
+export function useHouseholdTransactions(initialLimit?: number) {
+  const { user } = useAuth();
+  const pageSize = initialLimit ?? PAGE_SIZE;
+
+  return useInfiniteQuery({
+    queryKey: ['household-transactions', user?.profileId, pageSize],
+    queryFn: async ({ pageParam = 0 }): Promise<HouseholdTransaction[]> => {
       if (!user?.profileId) return [];
 
       // Get all children profile ids for this parent
@@ -28,25 +31,34 @@ export function useHouseholdTransactions(limit = 10) {
         .select('profile_id, nickname, profiles!children_profile_id_fkey ( display_name, avatar )')
         .eq('parent_profile_id', user.profileId);
 
-      if (!children?.length) return [];
-
       const profileMap = new Map<string, { name: string; avatar: string }>();
-      for (const c of children as any[]) {
+
+      // Add parent to map
+      profileMap.set(user.profileId, {
+        name: user.name ?? 'Encarregado',
+        avatar: user.avatar ?? '👤',
+      });
+
+      // Add children to map
+      for (const c of (children ?? []) as any[]) {
         profileMap.set(c.profile_id, {
           name: c.profiles?.display_name ?? c.nickname ?? 'Criança',
           avatar: c.profiles?.avatar ?? '👧',
         });
       }
 
-      const profileIds = children.map((c: any) => c.profile_id);
+      const profileIds = [
+        user.profileId,
+        ...(children ?? []).map((c: any) => c.profile_id),
+      ];
 
-      // Fetch recent transactions from the wallet_transactions view
+      // Fetch transactions from the wallet_transactions view for all household members
       const { data: txs, error } = await supabase
         .from('wallet_transactions')
         .select('*')
         .in('profile_id', profileIds)
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .range(pageParam * pageSize, (pageParam + 1) * pageSize - 1);
 
       if (error) throw error;
 
@@ -64,6 +76,11 @@ export function useHouseholdTransactions(limit = 10) {
           avatar: profile?.avatar ?? '👧',
         };
       });
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < pageSize) return undefined;
+      return allPages.length;
     },
     enabled: !!user?.profileId && user?.role === 'parent',
   });
