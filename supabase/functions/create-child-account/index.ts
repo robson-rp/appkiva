@@ -66,80 +66,43 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Apenas encarregados podem criar contas de crianças' }), { status: 403, headers: corsHeaders });
     }
 
-    // Check username uniqueness
-    const { data: existingUsername } = await adminClient
-      .from('profiles')
-      .select('id')
-      .eq('username', username.toLowerCase())
-      .maybeSingle();
-
-    if (existingUsername) {
-      return new Response(JSON.stringify({ error: 'Este nome de utilizador já está em uso' }), { status: 409, headers: corsHeaders });
-    }
-
-    // Check child limit
-    const { data: existingChildren } = await adminClient
-      .from('children')
-      .select('id')
-      .eq('parent_profile_id', callerProfile.id);
-
-    // Get max from subscription tier + extra purchased
-    let maxChildren = 2;
-    if (callerProfile.tenant_id) {
-      const { data: tenant } = await adminClient
-        .from('tenants')
-        .select('subscription_tier_id, extra_children_purchased')
-        .eq('id', callerProfile.tenant_id)
-        .single();
-      if (tenant?.subscription_tier_id) {
-        const { data: tier } = await adminClient
-          .from('subscription_tiers')
-          .select('max_children')
-          .eq('id', tenant.subscription_tier_id)
-          .single();
-        if (tier?.max_children) maxChildren = tier.max_children;
-      }
-      maxChildren += (tenant?.extra_children_purchased ?? 0);
-    }
-
-    if ((existingChildren?.length ?? 0) >= maxChildren) {
-      return new Response(JSON.stringify({ error: `Limite de crianças atingido (${maxChildren}). Faça upgrade do plano.` }), { status: 400, headers: corsHeaders });
-    }
-
-    // Ensure parent has a household
-    let householdId = callerProfile.household_id;
-    if (!householdId) {
-      const { data: hId } = await adminClient.rpc('ensure_parent_household', { _profile_id: callerProfile.id });
-      householdId = hId as string;
-    }
-
-    // Create auth user with synthetic email
+    // Check username uniqueness — but allow reuse if the previous child was deleted (orphaned profile)
     const syntheticEmail = `${username.toLowerCase()}@child.kivara.local`;
     const childAvatar = avatar || '🦊';
 
-    // Check if an orphaned auth user exists with this email (from a previously deleted child)
-    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
-    const orphanedUser = existingUsers?.users?.find(u => u.email === syntheticEmail);
+    const { data: existingProfile } = await adminClient
+      .from('profiles')
+      .select('id, user_id')
+      .eq('username', username.toLowerCase())
+      .maybeSingle();
 
-    let childUserId: string;
-
-    if (orphanedUser) {
-      // Check if this user still has a profile linked to an active child
-      const { data: existingChild } = await adminClient
+    if (existingProfile) {
+      // Check if this profile is linked to an active child
+      const { data: activeChild } = await adminClient
         .from('children')
         .select('id')
-        .eq('profile_id', (await adminClient.from('profiles').select('id').eq('user_id', orphanedUser.id).maybeSingle()).data?.id || '')
+        .eq('profile_id', existingProfile.id)
         .maybeSingle();
 
-      if (existingChild) {
-        return new Response(JSON.stringify({ error: 'Este nome de utilizador já está em uso por outra criança activa' }), { status: 409, headers: corsHeaders });
+      if (activeChild) {
+        return new Response(JSON.stringify({ error: 'Este nome de utilizador já está em uso' }), { status: 409, headers: corsHeaders });
       }
 
-      // Orphaned user — delete and recreate
-      await adminClient.auth.admin.deleteUser(orphanedUser.id);
-      // Also clean up orphaned profile/roles
-      await adminClient.from('user_roles').delete().eq('user_id', orphanedUser.id);
-      await adminClient.from('profiles').delete().eq('user_id', orphanedUser.id);
+      // Orphaned profile — clean up auth user, profile, and roles
+      if (existingProfile.user_id) {
+        await adminClient.auth.admin.deleteUser(existingProfile.user_id);
+        await adminClient.from('user_roles').delete().eq('user_id', existingProfile.user_id);
+      }
+      await adminClient.from('profiles').delete().eq('id', existingProfile.id);
+    } else {
+      // No profile with this username, but check if auth user exists with synthetic email
+      const { data: authUserList } = await adminClient.auth.admin.listUsers({ filter: syntheticEmail });
+      const orphanedAuthUser = authUserList?.users?.[0];
+      if (orphanedAuthUser) {
+        await adminClient.auth.admin.deleteUser(orphanedAuthUser.id);
+        await adminClient.from('user_roles').delete().eq('user_id', orphanedAuthUser.id);
+        await adminClient.from('profiles').delete().eq('user_id', orphanedAuthUser.id);
+      }
     }
 
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
