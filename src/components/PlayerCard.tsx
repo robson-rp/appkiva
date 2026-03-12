@@ -30,7 +30,17 @@ export function PlayerCard({
   onLevelUpClick,
 }: PlayerCardProps) {
   const t = useT();
-  const config = LEVEL_CONFIG[level];
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
+    queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+    queryClient.invalidateQueries({ queryKey: ['children'] });
+    setTimeout(() => setIsRefreshing(false), 1500);
+  };
+
   const levels = Object.entries(LEVEL_CONFIG) as [Level, typeof config][];
   const currentIndex = levels.findIndex(([k]) => k === level);
   const nextLevel = levels[currentIndex + 1];
