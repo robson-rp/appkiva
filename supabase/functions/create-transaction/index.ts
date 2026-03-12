@@ -239,7 +239,8 @@ Deno.serve(async (req) => {
     let debitWalletId: string;
     let creditWalletId: string;
     const requiresApproval = REQUIRES_APPROVAL_TYPES.includes(body.entry_type) && !isParent && !isAdmin;
-    const isEmission = EMISSION_TYPES.includes(body.entry_type);
+    const isEmission = EMISSION_TYPES.includes(body.entry_type) || 
+      (body.entry_type === "vault_deposit" && (isParent || isAdmin) && !!targetWallet);
 
     // 8b. Emission limit check (for parents emitting KVC)
     if (isEmission && (isParent || isAdmin) && body.entry_type !== "vault_interest") {
@@ -280,8 +281,15 @@ Deno.serve(async (req) => {
         break;
 
       case "vault_deposit":
-        debitWalletId = callerWallet.id;
-        creditWalletId = targetWallet?.id ?? callerWallet.id;
+        if ((isParent || isAdmin) && targetWallet) {
+          // Parent/admin depositing into child's dream = emission from system
+          debitWalletId = systemWalletId;
+          creditWalletId = targetWallet.id;
+        } else {
+          // Child depositing own funds
+          debitWalletId = callerWallet.id;
+          creditWalletId = targetWallet?.id ?? callerWallet.id;
+        }
         break;
 
       case "vault_withdraw":
