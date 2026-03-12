@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Crown, Check, ArrowDown, Sparkles, Shield, AlertTriangle, Receipt, Clock, CheckCircle2, XCircle, CalendarClock, Star } from 'lucide-react';
 import { useAllFeatures } from '@/hooks/use-feature-gate';
 import { useSubscriptionTiers, useUpgradeSubscription, useInvoices } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
@@ -48,6 +48,16 @@ export default function ParentSubscription() {
   const lowerTiers = familyTiers.filter((_, i) => i < currentIndex);
   const isFreeTier = !tierName || tierName === 'Free' || tierName === 'Gratuito' || currentIndex <= 0;
 
+  // Check if user is on the highest family tier (no tier above the current one)
+  const higherTiers = familyTiers.filter((_, i) => i > currentIndex);
+  const isHighestTier = currentIndex >= 0 && higherTiers.length === 0;
+
+  // Calculate next billing date from last invoice
+  const lastPaidInvoice = invoices.find(inv => inv.status === 'paid');
+  const nextBillingDate = lastPaidInvoice
+    ? new Date(new Date(lastPaidInvoice.created_at).getTime() + 30 * 24 * 60 * 60 * 1000)
+    : null;
+
   const handleDowngrade = async () => {
     if (!downgradeTarget) return;
     try {
@@ -84,13 +94,47 @@ export default function ParentSubscription() {
                   )}
                 </div>
               </div>
-              <Badge className="bg-white/20 text-white border-0 font-display">
-                <Shield className="h-3 w-3 mr-1" /> {t('parent.subscription.active')}
-              </Badge>
+              <div className="flex flex-col items-end gap-1">
+                <Badge className="bg-white/20 text-white border-0 font-display">
+                  <Shield className="h-3 w-3 mr-1" /> {t('parent.subscription.active')}
+                </Badge>
+                {isHighestTier && (
+                  <Badge className="bg-white/30 text-white border-0 font-display text-[10px]">
+                    <Star className="h-3 w-3 mr-1" /> {t('parent.subscription.max_plan')}
+                  </Badge>
+                )}
+              </div>
             </div>
+
+            {/* Next billing info for paid plans */}
+            {!isFreeTier && nextBillingDate && (
+              <div className="mt-4 pt-3 border-t border-white/15 flex items-center gap-2 text-sm opacity-80">
+                <CalendarClock className="h-4 w-4" />
+                <span>{t('parent.subscription.next_billing')}: {nextBillingDate.toLocaleDateString()}</span>
+                <span className="ml-auto text-xs bg-white/15 px-2 py-0.5 rounded-full">
+                  {t('parent.subscription.monthly')}
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Max Plan Message */}
+      {isHighestTier && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-sm text-foreground">
+                {t('parent.subscription.max_plan_desc')}
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Features List */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -142,51 +186,59 @@ export default function ParentSubscription() {
         </Card>
       </motion.div>
 
-      {/* Actions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3">
-        <Button
-          onClick={() => setPaymentOpen(true)}
-          className="w-full rounded-xl font-display h-12 text-base gap-2 bg-accent hover:bg-accent/90 text-accent-foreground"
-        >
-          <Crown className="h-4 w-4" /> {t('parent.subscription.upgrade')}
-        </Button>
+      {/* Actions — only show upgrade if NOT on highest tier */}
+      {!isHighestTier && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3">
+          <Button
+            onClick={() => setPaymentOpen(true)}
+            className="w-full rounded-xl font-display h-12 text-base gap-2 bg-accent hover:bg-accent/90 text-accent-foreground"
+          >
+            <Crown className="h-4 w-4" /> {t('parent.subscription.upgrade')}
+          </Button>
+        </motion.div>
+      )}
 
-        {!isFreeTier && lowerTiers.length > 0 && (
-          <div className="space-y-2">
-            <Separator />
-            <p className="text-xs text-muted-foreground text-center">{t('parent.subscription.or_lower')}</p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {lowerTiers.map((tier) => (
-                <Button
-                  key={tier.id}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl text-xs gap-1.5"
-                  onClick={() => {
-                    setDowngradeTarget(tier);
-                    setDowngradeOpen(true);
-                  }}
-                >
-                  <ArrowDown className="h-3 w-3" />
-                  {tier.name}
-                </Button>
-              ))}
-            </div>
+      {/* Downgrade options — only when not on free tier */}
+      {!isFreeTier && lowerTiers.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-3">
+          <Separator />
+          <p className="text-xs text-muted-foreground text-center">{t('parent.subscription.or_lower')}</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {lowerTiers.map((tier) => (
+              <Button
+                key={tier.id}
+                variant="outline"
+                size="sm"
+                className="rounded-xl text-xs gap-1.5"
+                onClick={() => {
+                  setDowngradeTarget(tier);
+                  setDowngradeOpen(true);
+                }}
+              >
+                <ArrowDown className="h-3 w-3" />
+                {tier.name}
+              </Button>
+            ))}
           </div>
-        )}
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Billing History */}
-      {invoices.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Receipt className="h-4 w-4 text-primary" />
-                <h2 className="font-display font-semibold">{t('parent.subscription.billing_history')}</h2>
-              </div>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Receipt className="h-4 w-4 text-primary" />
+              <h2 className="font-display font-semibold">{t('parent.subscription.billing_history')}</h2>
+            </div>
+
+            {invoices.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-6">
+                {t('parent.subscription.no_invoices')}
+              </p>
+            ) : (
               <div className="space-y-2">
-                {invoices.slice(0, 6).map((inv) => {
+                {invoices.slice(0, 10).map((inv) => {
                   const statusIcon = inv.status === 'paid'
                     ? <CheckCircle2 className="h-4 w-4 text-green-500" />
                     : inv.status === 'pending'
@@ -203,6 +255,11 @@ export default function ParentSubscription() {
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(inv.created_at).toLocaleDateString()}
+                            {inv.billing_period && (
+                              <span className="ml-1.5 text-muted-foreground/70">
+                                · {inv.billing_period === 'monthly' ? t('parent.subscription.monthly') : t('parent.subscription.yearly')}
+                              </span>
+                            )}
                           </p>
                         </div>
                       </div>
@@ -221,18 +278,21 @@ export default function ParentSubscription() {
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      <PaymentSimulator
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-        currentTierName={tierName}
-        tiers={familyTiers}
-        onConfirmUpgrade={upgrade}
-      />
+      {/* Payment Simulator — only if not on highest tier */}
+      {!isHighestTier && (
+        <PaymentSimulator
+          open={paymentOpen}
+          onOpenChange={setPaymentOpen}
+          currentTierName={tierName}
+          tiers={familyTiers}
+          onConfirmUpgrade={upgrade}
+        />
+      )}
 
       {/* Downgrade Confirmation Dialog */}
       <Dialog open={downgradeOpen} onOpenChange={setDowngradeOpen}>

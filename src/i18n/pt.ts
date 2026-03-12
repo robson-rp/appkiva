@@ -1097,6 +1097,13 @@ const pt: Record<string, string> = {
   'parent.subscription.status_pending': 'Pendente',
   'parent.subscription.status_failed': 'Falhou',
   'parent.subscription.status_cancelled': 'Cancelado',
+  'parent.subscription.max_plan': 'Plano máximo activo',
+  'parent.subscription.max_plan_desc': 'Tens o plano mais completo disponível. Todas as funcionalidades estão desbloqueadas.',
+  'parent.subscription.billing_recurrence': 'Recorrência',
+  'parent.subscription.monthly': 'Mensal',
+  'parent.subscription.yearly': 'Anual',
+  'parent.subscription.next_billing': 'Próxima cobrança',
+  'parent.subscription.no_invoices': 'Sem facturas registadas',
 
   // ─── Parent Profile ───
   'parent.profile.guardian': 'Encarregado',
