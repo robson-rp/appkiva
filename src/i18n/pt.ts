@@ -849,6 +849,24 @@ const pt: Record<string, string> = {
   'child.dreams.upgrade_title': 'Cofres de Sonhos',
   'child.dreams.upgrade_desc': 'Cria um vision board dos teus sonhos, acompanha o progresso e recebe incentivos dos pais. Disponível no plano Família Premium.',
 
+  // ─── Parent Dreams ───
+  'dreams.parent_title': 'Sonhos dos Filhos',
+  'dreams.parent_subtitle': 'Acompanhe e incentive os sonhos de cada filho',
+  'dreams.comment': 'Comentar',
+  'dreams.deposit': 'Depositar',
+  'dreams.send_encouragement': 'Enviar Incentivo',
+  'dreams.comment_placeholder': 'Escreve uma mensagem de incentivo...',
+  'dreams.send': 'Enviar',
+  'dreams.comment_sent': 'Comentário enviado! 💬',
+  'dreams.deposit_to': 'Depositar em',
+  'dreams.amount_placeholder': 'Montante (KivaCoins)',
+  'dreams.confirm_deposit': 'Confirmar Depósito',
+  'dreams.deposit_success': 'Depósito realizado! 🎉',
+  'dreams.no_dreams': 'Nenhum sonho criado pelos filhos ainda.',
+  'dreams.hide_comments': 'Esconder comentários',
+  'dreams.show_comments': 'Ver comentários',
+  'dreams.other': 'Outros',
+
   // ─── Child Store ───
   'child.store.title': 'Loja de Recompensas',
   'child.store.subtitle': 'Resgata prémios com as tuas moedas!',

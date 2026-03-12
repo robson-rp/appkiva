@@ -847,6 +847,24 @@ const en: Record<string, string> = {
   'child.dreams.upgrade_title': 'Dream Vaults',
   'child.dreams.upgrade_desc': 'Create a vision board of your dreams, track progress and get encouragement from parents. Available on the Family Premium plan.',
 
+  // ─── Parent Dreams ───
+  'dreams.parent_title': 'Children\'s Dreams',
+  'dreams.parent_subtitle': 'Track and encourage each child\'s dreams',
+  'dreams.comment': 'Comment',
+  'dreams.deposit': 'Deposit',
+  'dreams.send_encouragement': 'Send Encouragement',
+  'dreams.comment_placeholder': 'Write an encouragement message...',
+  'dreams.send': 'Send',
+  'dreams.comment_sent': 'Comment sent! 💬',
+  'dreams.deposit_to': 'Deposit to',
+  'dreams.amount_placeholder': 'Amount (KivaCoins)',
+  'dreams.confirm_deposit': 'Confirm Deposit',
+  'dreams.deposit_success': 'Deposit completed! 🎉',
+  'dreams.no_dreams': 'No dreams created by children yet.',
+  'dreams.hide_comments': 'Hide comments',
+  'dreams.show_comments': 'Show comments',
+  'dreams.other': 'Other',
+
   // ─── Child Store ───
   'child.store.title': 'Rewards Store',
   'child.store.subtitle': 'Redeem prizes with your coins!',
