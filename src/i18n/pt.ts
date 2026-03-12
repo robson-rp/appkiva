@@ -760,6 +760,7 @@ const pt: Record<string, string> = {
   'child.wallet.history': '📜 Histórico',
   'child.wallet.movements': 'movimentos',
   'child.wallet.no_movements': 'Sem movimentos ainda',
+  'child.wallet.refresh': 'Atualizar',
   'child.wallet.saving_vault': 'Poupança',
   'child.wallet.withdrawal_vault': 'Levantamento',
 
