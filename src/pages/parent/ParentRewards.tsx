@@ -5,7 +5,7 @@ import { FeatureGateWrapper } from '@/components/UpgradePrompt';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Gift } from 'lucide-react';
+import { Plus, Gift, Sparkles, Loader2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRewards, useCreateReward, useDeleteReward, type RewardCategory } from '@/hooks/use-rewards';
 import { useT } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } } };
@@ -26,6 +28,14 @@ const categoryColors: Record<string, string> = {
 };
 
 const iconOptions = ['🎬', '🌙', '🍕', '🎢', '📖', '📱', '🎮', '⚽', '🎨', '🎁', '🏖️', '🍦'];
+
+interface AISuggestion {
+  name: string;
+  description: string;
+  price: number;
+  category: RewardCategory;
+  icon: string;
+}
 
 export default function ParentRewards() {
   const t = useT();
@@ -48,6 +58,12 @@ export default function ParentRewards() {
   const [category, setCategory] = useState<RewardCategory>('experience');
   const [icon, setIcon] = useState('🎁');
 
+  // AI suggestions state
+  const [aiDialogOpen, setAiDialogOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
+  const [aiAdding, setAiAdding] = useState<number | null>(null);
+
   const handleCreate = () => {
     if (!name || !price) return;
     createReward.mutate(
@@ -57,6 +73,47 @@ export default function ParentRewards() {
           setDialogOpen(false);
           setName(''); setDescription(''); setPrice(''); setCategory('experience'); setIcon('🎁');
         },
+      }
+    );
+  };
+
+  const handleAiSuggest = async () => {
+    setAiLoading(true);
+    setAiSuggestions([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-rewards', {
+        body: { childAge: '8-12' },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setAiSuggestions(data.suggestions ?? []);
+    } catch (err) {
+      toast({
+        title: t('parent.rewards.ai_error'),
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: 'destructive',
+      });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleAddSuggestion = (suggestion: AISuggestion, index: number) => {
+    setAiAdding(index);
+    createReward.mutate(
+      {
+        name: suggestion.name,
+        description: suggestion.description,
+        price: suggestion.price,
+        icon: suggestion.icon,
+        category: suggestion.category,
+      },
+      {
+        onSuccess: () => {
+          setAiAdding(null);
+          toast({ title: `${suggestion.icon} ${suggestion.name}`, description: t('parent.rewards.added') });
+        },
+        onError: () => setAiAdding(null),
       }
     );
   };
@@ -102,69 +159,148 @@ export default function ParentRewards() {
           </h2>
           <p className="text-xs text-muted-foreground">{rewards.length} {t('parent.rewards.count')}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="rounded-xl font-display gap-1">
-              <Plus className="h-4 w-4" /> {t('parent.rewards.new_reward')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle className="font-display">{t('parent.rewards.create_reward')}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>{t('parent.rewards.icon')}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {iconOptions.map(ic => (
-                    <button
-                      key={ic}
-                      type="button"
-                      onClick={() => setIcon(ic)}
-                      className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border-2 transition-all ${icon === ic ? 'border-primary bg-primary/10 scale-110' : 'border-border/50 hover:border-border'}`}
-                    >
-                      {ic}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('parent.rewards.name')}</Label>
-                <Input placeholder={t('parent.rewards.name_placeholder')} value={name} onChange={e => setName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>{t('parent.rewards.description')}</Label>
-                <Textarea placeholder={t('parent.rewards.desc_placeholder')} value={description} onChange={e => setDescription(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl font-display gap-1"
+            onClick={() => { setAiDialogOpen(true); handleAiSuggest(); }}
+          >
+            <Sparkles className="h-4 w-4" /> IA
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="rounded-xl font-display gap-1">
+                <Plus className="h-4 w-4" /> {t('parent.rewards.new_reward')}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="font-display">{t('parent.rewards.create_reward')}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>{t('parent.rewards.price')}</Label>
-                  <Input type="number" placeholder="50" value={price} onChange={e => setPrice(e.target.value)} />
+                  <Label>{t('parent.rewards.icon')}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {iconOptions.map(ic => (
+                      <button
+                        key={ic}
+                        type="button"
+                        onClick={() => setIcon(ic)}
+                        className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border-2 transition-all ${icon === ic ? 'border-primary bg-primary/10 scale-110' : 'border-border/50 hover:border-border'}`}
+                      >
+                        {ic}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('parent.rewards.category')}</Label>
-                  <Select value={category} onValueChange={v => setCategory(v as RewardCategory)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="experience">{t('parent.rewards.cat.experience')}</SelectItem>
-                      <SelectItem value="privilege">{t('parent.rewards.cat.privilege')}</SelectItem>
-                      <SelectItem value="physical">{t('parent.rewards.cat.physical')}</SelectItem>
-                      <SelectItem value="digital">{t('parent.rewards.cat.digital')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>{t('parent.rewards.name')}</Label>
+                  <Input placeholder={t('parent.rewards.name_placeholder')} value={name} onChange={e => setName(e.target.value)} />
                 </div>
+                <div className="space-y-2">
+                  <Label>{t('parent.rewards.description')}</Label>
+                  <Textarea placeholder={t('parent.rewards.desc_placeholder')} value={description} onChange={e => setDescription(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>{t('parent.rewards.price')}</Label>
+                    <Input type="number" placeholder="50" value={price} onChange={e => setPrice(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t('parent.rewards.category')}</Label>
+                    <Select value={category} onValueChange={v => setCategory(v as RewardCategory)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="experience">{t('parent.rewards.cat.experience')}</SelectItem>
+                        <SelectItem value="privilege">{t('parent.rewards.cat.privilege')}</SelectItem>
+                        <SelectItem value="physical">{t('parent.rewards.cat.physical')}</SelectItem>
+                        <SelectItem value="digital">{t('parent.rewards.cat.digital')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Button
+                  className="w-full rounded-xl font-display"
+                  disabled={!name || !price || createReward.isPending}
+                  onClick={handleCreate}
+                >
+                  {createReward.isPending ? t('parent.rewards.creating') : t('parent.rewards.create_btn')}
+                </Button>
               </div>
-              <Button
-                className="w-full rounded-xl font-display"
-                disabled={!name || !price || createReward.isPending}
-                onClick={handleCreate}
-              >
-                {createReward.isPending ? t('parent.rewards.creating') : t('parent.rewards.create_btn')}
+            </DialogContent>
+          </Dialog>
+        </div>
+      </motion.div>
+
+      {/* AI Suggestions Dialog */}
+      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              {t('parent.rewards.ai_title')}
+            </DialogTitle>
+          </DialogHeader>
+
+          {aiLoading ? (
+            <div className="flex flex-col items-center justify-center py-10 gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">{t('parent.rewards.ai_loading')}</p>
+            </div>
+          ) : aiSuggestions.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-muted-foreground">{t('parent.rewards.ai_empty')}</p>
+              <Button size="sm" className="mt-3 rounded-xl font-display gap-1" onClick={handleAiSuggest}>
+                <Sparkles className="h-4 w-4" /> {t('parent.rewards.ai_retry')}
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
-      </motion.div>
+          ) : (
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {aiSuggestions.map((s, i) => (
+                <Card key={i} className="border-border/50">
+                  <CardContent className="p-3 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center text-xl shrink-0">
+                      {s.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-display font-bold text-sm truncate">{s.name}</h4>
+                        <Badge variant="outline" className={`text-[10px] shrink-0 ${categoryColors[s.category] ?? ''}`}>
+                          {categoryLabels[s.category] ?? s.category}
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{s.description}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="font-display text-sm font-bold">🪙 {s.price}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 rounded-lg text-xs font-display gap-1"
+                          disabled={aiAdding === i || createReward.isPending}
+                          onClick={() => handleAddSuggestion(s, i)}
+                        >
+                          {aiAdding === i ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                          {t('parent.rewards.add')}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full rounded-xl font-display gap-1 text-xs"
+                onClick={handleAiSuggest}
+                disabled={aiLoading}
+              >
+                <Sparkles className="h-3.5 w-3.5" /> {t('parent.rewards.ai_more')}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Rewards Grid */}
       {isLoading ? (
