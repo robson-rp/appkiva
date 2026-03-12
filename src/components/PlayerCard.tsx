@@ -4,8 +4,9 @@ import { Level, LEVEL_CONFIG } from '@/types/kivara';
 import { getLeagueTier, LEAGUE_TIERS } from '@/types/league';
 import { AvatarGlow } from '@/components/AvatarGlow';
 import { LeagueBadge } from '@/components/LeagueBadge';
-import { Flame, Trophy, Star, Zap } from 'lucide-react';
+import { Flame, Trophy, Star, Zap, RefreshCw } from 'lucide-react';
 import { useT } from '@/contexts/LanguageContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PlayerCardProps {
   name: string;
