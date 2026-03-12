@@ -922,9 +922,9 @@ export default function Login() {
                               inputMode="numeric"
                               placeholder="••••"
                               value={childPin}
-                              onChange={e => setChildPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              onChange={e => setChildPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                               className="h-12 rounded-xl text-base tracking-widest text-center font-mono"
-                              maxLength={6}
+                              maxLength={4}
                               minLength={4}
                               required
                               autoComplete="current-password"
