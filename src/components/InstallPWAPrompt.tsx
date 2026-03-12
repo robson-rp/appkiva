@@ -18,11 +18,12 @@ function isDismissed(): boolean {
 
 export function InstallPWAPrompt() {
   const ctx = useContext(LanguageContext);
+  const { isInstallable, install, isIOS } = usePWAInstall();
+  const [dismissed, setDismissed] = useState(() => isDismissed());
+
   // Gracefully handle missing provider (e.g. during HMR)
   if (!ctx) return null;
   const t = ctx.t;
-  const { isInstallable, install, isIOS } = usePWAInstall();
-  const [dismissed, setDismissed] = useState(() => isDismissed());
 
   if (!isInstallable || dismissed) return null;
 
