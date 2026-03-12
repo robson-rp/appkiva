@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 
 export interface WalletBalance {
   wallet_id: string;
@@ -20,9 +21,35 @@ export interface WalletTransaction {
   metadata: Record<string, unknown>;
 }
 
+/** Subscribe to ledger_entries changes and invalidate wallet queries */
+function useWalletRealtime() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('wallet-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'ledger_entries' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
+          queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+          queryClient.invalidateQueries({ queryKey: ['children'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+}
+
 export function useWalletBalance(profileId?: string) {
   const { user } = useAuth();
   const id = profileId || user?.profileId;
+
+  useWalletRealtime();
 
   return useQuery({
     queryKey: ['wallet-balance', id],
@@ -40,6 +67,7 @@ export function useWalletBalance(profileId?: string) {
       return (data as WalletBalance | null);
     },
     enabled: !!id,
+    refetchInterval: 30000,
   });
 }
 
@@ -52,7 +80,6 @@ export function useWalletTransactions(profileId?: string, limit = 20) {
     queryFn: async () => {
       if (!id) return [];
       
-      // Get wallet id first
       const { data: wallet } = await supabase
         .from('wallets')
         .select('id')
@@ -74,5 +101,6 @@ export function useWalletTransactions(profileId?: string, limit = 20) {
       return (data as WalletTransaction[]) ?? [];
     },
     enabled: !!id,
+    refetchInterval: 30000,
   });
 }
