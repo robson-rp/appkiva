@@ -117,10 +117,35 @@ Deno.serve(async (req) => {
     const syntheticEmail = `${username.toLowerCase()}@child.kivara.local`;
     const childAvatar = avatar || '🦊';
 
+    // Check if an orphaned auth user exists with this email (from a previously deleted child)
+    const { data: existingUsers } = await adminClient.auth.admin.listUsers();
+    const orphanedUser = existingUsers?.users?.find(u => u.email === syntheticEmail);
+
+    let childUserId: string;
+
+    if (orphanedUser) {
+      // Check if this user still has a profile linked to an active child
+      const { data: existingChild } = await adminClient
+        .from('children')
+        .select('id')
+        .eq('profile_id', (await adminClient.from('profiles').select('id').eq('user_id', orphanedUser.id).maybeSingle()).data?.id || '')
+        .maybeSingle();
+
+      if (existingChild) {
+        return new Response(JSON.stringify({ error: 'Este nome de utilizador já está em uso por outra criança activa' }), { status: 409, headers: corsHeaders });
+      }
+
+      // Orphaned user — delete and recreate
+      await adminClient.auth.admin.deleteUser(orphanedUser.id);
+      // Also clean up orphaned profile/roles
+      await adminClient.from('user_roles').delete().eq('user_id', orphanedUser.id);
+      await adminClient.from('profiles').delete().eq('user_id', orphanedUser.id);
+    }
+
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email: syntheticEmail,
       password: pin,
-      email_confirm: true, // Auto-confirm, no email verification needed
+      email_confirm: true,
       user_metadata: {
         display_name: display_name.trim(),
         role: 'child',
@@ -131,7 +156,7 @@ Deno.serve(async (req) => {
 
     if (createError || !newUser.user) {
       console.error('Create user error:', createError);
-      return new Response(JSON.stringify({ error: 'Erro ao criar conta da criança' }), { status: 500, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: createError?.message || 'Erro ao criar conta da criança' }), { status: 500, headers: corsHeaders });
     }
 
     // Wait briefly for trigger to create profile
