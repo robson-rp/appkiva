@@ -46,6 +46,8 @@ const ParentConsent = lazy(() => import("./pages/parent/ParentConsent"));
 const ParentSupport = lazy(() => import("./pages/parent/ParentSupport"));
 const ParentMissions = lazy(() => import("./pages/parent/ParentMissions"));
 const ParentDreams = lazy(() => import("./pages/parent/ParentDreams"));
+const ParentInsights = lazy(() => import("./pages/parent/ParentInsights"));
+const ParentActivity = lazy(() => import("./pages/parent/ParentActivity"));
 
 // Child
 const ChildDashboard = lazy(() => import("./pages/child/ChildDashboard"));
