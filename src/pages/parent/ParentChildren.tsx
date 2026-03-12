@@ -15,7 +15,7 @@ import { usePendingBudgetExceptions, useResolveBudgetException } from '@/hooks/u
 import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
-import { useSubscriptionTiers } from '@/hooks/use-subscription';
+import { useSubscriptionTiers, useAddExtraChild } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
 import EditChildDialog from '@/components/EditChildDialog';
