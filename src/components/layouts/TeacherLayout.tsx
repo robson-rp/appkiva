@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap, School, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap, School, MoreHorizontal, CreditCard } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import kivaraLogo from '@/assets/logo-kivara.svg';
@@ -34,6 +34,7 @@ function useTeacherNav() {
     { title: t('nav.teacher.classes'), url: '/teacher/classes', icon: Users },
     { title: t('nav.teacher.challenges'), url: '/teacher/challenges', icon: Trophy, badge: urgentChallengesCount },
     { title: t('nav.teacher.school'), url: '/teacher/school', icon: School },
+    { title: t('nav.teacher.subscription'), url: '/teacher/subscription', icon: CreditCard },
     { title: t('nav.teacher.profile'), url: '/teacher/profile', icon: UserCircle },
   ];
 
@@ -45,6 +46,7 @@ function useTeacherNav() {
 
   const mobileMoreItems = [
     { title: t('nav.teacher.school'), url: '/teacher/school', icon: School },
+    { title: t('nav.teacher.subscription'), url: '/teacher/subscription', icon: CreditCard },
     { title: t('nav.teacher.profile'), url: '/teacher/profile', icon: UserCircle },
   ];
 

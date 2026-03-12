@@ -303,6 +303,7 @@ const pt: Record<string, string> = {
   'common.view_all': 'Ver todas',
   'common.logout': 'Sair',
   'common.more_options': 'Mais opções',
+  'common.month_short': 'mês',
   'common.requires_upgrade': 'Requer upgrade',
   'common.copied': 'Copiado! 📋',
   'common.share': 'Partilhar',
@@ -371,6 +372,7 @@ const pt: Record<string, string> = {
   'nav.teacher.challenges': 'Desafios',
   'nav.teacher.school': 'Escola',
   'nav.teacher.profile': 'Perfil',
+  'nav.teacher.subscription': 'Subscrição',
   'nav.teacher.slogan': 'Modo Escolar',
   'nav.teacher.role': 'Professor',
   'nav.teacher.badge': 'ESCOLA',
@@ -1520,6 +1522,18 @@ const pt: Record<string, string> = {
   'partner.subscription.upgrade': 'Upgrade',
   'partner.subscription.current': 'Plano Actual',
 
+  // ─── Teacher Subscription ───
+  'teacher.subscription.current_plan': 'Plano actual',
+  'teacher.subscription.free': 'Gratuito',
+  'teacher.subscription.active': 'Activo',
+  'teacher.subscription.classrooms': 'Turmas',
+  'teacher.subscription.students': 'Alunos',
+  'teacher.subscription.compare_plans': 'Comparar Planos',
+  'teacher.subscription.up_to_students': 'Até {count} alunos',
+  'teacher.subscription.up_to_classrooms': 'Até {count} turmas',
+  'teacher.subscription.upgrade': 'Upgrade',
+  'teacher.subscription.current': 'Plano Actual',
+
   // ─── Shared: SendAllowanceDialog ───
   'dialog.allowance.title': 'Enviar Mesada',
   'dialog.allowance.child': 'Criança',
@@ -1856,6 +1870,7 @@ const pt: Record<string, string> = {
   'admin.subs.type_family': 'Família Premium',
   'admin.subs.type_school': 'Escolar',
   'admin.subs.type_partner': 'Parceiro',
+  'admin.subs.type_teacher': 'Professor',
   'admin.subs.status_active': 'Activo',
   'admin.subs.status_inactive': 'Inactivo',
   'admin.subs.new_plan': 'Novo Plano',

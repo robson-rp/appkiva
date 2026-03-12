@@ -37,6 +37,7 @@ function useTierTypeLabels() {
     family_premium: t('admin.subs.type_family'),
     school_institutional: t('admin.subs.type_school'),
     partner_program: t('admin.subs.type_partner'),
+    teacher: t('admin.subs.type_teacher'),
   } as Record<string, string>;
 }
 
@@ -68,7 +69,7 @@ export default function AdminSubscriptions() {
 
   const tierSchema = useMemo(() => z.object({
     name: z.string().trim().min(1, t('admin.subs.name_required')).max(100),
-    tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program']),
+    tier_type: z.enum(['free', 'family_premium', 'school_institutional', 'partner_program', 'teacher']),
     price_monthly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
     price_yearly: z.number().min(0, t('admin.subs.must_be_gte_zero')),
     max_children: z.number().int().min(0),
@@ -236,6 +237,7 @@ export default function AdminSubscriptions() {
                 <SelectItem value="family_premium">{t('admin.subs.type_family')}</SelectItem>
                 <SelectItem value="school_institutional">{t('admin.subs.type_school')}</SelectItem>
                 <SelectItem value="partner_program">{t('admin.subs.type_partner')}</SelectItem>
+                <SelectItem value="teacher">{t('admin.subs.type_teacher')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -356,6 +358,7 @@ export default function AdminSubscriptions() {
                   <SelectItem value="family_premium">{t('admin.subs.type_family')}</SelectItem>
                   <SelectItem value="school_institutional">{t('admin.subs.type_school')}</SelectItem>
                   <SelectItem value="partner_program">{t('admin.subs.type_partner')}</SelectItem>
+                  <SelectItem value="teacher">{t('admin.subs.type_teacher')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

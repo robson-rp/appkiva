@@ -66,6 +66,7 @@ const TeacherChallenges = lazy(() => import("./pages/teacher/TeacherChallenges")
 const TeacherStudentProfile = lazy(() => import("./pages/teacher/TeacherStudentProfile"));
 const TeacherSchoolProfile = lazy(() => import("./pages/teacher/TeacherSchoolProfile"));
 const TeacherProfile = lazy(() => import("./pages/teacher/TeacherProfile"));
+const TeacherSubscription = lazy(() => import("./pages/teacher/TeacherSubscription"));
 
 // Teen
 const TeenDashboard = lazy(() => import("./pages/teen/TeenDashboard"));
@@ -219,6 +220,7 @@ function renderRoutes(user: { role: string }) {
         <Route path="/teacher/student/:studentId" element={<TeacherLayout><S><TeacherStudentProfile /></S></TeacherLayout>} />
         <Route path="/teacher/school" element={<TeacherLayout><S><TeacherSchoolProfile /></S></TeacherLayout>} />
         <Route path="/teacher/profile" element={<TeacherLayout><S><TeacherProfile /></S></TeacherLayout>} />
+        <Route path="/teacher/subscription" element={<TeacherLayout><S><TeacherSubscription /></S></TeacherLayout>} />
         {INVITE_ROUTE}
         {INSTALL_ROUTE}
         <Route path="*" element={<Navigate to="/teacher" replace />} />
