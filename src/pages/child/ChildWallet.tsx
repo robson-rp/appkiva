@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import kivoImg from '@/assets/kivo.svg';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
+import { useQueryClient } from '@tanstack/react-query';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { useDonationCauses, useMyDonations, useDonate } from '@/hooks/use-donations';
 import { useT } from '@/contexts/LanguageContext';
