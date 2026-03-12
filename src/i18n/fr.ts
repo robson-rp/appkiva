@@ -322,6 +322,14 @@ const fr: Record<string, string> = {
   'common.balance': 'Solde',
   'common.no_data': 'Aucune donnée',
   'common.name': 'Nom',
+  'parent.children.invite_register': 'Invitation d\'inscription',
+  'parent.children.invite_register_desc': 'Pour les enfants/ados qui créeront leur propre compte avec email et mot de passe.',
+  'parent.children.invite_note': 'Ce code est pour les enfants qui vont créer leur propre compte. Si vous avez déjà créé l\'enfant via le bouton "Créer un compte", vous n\'avez pas besoin de ce code — utilisez le nom d\'utilisateur et le PIN.',
+  'parent.children.credentials_desc': 'Enregistrez ces identifiants. L\'enfant peut maintenant se connecter avec.',
+  'parent.children.copy_credentials': 'Copier les identifiants',
+  'parent.children.credentials_copied': 'Identifiants copiés dans le presse-papiers',
+  'parent.children.credentials_warning': 'Conservez le nom d\'utilisateur et le PIN en lieu sûr. Partagez-les avec l\'enfant pour qu\'il puisse accéder à la plateforme.',
+  'common.done': 'Terminé',
 };
 
 export default fr;

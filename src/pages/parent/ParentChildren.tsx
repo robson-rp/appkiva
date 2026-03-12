@@ -63,6 +63,10 @@ export default function ParentChildren() {
   const [newChildAvatar, setNewChildAvatar] = useState('🦊');
   const [newChildDob, setNewChildDob] = useState('');
   const [creatingChild, setCreatingChild] = useState(false);
+  // Success credentials display
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [createdCredentials, setCreatedCredentials] = useState<{ username: string; pin: string; displayName: string } | null>(null);
+  const [credsCopied, setCredsCopied] = useState(false);
   // Co-guardian state
   const [guardianDialogOpen, setGuardianDialogOpen] = useState(false);
   const [guardianEmail, setGuardianEmail] = useState('');
@@ -204,7 +208,7 @@ export default function ParentChildren() {
               await generateAndPersistCode();
               setInviteOpen(true);
             }}>
-              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.invite')}
+              <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.invite_register')}
             </Button>
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
               if (!canAddChild) { setExtraChildOpen(true); return; }
@@ -480,13 +484,21 @@ export default function ParentChildren() {
               <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
                 <Link2 className="h-5 w-5 text-primary" />
               </div>
-              {t('parent.children.invite_child')}
+              {t('parent.children.invite_register')}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              {t('parent.children.share_desc')}
+              {t('parent.children.invite_register_desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 mt-2">
+            {/* Info box explaining this flow */}
+            <div className="bg-accent/10 rounded-2xl p-3 flex items-start gap-2 border border-accent/20">
+              <Shield className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t('parent.children.invite_note')}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_code')}</p>
               <div className="flex items-center gap-2">
@@ -753,8 +765,10 @@ export default function ParentChildren() {
                 return;
               }
               qc.invalidateQueries({ queryKey: ['children'] });
-              toast({ title: t('parent.children.account_created'), description: t('parent.children.account_created_desc') });
+              // Show credentials dialog
+              setCreatedCredentials({ username: newChildUsername.toLowerCase(), pin: newChildPin, displayName: newChildName });
               setCreateOpen(false);
+              setSuccessOpen(true);
               setNewChildName('');
               setNewChildUsername('');
               setNewChildPin('');
@@ -871,6 +885,62 @@ export default function ParentChildren() {
               )}
             </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Credentials Dialog */}
+      <Dialog open={successOpen} onOpenChange={(open) => {
+        setSuccessOpen(open);
+        if (!open) setCreatedCredentials(null);
+      }}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl flex items-center gap-2">
+              <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-secondary" />
+              </div>
+              {t('parent.children.account_created')}
+            </DialogTitle>
+            <DialogDescription>{t('parent.children.credentials_desc')}</DialogDescription>
+          </DialogHeader>
+          {createdCredentials && (
+            <div className="space-y-4 mt-2">
+              <div className="bg-muted/50 rounded-2xl p-4 space-y-3 border border-border/30">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.child_username')}</span>
+                  <span className="font-mono font-bold text-foreground">{createdCredentials.username}</span>
+                </div>
+                <div className="h-px bg-border/30" />
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">PIN</span>
+                  <span className="font-mono font-bold text-foreground tracking-widest">{createdCredentials.pin}</span>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full rounded-xl font-display gap-2"
+                onClick={() => {
+                  const text = `${t('parent.children.child_username')}: ${createdCredentials.username}\nPIN: ${createdCredentials.pin}`;
+                  navigator.clipboard.writeText(text);
+                  setCredsCopied(true);
+                  toast({ title: t('common.copied'), description: t('parent.children.credentials_copied') });
+                  setTimeout(() => setCredsCopied(false), 2000);
+                }}
+              >
+                {credsCopied ? <Check className="h-4 w-4 text-secondary" /> : <Copy className="h-4 w-4" />}
+                {credsCopied ? t('parent.children.copied') : t('parent.children.copy_credentials')}
+              </Button>
+              <div className="bg-[hsl(var(--kivara-light-gold))] rounded-2xl p-3 flex items-start gap-2">
+                <Shield className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {t('parent.children.credentials_warning')}
+                </p>
+              </div>
+              <Button className="w-full rounded-xl font-display" onClick={() => { setSuccessOpen(false); setCreatedCredentials(null); }}>
+                {t('common.done')}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
