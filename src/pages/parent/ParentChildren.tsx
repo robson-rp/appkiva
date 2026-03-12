@@ -200,7 +200,7 @@ export default function ParentChildren() {
           </div>
           <div className="flex gap-2">
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
-              if (!canAddChild) { setPaymentOpen(true); return; }
+              if (!canAddChild) { setExtraChildOpen(true); return; }
               await generateAndPersistCode();
               setInviteOpen(true);
             }}>
