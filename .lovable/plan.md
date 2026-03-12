@@ -1,102 +1,128 @@
 
 
-## Plano: Facturas com valor real, download PDF, gestao admin, e crianças extra
+# Plan: KIVARA Core Platform Architecture Evolution
 
-### Problemas Actuais
+## Current State Assessment
 
-1. **Facturas sem valor real da subscrição**: O historico mostra `inv.amount` mas nao inclui o nome do plano associado (tier_id nao e resolvido para nome/preco).
-2. **Sem download de factura**: Nao existe botao de download PDF para facturas.
-3. **Admin nao tem visao de facturas**: `AdminSubscriptions.tsx` gere tiers mas nao lista facturas de todos os tenants. `AdminFinance.tsx` tambem nao mostra facturas.
-4. **Crianças extra mediante pagamento**: Quando `childrenCount >= maxChildren`, abre `PaymentSimulator` para upgrade de plano. Falta a opcao de adicionar crianças extra sem mudar de plano, pagando `extra_child_price`.
+The project already has significant foundations built:
+- **Real authentication** with RBAC (parent, child, teen, teacher roles)
+- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
+- **Household-based data isolation** via RLS policies
+- **Virtual coin economy** (KVC) fully operational
+- **Edge functions** for server-side transaction validation
 
----
+What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
 
-### Implementacao
+## What Lovable Can and Cannot Build
 
-#### 1. Facturas com valor real e nome do plano
+**Can build (within Lovable Cloud):**
+- Tenant/organization layer in the database
+- Admin super-role with management dashboard
+- Subscription tier definitions and feature gating
+- Currency configuration per tenant
+- Audit log table with triggers
+- Basic anomaly detection queries
+- Risk/admin dashboard UI
 
-**Ficheiro**: `src/hooks/use-subscription.ts`
-- Alterar query de `useInvoices` para fazer join com `subscription_tiers` via `tier_id`:
-  ```
-  .select('*, subscription_tiers(name, tier_type)')
-  ```
-- Actualizar interface `SubscriptionInvoice` para incluir `tier_name`.
+**Cannot build (requires external infrastructure):**
+- Real payment processing (Stripe, mobile money, bank integrations)
+- KYC/AML verification services
+- IP address logging in edge functions (Deno limitation)
+- True microservice separation (everything runs as Supabase + edge functions)
+- Real-time fraud ML models
 
-**Ficheiro**: `src/pages/parent/ParentSubscription.tsx`
-- Mostrar nome do plano na linha da factura (ex: "Família Premium · Kz 2.490").
+## Implementation Plan (4 Phases)
 
-#### 2. Download de factura em PDF
+### Phase 1 — Multi-Tenant Foundation
 
-**Ficheiro**: `src/pages/parent/ParentSubscription.tsx`
-- Usar `jspdf` (ja instalado) para gerar PDF com:
-  - Logo Kivara, nome do tenant, dados da factura
-  - Numero da factura, data, valor, moeda, estado, metodo de pagamento
-  - Botao `Download` (icone) em cada linha do historico de facturas
+**Database migrations:**
 
-Criar funcao utilitaria `generateInvoicePdf(invoice, tenantName, currencySymbol)` num ficheiro `src/lib/invoice-pdf.ts`.
+1. Create `tenants` table:
+   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
 
-#### 3. Gestao financeira no Admin
+2. Create `subscription_tiers` table:
+   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
 
-**Ficheiro**: `src/pages/admin/AdminSubscriptions.tsx`
-- Adicionar nova tab/seccao "Facturas" com:
-  - Tabela de todas as facturas (join com tenants e tiers para mostrar nome do tenant e plano)
-  - Filtros por estado (paid/pending/failed), por tenant, por periodo
-  - Totais agregados (receita total, pendente, falhada)
-  - Possibilidade de marcar factura como paga manualmente
+3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
 
-**Ficheiro**: `src/hooks/use-subscription.ts`
-- Criar `useAdminInvoices()` hook que lista todas as facturas (sem filtro por tenant) — protegido por RLS admin.
+4. Expand `app_role` enum to include `admin`
 
-**DB Migration**: Adicionar RLS policy para admins lerem `subscription_invoices`:
-```sql
-CREATE POLICY "Admins can view all invoices"
-ON public.subscription_invoices FOR SELECT
-TO authenticated
-USING (public.has_role(auth.uid(), 'admin'));
+5. RLS policies on new tables: admin-only write, tenant-scoped reads
 
-CREATE POLICY "Admins can update invoices"
-ON public.subscription_invoices FOR UPDATE
-TO authenticated
-USING (public.has_role(auth.uid(), 'admin'));
-```
+**Frontend:**
+- Create `/admin` layout and dashboard route
+- Admin dashboard with tenant list, subscription management, and global stats
+- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
 
-#### 4. Adicionar crianças extra mediante pagamento
+### Phase 2 — Currency Localization & Real Money Domain Separation
 
-**Ficheiro**: `src/pages/parent/ParentChildren.tsx`
-- Quando `childrenCount >= maxChildren`, em vez de abrir upgrade de plano, mostrar dialog com 2 opcoes:
-  - "Fazer upgrade do plano" (comportamento actual)
-  - "Adicionar criança extra" — mostra o preco por criança extra (`extra_child_price` do tier actual) e gera uma factura de pagamento unico
+**Database:**
 
-**Ficheiro**: `supabase/functions/add-extra-child-slot/index.ts` (novo)
-- Edge function que:
-  1. Verifica que o user e parent
-  2. Obtem o tier actual e o `extra_child_price`
-  3. Incrementa `max_children` override no tenant (novo campo) ou aumenta directamente
-  4. Cria factura de pagamento unico com `billing_period = 'one_time'`
-  5. Retorna sucesso
+1. Create `supported_currencies` table:
+   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
 
-**DB Migration**: Adicionar campo `extra_children_purchased` ao `tenants`:
-```sql
-ALTER TABLE public.tenants 
-ADD COLUMN extra_children_purchased integer NOT NULL DEFAULT 0;
-```
+2. Add `real_money_enabled` flag to tenants
 
-**Ficheiro**: `supabase/functions/create-child-account/index.ts`
-- Alterar calculo de `maxChildren` para: `tier.max_children + tenant.extra_children_purchased`
+3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
 
----
+**Frontend:**
+- Currency display component that formats based on tenant currency
+- Settings page for admin to configure tenant currency
+- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
 
-### Ficheiros Criados/Alterados
+### Phase 3 — Audit Logging & Compliance
 
-| Ficheiro | Accao |
-|---|---|
-| `src/lib/invoice-pdf.ts` | Criar — gerador PDF de factura |
-| `src/hooks/use-subscription.ts` | Alterar — join tier name, hook admin |
-| `src/pages/parent/ParentSubscription.tsx` | Alterar — tier name + download PDF |
-| `src/pages/parent/ParentChildren.tsx` | Alterar — opcao criança extra |
-| `src/pages/admin/AdminSubscriptions.tsx` | Alterar — seccao facturas admin |
-| `supabase/functions/add-extra-child-slot/index.ts` | Criar — edge function |
-| `supabase/functions/create-child-account/index.ts` | Alterar — considerar extras |
-| `src/i18n/pt.ts` e `src/i18n/en.ts` | Alterar — novas chaves i18n |
-| **Migration SQL** | RLS invoices para admin + `extra_children_purchased` em tenants |
+**Database:**
+
+1. Create `audit_log` table (append-only):
+   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
+   - RLS: admin-only SELECT, no UPDATE/DELETE
+
+2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
+
+3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
+
+**Frontend:**
+- Audit log viewer in admin dashboard with filters (user, action type, date range)
+- Consent management panel for parents (view/revoke)
+- Data export/deletion request workflow
+
+### Phase 4 — Risk Monitoring & Anti-Fraud
+
+**Database:**
+
+1. Create `risk_flags` table:
+   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
+
+2. Create database function `check_anomalies()` that can be called periodically to flag:
+   - More than N rewards claimed in 24h
+   - Transaction amounts exceeding historical average by 3x
+   - Repeated identical transactions
+
+**Edge function:**
+- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
+
+**Frontend:**
+- Risk dashboard at `/admin/risk` showing:
+  - Flagged accounts with severity badges
+  - Suspicious transaction list
+  - Resolution workflow (mark as resolved with notes)
+- Key metrics cards: daily active users, transaction volume, flag count
+
+## Technical Approach
+
+- All new tables get RLS policies scoped to tenant + role
+- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
+- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
+- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
+- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
+
+## Estimated Scope
+
+| Phase | New Tables | Edge Functions | UI Pages |
+|-------|-----------|---------------|----------|
+| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
+| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
+| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
+| 4. Risk | 1 | 1 | 1 (risk dashboard) |
 

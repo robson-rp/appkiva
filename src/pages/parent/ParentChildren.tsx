@@ -15,7 +15,7 @@ import { usePendingBudgetExceptions, useResolveBudgetException } from '@/hooks/u
 import { createNotification } from '@/hooks/use-notifications';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAllFeatures, FEATURES } from '@/hooks/use-feature-gate';
-import { useSubscriptionTiers } from '@/hooks/use-subscription';
+import { useSubscriptionTiers, useAddExtraChild } from '@/hooks/use-subscription';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
 import EditChildDialog from '@/components/EditChildDialog';
@@ -50,6 +50,7 @@ export default function ParentChildren() {
   const [inviteSaving, setInviteSaving] = useState(false);
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [extraChildOpen, setExtraChildOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
@@ -85,10 +86,12 @@ export default function ParentChildren() {
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
   const { upgrade } = useUpgradeSubscription();
+  const { addExtraChild, loading: addingExtra } = useAddExtraChild();
   const hasMultiChild = hasFeature(FEATURES.MULTI_CHILD);
 
   const currentTier = tiers.find(ti => ti.name === tierName);
   const maxChildren = currentTier?.maxChildren ?? 2;
+  const extraChildPrice = currentTier?.extraChildPrice ?? 0;
   const childrenCount = children.length;
   const canAddChild = childrenCount < maxChildren || hasMultiChild;
 
@@ -197,14 +200,14 @@ export default function ParentChildren() {
           </div>
           <div className="flex gap-2">
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={async () => {
-              if (!canAddChild) { setPaymentOpen(true); return; }
+              if (!canAddChild) { setExtraChildOpen(true); return; }
               await generateAndPersistCode();
               setInviteOpen(true);
             }}>
               <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.invite')}
             </Button>
             <Button size="sm" className="rounded-2xl font-display gap-1.5 bg-white/15 hover:bg-white/25 text-primary-foreground border-0 backdrop-blur-sm shadow-lg text-xs sm:text-sm" onClick={() => {
-              if (!canAddChild) { setPaymentOpen(true); return; }
+              if (!canAddChild) { setExtraChildOpen(true); return; }
               setCreateOpen(true);
             }}>
               <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> {t('parent.children.create_child')}
@@ -223,7 +226,7 @@ export default function ParentChildren() {
             <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.children.total_balance')}</span>
           </div>
           {!canAddChild && (
-            <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setPaymentOpen(true)}>
+            <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setExtraChildOpen(true)}>
               <Crown className="h-4 w-4 text-accent-foreground" />
               <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">{t('parent.children.upgrade_more')}</span>
             </div>
@@ -629,7 +632,47 @@ export default function ParentChildren() {
         </DialogContent>
       </Dialog>
 
-      {/* Upgrade Payment for extra children */}
+      {/* Extra Child / Upgrade Choice Dialog */}
+      <Dialog open={extraChildOpen} onOpenChange={setExtraChildOpen}>
+        <DialogContent className="sm:max-w-sm rounded-2xl border-border/50">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <Crown className="h-5 w-5 text-accent-foreground" />
+              {t('parent.children.limit_reached_title')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('parent.children.limit_reached_desc').replace('{max}', String(maxChildren))}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {extraChildPrice > 0 && (
+              <Button
+                className="w-full rounded-xl font-display gap-2"
+                disabled={addingExtra}
+                onClick={async () => {
+                  try {
+                    await addExtraChild();
+                    setExtraChildOpen(false);
+                  } catch {}
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+                {addingExtra ? t('parent.subscription.processing') : `${t('parent.children.add_extra_child')} (${currentTier?.extraChildPrice ?? 0} USD)`}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              className="w-full rounded-xl font-display gap-2"
+              onClick={() => { setExtraChildOpen(false); setPaymentOpen(true); }}
+            >
+              <Crown className="h-4 w-4" />
+              {t('parent.subscription.upgrade')}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Payment for plan change */}
       <PaymentSimulator
         open={paymentOpen}
         onOpenChange={setPaymentOpen}

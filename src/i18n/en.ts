@@ -1102,6 +1102,35 @@ const en: Record<string, string> = {
   'parent.subscription.yearly': 'Yearly',
   'parent.subscription.next_billing': 'Next billing',
   'parent.subscription.no_invoices': 'No invoices recorded',
+  'parent.subscription.download_pdf': 'Download invoice PDF',
+  'parent.subscription.one_time': 'One-time payment',
+
+  // ─── Parent Children Extra ───
+  'parent.children.limit_reached_title': 'Child limit reached',
+  'parent.children.limit_reached_desc': 'You already have {max} children on your plan. You can add an extra child or upgrade.',
+  'parent.children.add_extra_child': 'Add extra child',
+
+  // ─── Admin Invoices ───
+  'admin.subs.tab_plans': 'Plans',
+  'admin.subs.tab_invoices': 'Invoices',
+  'admin.invoices.total_revenue': 'Total revenue',
+  'admin.invoices.pending': 'Pending',
+  'admin.invoices.failed': 'Failed',
+  'admin.invoices.total': 'Total invoices',
+  'admin.invoices.all': 'All',
+  'admin.invoices.status_paid': 'Paid',
+  'admin.invoices.status_pending': 'Pending',
+  'admin.invoices.status_failed': 'Failed',
+  'admin.invoices.col_tenant': 'Family',
+  'admin.invoices.col_plan': 'Plan',
+  'admin.invoices.col_amount': 'Amount',
+  'admin.invoices.col_period': 'Period',
+  'admin.invoices.col_date': 'Date',
+  'admin.invoices.col_status': 'Status',
+  'admin.invoices.col_actions': 'Actions',
+  'admin.invoices.no_invoices': 'No invoices recorded',
+  'admin.invoices.mark_paid': 'Mark as paid',
+  'admin.invoices.marked_paid': 'Invoice marked as paid',
 
   // ─── Parent Profile ───
   'parent.profile.guardian': 'Guardian',

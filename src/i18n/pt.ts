@@ -1104,6 +1104,35 @@ const pt: Record<string, string> = {
   'parent.subscription.yearly': 'Anual',
   'parent.subscription.next_billing': 'Próxima cobrança',
   'parent.subscription.no_invoices': 'Sem facturas registadas',
+  'parent.subscription.download_pdf': 'Descarregar factura PDF',
+  'parent.subscription.one_time': 'Pagamento único',
+
+  // ─── Parent Children Extra ───
+  'parent.children.limit_reached_title': 'Limite de crianças atingido',
+  'parent.children.limit_reached_desc': 'Já tens {max} crianças no teu plano. Podes adicionar uma criança extra ou fazer upgrade.',
+  'parent.children.add_extra_child': 'Adicionar criança extra',
+
+  // ─── Admin Invoices ───
+  'admin.subs.tab_plans': 'Planos',
+  'admin.subs.tab_invoices': 'Facturas',
+  'admin.invoices.total_revenue': 'Receita total',
+  'admin.invoices.pending': 'Pendente',
+  'admin.invoices.failed': 'Falhadas',
+  'admin.invoices.total': 'Total facturas',
+  'admin.invoices.all': 'Todos',
+  'admin.invoices.status_paid': 'Pago',
+  'admin.invoices.status_pending': 'Pendente',
+  'admin.invoices.status_failed': 'Falhou',
+  'admin.invoices.col_tenant': 'Família',
+  'admin.invoices.col_plan': 'Plano',
+  'admin.invoices.col_amount': 'Valor',
+  'admin.invoices.col_period': 'Período',
+  'admin.invoices.col_date': 'Data',
+  'admin.invoices.col_status': 'Estado',
+  'admin.invoices.col_actions': 'Acções',
+  'admin.invoices.no_invoices': 'Sem facturas registadas',
+  'admin.invoices.mark_paid': 'Marcar como pago',
+  'admin.invoices.marked_paid': 'Factura marcada como paga',
 
   // ─── Parent Profile ───
   'parent.profile.guardian': 'Encarregado',

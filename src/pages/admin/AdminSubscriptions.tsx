@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -20,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users, Globe } from 'lucide-react';
+import { CreditCard, Plus, Pencil, Trash2, Search, Package, CheckCircle, XCircle, Users, Globe, Receipt } from 'lucide-react';
 import {
   useSubscriptionTiers, useCreateSubscriptionTier, useUpdateSubscriptionTier, useDeleteSubscriptionTier,
 } from '@/hooks/use-tenants';
@@ -29,6 +30,7 @@ import { useT } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import AdminInvoicesTab from '@/components/admin/AdminInvoicesTab';
 
 function useTierTypeLabels() {
   const t = useT();
@@ -196,6 +198,18 @@ export default function AdminSubscriptions() {
         <h1 className="text-2xl font-display font-bold text-foreground">{t('admin.subs.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('admin.subs.subtitle')}</p>
       </div>
+
+      <Tabs defaultValue="plans" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="plans" className="gap-1.5"><Package className="h-3.5 w-3.5" /> {t('admin.subs.tab_plans')}</TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> {t('admin.subs.tab_invoices')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="invoices">
+          <AdminInvoicesTab />
+        </TabsContent>
+
+        <TabsContent value="plans" className="space-y-6">
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -540,6 +554,8 @@ export default function AdminSubscriptions() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
