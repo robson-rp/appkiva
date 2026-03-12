@@ -66,6 +66,7 @@ const TeacherChallenges = lazy(() => import("./pages/teacher/TeacherChallenges")
 const TeacherStudentProfile = lazy(() => import("./pages/teacher/TeacherStudentProfile"));
 const TeacherSchoolProfile = lazy(() => import("./pages/teacher/TeacherSchoolProfile"));
 const TeacherProfile = lazy(() => import("./pages/teacher/TeacherProfile"));
+const TeacherSubscription = lazy(() => import("./pages/teacher/TeacherSubscription"));
 
 // Teen
 const TeenDashboard = lazy(() => import("./pages/teen/TeenDashboard"));
