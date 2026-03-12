@@ -150,7 +150,7 @@ export default function ParentTasks() {
             <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">{t('parent.tasks.title')}</h1>
             <p className="text-small text-primary-foreground/60 mt-1">{t('parent.tasks.subtitle')}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
               onClick={handleAiSuggest}
               disabled={aiLoading}
