@@ -68,7 +68,14 @@ export function PlayerCard({
               <LeagueBadge weeklyPoints={weeklyPoints} compact />
             </div>
           </div>
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 flex flex-col items-end gap-1">
+            <button
+              onClick={handleRefresh}
+              className="bg-white/15 backdrop-blur-sm rounded-xl p-1.5 hover:bg-white/25 transition-colors"
+              aria-label={t('child.wallet.refresh') ?? 'Atualizar'}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 text-white ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
             <motion.span
               key={balance}
               initial={{ scale: 1.2, opacity: 0 }}
