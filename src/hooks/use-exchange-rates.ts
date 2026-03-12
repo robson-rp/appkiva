@@ -33,14 +33,21 @@ export function convertPrice(
 ): number {
   if (fromCurrency === toCurrency) return amount;
 
-  const fromRate = rates.find(r => r.base_currency === 'USD' && r.target_currency === fromCurrency);
-  const toRate = rates.find(r => r.base_currency === 'USD' && r.target_currency === toCurrency);
+  // All rates are stored as USD → target.
+  // If converting from USD, the "from" rate is implicitly 1.
+  const fromRateValue = fromCurrency === 'USD'
+    ? 1
+    : rates.find(r => r.base_currency === 'USD' && r.target_currency === fromCurrency)?.rate;
 
-  if (!fromRate || !toRate) return amount;
+  const toRateValue = toCurrency === 'USD'
+    ? 1
+    : rates.find(r => r.base_currency === 'USD' && r.target_currency === toCurrency)?.rate;
+
+  if (!fromRateValue || !toRateValue) return amount;
 
   // amount in FROM → USD → TO
-  const usdAmount = amount / fromRate.rate;
-  return usdAmount * toRate.rate;
+  const usdAmount = amount / fromRateValue;
+  return usdAmount * toRateValue;
 }
 
 /**
