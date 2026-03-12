@@ -626,6 +626,14 @@ const pt: Record<string, string> = {
   'parent.rewards.no_rewards_hint': 'Clica em "Nova Recompensa" para começar!',
   'parent.rewards.remove': 'Remover',
   'parent.rewards.count': 'recompensas criadas',
+  'parent.rewards.ai_title': 'Sugestões IA',
+  'parent.rewards.ai_loading': 'A gerar recompensas com IA...',
+  'parent.rewards.ai_empty': 'Nenhuma sugestão disponível',
+  'parent.rewards.ai_retry': 'Tentar novamente',
+  'parent.rewards.ai_more': 'Gerar mais sugestões',
+  'parent.rewards.ai_error': 'Erro ao gerar sugestões',
+  'parent.rewards.add': 'Adicionar',
+  'parent.rewards.added': 'Recompensa adicionada!',
 
   // ─── Parent Reports ───
   'parent.reports.title': 'Relatórios Educativos',
