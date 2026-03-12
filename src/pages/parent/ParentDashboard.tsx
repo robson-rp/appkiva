@@ -294,12 +294,15 @@ export default function ParentDashboard() {
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base font-display flex items-center gap-2">
+             <CardTitle className="text-base font-display flex items-center gap-2">
                 <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 {t('parent.dashboard.recent_activity')}
               </CardTitle>
+              <button onClick={() => navigate('/parent/activity')} className="text-small text-primary font-semibold flex items-center gap-0.5 hover:underline min-h-[44px]">
+                {t('common.view_all')} <ChevronRight className="h-4 w-4" />
+              </button>
             </CardHeader>
             <CardContent className="space-y-1">
               {txLoading ? (
