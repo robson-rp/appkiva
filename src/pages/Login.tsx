@@ -935,7 +935,7 @@ export default function Login() {
                             type="submit"
                             className="w-full font-display font-bold h-13 rounded-xl text-base"
                             size="lg"
-                            disabled={submitting || childUsername.length < 3 || childPin.length < 4}
+                            disabled={submitting || childUsername.length < 3 || childPin.length !== 4}
                           >
                             {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : t('auth.sign_in')}
                           </Button>
