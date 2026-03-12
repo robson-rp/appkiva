@@ -343,7 +343,7 @@ export default function ParentTasks() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-xl h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            className="rounded-xl h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10"
                             onClick={() => openEditDialog({
                               id: task.id,
                               title: task.title,
