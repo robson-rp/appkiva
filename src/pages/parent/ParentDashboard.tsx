@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
-import { Users, ListTodo, CheckCircle, PiggyBank, TrendingUp, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Target, Handshake, Send, Gauge, Loader2 } from 'lucide-react';
+import { Users, ListTodo, CheckCircle, PiggyBank, ChevronRight, ArrowUpRight, ArrowDownLeft, Sparkles, Brain, Send, Gauge } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Progress } from '@/components/ui/progress';
@@ -12,11 +12,8 @@ import { SendAllowanceDialog } from '@/components/SendAllowanceDialog';
 import { useHouseholdTransactions } from '@/hooks/use-household-transactions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ParentChildrenStreaks } from '@/components/parent/ParentChildrenStreaks';
-import { ParentInsightsWidget } from '@/components/parent/ParentInsightsWidget';
 import { ParentWeeklySummary } from '@/components/parent/ParentWeeklySummary';
 import { useEmissionStats } from '@/hooks/use-emission-stats';
-import { useAllFeatures } from '@/hooks/use-feature-gate';
-import { PlanSummaryWidget } from '@/components/PlanSummaryWidget';
 import { format, differenceInYears } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -31,11 +28,10 @@ export default function ParentDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: children = [], isLoading: childrenLoading } = useChildren();
-  const { data: txData, isLoading: txLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHouseholdTransactions(8);
-  const realTransactions = txData?.pages?.flat() ?? [];
+  const { data: txData, isLoading: txLoading } = useHouseholdTransactions(4);
+  const realTransactions = (txData?.pages?.flat() ?? []).slice(0, 4);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const { data: emissionStats } = useEmissionStats();
-  const { loading: featuresLoading } = useAllFeatures();
 
   const totalBalance = children.reduce((s, c) => s + c.balance, 0);
 
@@ -171,12 +167,6 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-      {/* Subscription Plan Summary */}
-      {!featuresLoading && (
-        <motion.div variants={item}>
-          <PlanSummaryWidget onClick={() => navigate('/parent/subscription')} upgradeLabel={t('parent.dashboard.upgrade_hint')} />
-        </motion.div>
-      )}
 
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4" data-onboarding="tasks">
         {stats.map((stat, i) => (
@@ -209,15 +199,26 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-      {/* AI Behavioral Insights */}
+      {/* AI Insights compact link */}
       {children.length > 0 && (
         <motion.div variants={item}>
-          <ParentInsightsWidget children={children.map(c => ({
-            childId: c.childId,
-            profileId: c.profileId,
-            displayName: c.displayName,
-            dateOfBirth: c.dateOfBirth,
-          }))} />
+          <Card
+            className="border-border/50 cursor-pointer hover:shadow-kivara transition-all duration-300 overflow-hidden"
+            onClick={() => navigate('/parent/insights')}
+          >
+            <CardContent className="p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-base">{t('parent.insights.title')}</p>
+                  <p className="text-small text-muted-foreground">{t('parent.insights.description')}</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
         </motion.div>
       )}
 
@@ -293,12 +294,15 @@ export default function ParentDashboard() {
           <Card className="border-border/50 h-full overflow-hidden">
             <div className="h-0.5 bg-primary" />
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-base font-display flex items-center gap-2">
+             <CardTitle className="text-base font-display flex items-center gap-2">
                 <div className="w-9 h-9 rounded-xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-primary" />
                 </div>
                 {t('parent.dashboard.recent_activity')}
               </CardTitle>
+              <button onClick={() => navigate('/parent/activity')} className="text-small text-primary font-semibold flex items-center gap-0.5 hover:underline min-h-[44px]">
+                {t('common.view_all')} <ChevronRight className="h-4 w-4" />
+              </button>
             </CardHeader>
             <CardContent className="space-y-1">
               {txLoading ? (
@@ -348,22 +352,6 @@ export default function ParentDashboard() {
                     </div>
                   );
                 })
-              )}
-              {hasNextPage && (
-                <div className="pt-3 flex justify-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary text-small gap-1.5"
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                  >
-                    {isFetchingNextPage ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : null}
-                    {isFetchingNextPage ? 'A carregar...' : 'Carregar mais'}
-                  </Button>
-                </div>
               )}
             </CardContent>
           </Card>
