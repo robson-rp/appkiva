@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { Button } from '@/components/ui/button';
 import { Download, X, Share, PlusSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useT } from '@/contexts/LanguageContext';
+import { LanguageContext } from '@/contexts/LanguageContext';
 
 const DISMISS_KEY = 'pwa-prompt-dismissed-at';
 const DISMISS_DAYS = 7;
