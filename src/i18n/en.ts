@@ -2807,6 +2807,14 @@ const en: Record<string, string> = {
   'parent.children.account_created': 'Account created successfully!',
   'parent.children.account_created_desc': 'The child can sign in with their username and PIN.',
   'parent.children.username_taken': 'This username is already taken',
+  'parent.children.invite_register': 'Registration invite',
+  'parent.children.invite_register_desc': 'For children/teens who will create their own account with email and password.',
+  'parent.children.invite_note': 'This code is for children who will create their own account. If you already created the child using the "Create account" button, you don\'t need this code — use the username and PIN instead.',
+  'parent.children.credentials_desc': 'Save these login details. The child can now sign in with them.',
+  'parent.children.copy_credentials': 'Copy credentials',
+  'parent.children.credentials_copied': 'Credentials copied to clipboard',
+  'parent.children.credentials_warning': 'Save the username and PIN in a safe place. Share them with the child so they can access the platform.',
+  'common.done': 'Done',
 
   // ─── Referral System ───
   'referral.title': 'Invite friends',

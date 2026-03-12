@@ -2811,6 +2811,14 @@ const pt: Record<string, string> = {
   'parent.children.account_created': 'Conta criada com sucesso!',
   'parent.children.account_created_desc': 'A criança pode entrar com o nome de utilizador e PIN.',
   'parent.children.username_taken': 'Este nome de utilizador já está em uso',
+  'parent.children.invite_register': 'Convite de registo',
+  'parent.children.invite_register_desc': 'Para crianças/adolescentes que criarão a sua própria conta com email e password.',
+  'parent.children.invite_note': 'Este código é para crianças que vão criar a sua própria conta. Se já criaste a criança pelo botão "Criar conta", não precisas deste código — usa o nome de utilizador e PIN.',
+  'parent.children.credentials_desc': 'Guarda estes dados de acesso. A criança já pode entrar com eles.',
+  'parent.children.copy_credentials': 'Copiar credenciais',
+  'parent.children.credentials_copied': 'Credenciais copiadas para a área de transferência',
+  'parent.children.credentials_warning': 'Guarda o nome de utilizador e PIN num local seguro. Podes partilhá-los com a criança para ela aceder à plataforma.',
+  'common.done': 'Concluído',
 
   // ─── Referral System ───
   'referral.title': 'Convidar amigos',
