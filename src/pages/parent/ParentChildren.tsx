@@ -86,10 +86,12 @@ export default function ParentChildren() {
   const { hasFeature, tierName } = useAllFeatures();
   const { data: tiers = [] } = useSubscriptionTiers();
   const { upgrade } = useUpgradeSubscription();
+  const { addExtraChild, loading: addingExtra } = useAddExtraChild();
   const hasMultiChild = hasFeature(FEATURES.MULTI_CHILD);
 
   const currentTier = tiers.find(ti => ti.name === tierName);
   const maxChildren = currentTier?.maxChildren ?? 2;
+  const extraChildPrice = currentTier?.extraChildPrice ?? 0;
   const childrenCount = children.length;
   const canAddChild = childrenCount < maxChildren || hasMultiChild;
 
