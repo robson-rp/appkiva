@@ -321,6 +321,7 @@ const fr: Record<string, string> = {
   'common.total_balance': 'Solde total',
   'common.balance': 'Solde',
   'common.no_data': 'Aucune donnée',
+  'common.name': 'Nom',
 };
 
 export default fr;

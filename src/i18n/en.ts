@@ -321,6 +321,7 @@ const en: Record<string, string> = {
   'common.total_balance': 'Total Balance',
   'common.balance': 'Balance',
   'common.no_data': 'No data',
+  'common.name': 'Name',
 
   // ─── Navigation Labels (Layouts) ───
   'nav.parent.panel': 'Dashboard',

@@ -322,6 +322,7 @@ const pt: Record<string, string> = {
   'common.total_balance': 'Saldo Total',
   'common.balance': 'Saldo',
   'common.no_data': 'Sem dados',
+  'common.name': 'Nome',
 
   // ─── Navigation Labels (Layouts) ───
   'nav.parent.panel': 'Painel',
