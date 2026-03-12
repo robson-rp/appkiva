@@ -41,7 +41,7 @@ export function PlayerCard({
     queryClient.invalidateQueries({ queryKey: ['children'] });
     setTimeout(() => setIsRefreshing(false), 1500);
   };
-
+  const config = LEVEL_CONFIG[level];
   const levels = Object.entries(LEVEL_CONFIG) as [Level, typeof config][];
   const currentIndex = levels.findIndex(([k]) => k === level);
   const nextLevel = levels[currentIndex + 1];
