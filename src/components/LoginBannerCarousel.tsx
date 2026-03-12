@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Banner {
   id: string;
@@ -13,13 +12,12 @@ interface Banner {
   display_order: number;
 }
 
-const AUTO_PLAY_MS = 4000;
+const AUTO_PLAY_MS = 3000;
 
 export default function LoginBannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
   const isPaused = useRef(false);
   const rafRef = useRef<number | null>(null);
   const startTimeRef = useRef(Date.now());
@@ -36,23 +34,15 @@ export default function LoginBannerCarousel() {
       });
   }, []);
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
+  const goTo = useCallback((i: number) => {
+    setActiveIndex(i);
     setProgress(0);
     startTimeRef.current = Date.now();
-  }, [emblaApi]);
+  }, []);
 
+  // Auto-play with animated progress
   useEffect(() => {
-    if (!emblaApi) return;
-    onSelect();
-    emblaApi.on("select", onSelect);
-    return () => { emblaApi.off("select", onSelect); };
-  }, [emblaApi, onSelect]);
-
-  // Animated progress + auto-play
-  useEffect(() => {
-    if (!emblaApi || banners.length <= 1) return;
+    if (banners.length <= 1) return;
 
     const tick = () => {
       if (!isPaused.current) {
@@ -60,7 +50,7 @@ export default function LoginBannerCarousel() {
         const pct = Math.min(elapsed / AUTO_PLAY_MS, 1);
         setProgress(pct);
         if (pct >= 1) {
-          emblaApi.scrollNext();
+          goTo((activeIndex + 1) % banners.length);
           return;
         }
       }
@@ -68,10 +58,11 @@ export default function LoginBannerCarousel() {
     };
 
     rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [emblaApi, banners.length]);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [banners.length, activeIndex, goTo]);
 
-  // Pause/resume resets timing
   const handlePause = useCallback(() => { isPaused.current = true; }, []);
   const handleResume = useCallback(() => {
     isPaused.current = false;
@@ -94,53 +85,77 @@ export default function LoginBannerCarousel() {
     </div>
   );
 
-  const Wrapper = ({ href, bannerId, children, className }: { href: string | null; bannerId: string; children: React.ReactNode; className?: string }) =>
-    href ? (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className} onClick={() => trackClick(bannerId)}>{children}</a>
-    ) : (
-      <div className={className}>{children}</div>
-    );
-
-  const handleSegmentClick = (i: number) => {
-    emblaApi?.scrollTo(i);
-  };
-
   return (
     <div
       className="w-full"
       onMouseEnter={handlePause}
       onMouseLeave={handleResume}
     >
-      <div ref={emblaRef} className="overflow-hidden rounded-2xl">
-        <div className="flex">
-          {banners.map((b, idx) => (
-            <div key={b.id} className="min-w-0 shrink-0 grow-0 basis-full">
-              <Wrapper href={b.link_url} bannerId={b.id}>
-                <AspectRatio ratio={1.5}>
-                  <img
-                    src={b.image_url}
-                    alt={b.title}
-                    className="h-full w-full object-cover rounded-2xl"
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    fetchPriority={idx === 0 ? "high" : "auto"}
-                    decoding={idx === 0 ? "sync" : "async"}
-                  />
-                </AspectRatio>
-              </Wrapper>
-            </div>
-          ))}
-        </div>
+      {/* Crossfade stack */}
+      <div className="relative w-full overflow-hidden rounded-2xl">
+        <AspectRatio ratio={1.5}>
+          {banners.map((b, idx) => {
+            const isActive = idx === activeIndex;
+            const content = (
+              <img
+                src={b.image_url}
+                alt={b.title}
+                className="h-full w-full object-cover"
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchPriority={idx === 0 ? "high" : "auto"}
+                decoding={idx === 0 ? "sync" : "async"}
+              />
+            );
+
+            return (
+              <div
+                key={b.id}
+                className={cn(
+                  "absolute inset-0 transition-all duration-600 ease-out",
+                  isActive
+                    ? "opacity-100 scale-100 z-10"
+                    : "opacity-0 scale-[1.03] z-0"
+                )}
+                style={{ transitionDuration: "600ms" }}
+              >
+                {b.link_url ? (
+                  <a
+                    href={b.link_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block h-full w-full"
+                    onClick={() => trackClick(b.id)}
+                  >
+                    {content}
+                  </a>
+                ) : (
+                  content
+                )}
+              </div>
+            );
+          })}
+        </AspectRatio>
       </div>
 
+      {/* Segmented dot indicators */}
       {banners.length > 1 && (
-        <div className="relative h-[1.5px] mt-2 mx-12 rounded-full bg-muted-foreground/8">
-          <div
-            className="absolute inset-y-0 left-0 rounded-full bg-primary/50 transition-[left,width] duration-500 ease-out"
-            style={{
-              width: `${100 / banners.length}%`,
-              left: `${(selectedIndex / banners.length) * 100}%`,
-            }}
-          />
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="relative h-1.5 rounded-full overflow-hidden bg-muted-foreground/15 transition-all duration-300 cursor-pointer"
+              style={{ width: i === activeIndex ? 28 : 10 }}
+              aria-label={`Banner ${i + 1}`}
+            >
+              {i === activeIndex && (
+                <span
+                  className="absolute inset-y-0 left-0 rounded-full bg-primary/70"
+                  style={{ width: `${progress * 100}%` }}
+                />
+              )}
+            </button>
+          ))}
         </div>
       )}
     </div>
