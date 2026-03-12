@@ -31,7 +31,8 @@ export default function ParentDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: children = [], isLoading: childrenLoading } = useChildren();
-  const { data: realTransactions = [], isLoading: txLoading } = useHouseholdTransactions(8);
+  const { data: txData, isLoading: txLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHouseholdTransactions(8);
+  const realTransactions = txData?.pages?.flat() ?? [];
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const { data: emissionStats } = useEmissionStats();
   const { loading: featuresLoading } = useAllFeatures();
