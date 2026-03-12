@@ -1857,6 +1857,7 @@ const pt: Record<string, string> = {
   'admin.subs.type_family': 'Família Premium',
   'admin.subs.type_school': 'Escolar',
   'admin.subs.type_partner': 'Parceiro',
+  'admin.subs.type_teacher': 'Professor',
   'admin.subs.status_active': 'Activo',
   'admin.subs.status_inactive': 'Inactivo',
   'admin.subs.new_plan': 'Novo Plano',
