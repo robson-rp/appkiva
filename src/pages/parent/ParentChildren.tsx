@@ -484,13 +484,21 @@ export default function ParentChildren() {
               <div className="w-10 h-10 rounded-2xl bg-[hsl(var(--kivara-light-blue))] flex items-center justify-center">
                 <Link2 className="h-5 w-5 text-primary" />
               </div>
-              {t('parent.children.invite_child')}
+              {t('parent.children.invite_register')}
             </DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              {t('parent.children.share_desc')}
+              {t('parent.children.invite_register_desc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 mt-2">
+            {/* Info box explaining this flow */}
+            <div className="bg-accent/10 rounded-2xl p-3 flex items-start gap-2 border border-accent/20">
+              <Shield className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t('parent.children.invite_note')}
+              </p>
+            </div>
+
             <div className="space-y-2">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_code')}</p>
               <div className="flex items-center gap-2">
