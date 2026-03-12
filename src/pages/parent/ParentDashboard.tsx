@@ -199,15 +199,26 @@ export default function ParentDashboard() {
         </motion.div>
       )}
 
-      {/* AI Behavioral Insights */}
+      {/* AI Insights compact link */}
       {children.length > 0 && (
         <motion.div variants={item}>
-          <ParentInsightsWidget children={children.map(c => ({
-            childId: c.childId,
-            profileId: c.profileId,
-            displayName: c.displayName,
-            dateOfBirth: c.dateOfBirth,
-          }))} />
+          <Card
+            className="border-border/50 cursor-pointer hover:shadow-kivara transition-all duration-300 overflow-hidden"
+            onClick={() => navigate('/parent/insights')}
+          >
+            <CardContent className="p-5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <Brain className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-base">{t('parent.insights.title')}</p>
+                  <p className="text-small text-muted-foreground">{t('parent.insights.description')}</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
         </motion.div>
       )}
 
