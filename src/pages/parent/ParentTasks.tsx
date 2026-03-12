@@ -457,7 +457,7 @@ export default function ParentTasks() {
                   <Badge variant="outline" className="text-xs">🪙 {s.reward}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{s.description}</p>
-                <span className="text-[10px] text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
+                <span className="text-xs text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
               </motion.button>
             ))}
           </div>
