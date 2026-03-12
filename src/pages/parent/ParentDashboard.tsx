@@ -28,8 +28,8 @@ export default function ParentDashboard() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: children = [], isLoading: childrenLoading } = useChildren();
-  const { data: txData, isLoading: txLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHouseholdTransactions(8);
-  const realTransactions = txData?.pages?.flat() ?? [];
+  const { data: txData, isLoading: txLoading } = useHouseholdTransactions(4);
+  const realTransactions = (txData?.pages?.flat() ?? []).slice(0, 4);
   const [allowanceOpen, setAllowanceOpen] = useState(false);
   const { data: emissionStats } = useEmissionStats();
   const { loading: featuresLoading } = useAllFeatures();
