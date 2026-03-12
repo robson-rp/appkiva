@@ -20,9 +20,16 @@ const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transiti
 
 export default function ChildWallet() {
   const t = useT();
-  const { data: walletBalance } = useWalletBalance();
-  const { data: ledgerTx } = useWalletTransactions();
+  const queryClient = useQueryClient();
+  const { data: walletBalance, isFetching: isBalanceFetching } = useWalletBalance();
+  const { data: ledgerTx, isFetching: isTxFetching } = useWalletTransactions();
   const balance = walletBalance?.balance ?? 0;
+  const isRefreshing = isBalanceFetching || isTxFetching;
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['wallet-balance'] });
+    queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
+  };
 
   // Real donations data
   const { data: causes = [] } = useDonationCauses();
