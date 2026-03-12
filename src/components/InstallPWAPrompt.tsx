@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 import { Button } from '@/components/ui/button';
 import { Download, X, Share, PlusSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useT } from '@/contexts/LanguageContext';
+import { LanguageContext } from '@/contexts/LanguageContext';
 
 const DISMISS_KEY = 'pwa-prompt-dismissed-at';
 const DISMISS_DAYS = 7;
@@ -17,9 +17,13 @@ function isDismissed(): boolean {
 }
 
 export function InstallPWAPrompt() {
-  const t = useT();
+  const ctx = useContext(LanguageContext);
   const { isInstallable, install, isIOS } = usePWAInstall();
   const [dismissed, setDismissed] = useState(() => isDismissed());
+
+  // Gracefully handle missing provider (e.g. during HMR)
+  if (!ctx) return null;
+  const t = ctx.t;
 
   if (!isInstallable || dismissed) return null;
 
