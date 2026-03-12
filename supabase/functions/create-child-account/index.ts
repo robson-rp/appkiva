@@ -105,7 +105,41 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+    // Check child limit
+    const { data: existingChildren } = await adminClient
+      .from('children')
+      .select('id')
+      .eq('parent_profile_id', callerProfile.id);
+
+    let maxChildren = 2;
+    if (callerProfile.tenant_id) {
+      const { data: tenant } = await adminClient
+        .from('tenants')
+        .select('subscription_tier_id, extra_children_purchased')
+        .eq('id', callerProfile.tenant_id)
+        .single();
+      if (tenant?.subscription_tier_id) {
+        const { data: tier } = await adminClient
+          .from('subscription_tiers')
+          .select('max_children')
+          .eq('id', tenant.subscription_tier_id)
+          .single();
+        if (tier?.max_children) maxChildren = tier.max_children;
+      }
+      maxChildren += (tenant?.extra_children_purchased ?? 0);
+    }
+
+    if ((existingChildren?.length ?? 0) >= maxChildren) {
+      return new Response(JSON.stringify({ error: `Limite de crianças atingido (${maxChildren}). Faça upgrade do plano.` }), { status: 400, headers: corsHeaders });
+    }
+
+    // Ensure parent has a household
+    let householdId = callerProfile.household_id;
+    if (!householdId) {
+      const { data: hId } = await adminClient.rpc('ensure_parent_household', { _profile_id: callerProfile.id });
+      householdId = hId as string;
+    }
+
       email: syntheticEmail,
       password: pin,
       email_confirm: true,
