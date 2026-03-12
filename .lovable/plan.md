@@ -1,128 +1,62 @@
 
 
-# Plan: KIVARA Core Platform Architecture Evolution
+## Subscrições para Professor e Parceiro
 
-## Current State Assessment
+### Estado actual
+- **3 tiers na DB**: Gratuito, Família Premium, Escola/Institucional
+- **0 tiers partner_program** → página `PartnerSubscription` mostra lista vazia
+- **0 tiers teacher** → não existe página nem rota de subscrição para professor
+- A rota `/partner/subscription` já existe no router e no layout
+- A rota `/teacher/subscription` NÃO existe
 
-The project already has significant foundations built:
-- **Real authentication** with RBAC (parent, child, teen, teacher roles)
-- **Ledger-first architecture** with double-entry accounting, immutable entries, and derived balances
-- **Household-based data isolation** via RLS policies
-- **Virtual coin economy** (KVC) fully operational
-- **Edge functions** for server-side transaction validation
+### O que fazer
 
-What's missing from the request: multi-tenant architecture, admin super-role, subscription management, currency localization, real money separation, audit logging, fraud detection, and risk dashboards.
+**1. Inserir tiers na DB (dados, não schema)**
 
-## What Lovable Can and Cannot Build
+Inserir 3 tiers partner_program:
+| Nome | Preço mensal | Max children | Max programs | Features |
+|------|-------------|-------------|-------------|----------|
+| Parceiro Starter | 0 | 50 | 2 | basic_wallet, basic_tasks |
+| Parceiro Pro | 9990 | 500 | 10 | + advanced_analytics, export_reports, custom_branding |
+| Parceiro Enterprise | 49990 | 99999 | 99999 | + api_access, priority_support |
 
-**Can build (within Lovable Cloud):**
-- Tenant/organization layer in the database
-- Admin super-role with management dashboard
-- Subscription tier definitions and feature gating
-- Currency configuration per tenant
-- Audit log table with triggers
-- Basic anomaly detection queries
-- Risk/admin dashboard UI
+Inserir 2 tiers teacher (novo tier_type `teacher`):
+| Nome | Preço | Max children | Features |
+|------|-------|-------------|----------|
+| Professor Gratuito | 0 | 30 | basic_wallet, basic_tasks, classroom_mode |
+| Professor Premium | 4990 | 200 | + advanced_analytics, export_reports, priority_support |
 
-**Cannot build (requires external infrastructure):**
-- Real payment processing (Stripe, mobile money, bank integrations)
-- KYC/AML verification services
-- IP address logging in edge functions (Deno limitation)
-- True microservice separation (everything runs as Supabase + edge functions)
-- Real-time fraud ML models
+**2. Inserir preços regionais para os novos tiers**
 
-## Implementation Plan (4 Phases)
+Adicionar registos em `tier_regional_prices` para os 5 tiers pagos (Parceiro Pro, Parceiro Enterprise, Professor Premium) × 6 moedas (MZN, BRL, EUR, USD, CVE, ZAR).
 
-### Phase 1 — Multi-Tenant Foundation
+**3. Actualizar AdminSubscriptions para aceitar tier_type `teacher`**
 
-**Database migrations:**
+Adicionar `teacher` como opção no enum do formulário e no mapa de labels em `AdminSubscriptions.tsx`.
 
-1. Create `tenants` table:
-   - `id`, `name`, `type` (enum: family, school, institutional_partner), `settings` (jsonb), `currency`, `subscription_tier`, `is_active`, `created_at`
+**4. Criar página TeacherSubscription**
 
-2. Create `subscription_tiers` table:
-   - `id`, `name`, `type` (enum: free, family_premium, school_institutional, partner_program), `max_children`, `max_classrooms`, `features` (jsonb array of enabled feature keys), `price_monthly`, `price_yearly`, `currency`, `is_active`
+Nova página `src/pages/teacher/TeacherSubscription.tsx` — estrutura semelhante a `PartnerSubscription.tsx` mas filtrando por `tierType === 'teacher'`. Usa `useSubscriptionTiers()` existente.
 
-3. Add `tenant_id` column to `households` and `profiles` tables (nullable initially for migration)
+**5. Criar hook `use-teacher-limits.ts`**
 
-4. Expand `app_role` enum to include `admin`
+Semelhante a `use-partner-limits.ts` — lê o tier do tenant do professor e calcula limites de alunos/turmas.
 
-5. RLS policies on new tables: admin-only write, tenant-scoped reads
+**6. Adicionar rota e nav**
 
-**Frontend:**
-- Create `/admin` layout and dashboard route
-- Admin dashboard with tenant list, subscription management, and global stats
-- Feature gate helper: `useFeatureGate(featureKey)` hook that checks tenant subscription
+- Adicionar rota `/teacher/subscription` no `App.tsx`
+- Adicionar item de navegação no `TeacherLayout.tsx`
 
-### Phase 2 — Currency Localization & Real Money Domain Separation
+**7. Actualizar `SubscriptionTier` interface**
 
-**Database:**
+Adicionar `teacher` ao enum de `tier_type` no formulário admin.
 
-1. Create `supported_currencies` table:
-   - `code` (PKR, KES, NGN, USD, AOA), `name`, `symbol`, `decimal_places`, `is_active`
-
-2. Add `real_money_enabled` flag to tenants
-
-3. Create separate `wallet_type` for real money (`real` already exists in enum) — the existing wallet infrastructure supports this
-
-**Frontend:**
-- Currency display component that formats based on tenant currency
-- Settings page for admin to configure tenant currency
-- Clear UI separation: virtual coins use the coin icon, real money uses currency symbol
-
-### Phase 3 — Audit Logging & Compliance
-
-**Database:**
-
-1. Create `audit_log` table (append-only):
-   - `id`, `tenant_id`, `user_id`, `profile_id`, `action` (enum), `resource_type`, `resource_id`, `old_values` (jsonb), `new_values` (jsonb), `metadata` (jsonb), `created_at`
-   - RLS: admin-only SELECT, no UPDATE/DELETE
-
-2. Create database triggers on critical tables (`ledger_entries`, `wallets`, `profiles`, `consent_records`, `user_roles`) that auto-insert into `audit_log`
-
-3. Enhance `consent_records` table with `ip_metadata` and `revocation_reason` columns
-
-**Frontend:**
-- Audit log viewer in admin dashboard with filters (user, action type, date range)
-- Consent management panel for parents (view/revoke)
-- Data export/deletion request workflow
-
-### Phase 4 — Risk Monitoring & Anti-Fraud
-
-**Database:**
-
-1. Create `risk_flags` table:
-   - `id`, `tenant_id`, `profile_id`, `flag_type` (enum: excessive_rewards, unusual_transactions, rate_limit_hit, task_exploitation), `severity` (low/medium/high/critical), `description`, `metadata` (jsonb), `resolved_at`, `resolved_by`, `created_at`
-
-2. Create database function `check_anomalies()` that can be called periodically to flag:
-   - More than N rewards claimed in 24h
-   - Transaction amounts exceeding historical average by 3x
-   - Repeated identical transactions
-
-**Edge function:**
-- `risk-scan` edge function that runs anomaly checks and inserts into `risk_flags`
-
-**Frontend:**
-- Risk dashboard at `/admin/risk` showing:
-  - Flagged accounts with severity badges
-  - Suspicious transaction list
-  - Resolution workflow (mark as resolved with notes)
-- Key metrics cards: daily active users, transaction volume, flag count
-
-## Technical Approach
-
-- All new tables get RLS policies scoped to tenant + role
-- The `admin` role bypasses household scoping via `has_role(auth.uid(), 'admin')`
-- Audit triggers use `SECURITY DEFINER` to write regardless of caller permissions
-- Subscription feature gating is client-side initially (enforced server-side in edge functions for financial operations)
-- No changes to existing `ledger_entries`, `wallets`, or `wallet_balances` structures — they already support the architecture
-
-## Estimated Scope
-
-| Phase | New Tables | Edge Functions | UI Pages |
-|-------|-----------|---------------|----------|
-| 1. Multi-tenant | 2 | 0 | 3 (admin layout, dashboard, tenant mgmt) |
-| 2. Currency | 1 | 0 | 2 (currency settings, display components) |
-| 3. Audit | 1 + triggers | 0 | 2 (audit viewer, consent panel) |
-| 4. Risk | 1 | 1 | 1 (risk dashboard) |
+### Ficheiros a criar/editar
+- `src/pages/teacher/TeacherSubscription.tsx` (criar)
+- `src/hooks/use-teacher-limits.ts` (criar)
+- `src/components/layouts/TeacherLayout.tsx` (adicionar nav item)
+- `src/pages/admin/AdminSubscriptions.tsx` (adicionar teacher type)
+- `src/App.tsx` (adicionar rota)
+- `src/test/role-access.test.ts` (adicionar `/teacher/subscription`)
+- DB: inserir 5 novos tiers + preços regionais via insert tool
 
