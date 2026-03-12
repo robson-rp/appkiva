@@ -51,6 +51,7 @@ export default function ParentChildren() {
   const [copied, setCopied] = useState<'code' | 'link' | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [extraChildOpen, setExtraChildOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [editChild, setEditChild] = useState<{ childId: string; profileId: string; displayName: string; nickname: string | null; avatar: string; dateOfBirth: string | null } | null>(null);
   const [deleteChild, setDeleteChild] = useState<{ childId: string; displayName: string } | null>(null);
   // Create child account state
