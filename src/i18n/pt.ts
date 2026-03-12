@@ -341,6 +341,9 @@ const pt: Record<string, string> = {
   'nav.parent.menu': 'Menu',
   'nav.parent.slogan': 'Pequenos hábitos. Grandes futuros.',
   'nav.parent.role': 'Encarregado',
+  'nav.parent.insights': 'Insights',
+  'nav.parent.activity': 'Actividades',
+  'parent.activity.subtitle': 'Histórico completo de transações da família.',
 
   'nav.child.home': 'Início',
   'nav.child.wallet': 'Carteira',

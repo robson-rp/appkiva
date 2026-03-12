@@ -340,6 +340,9 @@ const en: Record<string, string> = {
   'nav.parent.menu': 'Menu',
   'nav.parent.slogan': 'Small habits. Big futures.',
   'nav.parent.role': 'Parent',
+  'nav.parent.insights': 'Insights',
+  'nav.parent.activity': 'Activity',
+  'parent.activity.subtitle': 'Full family transaction history.',
 
   'nav.child.home': 'Home',
   'nav.child.wallet': 'Wallet',
