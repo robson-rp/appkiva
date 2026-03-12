@@ -306,7 +306,7 @@ export default function ParentTasks() {
                           <h3 className="font-display font-bold text-sm">{task.title}</h3>
                           <span className="text-caption text-muted-foreground bg-muted rounded-lg px-2 py-0.5">{categoryLabels[task.category]}</span>
                           {(task as any).is_recurring && (
-                            <Badge variant="outline" className="text-[9px] gap-1 px-1.5 py-0 border-primary/30 text-primary">
+                            <Badge variant="outline" className="text-xs gap-1 px-1.5 py-0.5 border-primary/30 text-primary">
                               <RefreshCw className="h-2.5 w-2.5" />
                               {recurrenceLabels[(task as any).recurrence] || t('parent.tasks.recurrent')}
                             </Badge>
