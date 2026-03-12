@@ -140,12 +140,9 @@ Deno.serve(async (req) => {
       householdId = hId as string;
     }
 
-    // Pad PIN to meet minimum 6-char password requirement
-    const childPassword = pin.padEnd(6, '0');
-
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email: syntheticEmail,
-      password: childPassword,
+      password: pin,
       email_confirm: true,
       user_metadata: {
         display_name: display_name.trim(),

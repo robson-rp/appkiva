@@ -196,21 +196,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginAsChild = async (username: string, pin: string) => {
     const normalizedUsername = username.trim().toLowerCase();
     const normalizedPin = pin.trim();
-    const syntheticEmail = `${normalizedUsername}@child.kivara.local`;
 
-    // Backward compatibility: old children were created with raw 4-digit PIN,
-    // newer ones are padded to meet auth password minimum length.
+    // Compat: tenta o username exato e, se houver sufixo numérico acidental, tenta sem sufixo.
+    const usernameCandidates = Array.from(new Set([
+      normalizedUsername,
+      normalizedUsername.replace(/\d+$/, ''),
+    ].filter((u) => u.length >= 3)));
+
+    // Compat: contas antigas podem estar com PIN raw (4) ou padded (6).
     const pinCandidates = normalizedPin.length < 6
       ? [normalizedPin, normalizedPin.padEnd(6, '0')]
       : [normalizedPin];
 
-    for (const candidate of pinCandidates) {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: syntheticEmail,
-        password: candidate,
-      });
-      if (!error) {
-        return { error: null };
+    for (const usernameCandidate of usernameCandidates) {
+      const syntheticEmail = `${usernameCandidate}@child.kivara.local`;
+      for (const candidate of pinCandidates) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: syntheticEmail,
+          password: candidate,
+        });
+        if (!error) {
+          return { error: null };
+        }
       }
     }
 

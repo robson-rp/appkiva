@@ -2790,7 +2790,7 @@ const en: Record<string, string> = {
 
   // ─── Child Account Creation ───
   'auth.username': 'Username',
-  'auth.pin_hint': '4-6 digit PIN set by parent',
+  'auth.pin_hint': '4-digit PIN set by parent',
   'auth.child_account_hint': 'Your account is created by your parent',
   'parent.children.create_child': 'Create account',
   'parent.children.create_child_title': 'Create child account',
@@ -2799,7 +2799,7 @@ const en: Record<string, string> = {
   'parent.children.child_username_hint': '3-20 characters, letters, numbers and _ only',
   'parent.children.child_pin': 'PIN',
   'parent.children.child_pin_confirm': 'Confirm PIN',
-  'parent.children.child_pin_hint': '4-6 numeric digits',
+  'parent.children.child_pin_hint': '4 numeric digits',
   'parent.children.child_pin_mismatch': 'PINs do not match',
   'parent.children.child_dob': 'Date of birth',
   'parent.children.child_avatar': 'Avatar',

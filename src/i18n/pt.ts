@@ -2794,7 +2794,7 @@ const pt: Record<string, string> = {
 
   // ─── Child Account Creation ───
   'auth.username': 'Nome de utilizador',
-  'auth.pin_hint': 'PIN de 4-6 dígitos definido pelo encarregado',
+  'auth.pin_hint': 'PIN de 4 dígitos definido pelo encarregado',
   'auth.child_account_hint': 'A tua conta é criada pelo teu encarregado',
   'parent.children.create_child': 'Criar conta',
   'parent.children.create_child_title': 'Criar conta de criança',
@@ -2803,7 +2803,7 @@ const pt: Record<string, string> = {
   'parent.children.child_username_hint': '3-20 caracteres, apenas letras, números e _',
   'parent.children.child_pin': 'PIN',
   'parent.children.child_pin_confirm': 'Confirmar PIN',
-  'parent.children.child_pin_hint': '4-6 dígitos numéricos',
+  'parent.children.child_pin_hint': '4 dígitos numéricos',
   'parent.children.child_pin_mismatch': 'Os PINs não coincidem',
   'parent.children.child_dob': 'Data de nascimento',
   'parent.children.child_avatar': 'Avatar',
