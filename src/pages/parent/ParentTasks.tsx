@@ -146,11 +146,11 @@ export default function ParentTasks() {
         <div className="absolute top-0 left-1/3 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.tasks.management')}</p>
+            <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.tasks.management')}</p>
             <h1 className="font-display text-heading md:text-heading-lg font-bold mt-1">{t('parent.tasks.title')}</h1>
             <p className="text-small text-primary-foreground/60 mt-1">{t('parent.tasks.subtitle')}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <Button
               onClick={handleAiSuggest}
               disabled={aiLoading}
@@ -254,7 +254,7 @@ export default function ParentTasks() {
                   <s.icon className={`h-4 w-4 ${s.color}`} />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
                   <p className="font-display font-bold text-xl">{s.value}</p>
                 </div>
               </CardContent>
@@ -306,7 +306,7 @@ export default function ParentTasks() {
                           <h3 className="font-display font-bold text-sm">{task.title}</h3>
                           <span className="text-caption text-muted-foreground bg-muted rounded-lg px-2 py-0.5">{categoryLabels[task.category]}</span>
                           {(task as any).is_recurring && (
-                            <Badge variant="outline" className="text-[9px] gap-1 px-1.5 py-0 border-primary/30 text-primary">
+                            <Badge variant="outline" className="text-xs gap-1 px-1.5 py-0.5 border-primary/30 text-primary">
                               <RefreshCw className="h-2.5 w-2.5" />
                               {recurrenceLabels[(task as any).recurrence] || t('parent.tasks.recurrent')}
                             </Badge>
@@ -332,7 +332,7 @@ export default function ParentTasks() {
                         {task.status === 'completed' && (
                           <Button
                             size="sm"
-                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-9 flex-1 sm:flex-none"
+                            className="rounded-xl gap-1.5 font-display bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-sm h-11 w-full sm:w-auto"
                             disabled={approveTask.isPending}
                             onClick={() => approveTask.mutate(task.id)}
                           >
@@ -343,7 +343,7 @@ export default function ParentTasks() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="rounded-xl h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            className="rounded-xl h-11 w-11 text-muted-foreground hover:text-primary hover:bg-primary/10"
                             onClick={() => openEditDialog({
                               id: task.id,
                               title: task.title,
@@ -361,7 +361,7 @@ export default function ParentTasks() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="rounded-xl h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                className="rounded-xl h-11 w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                 aria-label={t('parent.tasks.delete_task')}
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -454,10 +454,10 @@ export default function ParentTasks() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-display font-bold text-sm">{s.title}</p>
-                  <Badge variant="outline" className="text-[10px]">🪙 {s.reward}</Badge>
+                  <Badge variant="outline" className="text-xs">🪙 {s.reward}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{s.description}</p>
-                <span className="text-[10px] text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
+                <span className="text-xs text-muted-foreground mt-1 inline-block">{categoryLabels[s.category] || s.category}</span>
               </motion.button>
             ))}
           </div>
