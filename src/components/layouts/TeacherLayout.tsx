@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Trophy, LogOut, UserCircle, GraduationCap, School, MoreHorizontal } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
