@@ -2566,6 +2566,11 @@ const pt: Record<string, string> = {
   // ─── ThemeToggle ───
   'theme.toggle': 'Alternar tema',
 
+  // ─── Accessibility ───
+  'accessibility.menu': 'Acessibilidade',
+  'accessibility.highContrast': 'Alto contraste',
+  'accessibility.highContrastDesc': 'Aumenta o contraste de cores para melhor legibilidade',
+
   // ─── ConfettiCelebration ───
   'confetti.goal_reached': 'Meta atingida! 🏆',
   'confetti.vault_reached': 'O cofre "{name}" chegou ao objectivo!',

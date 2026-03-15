@@ -5,6 +5,7 @@ import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import { Button } from '@/components/ui/button';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -64,6 +65,7 @@ export function TeenLayout({ children }: { children: ReactNode }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <AccessibilityMenu />
             <ThemeToggle />
             <NavLink to="/teen/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label={t('nav.teen.profile')}>
               <UserCircle className="h-5 w-5 text-muted-foreground" />

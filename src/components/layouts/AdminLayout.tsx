@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, Building2, CreditCard, Globe, Shield, AlertTriangle, LogOut, ScrollText, School, DollarSign, Users, BookOpen, Sparkles, Bell, Image, ShieldAlert, Target } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -138,6 +139,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
               </div>
               <div className="flex items-center gap-2">
+                <AccessibilityMenu />
                 <ThemeToggle />
                 {isMobile && (
                   <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label={t('common.logout')}>

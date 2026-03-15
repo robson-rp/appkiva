@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, ListTodo, Wallet, BarChart3, LogOut, UserCircle, Gift, PiggyBank, Crown, Shield, Lock, MoreHorizontal, Headphones, Target, Sparkles, Brain, Activity } from 'lucide-react';
 import { NotificationDropdown } from '@/components/NotificationDropdown';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import kivaraLogo from '@/assets/logo-kivara.svg';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -182,6 +183,7 @@ export function ParentLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
               </div>
               <div className="flex items-center gap-2">
+                <AccessibilityMenu />
                 <ThemeToggle />
                 <NotificationDropdown />
                 {isMobile && (
