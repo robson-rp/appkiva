@@ -72,6 +72,7 @@ export function ChildLayout({ children }: { children: ReactNode }) {
             <NavLink to="/child/profile" className="relative p-2.5 rounded-2xl hover:bg-muted/80 transition-all duration-200 active:scale-95" aria-label={t('nav.child.profile')}>
               <UserCircle className="h-5 w-5 text-muted-foreground" />
             </NavLink>
+            <AccessibilityMenu />
             <ThemeToggle />
             <NotificationDropdown />
             <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95" aria-label={t('common.logout')}>

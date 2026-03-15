@@ -140,6 +140,7 @@ export function PartnerLayout({ children }: { children: ReactNode }) {
                 <img src={kivaraLogo} alt="KIVARA" className="h-8 opacity-70" />
               </div>
               <div className="flex items-center gap-2">
+                <AccessibilityMenu />
                 <ThemeToggle />
                 {isMobile && (
                   <Button variant="ghost" size="icon" onClick={logout} className="text-muted-foreground rounded-2xl hover:bg-destructive/10 hover:text-destructive" aria-label={t('common.logout')}>
