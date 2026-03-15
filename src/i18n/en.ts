@@ -2562,6 +2562,11 @@ const en: Record<string, string> = {
   // ─── ThemeToggle ───
   'theme.toggle': 'Toggle theme',
 
+  // ─── Accessibility ───
+  'accessibility.menu': 'Accessibility',
+  'accessibility.highContrast': 'High contrast',
+  'accessibility.highContrastDesc': 'Increases color contrast for better readability',
+
   // ─── ConfettiCelebration ───
   'confetti.goal_reached': 'Goal reached! 🏆',
   'confetti.vault_reached': 'The vault "{name}" reached its target!',
