@@ -20,6 +20,7 @@ import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
 import UpgradePrompt from '@/components/UpgradePrompt';
 import { useT } from '@/contexts/LanguageContext';
+import { BiometricPrompt } from '@/components/BiometricPrompt';
 
 export default function ChildVaults() {
   const t = useT();
