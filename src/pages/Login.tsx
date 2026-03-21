@@ -330,6 +330,8 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
+          // Store credentials for potential biometric setup
+          setLoginCredentials({ email, password });
         }
       }
 
