@@ -28,12 +28,18 @@ export function SendAllowanceDialog({ open, onOpenChange, children }: SendAllowa
 
   const selectedChild = children.find(c => c.profileId === selectedChildId);
 
-  const handleSend = async () => {
+  const [showBiometric, setShowBiometric] = useState(false);
+
+  const handleSendClick = () => {
     if (!selectedChildId || !amount || Number(amount) <= 0) {
       toast({ title: t('common.error'), description: t('dialog.allowance.validation'), variant: 'destructive' });
       return;
     }
+    // Try biometric first, then proceed
+    setShowBiometric(true);
+  };
 
+  const handleSendConfirmed = async () => {
     setSending(true);
     try {
       const result = await createTransaction({
