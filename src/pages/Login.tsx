@@ -123,6 +123,15 @@ export default function Login() {
   // Redirect when user is loaded by AuthContext (pending2FA blocks redirect)
   useEffect(() => {
     if (user && !pending2FA) {
+      // Register native push on login
+      nativePush.register();
+      
+      // Show biometric setup prompt if credentials available and biometric not yet enabled
+      if (loginCredentials && biometric.isAvailable && !biometric.isEnabled) {
+        setShowBiometricSetup(true);
+        return; // Don't navigate yet, wait for biometric prompt
+      }
+      
       const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
       navigate(dest, { replace: true });
     }
