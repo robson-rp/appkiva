@@ -318,6 +318,7 @@ function AppShell() {
   const handleSplashComplete = useCallback(() => {
     sessionStorage.setItem('kivara-splash', '1');
     setSplashDone(true);
+    CapSplashScreen.hide().catch(() => {});
   }, []);
 
   if (!splashDone) {
