@@ -10,7 +10,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck, Globe } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck, Globe, Fingerprint } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -21,6 +21,9 @@ import { supabase } from '@/integrations/supabase/client';
 import LoginBannerCarousel from '@/components/LoginBannerCarousel';
 import { useT, useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useBiometric } from '@/hooks/use-biometric';
+import { BiometricSetupPrompt } from '@/components/BiometricLoginPrompt';
+import { useNativePush } from '@/hooks/use-native-push';
 
 const localeFlag: Record<string, string> = { pt: '🇵🇹', en: '🇬🇧', fr: '🇫🇷' };
 const localeLabel: Record<string, string> = { pt: 'Português', en: 'English', fr: 'Français' };
