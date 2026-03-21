@@ -20,6 +20,7 @@ import { VaultInterestHistory } from '@/components/VaultInterestHistory';
 import { useFeatureGate, FEATURES } from '@/hooks/use-feature-gate';
 import UpgradePrompt from '@/components/UpgradePrompt';
 import { useT } from '@/contexts/LanguageContext';
+import { BiometricPrompt } from '@/components/BiometricPrompt';
 
 export default function ChildVaults() {
   const t = useT();
@@ -42,6 +43,8 @@ export default function ChildVaults() {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [confettiActive, setConfettiActive] = useState(false);
   const [confettiVault, setConfettiVault] = useState<{ name: string; icon: string } | null>(null);
+  const [showBiometric, setShowBiometric] = useState(false);
+  const [biometricAction, setBiometricAction] = useState<'deposit' | 'withdraw'>('deposit');
 
   const balance = walletBalance?.balance ?? 0;
 
@@ -68,7 +71,13 @@ export default function ChildVaults() {
 
   const openDepositDialog = (vault: typeof depositVault) => { setDepositVault(vault); setDepositAmount(''); setDepositDialogOpen(true); };
 
-  const handleDeposit = () => {
+  const handleDepositClick = () => {
+    if (!depositVault || !depositAmount || Number(depositAmount) <= 0) return;
+    setBiometricAction('deposit');
+    setShowBiometric(true);
+  };
+
+  const handleDepositConfirmed = () => {
     if (!depositVault || !depositAmount) return;
     const amount = Number(depositAmount);
     if (amount <= 0) return;
@@ -87,13 +96,25 @@ export default function ChildVaults() {
 
   const openWithdrawDialog = (vault: typeof withdrawVault) => { setWithdrawVault(vault); setWithdrawAmount(''); setWithdrawDialogOpen(true); };
 
-  const handleWithdraw = () => {
+  const handleWithdrawClick = () => {
+    if (!withdrawVault || !withdrawAmount || Number(withdrawAmount) <= 0) return;
+    setBiometricAction('withdraw');
+    setShowBiometric(true);
+  };
+
+  const handleWithdrawConfirmed = () => {
     if (!withdrawVault || !withdrawAmount) return;
     const amount = Number(withdrawAmount);
     if (amount <= 0) return;
     withdrawFromVault.mutate({ vaultId: withdrawVault.id, amount }, {
       onSuccess: () => { setWithdrawDialogOpen(false); setWithdrawVault(null); setWithdrawAmount(''); },
     });
+  };
+
+  const handleBiometricVerified = () => {
+    setShowBiometric(false);
+    if (biometricAction === 'deposit') handleDepositConfirmed();
+    else handleWithdrawConfirmed();
   };
 
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
@@ -312,7 +333,7 @@ export default function ChildVaults() {
                 </div>
               )}
             </div>
-            <Button className="w-full rounded-xl font-display gap-2" disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending} onClick={handleDeposit}>
+            <Button className="w-full rounded-xl font-display gap-2" disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending} onClick={handleDepositClick}>
               {depositToVault.isPending ? t('child.vaults.depositing') : (<><ArrowDownToLine className="h-4 w-4" /> {t('child.vaults.deposit_btn')} {depositAmount ? `${depositAmount} KVC` : ''}</>)}
             </Button>
             {Number(depositAmount) > balance && <p className="text-xs text-destructive text-center">{t('child.vaults.insufficient')}</p>}
@@ -348,7 +369,7 @@ export default function ChildVaults() {
                 </div>
               )}
             </div>
-            <Button className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending} onClick={handleWithdraw}>
+            <Button className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending} onClick={handleWithdrawClick}>
               {withdrawFromVault.isPending ? t('child.vaults.withdrawing') : (<><ArrowUpFromLine className="h-4 w-4" /> {t('child.vaults.withdraw_btn')} {withdrawAmount ? `${withdrawAmount} KVC` : ''}</>)}
             </Button>
             {Number(withdrawAmount) > maxWithdraw && maxWithdraw > 0 && <p className="text-xs text-destructive text-center">{t('child.vaults.exceeds_balance')}</p>}
@@ -358,6 +379,12 @@ export default function ChildVaults() {
 
       <Kivo page="vaults" />
       <ConfettiCelebration active={confettiActive} onComplete={() => setConfettiActive(false)} vaultName={confettiVault?.name} vaultIcon={confettiVault?.icon} />
+      <BiometricPrompt
+        action="vault"
+        open={showBiometric}
+        onVerified={handleBiometricVerified}
+        onCancel={() => setShowBiometric(false)}
+      />
     </div>
   );
 }

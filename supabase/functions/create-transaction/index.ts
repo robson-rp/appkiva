@@ -548,7 +548,55 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 13. Get updated balance (for the recipient wallet)
+    // 12c. Push notification for allowance / task_reward / mission_reward
+    if (['allowance', 'task_reward', 'mission_reward'].includes(body.entry_type) && body.target_profile_id) {
+      const titleMap: Record<string, string> = {
+        allowance: '💰 Mesada recebida!',
+        task_reward: '⭐ Recompensa de tarefa!',
+        mission_reward: '🎯 Missão completada!',
+      };
+      const msgMap: Record<string, string> = {
+        allowance: `Recebeste ${body.amount} KVC de mesada!`,
+        task_reward: `Recebeste ${body.amount} KVC por completar uma tarefa!`,
+        mission_reward: `Recebeste ${body.amount} KVC por completar uma missão!`,
+      };
+
+      // Create in-app notification
+      const { data: pushNotif } = await supabaseAdmin.from('notifications').insert({
+        profile_id: body.target_profile_id,
+        title: titleMap[body.entry_type],
+        message: msgMap[body.entry_type],
+        type: body.entry_type,
+        metadata: { amount: body.amount, trigger: body.entry_type },
+      }).select('id').single();
+
+      if (pushNotif) {
+        await supabaseAdmin.from('notification_log').insert({
+          profile_id: body.target_profile_id,
+          notification_id: pushNotif.id,
+        });
+      }
+
+      // Send web push
+      try {
+        await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-push-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          },
+          body: JSON.stringify({
+            action: 'send',
+            profileId: body.target_profile_id,
+            title: titleMap[body.entry_type],
+            body: msgMap[body.entry_type],
+            data: { type: body.entry_type, amount: body.amount },
+          }),
+        });
+      } catch (e) {
+        console.error('[create-transaction] push send failed:', e);
+      }
+    }
     const balanceWalletId = isEmission ? creditWalletId : creditWalletId;
     const { data: newBalance } = await supabaseAdmin
       .from("wallet_balances")

@@ -10,6 +10,7 @@ import { createTransaction } from '@/lib/ledger-api';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChildWithBalance } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
+import { BiometricPrompt } from '@/components/BiometricPrompt';
 
 interface SendAllowanceDialogProps {
   open: boolean;
@@ -27,12 +28,18 @@ export function SendAllowanceDialog({ open, onOpenChange, children }: SendAllowa
 
   const selectedChild = children.find(c => c.profileId === selectedChildId);
 
-  const handleSend = async () => {
+  const [showBiometric, setShowBiometric] = useState(false);
+
+  const handleSendClick = () => {
     if (!selectedChildId || !amount || Number(amount) <= 0) {
       toast({ title: t('common.error'), description: t('dialog.allowance.validation'), variant: 'destructive' });
       return;
     }
+    // Try biometric first, then proceed
+    setShowBiometric(true);
+  };
 
+  const handleSendConfirmed = async () => {
     setSending(true);
     try {
       const result = await createTransaction({
@@ -119,11 +126,18 @@ export function SendAllowanceDialog({ open, onOpenChange, children }: SendAllowa
             </div>
           )}
 
-          <Button className="w-full rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={handleSend} disabled={sending || !selectedChildId || !amount || Number(amount) <= 0}>
+          <Button className="w-full rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={handleSendClick} disabled={sending || !selectedChildId || !amount || Number(amount) <= 0}>
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {sending ? t('dialog.allowance.sending') : t('dialog.allowance.confirm')}
           </Button>
         </div>
+
+        <BiometricPrompt
+          action="transaction"
+          open={showBiometric}
+          onVerified={() => { setShowBiometric(false); handleSendConfirmed(); }}
+          onCancel={() => setShowBiometric(false)}
+        />
       </DialogContent>
     </Dialog>
   );

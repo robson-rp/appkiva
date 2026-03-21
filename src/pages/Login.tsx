@@ -10,7 +10,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck, Globe } from 'lucide-react';
+import { Shield, Sparkles, ArrowLeft, GraduationCap, Zap, Loader2, Building2, Phone, Mail, CheckCircle2, AlertTriangle, Clock, ShieldCheck, Globe, Fingerprint } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -21,6 +21,9 @@ import { supabase } from '@/integrations/supabase/client';
 import LoginBannerCarousel from '@/components/LoginBannerCarousel';
 import { useT, useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useBiometric } from '@/hooks/use-biometric';
+import { BiometricSetupPrompt } from '@/components/BiometricLoginPrompt';
+import { useNativePush } from '@/hooks/use-native-push';
 
 const localeFlag: Record<string, string> = { pt: '🇵🇹', en: '🇬🇧', fr: '🇫🇷' };
 const localeLabel: Record<string, string> = { pt: 'Português', en: 'English', fr: 'Français' };
@@ -96,6 +99,10 @@ export default function Login() {
   const { login, loginAsChild, signup, user, pending2FA, complete2FA } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const biometric = useBiometric();
+  const nativePush = useNativePush();
+  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
+  const [loginCredentials, setLoginCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Auto-fill invite code from URL query param (?invite=ABC123)
   useEffect(() => {
@@ -116,6 +123,15 @@ export default function Login() {
   // Redirect when user is loaded by AuthContext (pending2FA blocks redirect)
   useEffect(() => {
     if (user && !pending2FA) {
+      // Register native push on login
+      nativePush.register();
+      
+      // Show biometric setup prompt if credentials available and biometric not yet enabled
+      if (loginCredentials && biometric.isAvailable && !biometric.isEnabled) {
+        setShowBiometricSetup(true);
+        return; // Don't navigate yet, wait for biometric prompt
+      }
+      
       const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
       navigate(dest, { replace: true });
     }
@@ -314,6 +330,8 @@ export default function Login() {
             setSubmitting(false);
             return;
           }
+          // Store credentials for potential biometric setup
+          setLoginCredentials({ email, password });
         }
       }
 
@@ -455,7 +473,43 @@ export default function Login() {
     );
   }
 
+  const handleBiometricSetupClose = () => {
+    setShowBiometricSetup(false);
+    setLoginCredentials(null);
+    if (user && !pending2FA) {
+      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
+      navigate(dest, { replace: true });
+    }
+  };
+
+  // Biometric quick login handler
+  const handleBiometricLogin = async () => {
+    if (!biometric.isNative || !biometric.isEnabled) return;
+    const verified = await biometric.verify('login', locale);
+    if (!verified) return;
+    const creds = await biometric.getCredentials();
+    if (!creds) return;
+    setSubmitting(true);
+    try {
+      const { error } = await login(creds.username, creds.password);
+      if (error) {
+        toast({ title: t(error), variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
+    <>
+    <BiometricSetupPrompt
+      open={showBiometricSetup}
+      email={loginCredentials?.email ?? ''}
+      password={loginCredentials?.password ?? ''}
+      onClose={handleBiometricSetupClose}
+    />
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Hero Panel */}
       <div className="relative flex flex-col items-center justify-center px-4 py-3 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
@@ -1118,5 +1172,7 @@ export default function Login() {
         </motion.div>
       </div>
     </div>
+  );
+    </>
   );
 }
