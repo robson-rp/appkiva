@@ -333,7 +333,7 @@ export default function ChildVaults() {
                 </div>
               )}
             </div>
-            <Button className="w-full rounded-xl font-display gap-2" disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending} onClick={handleDeposit}>
+            <Button className="w-full rounded-xl font-display gap-2" disabled={!depositAmount || Number(depositAmount) <= 0 || Number(depositAmount) > balance || depositToVault.isPending} onClick={handleDepositClick}>
               {depositToVault.isPending ? t('child.vaults.depositing') : (<><ArrowDownToLine className="h-4 w-4" /> {t('child.vaults.deposit_btn')} {depositAmount ? `${depositAmount} KVC` : ''}</>)}
             </Button>
             {Number(depositAmount) > balance && <p className="text-xs text-destructive text-center">{t('child.vaults.insufficient')}</p>}
