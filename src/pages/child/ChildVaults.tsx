@@ -43,6 +43,8 @@ export default function ChildVaults() {
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [confettiActive, setConfettiActive] = useState(false);
   const [confettiVault, setConfettiVault] = useState<{ name: string; icon: string } | null>(null);
+  const [showBiometric, setShowBiometric] = useState(false);
+  const [biometricAction, setBiometricAction] = useState<'deposit' | 'withdraw'>('deposit');
 
   const balance = walletBalance?.balance ?? 0;
 
