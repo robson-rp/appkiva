@@ -126,11 +126,18 @@ export function SendAllowanceDialog({ open, onOpenChange, children }: SendAllowa
             </div>
           )}
 
-          <Button className="w-full rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={handleSend} disabled={sending || !selectedChildId || !amount || Number(amount) <= 0}>
+          <Button className="w-full rounded-xl font-display gap-2 bg-accent hover:bg-accent/90 text-accent-foreground" onClick={handleSendClick} disabled={sending || !selectedChildId || !amount || Number(amount) <= 0}>
             {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             {sending ? t('dialog.allowance.sending') : t('dialog.allowance.confirm')}
           </Button>
         </div>
+
+        <BiometricPrompt
+          action="transaction"
+          open={showBiometric}
+          onVerified={() => { setShowBiometric(false); handleSendConfirmed(); }}
+          onCancel={() => setShowBiometric(false)}
+        />
       </DialogContent>
     </Dialog>
   );

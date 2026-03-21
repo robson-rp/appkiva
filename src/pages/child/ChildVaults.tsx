@@ -96,13 +96,25 @@ export default function ChildVaults() {
 
   const openWithdrawDialog = (vault: typeof withdrawVault) => { setWithdrawVault(vault); setWithdrawAmount(''); setWithdrawDialogOpen(true); };
 
-  const handleWithdraw = () => {
+  const handleWithdrawClick = () => {
+    if (!withdrawVault || !withdrawAmount || Number(withdrawAmount) <= 0) return;
+    setBiometricAction('withdraw');
+    setShowBiometric(true);
+  };
+
+  const handleWithdrawConfirmed = () => {
     if (!withdrawVault || !withdrawAmount) return;
     const amount = Number(withdrawAmount);
     if (amount <= 0) return;
     withdrawFromVault.mutate({ vaultId: withdrawVault.id, amount }, {
       onSuccess: () => { setWithdrawDialogOpen(false); setWithdrawVault(null); setWithdrawAmount(''); },
     });
+  };
+
+  const handleBiometricVerified = () => {
+    setShowBiometric(false);
+    if (biometricAction === 'deposit') handleDepositConfirmed();
+    else handleWithdrawConfirmed();
   };
 
   const maxWithdraw = withdrawVault?.currentAmount ?? 0;
