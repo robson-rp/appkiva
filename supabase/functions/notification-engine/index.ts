@@ -223,12 +223,22 @@ Deno.serve(async (req) => {
       }).select('id').single();
 
       if (notif) {
-        await supabase.from('notification_log').insert({
-          profile_id: vault.profile_id,
-          notification_id: notif.id,
-        });
-        savingsCount++;
-      }
+          await supabase.from('notification_log').insert({
+            profile_id: vault.profile_id,
+            notification_id: notif.id,
+          });
+          savingsCount++;
+
+          // Send push for savings milestone
+          const pushTitle = `${emoji} Progresso de poupança!`;
+          const pushBody = milestone >= 100
+            ? `Parabéns! Atingiste 100% do objectivo no sonho "${vault.title}"!`
+            : `Kivo diz: Atingiste ${milestone}% do teu objectivo no sonho "${vault.title}". Continua assim!`;
+          await sendPush(supabaseUrl, serviceRoleKey, vault.profile_id, pushTitle, pushBody,
+            { type: 'savings_milestone', percentage: milestone });
+          await sendNativePush(supabase, vault.profile_id, pushTitle, pushBody,
+            { type: 'savings_milestone', percentage: milestone });
+        }
     }
     results.savings_milestones = savingsCount;
 
