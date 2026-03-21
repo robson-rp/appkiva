@@ -10,6 +10,7 @@ import { createTransaction } from '@/lib/ledger-api';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ChildWithBalance } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
+import { BiometricPrompt } from '@/components/BiometricPrompt';
 
 interface SendAllowanceDialogProps {
   open: boolean;
