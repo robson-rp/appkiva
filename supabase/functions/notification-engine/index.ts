@@ -31,6 +31,35 @@ async function sendPush(
   }
 }
 
+/** Send native push notifications to device tokens (FCM/APNs) */
+async function sendNativePush(
+  supabase: any,
+  profileId: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+) {
+  try {
+    const { data: tokens } = await supabase
+      .from('push_device_tokens')
+      .select('token, platform')
+      .eq('profile_id', profileId);
+
+    if (!tokens || tokens.length === 0) return;
+
+    // For now, log native tokens — FCM/APNs integration requires server keys
+    // which will be configured when building for production
+    console.log(`[notification-engine] ${tokens.length} native device(s) for ${profileId}:`, 
+      tokens.map((t: any) => t.platform));
+    
+    // TODO: When FCM/APNs keys are configured, send via:
+    // - FCM HTTP v1 API for Android tokens
+    // - APNs for iOS tokens
+  } catch (e) {
+    console.error('[notification-engine] native push failed:', e);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
