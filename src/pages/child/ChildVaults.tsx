@@ -71,7 +71,13 @@ export default function ChildVaults() {
 
   const openDepositDialog = (vault: typeof depositVault) => { setDepositVault(vault); setDepositAmount(''); setDepositDialogOpen(true); };
 
-  const handleDeposit = () => {
+  const handleDepositClick = () => {
+    if (!depositVault || !depositAmount || Number(depositAmount) <= 0) return;
+    setBiometricAction('deposit');
+    setShowBiometric(true);
+  };
+
+  const handleDepositConfirmed = () => {
     if (!depositVault || !depositAmount) return;
     const amount = Number(depositAmount);
     if (amount <= 0) return;
