@@ -369,7 +369,7 @@ export default function ChildVaults() {
                 </div>
               )}
             </div>
-            <Button className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending} onClick={handleWithdraw}>
+            <Button className="w-full rounded-xl font-display gap-2 bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={!withdrawAmount || Number(withdrawAmount) <= 0 || Number(withdrawAmount) > maxWithdraw || withdrawFromVault.isPending} onClick={handleWithdrawClick}>
               {withdrawFromVault.isPending ? t('child.vaults.withdrawing') : (<><ArrowUpFromLine className="h-4 w-4" /> {t('child.vaults.withdraw_btn')} {withdrawAmount ? `${withdrawAmount} KVC` : ''}</>)}
             </Button>
             {Number(withdrawAmount) > maxWithdraw && maxWithdraw > 0 && <p className="text-xs text-destructive text-center">{t('child.vaults.exceeds_balance')}</p>}

@@ -473,9 +473,18 @@ export default function Login() {
     );
   }
 
-  // Biometric quick login attempt on mount
-  const handleBiometricLogin = useCallback(async () => {
-    if (!biometric.isNative || !biometric.isEnabled || authMode !== 'login') return;
+  const handleBiometricSetupClose = () => {
+    setShowBiometricSetup(false);
+    setLoginCredentials(null);
+    if (user && !pending2FA) {
+      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
+      navigate(dest, { replace: true });
+    }
+  };
+
+  // Biometric quick login handler
+  const handleBiometricLogin = async () => {
+    if (!biometric.isNative || !biometric.isEnabled) return;
     const verified = await biometric.verify('login', locale);
     if (!verified) return;
     const creds = await biometric.getCredentials();
@@ -490,15 +499,6 @@ export default function Login() {
       toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
     } finally {
       setSubmitting(false);
-    }
-  }, [biometric.isNative, biometric.isEnabled, authMode, locale]);
-
-  const handleBiometricSetupClose = () => {
-    setShowBiometricSetup(false);
-    setLoginCredentials(null);
-    if (user && !pending2FA) {
-      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
-      navigate(dest, { replace: true });
     }
   };
 
