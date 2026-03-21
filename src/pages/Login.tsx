@@ -473,7 +473,43 @@ export default function Login() {
     );
   }
 
+  // Biometric quick login attempt on mount
+  const handleBiometricLogin = useCallback(async () => {
+    if (!biometric.isNative || !biometric.isEnabled || authMode !== 'login') return;
+    const verified = await biometric.verify('login', locale);
+    if (!verified) return;
+    const creds = await biometric.getCredentials();
+    if (!creds) return;
+    setSubmitting(true);
+    try {
+      const { error } = await login(creds.username, creds.password);
+      if (error) {
+        toast({ title: t(error), variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [biometric.isNative, biometric.isEnabled, authMode, locale]);
+
+  const handleBiometricSetupClose = () => {
+    setShowBiometricSetup(false);
+    setLoginCredentials(null);
+    if (user && !pending2FA) {
+      const dest = user.role === 'parent' ? '/parent' : user.role === 'teacher' ? '/teacher' : user.role === 'teen' ? '/teen' : user.role === 'admin' ? '/admin' : user.role === 'partner' ? '/partner' : '/child';
+      navigate(dest, { replace: true });
+    }
+  };
+
   return (
+    <>
+    <BiometricSetupPrompt
+      open={showBiometricSetup}
+      email={loginCredentials?.email ?? ''}
+      password={loginCredentials?.password ?? ''}
+      onClose={handleBiometricSetupClose}
+    />
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Hero Panel */}
       <div className="relative flex flex-col items-center justify-center px-4 py-3 lg:flex-1 lg:p-16 gradient-kivara overflow-hidden">
