@@ -120,6 +120,16 @@ Deno.serve(async (req) => {
             notification_id: notif.id,
           });
           reminderCount++;
+
+          // Send push (web + native)
+          await sendPush(supabaseUrl, serviceRoleKey, profile.id, 
+            '👋 Pronto para o desafio de hoje?',
+            `Kivo diz: Olá ${profile.display_name}! Pronto para o desafio de dinheiro de hoje?`,
+            { type: 'daily_reminder' });
+          await sendNativePush(supabase, profile.id,
+            '👋 Pronto para o desafio de hoje?',
+            `Kivo diz: Olá ${profile.display_name}! Pronto para o desafio de dinheiro de hoje?`,
+            { type: 'daily_reminder' });
         }
       }
       results.daily_reminders = reminderCount;
