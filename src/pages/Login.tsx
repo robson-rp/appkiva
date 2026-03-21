@@ -99,6 +99,10 @@ export default function Login() {
   const { login, loginAsChild, signup, user, pending2FA, complete2FA } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const biometric = useBiometric();
+  const nativePush = useNativePush();
+  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
+  const [loginCredentials, setLoginCredentials] = useState<{ email: string; password: string } | null>(null);
 
   // Auto-fill invite code from URL query param (?invite=ABC123)
   useEffect(() => {
