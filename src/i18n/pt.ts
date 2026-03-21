@@ -2921,7 +2921,27 @@ const pt: Record<string, string> = {
   'nudge.goal_close': 'Mais {amount} moedas e atinges a meta "{goal}"!',
   'nudge.mission_pending': 'Tens uma missão em curso — termina-a para ganhar recompensas!',
   'nudge.keep_going': 'Estás com {streak} dias seguidos — continua assim! 💪',
-  'nudge.surprise_bonus': 'Bónus surpresa do Kivo! 🎁',
+'nudge.surprise_bonus': 'Bónus surpresa do Kivo! 🎁',
+
+  // ─── Biometric ───
+  'biometric.title': 'Verificação biométrica',
+  'biometric.reason_login': 'Confirma a tua identidade para entrar na app.',
+  'biometric.reason_transaction': 'Confirma a tua identidade para autorizar esta transacção.',
+  'biometric.reason_vault': 'Confirma a tua identidade para aceder ao cofre.',
+  'biometric.verifying': 'A verificar…',
+  'biometric.failed': 'Verificação falhou. Tenta novamente.',
+  'biometric.use': 'Usar',
+  'biometric.retry': 'Tentar novamente',
+  'biometric.setup_title': 'Login biométrico',
+  'biometric.setup_desc': 'Queres usar a impressão digital ou Face ID para entrar mais rapidamente da próxima vez?',
+  'biometric.enable': 'Activar biometria',
+  'biometric.skip': 'Agora não',
+  'biometric.settings_label': 'Login biométrico',
+  'biometric.settings_desc': 'Usar impressão digital ou reconhecimento facial para entrar',
+
+  // ─── Native Push ───
+  'push.native_enabled': 'Notificações nativas activadas',
+  'push.enable_native': 'Activar notificações',
 };
 
 export default pt;

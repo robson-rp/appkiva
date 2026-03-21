@@ -2917,7 +2917,27 @@ const en: Record<string, string> = {
   'nudge.goal_close': 'Just {amount} more coins to reach your "{goal}" goal!',
   'nudge.mission_pending': 'You have a mission in progress — finish it to earn rewards!',
   'nudge.keep_going': "You're on a {streak}-day streak — keep going! 💪",
-  'nudge.surprise_bonus': 'Surprise bonus from Kivo! 🎁',
+'nudge.surprise_bonus': 'Surprise bonus from Kivo! 🎁',
+
+  // ─── Biometric ───
+  'biometric.title': 'Biometric verification',
+  'biometric.reason_login': 'Confirm your identity to sign in.',
+  'biometric.reason_transaction': 'Confirm your identity to authorize this transaction.',
+  'biometric.reason_vault': 'Confirm your identity to access the vault.',
+  'biometric.verifying': 'Verifying…',
+  'biometric.failed': 'Verification failed. Try again.',
+  'biometric.use': 'Use',
+  'biometric.retry': 'Try again',
+  'biometric.setup_title': 'Biometric login',
+  'biometric.setup_desc': 'Would you like to use fingerprint or Face ID for faster sign-in next time?',
+  'biometric.enable': 'Enable biometrics',
+  'biometric.skip': 'Not now',
+  'biometric.settings_label': 'Biometric login',
+  'biometric.settings_desc': 'Use fingerprint or face recognition to sign in',
+
+  // ─── Native Push ───
+  'push.native_enabled': 'Native notifications enabled',
+  'push.enable_native': 'Enable notifications',
 };
 
 export default en;
