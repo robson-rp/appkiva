@@ -1881,6 +1881,41 @@ export type Database = {
           },
         ]
       }
+      push_device_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          profile_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          profile_id: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          profile_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_device_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth: string

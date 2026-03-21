@@ -31,6 +31,35 @@ async function sendPush(
   }
 }
 
+/** Send native push notifications to device tokens (FCM/APNs) */
+async function sendNativePush(
+  supabase: any,
+  profileId: string,
+  title: string,
+  body: string,
+  data?: Record<string, any>
+) {
+  try {
+    const { data: tokens } = await supabase
+      .from('push_device_tokens')
+      .select('token, platform')
+      .eq('profile_id', profileId);
+
+    if (!tokens || tokens.length === 0) return;
+
+    // For now, log native tokens — FCM/APNs integration requires server keys
+    // which will be configured when building for production
+    console.log(`[notification-engine] ${tokens.length} native device(s) for ${profileId}:`, 
+      tokens.map((t: any) => t.platform));
+    
+    // TODO: When FCM/APNs keys are configured, send via:
+    // - FCM HTTP v1 API for Android tokens
+    // - APNs for iOS tokens
+  } catch (e) {
+    console.error('[notification-engine] native push failed:', e);
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -91,6 +120,16 @@ Deno.serve(async (req) => {
             notification_id: notif.id,
           });
           reminderCount++;
+
+          // Send push (web + native)
+          await sendPush(supabaseUrl, serviceRoleKey, profile.id, 
+            '👋 Pronto para o desafio de hoje?',
+            `Kivo diz: Olá ${profile.display_name}! Pronto para o desafio de dinheiro de hoje?`,
+            { type: 'daily_reminder' });
+          await sendNativePush(supabase, profile.id,
+            '👋 Pronto para o desafio de hoje?',
+            `Kivo diz: Olá ${profile.display_name}! Pronto para o desafio de dinheiro de hoje?`,
+            { type: 'daily_reminder' });
         }
       }
       results.daily_reminders = reminderCount;
@@ -127,15 +166,15 @@ Deno.serve(async (req) => {
           });
           streakCount++;
 
-          // Also send web push notification
-          await sendPush(
-            supabaseUrl,
-            serviceRoleKey,
-            streak.profile_id,
+          // Also send web + native push
+          await sendPush(supabaseUrl, serviceRoleKey, streak.profile_id,
             '⚡ A tua sequência está em risco!',
             `Kivo diz: A tua sequência de ${streak.current_streak} dias está prestes a acabar! Completa uma missão para a manter.`,
-            { type: 'streak_at_risk', current_streak: streak.current_streak }
-          );
+            { type: 'streak_at_risk', current_streak: streak.current_streak });
+          await sendNativePush(supabase, streak.profile_id,
+            '⚡ A tua sequência está em risco!',
+            `Kivo diz: A tua sequência de ${streak.current_streak} dias está prestes a acabar! Completa uma missão para a manter.`,
+            { type: 'streak_at_risk', current_streak: streak.current_streak });
         }
       }
       results.streak_at_risk = streakCount;
