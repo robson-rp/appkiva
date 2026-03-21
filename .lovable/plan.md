@@ -1,51 +1,49 @@
 
 
-## Plano: App Mobile Nativa com Capacitor
+## Plano: Configurar Ícones e Splash Screen Nativos para iOS e Android
 
-A app já tem toda a lógica de roles (parent, child, teen, teacher) implementada — o AuthContext detecta o role e redireciona para o layout adequado. Uma única app nativa com Capacitor reutiliza todo este código existente.
+Os assets `app-icon-1024.png` e `splash-screen-2732.png` já existem em `public/`. Agora é preciso configurar o Capacitor para os usar correctamente em cada plataforma.
 
-### Abordagem
+### Contexto
 
-Usar **Capacitor** para empacotar a app React existente como app nativa iOS e Android. O mesmo código, os mesmos perfis — a app já abre o dashboard correcto conforme o tipo de utilizador.
+O Capacitor gera os ícones e splash screens nativos a partir de imagens fonte, usando o pacote `@capacitor/assets`. Este utilitário redimensiona automaticamente para todos os tamanhos necessários (iOS: 20px a 1024px, Android: mdpi a xxxhdpi).
 
 ### Alterações
 
-**1. Instalar dependências Capacitor**
-- `@capacitor/core`, `@capacitor/cli` (dev), `@capacitor/ios`, `@capacitor/android`
-- Inicializar com `npx cap init` (appId: `app.lovable.18620ef5321f449f8aebb24fba50d28b`, appName: `appkiva`)
+**1. Instalar `@capacitor/assets` (dev dependency)**
+- Ferramenta CLI que gera todos os tamanhos de ícones e splash screens para ambas as plataformas.
 
-**2. Configurar `capacitor.config.ts`**
-- Server URL apontando para o sandbox preview com hot-reload durante desenvolvimento
-- `cleartext: true` para desenvolvimento local
+**2. Criar estrutura de assets fonte**
+- Criar directório `resources/` na raiz do projecto.
+- Copiar `public/app-icon-1024.png` → `resources/icon.png` (ícone da app).
+- Copiar `public/splash-screen-2732.png` → `resources/splash.png` (splash screen).
+- Criar `resources/icon-foreground.png` (versão com padding para adaptive icons Android).
 
-**3. Ajustes de UI mobile-native**
-- Adicionar safe area insets (notch, barra de navegação) via `@capacitor/status-bar` e CSS `env(safe-area-inset-*)`
-- Configurar splash screen e ícone da app
-- Ajustar a status bar (cor, estilo) por role/tema
+**3. Actualizar `capacitor.config.ts`**
+- Adicionar configuração do `SplashScreen` com opções de resize e duração:
+  - `launchAutoHide: false` (para controlar via código quando esconder)
+  - `androidScaleType: 'CENTER_CROP'`
+  - `showSpinner: false`
+  - `splashFullScreen: true`
+  - `splashImmersive: true`
 
-**4. Capacidades nativas opcionais (fase seguinte)**
-- Push notifications nativas (`@capacitor/push-notifications`) em vez de web push
-- Câmara para avatar (`@capacitor/camera`)
-- Haptic feedback para interações de gamificação (`@capacitor/haptics`)
-- Biometria para login (Face ID / fingerprint)
+**4. Documentar comandos de geração**
+- Adicionar script `generate-assets` ao `package.json`: `npx capacitor-assets generate`
+- Este comando gera automaticamente todos os tamanhos para `ios/` e `android/` quando o utilizador correr localmente.
 
-### Passos do Utilizador (após setup)
+**5. Controlar splash screen programaticamente**
+- Importar `SplashScreen` de `@capacitor/splash-screen` no `App.tsx`.
+- Chamar `SplashScreen.hide()` após o carregamento inicial (quando o `SplashScreen` React component termina), para transição suave entre splash nativo e app.
 
-1. Exportar projecto para GitHub via "Export to Github"
-2. `git pull` + `npm install`
-3. `npx cap add ios` e/ou `npx cap add android`
-4. `npx cap update ios` / `npx cap update android`
-5. `npm run build` + `npx cap sync`
-6. `npx cap run ios` (requer Mac + Xcode) ou `npx cap run android` (Android Studio)
+### O que o utilizador faz depois
 
-### Resultado
+```bash
+git pull && npm install
+npx cap add ios    # ou android
+npx capacitor-assets generate
+npm run build && npx cap sync
+npx cap run ios    # ou android
+```
 
-Uma única app na App Store e Play Store. O login determina o perfil (Pai, Criança, Adolescente, Professor) e a app abre o dashboard adequado automaticamente — exactamente como funciona hoje na web.
-
-### Secção Técnica
-
-- O routing existente em `App.tsx` já gere os redirects por role
-- Os layouts (`ParentLayout`, `ChildLayout`, `TeenLayout`, `TeacherLayout`) já são responsivos
-- As melhorias tipográficas e de touch targets (14px floor, 44px buttons) já estão aplicadas
-- O Capacitor serve a app React dentro de uma WebView nativa com acesso a APIs do dispositivo
+O comando `capacitor-assets generate` cria automaticamente todos os ícones (29 tamanhos iOS, 9 tamanhos Android) e splash screens a partir das imagens fonte em `resources/`.
 
