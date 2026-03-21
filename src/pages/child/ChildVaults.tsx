@@ -379,6 +379,12 @@ export default function ChildVaults() {
 
       <Kivo page="vaults" />
       <ConfettiCelebration active={confettiActive} onComplete={() => setConfettiActive(false)} vaultName={confettiVault?.name} vaultIcon={confettiVault?.icon} />
+      <BiometricPrompt
+        action="vault"
+        open={showBiometric}
+        onVerified={handleBiometricVerified}
+        onCancel={() => setShowBiometric(false)}
+      />
     </div>
   );
 }
