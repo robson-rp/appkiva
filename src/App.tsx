@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { lazy, Suspense, useState, useCallback } from "react";
 import { InstallPWAPrompt } from "./components/InstallPWAPrompt";
 import { SplashScreen } from "./components/SplashScreen";
+import { SplashScreen as CapSplashScreen } from "@capacitor/splash-screen";
 import { OfflineBanner } from "./components/OfflineBanner";
 import { RewardAnimationProvider } from "./contexts/RewardAnimationContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
