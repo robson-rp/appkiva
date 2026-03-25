@@ -3,6 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import bannerFamilia from "@/assets/banner-familia.jpg";
+import bannerMissoes from "@/assets/banner-missoes.jpg";
+import bannerPoupar from "@/assets/banner-poupar.jpg";
+import bannerRecompensas from "@/assets/banner-recompensas.jpg";
+import bannerSonhos from "@/assets/banner-sonhos.jpg";
 
 interface Banner {
   id: string;
@@ -15,11 +20,11 @@ interface Banner {
 const AUTO_PLAY_MS = 3000;
 
 const FALLBACK_BANNERS: Banner[] = [
-  { id: "fb-1", title: "Família", image_url: "/banners/banner-familia.jpg", link_url: null, display_order: 1 },
-  { id: "fb-2", title: "Missões", image_url: "/banners/banner-missoes.jpg", link_url: null, display_order: 2 },
-  { id: "fb-3", title: "Poupar", image_url: "/banners/banner-poupar.jpg", link_url: null, display_order: 3 },
-  { id: "fb-4", title: "Recompensas", image_url: "/banners/banner-recompensas.jpg", link_url: null, display_order: 4 },
-  { id: "fb-5", title: "Sonhos", image_url: "/banners/banner-sonhos.jpg", link_url: null, display_order: 5 },
+  { id: "fb-1", title: "Família", image_url: bannerFamilia, link_url: null, display_order: 1 },
+  { id: "fb-2", title: "Missões", image_url: bannerMissoes, link_url: null, display_order: 2 },
+  { id: "fb-3", title: "Poupar", image_url: bannerPoupar, link_url: null, display_order: 3 },
+  { id: "fb-4", title: "Recompensas", image_url: bannerRecompensas, link_url: null, display_order: 4 },
+  { id: "fb-5", title: "Sonhos", image_url: bannerSonhos, link_url: null, display_order: 5 },
 ];
 
 export default function LoginBannerCarousel() {
