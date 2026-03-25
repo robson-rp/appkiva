@@ -14,6 +14,14 @@ interface Banner {
 
 const AUTO_PLAY_MS = 3000;
 
+const FALLBACK_BANNERS: Banner[] = [
+  { id: "fb-1", title: "Família", image_url: "/banners/banner-familia.jpg", link_url: null, display_order: 1 },
+  { id: "fb-2", title: "Missões", image_url: "/banners/banner-missoes.jpg", link_url: null, display_order: 2 },
+  { id: "fb-3", title: "Poupar", image_url: "/banners/banner-poupar.jpg", link_url: null, display_order: 3 },
+  { id: "fb-4", title: "Recompensas", image_url: "/banners/banner-recompensas.jpg", link_url: null, display_order: 4 },
+  { id: "fb-5", title: "Sonhos", image_url: "/banners/banner-sonhos.jpg", link_url: null, display_order: 5 },
+];
+
 export default function LoginBannerCarousel() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -29,8 +37,13 @@ export default function LoginBannerCarousel() {
       .eq("is_active", true)
       .order("display_order")
       .limit(5)
-      .then(({ data }) => {
-        if (data?.length) setBanners(data);
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Banner query failed, using fallback:", error.message);
+          setBanners(FALLBACK_BANNERS);
+          return;
+        }
+        setBanners(data?.length ? data : FALLBACK_BANNERS);
       });
   }, []);
 
@@ -70,11 +83,16 @@ export default function LoginBannerCarousel() {
   }, [progress]);
 
   const trackClick = useCallback((bannerId: string) => {
+    if (bannerId.startsWith("fb-")) return; // skip fallback banners
     supabase.from("banner_clicks").insert({
       banner_id: bannerId,
       user_agent: navigator.userAgent,
       referrer: document.referrer || null,
     }).then(() => {});
+  }, []);
+
+  const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = "/placeholder.svg";
   }, []);
 
   if (!banners.length) return (
@@ -104,6 +122,7 @@ export default function LoginBannerCarousel() {
                 loading={idx === 0 ? "eager" : "lazy"}
                 fetchPriority={idx === 0 ? "high" : "auto"}
                 decoding={idx === 0 ? "sync" : "async"}
+                onError={handleImgError}
               />
             );
 
