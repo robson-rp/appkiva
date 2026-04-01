@@ -34,7 +34,7 @@ export function TeenRecentTransactions({ transactions }: TeenRecentTransactionsP
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{tx.description}</p>
-                <p className="text-[10px] text-muted-foreground">{tx.date}{tx.category ? ` • ${SPENDING_CATEGORIES[tx.category]?.label}` : ''}</p>
+                <p className="text-xs text-muted-foreground">{tx.date}{tx.category ? ` • ${SPENDING_CATEGORIES[tx.category]?.label}` : ''}</p>
               </div>
             </div>
             <span className={`font-display font-bold text-sm ${

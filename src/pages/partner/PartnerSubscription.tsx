@@ -146,7 +146,7 @@ export default function PartnerSubscription() {
                       {tier.priceMonthly > 0 && <span className="text-xs text-muted-foreground font-normal">/mês</span>}
                     </p>
                     {isCurrent && (
-                      <Badge className="mt-2 bg-primary/10 text-primary border-0 text-[10px]">
+                      <Badge className="mt-2 bg-primary/10 text-primary border-0 text-xs">
                         <Crown className="h-3 w-3 mr-1" /> {t('partner.subscription.current')}
                       </Badge>
                     )}

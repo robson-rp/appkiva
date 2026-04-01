@@ -77,7 +77,7 @@ export default function TeenMissions() {
                         {mission.description && <p className="text-xs text-muted-foreground">{mission.description}</p>}
                       </div>
                     </div>
-                    <Badge variant={mission.status === 'completed' ? 'default' : mission.status === 'in_progress' ? 'secondary' : 'outline'} className="text-[10px]">
+                    <Badge variant={mission.status === 'completed' ? 'default' : mission.status === 'in_progress' ? 'secondary' : 'outline'} className="text-xs">
                       {mission.status === 'completed' ? t('teen.missions.status.completed') : mission.status === 'in_progress' ? t('teen.missions.status.in_progress') : t('teen.missions.status.available')}
                     </Badge>
                   </div>

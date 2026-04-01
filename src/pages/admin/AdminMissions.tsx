@@ -277,11 +277,11 @@ function TemplatesTab() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h4 className="font-display font-bold text-sm">{tpl.title}</h4>
-                    <Badge className={`text-[9px] ${difficultyColor[tpl.difficulty]}`}>{tpl.difficulty}</Badge>
-                    <Badge variant="outline" className="text-[9px] capitalize">{tpl.type}</Badge>
+                    <Badge className={`text-xs ${difficultyColor[tpl.difficulty]}`}>{tpl.difficulty}</Badge>
+                    <Badge variant="outline" className="text-xs capitalize">{tpl.type}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{tpl.description}</p>
-                  <div className="flex gap-2 mt-1 text-[10px] text-muted-foreground">
+                  <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                     <span>🪙 {tpl.reward_coins}</span>
                     <span>⭐ {tpl.reward_points}</span>
                     <span>{tpl.age_group === 'all' ? 'Todas idades' : `${tpl.age_group} anos`}</span>

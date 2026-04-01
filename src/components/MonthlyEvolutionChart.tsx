@@ -43,11 +43,11 @@ export function MonthlyEvolutionChart({ data }: MonthlyEvolutionChartProps) {
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-secondary" />
-            <span className="text-[10px] text-muted-foreground font-medium">{t('chart.earned')}</span>
+            <span className="text-xs text-muted-foreground font-medium">{t('chart.earned')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-sm bg-destructive" />
-            <span className="text-[10px] text-muted-foreground font-medium">{t('chart.spent')}</span>
+            <span className="text-xs text-muted-foreground font-medium">{t('chart.spent')}</span>
           </div>
         </div>
       </CardContent>

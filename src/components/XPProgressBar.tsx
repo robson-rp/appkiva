@@ -40,10 +40,10 @@ export function XPProgressBar() {
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5">
-            <span className="text-[10px] font-display font-bold text-foreground">{config.label}</span>
+            <span className="text-xs font-display font-bold text-foreground">{config.label}</span>
             <div className="flex items-center gap-1">
               <Zap className="h-3 w-3 text-accent" />
-              <span className="text-[10px] font-display font-bold text-accent-foreground">{points} FXP</span>
+              <span className="text-xs font-display font-bold text-accent-foreground">{points} FXP</span>
             </div>
           </div>
           <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -55,7 +55,7 @@ export function XPProgressBar() {
             />
           </div>
           {nextLevel && (
-            <p className="text-[9px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {t('xp.to_next').replace('{remaining}', String(remaining)).replace('{label}', nextLevel[1].label).replace('{avatar}', nextLevel[1].avatar)}
             </p>
           )}

@@ -173,17 +173,17 @@ export default function TeenVaults() {
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{vault.icon}</div>
                         <div>
                           <h3 className="font-display font-bold text-foreground">{vault.name}</h3>
-                          <p className="text-[10px] text-muted-foreground">📈 {vault.interestRate}% {t('teen.vaults.interest')}</p>
+                          <p className="text-xs text-muted-foreground">📈 {vault.interestRate}% {t('teen.vaults.interest')}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-display font-bold text-foreground">{vault.currentAmount} 🪙</p>
-                        <p className="text-[10px] text-muted-foreground">{t('teen.vaults.of')} {vault.targetAmount}</p>
+                        <p className="text-xs text-muted-foreground">{t('teen.vaults.of')} {vault.targetAmount}</p>
                       </div>
                     </div>
                     <Progress value={pct} className="h-2" />
                     <div className="flex items-center justify-between mt-2">
-                      <p className="text-[10px] text-muted-foreground">{Math.round(pct)}% {t('teen.vaults.completed')}</p>
+                      <p className="text-xs text-muted-foreground">{Math.round(pct)}% {t('teen.vaults.completed')}</p>
                       <div className="flex gap-1.5">
                         {vault.currentAmount === 0 && (
                           <AlertDialog>
@@ -228,15 +228,15 @@ export default function TeenVaults() {
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.this_month')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teen.vaults.this_month')}</p>
                           <p className="font-display font-bold text-sm text-secondary">+{monthlyInterest} 🪙</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_3_months')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_3_months')}</p>
                           <p className="font-display font-bold text-sm text-primary">{projection3m} 🪙</p>
                         </div>
                         <div className="bg-muted/50 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_6_months')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teen.vaults.in_6_months')}</p>
                           <p className="font-display font-bold text-sm text-accent-foreground">{projection6m} 🪙</p>
                         </div>
                       </div>

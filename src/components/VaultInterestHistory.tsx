@@ -37,14 +37,14 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
             </div>
             <div>
               <h3 className="font-display font-bold text-sm text-foreground">{t('interest.title')}</h3>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {(entries.length !== 1 ? t('interest.credits_plural') : t('interest.credits')).replace('{count}', String(entries.length))}
               </p>
             </div>
           </div>
           <div className="text-right">
             <p className="font-display font-bold text-secondary text-sm">+{totalInterest} 🪙</p>
-            <p className="text-[10px] text-muted-foreground">{t('interest.total_received')}</p>
+            <p className="text-xs text-muted-foreground">{t('interest.total_received')}</p>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function VaultInterestHistory({ profileId }: { profileId?: string }) {
                       <p className="text-xs font-medium text-foreground truncate">
                         {entry.vaultName ?? t('interest.vault_fallback')}
                       </p>
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Calendar className="h-2.5 w-2.5 shrink-0" />
                         <span>{new Date(entry.createdAt).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                         {entry.interestRate != null && (

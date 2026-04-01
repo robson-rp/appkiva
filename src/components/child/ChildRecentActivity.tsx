@@ -46,7 +46,7 @@ export function ChildRecentActivity({ transactions }: ChildRecentActivityProps) 
               </div>
               <div>
                 <p className="text-sm font-semibold">{tx.description}</p>
-                <p className="text-[11px] text-muted-foreground">{tx.date}</p>
+                <p className="text-xs text-muted-foreground">{tx.date}</p>
               </div>
             </div>
             <span className={`text-sm font-display font-bold ${tx.type === 'earned' || tx.type === 'allowance' ? 'text-secondary' : 'text-destructive'}`}>

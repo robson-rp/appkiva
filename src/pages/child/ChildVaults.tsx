@@ -281,15 +281,15 @@ export default function ChildVaults() {
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div className="bg-card/60 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.vaults.this_month')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('child.vaults.this_month')}</p>
                           <p className="font-display font-bold text-sm text-secondary">+{monthlyInterest} 🪙</p>
                         </div>
                         <div className="bg-card/60 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.vaults.in_3_months')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('child.vaults.in_3_months')}</p>
                           <p className="font-display font-bold text-sm text-primary">{projection3m} 🪙</p>
                         </div>
                         <div className="bg-card/60 rounded-lg p-2 text-center">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.vaults.in_6_months')}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('child.vaults.in_6_months')}</p>
                           <p className="font-display font-bold text-sm text-accent-foreground">{projection6m} 🪙</p>
                         </div>
                       </div>

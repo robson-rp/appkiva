@@ -83,8 +83,8 @@ export function LessonViewer({ lesson, onComplete, onBack }: LessonViewerProps) 
         <div className="flex-1 min-w-0">
           <h2 className="font-display font-bold text-foreground truncate">{lesson.icon} {lesson.title}</h2>
           <div className="flex items-center gap-2 mt-0.5">
-            <Badge className={`text-[10px] ${DIFFICULTY_CONFIG[lesson.difficulty].color} border-0`}>{DIFFICULTY_CONFIG[lesson.difficulty].label}</Badge>
-            <span className="text-[10px] text-muted-foreground">{phase === 'reading' ? `${blockIndex + 1}/${totalBlocks} ${t('lesson.blocks')}` : phase === 'quiz' ? `${t('lesson.question')} ${currentQuestion + 1}/${totalQuestions}` : t('lesson.results')}</span>
+            <Badge className={`text-xs ${DIFFICULTY_CONFIG[lesson.difficulty].color} border-0`}>{DIFFICULTY_CONFIG[lesson.difficulty].label}</Badge>
+            <span className="text-xs text-muted-foreground">{phase === 'reading' ? `${blockIndex + 1}/${totalBlocks} ${t('lesson.blocks')}` : phase === 'quiz' ? `${t('lesson.question')} ${currentQuestion + 1}/${totalQuestions}` : t('lesson.results')}</span>
           </div>
         </div>
         <Button variant="outline" size="icon" className="rounded-xl shrink-0" onClick={playTts} disabled={ttsLoading} title={ttsPlaying ? t('lesson.tts_stop') : t('lesson.tts_play')}>

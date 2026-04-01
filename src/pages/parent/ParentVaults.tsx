@@ -152,13 +152,13 @@ export default function ParentVaults() {
               </div>
               <div className="flex gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
-                  <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.vaults.total_saved')}</p>
+                  <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.vaults.total_saved')}</p>
                   <p className="font-display text-2xl font-bold text-primary-foreground mt-1">
                     {totalSaved} <span className="text-base">🪙</span>
                   </p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
-                  <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.vaults.vault_count')}</p>
+                  <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.vaults.vault_count')}</p>
                   <p className="font-display text-2xl font-bold text-primary-foreground mt-1">{allVaults.length}</p>
                 </div>
               </div>
@@ -215,7 +215,7 @@ export default function ParentVaults() {
                     </div>
                     <div>
                       <span className="text-base font-bold">{child?.displayName ?? t('parent.tasks.child')}</span>
-                      <p className="text-[10px] text-muted-foreground font-normal">{vaults.length} cofre{vaults.length !== 1 ? 's' : ''} · {vaults.reduce((s, v) => s + v.currentAmount, 0)} 🪙 {t('parent.vaults.total_label')}</p>
+                      <p className="text-xs text-muted-foreground font-normal">{vaults.length} cofre{vaults.length !== 1 ? 's' : ''} · {vaults.reduce((s, v) => s + v.currentAmount, 0)} 🪙 {t('parent.vaults.total_label')}</p>
                     </div>
                   </CardTitle>
                 </CardHeader>
@@ -239,19 +239,19 @@ export default function ParentVaults() {
                               <div className="flex items-center gap-2">
                                 <h4 className="font-display font-bold text-sm">{vault.name}</h4>
                                 {goalReached && (
-                                  <span className="text-[10px] font-display font-bold text-secondary bg-secondary/15 px-2 py-0.5 rounded-full border border-secondary/25">
+                                  <span className="text-xs font-display font-bold text-secondary bg-secondary/15 px-2 py-0.5 rounded-full border border-secondary/25">
                                     {t('parent.vaults.goal_reached')}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
                                 {t('parent.vaults.created_on')} {new Date(vault.createdAt).toLocaleDateString('pt-PT')}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p className="font-display font-bold text-sm">{vault.currentAmount} / {vault.targetAmount} 🪙</p>
-                            <p className="text-[10px] text-muted-foreground">{pct}% {t('parent.vaults.completed')}</p>
+                            <p className="text-xs text-muted-foreground">{pct}% {t('parent.vaults.completed')}</p>
                           </div>
                         </div>
 
@@ -334,7 +334,7 @@ export default function ParentVaults() {
           </DialogHeader>
           <div className="space-y-6">
             <div className="bg-muted/50 rounded-xl p-4 text-center">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{t('parent.vaults.interest_rate')}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t('parent.vaults.interest_rate')}</p>
               <p className="font-display text-4xl font-bold text-primary">{newRate}%</p>
             </div>
             <div className="space-y-3">
@@ -347,7 +347,7 @@ export default function ParentVaults() {
                 step={0.5}
                 className="py-2"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>0%</span>
                 <span>5%</span>
                 <span>10%</span>
@@ -447,7 +447,7 @@ export default function ParentVaults() {
                 step={0.5}
                 className="py-2"
               />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>0%</span>
                 <span>5%</span>
                 <span>10%</span>

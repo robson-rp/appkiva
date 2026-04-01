@@ -78,7 +78,7 @@ export function WeeklyChallenges() {
                     <button
                       key={f}
                       onClick={() => setRankFilter(f)}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-display font-bold transition-all ${rankFilter === f ? 'bg-white/25 text-white' : 'text-white/50 hover:text-white/80'}`}
+                      className={`px-3 py-1 rounded-lg text-xs font-display font-bold transition-all ${rankFilter === f ? 'bg-white/25 text-white' : 'text-white/50 hover:text-white/80'}`}
                     >
                       {f === 'class' ? t('challenges.filter_class') : t('challenges.filter_friends')}
                     </button>
@@ -100,7 +100,7 @@ export function WeeklyChallenges() {
                         <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-xl">{e.avatar}</div>
                         <div className="absolute -top-1.5 -right-1.5"><MedalIcon className={`h-4 w-4 ${medalColor}`} /></div>
                       </div>
-                      <p className="text-[10px] text-white/80 font-semibold truncate max-w-[60px] text-center">{e.name}</p>
+                      <p className="text-xs text-white/80 font-semibold truncate max-w-[60px] text-center">{e.name}</p>
                       <div className={`${heights[i]} w-14 rounded-t-xl bg-white/15 mt-1 flex items-end justify-center pb-1.5`}><span className="text-xs font-display font-bold text-white">{e.score}</span></div>
                     </motion.div>
                   );
@@ -139,10 +139,10 @@ export function WeeklyChallenges() {
                     <span className="w-6 text-center font-display font-bold text-sm text-muted-foreground">{MedalIcon ? <MedalIcon className={`h-4 w-4 mx-auto ${medalColor}`} /> : `#${entry.rank}`}</span>
                     <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-lg">{entry.avatar}</div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-display ${entry.isCurrentUser ? 'font-bold text-primary' : 'font-semibold'}`}>{entry.name} {entry.isCurrentUser && <span className="text-[10px] text-muted-foreground">({t('challenges.you')})</span>}</p>
-                      <p className="text-[10px] text-muted-foreground">{entry.challengesCompleted} {t('challenges.completed_count')}</p>
+                      <p className={`text-sm font-display ${entry.isCurrentUser ? 'font-bold text-primary' : 'font-semibold'}`}>{entry.name} {entry.isCurrentUser && <span className="text-xs text-muted-foreground">({t('challenges.you')})</span>}</p>
+                      <p className="text-xs text-muted-foreground">{entry.challengesCompleted} {t('challenges.completed_count')}</p>
                     </div>
-                    <span className="font-display font-bold text-sm">{entry.score} <span className="text-[10px] text-muted-foreground">{t('challenges.pts')}</span></span>
+                    <span className="font-display font-bold text-sm">{entry.score} <span className="text-xs text-muted-foreground">{t('challenges.pts')}</span></span>
                   </div>
                 );
               })}
@@ -186,30 +186,30 @@ function ChallengeCard({ challenge: ch }: { challenge: WeeklyChallenge }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <h3 className="font-display font-bold text-sm truncate">{ch.title}</h3>
-                <Badge className={`text-[9px] ${status.badge} border-0 rounded-lg shrink-0`}>{t(status.key)}</Badge>
-                {ch.type === 'social' && <Badge className="text-[9px] bg-[hsl(var(--kivara-pink))]/15 text-[hsl(var(--kivara-pink))] border-0 rounded-lg shrink-0">{t('challenges.type_social')}</Badge>}
+                <Badge className={`text-xs ${status.badge} border-0 rounded-lg shrink-0`}>{t(status.key)}</Badge>
+                {ch.type === 'social' && <Badge className="text-xs bg-[hsl(var(--kivara-pink))]/15 text-[hsl(var(--kivara-pink))] border-0 rounded-lg shrink-0">{t('challenges.type_social')}</Badge>}
               </div>
-              <p className="text-[11px] text-muted-foreground line-clamp-2">{ch.description}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2">{ch.description}</p>
             </div>
             <div className="text-right shrink-0">
               <p className="font-display font-bold text-sm">🪙 {ch.reward}</p>
-              <p className="text-[10px] text-muted-foreground">+{ch.kivaPointsReward} {t('challenges.pts')}</p>
+              <p className="text-xs text-muted-foreground">+{ch.kivaPointsReward} {t('challenges.pts')}</p>
             </div>
           </div>
           {ch.status === 'active' && (
             <>
               <div className="space-y-1.5 mb-2">
-                <div className="flex justify-between"><span className="text-[10px] text-muted-foreground">{ch.currentValue}/{ch.targetValue}</span><span className="text-[10px] font-display font-bold text-primary">{progress}%</span></div>
+                <div className="flex justify-between"><span className="text-xs text-muted-foreground">{ch.currentValue}/{ch.targetValue}</span><span className="text-xs font-display font-bold text-primary">{progress}%</span></div>
                 <Progress value={progress} className="h-2 rounded-full" />
               </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {ch.participantCount} {t('challenges.participants')}</span>
                 <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {remaining} {t('challenges.days_left')}</span>
               </div>
               {ch.type === 'social' && (
                 <div className="mt-2 bg-[hsl(var(--kivara-pink))]/10 rounded-xl p-2.5 flex items-center gap-2">
                   <Share2 className="h-3.5 w-3.5 text-[hsl(var(--kivara-pink))]" />
-                  <p className="text-[10px] text-muted-foreground font-medium">{t('challenges.social_hint')}</p>
+                  <p className="text-xs text-muted-foreground font-medium">{t('challenges.social_hint')}</p>
                 </div>
               )}
             </>

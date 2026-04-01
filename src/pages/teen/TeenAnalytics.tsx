@@ -120,7 +120,7 @@ export default function TeenAnalytics() {
           <motion.div key={m.label} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
             <Card className="border-border/50">
               <CardContent className="p-3 text-center">
-                <p className="text-[10px] text-muted-foreground">{m.label}</p>
+                <p className="text-xs text-muted-foreground">{m.label}</p>
                 <p className={`text-lg font-display font-bold ${m.color}`}>{m.value}</p>
               </CardContent>
             </Card>
@@ -196,7 +196,7 @@ export default function TeenAnalytics() {
                 <div className="flex gap-1">
                   {([3, 6, 12] as const).map((m) => (
                     <button key={m} onClick={() => setSummaryMonths(m)}
-                      className={`px-2.5 py-1 rounded-lg text-[10px] font-display font-bold transition-all duration-200 ${summaryMonths === m ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}>
+                      className={`px-2.5 py-1 rounded-lg text-xs font-display font-bold transition-all duration-200 ${summaryMonths === m ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/50 text-muted-foreground hover:bg-muted'}`}>
                       {m}M
                     </button>
                   ))}
@@ -222,9 +222,9 @@ export default function TeenAnalytics() {
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {monthlySummary.slice(-3).map((m) => (
                   <div key={m.month} className="bg-muted/50 rounded-lg p-2 text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{m.label}</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">{m.label}</p>
                     <p className={`font-display font-bold text-sm ${m.net >= 0 ? 'text-chart-3' : 'text-destructive'}`}>{m.net >= 0 ? '+' : ''}{m.net} 🪙</p>
-                    <p className="text-[9px] text-muted-foreground">{t('teen.analytics.net').toLowerCase()}</p>
+                    <p className="text-xs text-muted-foreground">{t('teen.analytics.net').toLowerCase()}</p>
                   </div>
                 ))}
               </div>
@@ -245,7 +245,7 @@ export default function TeenAnalytics() {
               <span className="text-xs text-muted-foreground mb-1">{t('teen.analytics.of_income')}</span>
             </div>
             <Progress value={savingsRate} className="h-3 mt-2" />
-            <p className="text-[10px] text-muted-foreground mt-1">{t('teen.analytics.recommended')}</p>
+            <p className="text-xs text-muted-foreground mt-1">{t('teen.analytics.recommended')}</p>
           </CardContent>
         </Card>
       </motion.div>

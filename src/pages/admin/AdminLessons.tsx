@@ -151,12 +151,12 @@ export default function AdminLessons() {
                       <span className="text-xl">{lesson.icon}</span>
                       <div>
                         <p className="font-display font-bold text-sm text-foreground">{lesson.title}</p>
-                        <p className="text-[11px] text-muted-foreground line-clamp-1">{lesson.description}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-1">{lesson.description}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="outline" className="text-[10px]">{(LESSON_CATEGORIES as any)[lesson.category]?.label || lesson.category}</Badge></TableCell>
-                  <TableCell><Badge className={`text-[10px] border-0 ${(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.color || ''}`}>{(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.label || lesson.difficulty}</Badge></TableCell>
+                  <TableCell><Badge variant="outline" className="text-xs">{(LESSON_CATEGORIES as any)[lesson.category]?.label || lesson.category}</Badge></TableCell>
+                  <TableCell><Badge className={`text-xs border-0 ${(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.color || ''}`}>{(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.label || lesson.difficulty}</Badge></TableCell>
                   <TableCell className="text-center font-mono text-sm">{lesson.kiva_points_reward}</TableCell>
                   <TableCell className="text-center"><Switch checked={lesson.is_active} onCheckedChange={() => toggleActive(lesson.id, lesson.is_active)} /></TableCell>
                   <TableCell className="text-right">

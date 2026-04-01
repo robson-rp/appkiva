@@ -24,7 +24,7 @@ export function WeeklySparkline({ points, totalEarned, totalSpent }: WeeklySpark
             </div>
             <span className="text-xs font-display font-bold text-foreground">{t('sparkline.this_week')}</span>
           </div>
-          <div className="flex items-center gap-3 text-[10px] font-display">
+          <div className="flex items-center gap-3 text-xs font-display">
             <span className="text-secondary font-bold">+{totalEarned} 🪙</span>
             <span className="text-destructive font-bold">-{totalSpent} 🪙</span>
           </div>

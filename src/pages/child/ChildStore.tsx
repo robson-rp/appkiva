@@ -119,9 +119,9 @@ export default function ChildStore() {
                 </span>
               </div>
               <Progress value={budgetPct} className="h-2" />
-              {budgetPct >= 100 && <p className="text-[11px] text-destructive font-display">{t('child.store.limit_reached')}</p>}
+              {budgetPct >= 100 && <p className="text-xs text-destructive font-display">{t('child.store.limit_reached')}</p>}
               {budgetPct >= 80 && budgetPct < 100 && (
-                <p className="text-[11px] text-muted-foreground font-display">{t('child.store.almost_limit')} {Math.floor(budgetRemaining)} 🪙</p>
+                <p className="text-xs text-muted-foreground font-display">{t('child.store.almost_limit')} {Math.floor(budgetRemaining)} 🪙</p>
               )}
             </CardContent>
           </Card>
@@ -166,11 +166,11 @@ export default function ChildStore() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-display font-bold text-sm">{reward.name}</h3>
-                          <Badge variant="outline" className={`text-[9px] ${categoryColors[reward.category] ?? categoryColors.digital}`}>
+                          <Badge variant="outline" className={`text-xs ${categoryColors[reward.category] ?? categoryColors.digital}`}>
                             {categoryLabels[reward.category] ?? reward.category}
                           </Badge>
                         </div>
-                        {reward.description && <p className="text-[11px] text-muted-foreground line-clamp-2">{reward.description}</p>}
+                        {reward.description && <p className="text-xs text-muted-foreground line-clamp-2">{reward.description}</p>}
                       </div>
                     </div>
                     <div className="flex justify-between items-center pt-1 border-t border-border/30">

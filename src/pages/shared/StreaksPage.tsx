@@ -81,19 +81,19 @@ export default function StreaksPage() {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Flame className="h-4 w-4 text-destructive mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.current')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.current')}</p>
                 <motion.p key={streakData.currentStreak} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display font-bold text-foreground text-2xl">
                   {streakData.currentStreak} 🔥
                 </motion.p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Trophy className="h-4 w-4 text-accent mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.record')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.record')}</p>
                 <p className="font-display font-bold text-foreground text-2xl">{streakData.longestStreak}</p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <CalendarDays className="h-4 w-4 text-primary mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.active_days')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('streaks.active_days')}</p>
                 <p className="font-display font-bold text-foreground text-2xl">{streakData.totalActiveDays}</p>
               </div>
             </div>
@@ -116,7 +116,7 @@ export default function StreaksPage() {
                 </Badge>
               </div>
               <Progress value={nextProgress} className="h-2.5 mb-1.5" />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{t('streaks.days_label').replace('{count}', String(streakData.currentStreak))}</span>
                 <span className="font-bold text-primary">+{nextMilestone.kivaPoints} KivaPoints</span>
                 <span>{t('streaks.days_label').replace('{count}', String(nextMilestone.days))}</span>
@@ -148,7 +148,7 @@ export default function StreaksPage() {
           <CardContent className="px-4 pb-4">
             <div className="grid grid-cols-7 gap-1 mb-1">
               {WEEKDAYS.map(d => (
-                <div key={d} className="text-[9px] text-muted-foreground text-center font-semibold">{d}</div>
+                <div key={d} className="text-xs text-muted-foreground text-center font-semibold">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1">
@@ -159,16 +159,16 @@ export default function StreaksPage() {
                 const isActive = activeDateSet.has(dateStr);
                 const isToday = dateStr === today.toISOString().split('T')[0];
                 return (
-                  <motion.div key={day} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: i * 0.01 }} className={`aspect-square rounded-lg flex items-center justify-center text-[11px] font-semibold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/40 text-muted-foreground'} ${isToday ? 'ring-2 ring-accent ring-offset-1 ring-offset-background' : ''}`}>
+                  <motion.div key={day} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: i * 0.01 }} className={`aspect-square rounded-lg flex items-center justify-center text-xs font-semibold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'bg-muted/40 text-muted-foreground'} ${isToday ? 'ring-2 ring-accent ring-offset-1 ring-offset-background' : ''}`}>
                     {day}
                   </motion.div>
                 );
               })}
             </div>
             <div className="flex items-center gap-3 mt-3 justify-center">
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground"><div className="w-3 h-3 rounded bg-primary" /> {t('streaks.active')}</div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground"><div className="w-3 h-3 rounded bg-muted/40" /> {t('streaks.inactive')}</div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground"><div className="w-3 h-3 rounded bg-muted/40 ring-2 ring-accent" /> {t('streaks.today')}</div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground"><div className="w-3 h-3 rounded bg-primary" /> {t('streaks.active')}</div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground"><div className="w-3 h-3 rounded bg-muted/40" /> {t('streaks.inactive')}</div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground"><div className="w-3 h-3 rounded bg-muted/40 ring-2 ring-accent" /> {t('streaks.today')}</div>
             </div>
           </CardContent>
         </Card>
@@ -192,7 +192,7 @@ export default function StreaksPage() {
                     <span className="text-2xl">{reward.icon}</span>
                     <div>
                       <p className={`text-sm font-display font-bold ${!isReachable ? 'text-muted-foreground' : 'text-foreground'}`}>{reward.label}</p>
-                      <p className="text-[10px] text-muted-foreground">+{reward.kivaPoints} KivaPoints</p>
+                      <p className="text-xs text-muted-foreground">+{reward.kivaPoints} KivaPoints</p>
                     </div>
                   </div>
                   {reward.claimed ? (
@@ -204,7 +204,7 @@ export default function StreaksPage() {
                   ) : (
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Lock className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-semibold">{reward.days - streakData.currentStreak}d</span>
+                      <span className="text-xs font-semibold">{reward.days - streakData.currentStreak}d</span>
                     </div>
                   )}
                 </motion.div>

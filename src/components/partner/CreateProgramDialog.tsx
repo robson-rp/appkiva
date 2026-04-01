@@ -147,7 +147,7 @@ export function CreateProgramDialog() {
                   className="rounded-xl"
                 />
                 {atChildrenLimit && parsedChildren > 0 && (
-                  <p className="text-[10px] text-destructive mt-1">{t('dialog.program.exceeds_limit').replace('{max}', String(limits.maxChildren))}</p>
+                  <p className="text-xs text-destructive mt-1">{t('dialog.program.exceeds_limit').replace('{max}', String(limits.maxChildren))}</p>
                 )}
               </div>
               <div>

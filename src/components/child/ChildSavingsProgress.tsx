@@ -51,7 +51,7 @@ export function ChildSavingsProgress({ vaults }: ChildSavingsProgressProps) {
                   <motion.span
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="text-[10px] text-secondary font-display font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md"
+                    className="text-xs text-secondary font-display font-bold bg-secondary/10 px-1.5 py-0.5 rounded-md"
                   >
                     +{monthlyInterest}{t('child.savings.per_month')}
                   </motion.span>
@@ -62,7 +62,7 @@ export function ChildSavingsProgress({ vaults }: ChildSavingsProgressProps) {
               </div>
               <div className="relative">
                 <Progress value={pct} className="h-3 rounded-full" />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-primary-foreground drop-shadow">
                   {pct}%
                 </span>
               </div>

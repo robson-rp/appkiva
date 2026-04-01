@@ -57,14 +57,14 @@ function CurrenciesTab() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">{c.code}</CardTitle>
               <div className="flex items-center gap-2">
-                <Badge variant={c.is_active ? 'default' : 'outline'} className="text-[10px]">{c.is_active ? t('admin.currencies.active') : t('admin.currencies.inactive')}</Badge>
+                <Badge variant={c.is_active ? 'default' : 'outline'} className="text-xs">{c.is_active ? t('admin.currencies.active') : t('admin.currencies.inactive')}</Badge>
                 <Switch checked={c.is_active} onCheckedChange={(v) => toggleMutation.mutate({ code: c.code, is_active: v })} className="scale-75" />
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-display font-bold">{c.symbol}</p>
               <p className="text-xs text-muted-foreground mt-1">{c.name}</p>
-              <p className="text-[10px] text-muted-foreground">{c.decimal_places} {t('admin.currencies.decimal_places')}</p>
+              <p className="text-xs text-muted-foreground">{c.decimal_places} {t('admin.currencies.decimal_places')}</p>
             </CardContent>
           </Card>
         ))}
@@ -147,7 +147,7 @@ function ExchangeRatesTab() {
           <DialogHeader><DialogTitle className="font-display flex items-center gap-2"><RefreshCw className="h-4 w-4 text-primary" />{t('admin.currencies.edit_rate')}</DialogTitle></DialogHeader>
           {editRate && (<div className="space-y-4">
             <div className="flex items-center gap-2 justify-center text-lg font-mono font-bold"><span>{editRate.base_currency}</span><ArrowRightLeft className="h-4 w-4 text-muted-foreground" /><span>{editRate.target_currency}</span></div>
-            <div><Label>{t('admin.currencies.new_rate_label')}</Label><Input type="number" step="0.0001" min="0" value={newRate} onChange={(e) => setNewRate(e.target.value)} className="font-mono mt-1" /><p className="text-[10px] text-muted-foreground mt-1">1 {editRate.base_currency} = {newRate || '?'} {editRate.target_currency}</p></div>
+            <div><Label>{t('admin.currencies.new_rate_label')}</Label><Input type="number" step="0.0001" min="0" value={newRate} onChange={(e) => setNewRate(e.target.value)} className="font-mono mt-1" /><p className="text-xs text-muted-foreground mt-1">1 {editRate.base_currency} = {newRate || '?'} {editRate.target_currency}</p></div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setEditRate(null)}>{t('admin.currencies.cancel')}</Button><Button onClick={handleUpdate} disabled={updateMutation.isPending}>{updateMutation.isPending ? t('admin.currencies.saving') : t('admin.currencies.save')}</Button></DialogFooter>
         </DialogContent>

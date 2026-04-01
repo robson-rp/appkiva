@@ -128,25 +128,25 @@ export default function ParentAllowance() {
         <div className="absolute bottom-0 right-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.allowance.management')}</p>
+            <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.allowance.management')}</p>
             <h1 className="font-display text-2xl font-bold mt-1">{t('parent.allowance.title')}</h1>
             <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.allowance.subtitle')}</p>
           </div>
           <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm rounded-full px-3 py-1.5">
             <BotMessageSquare className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-medium">{t('parent.allowance.automatic')}</span>
+            <span className="text-xs font-medium">{t('parent.allowance.automatic')}</span>
           </div>
         </div>
         <div className="relative flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Calendar className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalWeekly}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.allowance.base_week')}</span>
+            <span className="text-xs sm:text-xs text-primary-foreground/60">{t('parent.allowance.base_week')}</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.allowance.in_circulation')}</span>
+            <span className="text-xs sm:text-xs text-primary-foreground/60">{t('parent.allowance.in_circulation')}</span>
           </div>
         </div>
       </motion.div>
@@ -182,7 +182,7 @@ export default function ParentAllowance() {
                       <div className="flex-1">
                         <h3 className="font-display font-bold text-lg">{child.displayName}</h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.allowance.current_balance')}</span>
+                          <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{t('parent.allowance.current_balance')}</span>
                           <CoinDisplay amount={child.balance} size="sm" />
                         </div>
                       </div>
@@ -191,7 +191,7 @@ export default function ParentAllowance() {
                     {/* Allowance Breakdown */}
                     <div className="bg-muted/30 rounded-2xl p-4 border border-border/30 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
+                        <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1">
                           <Zap className="h-3 w-3" /> {t('parent.allowance.composition')}
                         </span>
                         <span className="font-display font-bold text-sm text-secondary">🪙 {totalAllowance}</span>
@@ -247,7 +247,7 @@ export default function ParentAllowance() {
                         </span>
                       </div>
                       {getConfig(child.profileId) && (
-                        <span className="flex items-center gap-1 text-[10px] text-secondary font-medium bg-secondary/10 rounded-full px-2 py-0.5">
+                        <span className="flex items-center gap-1 text-xs text-secondary font-medium bg-secondary/10 rounded-full px-2 py-0.5">
                           <BotMessageSquare className="h-3 w-3" /> Auto
                         </span>
                       )}
@@ -277,11 +277,11 @@ export default function ParentAllowance() {
                       <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{vault.icon}</div>
                       <div className="flex-1">
                         <h3 className="font-display font-bold text-sm">{vault.name}</h3>
-                        <p className="text-[10px] text-muted-foreground">{child?.displayName ?? t('parent.tasks.child')}</p>
+                        <p className="text-xs text-muted-foreground">{child?.displayName ?? t('parent.tasks.child')}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-display font-bold text-sm">{vault.currentAmount} 🪙</p>
-                        <p className="text-[10px] text-muted-foreground">de {vault.targetAmount}</p>
+                        <p className="text-xs text-muted-foreground">de {vault.targetAmount}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -306,7 +306,7 @@ export default function ParentAllowance() {
                         min={0}
                         step={0.5}
                       />
-                      <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <div className="flex justify-between text-xs text-muted-foreground">
                         <span>0%</span>
                         <span>10%</span>
                       </div>

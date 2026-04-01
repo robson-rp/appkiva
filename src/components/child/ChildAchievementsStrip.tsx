@@ -36,7 +36,7 @@ export function ChildAchievementsStrip({ achievements }: ChildAchievementsStripP
               <div className="w-14 h-14 rounded-2xl bg-card shadow-sm flex items-center justify-center mx-auto mb-1 text-2xl">
                 {ach.icon}
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground leading-tight">{ach.title}</p>
+              <p className="text-xs font-semibold text-muted-foreground leading-tight">{ach.title}</p>
             </motion.div>
           ))}
         </div>

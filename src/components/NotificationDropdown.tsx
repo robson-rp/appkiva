@@ -100,12 +100,12 @@ export function NotificationDropdown() {
               </motion.div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-display font-bold">{urgentNotif.title}</p>
-                <p className="text-[11px] opacity-90 line-clamp-2">{urgentNotif.message}</p>
+                <p className="text-xs opacity-90 line-clamp-2">{urgentNotif.message}</p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="shrink-0 h-7 text-[10px] font-bold text-destructive-foreground bg-destructive-foreground/15 hover:bg-destructive-foreground/25 rounded-lg gap-1 px-2"
+                className="shrink-0 h-7 text-xs font-bold text-destructive-foreground bg-destructive-foreground/15 hover:bg-destructive-foreground/25 rounded-lg gap-1 px-2"
                 onClick={() => {
                   handleMarkRead(urgentNotif.id);
                   setDismissedBannerId(urgentNotif.id);
@@ -130,7 +130,7 @@ export function NotificationDropdown() {
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm"
+                className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm"
               >
                 {unreadCount}
               </motion.span>
@@ -142,7 +142,7 @@ export function NotificationDropdown() {
             <div>
               <h3 className="font-display font-bold text-sm">{t('notif.title')}</h3>
               {unreadCount > 0 && (
-                <p className="text-[10px] text-muted-foreground">{t('notif.unread').replace('{count}', String(unreadCount))}</p>
+                <p className="text-xs text-muted-foreground">{t('notif.unread').replace('{count}', String(unreadCount))}</p>
               )}
             </div>
             <div className="flex items-center gap-1">
@@ -169,7 +169,7 @@ export function NotificationDropdown() {
                 <div className="p-6 text-center">
                   <p className="text-2xl mb-1">🎉</p>
                   <p className="text-sm text-muted-foreground">{t('notif.empty_title')}</p>
-                  <p className="text-[11px] text-muted-foreground/60 mt-1">{t('notif.empty_desc')}</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">{t('notif.empty_desc')}</p>
                 </div>
               ) : (
                 notifications.map((notif, i) => {
@@ -198,8 +198,8 @@ export function NotificationDropdown() {
                             <p className={`text-xs font-display ${!notif.read ? 'font-bold' : 'font-medium'} truncate`}>{notif.title}</p>
                             {!notif.read && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
                           </div>
-                          <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{notif.message}</p>
-                          <p className="text-[10px] text-muted-foreground/60 mt-1">{relativeDate(notif.date)}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{notif.message}</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">{relativeDate(notif.date)}</p>
                         </div>
                       </button>
                       <button

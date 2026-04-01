@@ -84,12 +84,12 @@ export default function NotificationHistory() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-display font-bold truncate">{n.title}</span>
-                      <Badge variant="outline" className="text-[10px] shrink-0">{n.type}</Badge>
-                      {n.urgent && <Badge variant="destructive" className="text-[10px]">{t('admin.notif.urgent')}</Badge>}
+                      <Badge variant="outline" className="text-xs shrink-0">{n.type}</Badge>
+                      {n.urgent && <Badge variant="destructive" className="text-xs">{t('admin.notif.urgent')}</Badge>}
                       {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
                     </div>
-                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{n.message}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{n.message}</p>
+                    <p className="text-xs text-muted-foreground/60 mt-0.5">
                       {(n.profiles as any)?.display_name ?? t('admin.notif.unknown_user')} · {relativeDate(n.created_at)}
                     </p>
                   </div>

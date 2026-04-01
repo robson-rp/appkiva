@@ -40,10 +40,10 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
             </div>
             <div>
               <p className="font-display font-bold text-xs">{displayName}</p>
-              <p className="text-[10px] text-muted-foreground">{t('plan.features_active').replace('{count}', String(activeCount)).replace('{total}', String(FEATURE_LIST.length))}</p>
+              <p className="text-xs text-muted-foreground">{t('plan.features_active').replace('{count}', String(activeCount)).replace('{total}', String(FEATURE_LIST.length))}</p>
             </div>
           </div>
-          <Badge variant={isFree ? 'secondary' : 'default'} className="font-display text-[10px] gap-0.5">
+          <Badge variant={isFree ? 'secondary' : 'default'} className="font-display text-xs gap-0.5">
             <Crown className="h-2.5 w-2.5" />
             {tierName || 'Free'}
           </Badge>
@@ -63,7 +63,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
             </div>
             <div>
               <p className="font-display font-bold text-sm">{t('plan.family_plan')}</p>
-              <p className="text-[10px] text-muted-foreground">{displayName}</p>
+              <p className="text-xs text-muted-foreground">{displayName}</p>
             </div>
           </div>
           <Badge variant={isFree ? 'secondary' : 'default'} className="font-display text-xs gap-1">
@@ -93,7 +93,7 @@ export function PlanSummaryWidget({ compact = false, onClick, upgradeLabel }: Pl
         </div>
         {isFree && (
           <div className="mt-3 flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
-            <p className="text-[11px] text-accent-foreground font-display font-bold">
+            <p className="text-xs text-accent-foreground font-display font-bold">
               {upgradeLabel || t('plan.upgrade_prompt')}
             </p>
             <ChevronRight className="h-4 w-4 text-accent-foreground" />

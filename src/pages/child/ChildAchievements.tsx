@@ -72,7 +72,7 @@ export default function ChildAchievements() {
                 </div>
                 <div>
                   <p className="font-display font-bold text-sm text-foreground">{t('child.achievements.badges_collection')}</p>
-                  <p className="text-[10px] text-muted-foreground">{t('child.achievements.badges_desc')}</p>
+                  <p className="text-xs text-muted-foreground">{t('child.achievements.badges_desc')}</p>
                 </div>
               </div>
               <span className="text-lg">→</span>
@@ -104,9 +104,9 @@ export default function ChildAchievements() {
                     {ach.icon}
                   </motion.span>
                   <h3 className="font-display font-semibold text-sm">{ach.title}</h3>
-                  <p className="text-[10px] text-muted-foreground mt-1">{ach.description}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{ach.description}</p>
                   {ach.unlockedAt && (
-                    <p className="text-[9px] text-primary font-medium mt-2">✓ {ach.unlockedAt}</p>
+                    <p className="text-xs text-primary font-medium mt-2">✓ {ach.unlockedAt}</p>
                   )}
                 </CardContent>
               </Card>
@@ -140,7 +140,7 @@ export default function ChildAchievements() {
                     </div>
                   </div>
                   <h3 className="font-display font-semibold text-sm text-muted-foreground">{ach.title}</h3>
-                  <p className="text-[10px] text-muted-foreground/70 mt-1">{ach.description}</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">{ach.description}</p>
                 </CardContent>
               </Card>
             </motion.div>

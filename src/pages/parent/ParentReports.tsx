@@ -96,7 +96,7 @@ export default function ParentReports() {
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="absolute bottom-0 left-1/2 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative">
-          <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.reports.analysis')}</p>
+          <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.reports.analysis')}</p>
           <h1 className="font-display text-2xl font-bold mt-1">{t('parent.reports.title')}</h1>
           <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.reports.subtitle')}</p>
         </div>
@@ -123,7 +123,7 @@ export default function ParentReports() {
                     <div className={`${s.bg} rounded-2xl p-2.5 w-fit mb-2`}>
                       <s.icon className={`h-4 w-4 ${s.color}`} />
                     </div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{s.label}</p>
                     <p className="font-display font-bold text-xl mt-0.5">
                       {typeof s.value === 'number' ? `🪙 ${s.value}` : s.value}
                     </p>
@@ -187,7 +187,7 @@ export default function ParentReports() {
                             <p className="text-sm font-display font-bold">
                               {isGood ? t('parent.reports.good_progress') : t('parent.reports.needs_incentive')}
                             </p>
-                            <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">{child.displayName}</span>
+                            <span className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">{child.displayName}</span>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed">
                             {completedCount} / {childTasks.length} {t('parent.reports.tasks_completed')} ({taskRate}%). {t('common.balance')}: 🪙 {child.balance}
@@ -241,7 +241,7 @@ export default function ParentReports() {
                     {[{ name: t('parent.reports.earned'), color: COLORS.green }, { name: t('parent.reports.saved'), color: COLORS.blue }, { name: t('parent.reports.spent'), color: COLORS.red }].map((l) => (
                       <div key={l.name} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
-                        <span className="text-[10px] text-muted-foreground font-medium">{l.name}</span>
+                        <span className="text-xs text-muted-foreground font-medium">{l.name}</span>
                       </div>
                     ))}
                   </div>
@@ -270,7 +270,7 @@ export default function ParentReports() {
                     {pieData.map((entry, i) => (
                       <div key={entry.name} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: pieColors[i] }} />
-                        <span className="text-[10px] text-muted-foreground font-medium">{entry.name}</span>
+                        <span className="text-xs text-muted-foreground font-medium">{entry.name}</span>
                         <span className="text-xs font-display font-bold">🪙 {entry.value}</span>
                       </div>
                     ))}
@@ -308,7 +308,7 @@ export default function ParentReports() {
                     {[{ name: t('parent.reports.completed_tasks'), color: COLORS.green }, { name: t('parent.reports.in_progress_tasks'), color: COLORS.gold }, { name: t('parent.reports.pending_tasks'), color: 'hsl(214, 20%, 85%)' }].map((l) => (
                       <div key={l.name} className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: l.color }} />
-                        <span className="text-[10px] text-muted-foreground font-medium">{l.name}</span>
+                        <span className="text-xs text-muted-foreground font-medium">{l.name}</span>
                       </div>
                     ))}
                   </div>
@@ -336,13 +336,13 @@ export default function ParentReports() {
                           </div>
                           <div className="flex-1">
                             <p className="font-display font-bold text-sm">{child.displayName}</p>
-                            <p className="text-[10px] text-muted-foreground">🪙 {child.balance}</p>
+                            <p className="text-xs text-muted-foreground">🪙 {child.balance}</p>
                           </div>
                         </div>
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span className="text-[10px] text-muted-foreground font-medium">{t('parent.reports.tasks_label')}</span>
-                            <span className="text-[10px] font-display font-bold text-secondary">{taskProgress}%</span>
+                            <span className="text-xs text-muted-foreground font-medium">{t('parent.reports.tasks_label')}</span>
+                            <span className="text-xs font-display font-bold text-secondary">{taskProgress}%</span>
                           </div>
                           <Progress value={taskProgress} className="h-1.5 rounded-full" />
                         </div>

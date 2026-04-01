@@ -201,33 +201,33 @@ function LessonCard({ lesson, index, completed, score, onStart }: { lesson: Micr
               <CheckCircle className="h-5 w-5 text-chart-3" />
             </div>
           )}
-          <Badge className={`absolute bottom-2 left-2 text-[9px] border-0 backdrop-blur-sm ${DIFFICULTY_CONFIG[lesson.difficulty].color}`}>
+          <Badge className={`absolute bottom-2 left-2 text-xs border-0 backdrop-blur-sm ${DIFFICULTY_CONFIG[lesson.difficulty].color}`}>
             {DIFFICULTY_CONFIG[lesson.difficulty].label}
           </Badge>
           {(hasAudio || hasVideo) && (
             <div className="absolute top-2 left-2 flex gap-1">
-              {hasAudio && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-[10px]">🎧</span>}
-              {hasVideo && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-[10px]">🎬</span>}
+              {hasAudio && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-xs">🎧</span>}
+              {hasVideo && <span className="bg-background/80 backdrop-blur-sm rounded-full px-1.5 py-0.5 text-xs">🎬</span>}
             </div>
           )}
         </div>
 
         <CardContent className="p-3">
           <h3 className="font-display font-bold text-foreground text-xs leading-tight line-clamp-2 min-h-[2rem]">{lesson.title}</h3>
-          <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1">{lesson.description}</p>
-          <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground line-clamp-1 mt-1">{lesson.description}</p>
+          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-0.5"><Clock className="h-3 w-3" /> {lesson.estimatedMinutes}min</span>
             <span className="flex items-center gap-0.5"><Star className="h-3 w-3 text-chart-2" /> {lesson.kivaPointsReward}</span>
           </div>
 
           <div className="mt-2.5">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[9px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {completed
                   ? t('learn.correct_count').replace('{correct}', String(correctCount)).replace('{total}', String(quizTotal))
                   : t('learn.questions_count').replace('{total}', String(quizTotal))}
               </span>
-              <span className="text-[9px] font-semibold text-foreground">{pct}%</span>
+              <span className="text-xs font-semibold text-foreground">{pct}%</span>
             </div>
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <motion.div className={`h-full rounded-full ${pct === 100 ? 'bg-chart-3' : pct > 0 ? 'bg-primary' : 'bg-muted-foreground/20'}`} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: index * 0.03 + 0.2 }} />

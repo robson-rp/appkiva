@@ -59,10 +59,10 @@ export function PlayerCard({
         <div className="flex items-start gap-4">
           <AvatarGlow level={level} size="md" />
           <div className="flex-1 min-w-0">
-            <p className="text-white/60 text-[10px] font-display uppercase tracking-wider">{t('player.player')}</p>
+            <p className="text-white/60 text-xs font-display uppercase tracking-wider">{t('player.player')}</p>
             <h2 className="font-display text-xl font-bold text-white truncate">{name}</h2>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="text-[10px] font-display font-bold bg-white/15 text-white px-2 py-0.5 rounded-full">
+              <span className="text-xs font-display font-bold bg-white/15 text-white px-2 py-0.5 rounded-full">
                 {config.label} {config.avatar}
               </span>
               <LeagueBadge weeklyPoints={weeklyPoints} compact />
@@ -84,7 +84,7 @@ export function PlayerCard({
             >
               {balance}
             </motion.span>
-            <span className="text-[10px] text-white/50 font-display">{t('player.kivacoins')}</span>
+            <span className="text-xs text-white/50 font-display">{t('player.kivacoins')}</span>
           </div>
         </div>
 
@@ -92,10 +92,10 @@ export function PlayerCard({
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1">
               <Zap className="h-3 w-3 text-white/60" />
-              <span className="text-[10px] text-white/60 font-display">{points} FXP</span>
+              <span className="text-xs text-white/60 font-display">{points} FXP</span>
             </div>
             {nextLevel && (
-              <span className="text-[10px] text-white/40 font-display">
+              <span className="text-xs text-white/40 font-display">
                 {t('player.to_next').replace('{points}', String(nextLevel[1].minPoints - points)).replace('{next}', nextLevel[1].avatar)}
               </span>
             )}
@@ -127,7 +127,7 @@ export function PlayerCard({
         {onLevelUpClick && (
           <button
             onClick={onLevelUpClick}
-            className="mt-3 text-[10px] text-white/40 hover:text-white/70 transition-colors font-display"
+            className="mt-3 text-xs text-white/40 hover:text-white/70 transition-colors font-display"
           >
             {t('player.see_evolution')}
           </button>

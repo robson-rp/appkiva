@@ -151,7 +151,7 @@ export default function ChildDreams() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-display font-bold text-base">{dream.title}</h3>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-lg font-display font-semibold border ${priority.className}`}>{priority.label}</span>
+                          <span className={`text-xs px-2 py-0.5 rounded-lg font-display font-semibold border ${priority.className}`}>{priority.label}</span>
                         </div>
                         <p className="text-xs text-muted-foreground line-clamp-2">{dream.description}</p>
                       </div>
@@ -164,7 +164,7 @@ export default function ChildDreams() {
                       </div>
                       <div className="relative">
                         <Progress value={pct} className="h-3 rounded-full" />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-primary-foreground drop-shadow">{pct}%</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-primary-foreground drop-shadow">{pct}%</span>
                       </div>
                     </div>
 
@@ -192,7 +192,7 @@ export default function ChildDreams() {
                               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-sm shrink-0">{comment.emoji || '💬'}</div>
                               <div className="flex-1 bg-card rounded-2xl rounded-tl-sm p-3 shadow-sm border border-border/30">
                                 <p className="text-sm leading-relaxed">{comment.text}</p>
-                                <p className="text-[10px] text-muted-foreground mt-1.5">{new Date(comment.createdAt).toLocaleDateString('pt-PT')}</p>
+                                <p className="text-xs text-muted-foreground mt-1.5">{new Date(comment.createdAt).toLocaleDateString('pt-PT')}</p>
                               </div>
                             </motion.div>
                           ))}

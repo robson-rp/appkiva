@@ -156,7 +156,7 @@ function AnalyticsTab() {
               <div key={role} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-display font-bold text-foreground">{label}</h3>
-                  <Badge variant="secondary" className="text-[10px]">{total} {t('admin.onboarding.users')}</Badge>
+                  <Badge variant="secondary" className="text-xs">{total} {t('admin.onboarding.users')}</Badge>
                 </div>
                 <div className="space-y-1.5">
                   {steps.map((s, i) => {
@@ -165,12 +165,12 @@ function AnalyticsTab() {
                     const dropDelta = i > 0 ? prevPct - pct : 0;
                     return (
                       <div key={i} className="flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground w-14 shrink-0">{s.step}</span>
+                        <span className="text-xs text-muted-foreground w-14 shrink-0">{s.step}</span>
                         <div className="flex-1 h-5 bg-muted rounded-md overflow-hidden relative">
                           <div className="h-full rounded-md transition-all duration-500" style={{ width: `${pct}%`, background: pct > 60 ? 'hsl(var(--kivara-green))' : pct > 30 ? 'hsl(var(--kivara-gold))' : 'hsl(var(--destructive) / 0.7)' }} />
-                          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-foreground">{s.users} ({pct}%)</span>
+                          <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-foreground">{s.users} ({pct}%)</span>
                         </div>
-                        {dropDelta > 0 && <span className="text-[9px] text-destructive font-medium w-8 text-right">-{dropDelta}%</span>}
+                        {dropDelta > 0 && <span className="text-xs text-destructive font-medium w-8 text-right">-{dropDelta}%</span>}
                       </div>
                     );
                   })}

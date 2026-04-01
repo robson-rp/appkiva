@@ -100,7 +100,7 @@ export default function ParentSubscription() {
                   <Shield className="h-3 w-3 mr-1" /> {t('parent.subscription.active')}
                 </Badge>
                 {isHighestTier && (
-                  <Badge className="bg-white/30 text-white border-0 font-display text-[10px]">
+                  <Badge className="bg-white/30 text-white border-0 font-display text-xs">
                     <Star className="h-3 w-3 mr-1" /> {t('parent.subscription.max_plan')}
                   </Badge>
                 )}
@@ -168,14 +168,14 @@ export default function ParentSubscription() {
                       {included ? (
                         <Check className="h-3.5 w-3.5" />
                       ) : (
-                        <span className="text-[10px] font-bold">—</span>
+                        <span className="text-xs font-bold">—</span>
                       )}
                     </div>
                     <span className={cn('text-sm', included ? 'font-medium' : 'text-muted-foreground')}>
                       {t(`feature.${feature}`)}
                     </span>
                     {!included && (
-                      <Badge variant="outline" className="ml-auto text-[10px] border-accent/30 text-accent-foreground">
+                      <Badge variant="outline" className="ml-auto text-xs border-accent/30 text-accent-foreground">
                         Premium
                       </Badge>
                     )}
@@ -289,7 +289,7 @@ export default function ParentSubscription() {
                          <Badge
                            variant="outline"
                            className={cn(
-                             'text-[10px]',
+                             'text-xs',
                              inv.status === 'paid' && 'border-green-300 text-green-700',
                              inv.status === 'pending' && 'border-amber-300 text-amber-700',
                              inv.status === 'failed' && 'border-destructive text-destructive',

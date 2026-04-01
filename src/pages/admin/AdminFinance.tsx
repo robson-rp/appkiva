@@ -209,7 +209,7 @@ export default function AdminFinance() {
             </div>
           ) : null}
           {moneySupply && !moneySupply.error && (
-            <p className="text-[10px] text-muted-foreground mt-3">
+            <p className="text-xs text-muted-foreground mt-3">
               {t('admin.finance.last_audit')} {new Date(moneySupply.audit_timestamp).toLocaleString('pt-PT')}
             </p>
           )}

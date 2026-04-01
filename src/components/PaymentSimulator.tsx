@@ -133,7 +133,7 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
             <div>
               <Label className="text-xs font-medium">{t('payment.phone')}</Label>
               <Input placeholder="9XX XXX XXX" value={phoneNumber} onChange={(e) => setPhoneNumber(formatPhone(e.target.value))} className="rounded-xl mt-1 font-mono" maxLength={9} />
-              <p className="text-[10px] text-muted-foreground mt-1">{t('payment.phone_hint')}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('payment.phone_hint')}</p>
             </div>
             <div className="bg-muted/50 rounded-xl p-3 text-center">
               <p className="text-xs text-muted-foreground">{t('payment.amount_label')}</p>
@@ -149,7 +149,7 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
               <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{t('payment.reference')}</span><span className="font-mono font-bold text-sm">{mockReference}</span></div>
               <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">{t('payment.amount')}</span><span className="font-display font-bold text-primary">{currentPrice}</span></div>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center">{t('payment.ref_hint')}</p>
+            <p className="text-xs text-muted-foreground text-center">{t('payment.ref_hint')}</p>
           </div>
         );
       case 'paypal':
@@ -168,7 +168,7 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
               <DialogHeader><DialogTitle className="font-display flex items-center gap-2"><Crown className="h-5 w-5 text-accent-foreground" />{t('payment.choose_plan')}</DialogTitle></DialogHeader>
               <div className="flex items-center justify-center gap-2 mt-4 mb-5">
                 <button onClick={() => setBilling('monthly')} className={cn('px-4 py-1.5 rounded-full text-xs font-semibold transition-all', billing === 'monthly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{t('payment.monthly')}</button>
-                <button onClick={() => setBilling('yearly')} className={cn('px-4 py-1.5 rounded-full text-xs font-semibold transition-all', billing === 'yearly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{t('payment.yearly')} <span className="text-[10px] ml-1 opacity-70">{t('payment.yearly_save')}</span></button>
+                <button onClick={() => setBilling('yearly')} className={cn('px-4 py-1.5 rounded-full text-xs font-semibold transition-all', billing === 'yearly' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{t('payment.yearly')} <span className="text-xs ml-1 opacity-70">{t('payment.yearly_save')}</span></button>
               </div>
               <div className="space-y-3">
                 {upgradeTiers.map((tier) => {
@@ -183,8 +183,8 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
                             <span className="font-display font-bold text-lg text-primary">{fmtTierPrice(tier.id, price, billing === 'monthly' ? 'price_monthly' : 'price_yearly')}<span className="text-xs text-muted-foreground font-normal">{period}</span></span>
                           </div>
                           <div className="flex flex-wrap gap-1.5">
-                            {tier.features.slice(0, 5).map((f) => (<span key={f} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{FEATURE_LABELS[f] ?? f}</span>))}
-                            {tier.features.length > 5 && (<span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">+{tier.features.length - 5} {t('payment.more')}</span>)}
+                            {tier.features.slice(0, 5).map((f) => (<span key={f} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">{FEATURE_LABELS[f] ?? f}</span>))}
+                            {tier.features.length > 5 && (<span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">+{tier.features.length - 5} {t('payment.more')}</span>)}
                           </div>
                         </CardContent>
                       </Card>
@@ -198,10 +198,10 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
 
           {step === 'payment' && selectedTier && (
             <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="p-6">
-              <DialogHeader><DialogTitle className="font-display flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary" />{t('payment.title')}<span className="text-[10px] bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-auto">{t('payment.simulator')}</span></DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle className="font-display flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary" />{t('payment.title')}<span className="text-xs bg-accent/20 text-accent-foreground px-2 py-0.5 rounded-full font-medium ml-auto">{t('payment.simulator')}</span></DialogTitle></DialogHeader>
               <div className="bg-muted/50 rounded-xl p-3 mt-4 mb-4 flex items-center justify-between">
                 <div><p className="text-xs text-muted-foreground">{t('payment.selected_plan')}</p><p className="font-display font-bold text-sm">{selectedTier.name}</p></div>
-                <p className="font-display font-bold text-primary">{currentPrice}<span className="text-[10px] text-muted-foreground font-normal">/{billing === 'monthly' ? t('payment.per_month').replace('/', '') : t('payment.per_year').replace('/', '')}</span></p>
+                <p className="font-display font-bold text-primary">{currentPrice}<span className="text-xs text-muted-foreground font-normal">/{billing === 'monthly' ? t('payment.per_month').replace('/', '') : t('payment.per_year').replace('/', '')}</span></p>
               </div>
               <div className="space-y-2 mb-4">
                 <Label className="text-xs font-medium text-muted-foreground">{t('payment.method')}</Label>
@@ -209,13 +209,13 @@ export default function PaymentSimulator({ open, onOpenChange, currentTierName, 
                   {availableMethods.map((method) => (
                     <button key={method.id} onClick={() => setSelectedMethod(method.id)} className={cn('flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left', selectedMethod === method.id ? 'border-primary bg-primary/5' : 'border-border/50 hover:border-primary/30')}>
                       <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', selectedMethod === method.id ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground')}>{method.icon}</div>
-                      <div className="min-w-0"><p className="font-display font-bold text-xs">{method.label}</p><p className="text-[10px] text-muted-foreground">{method.description}</p></div>
+                      <div className="min-w-0"><p className="font-display font-bold text-xs">{method.label}</p><p className="text-xs text-muted-foreground">{method.description}</p></div>
                     </button>
                   ))}
                 </div>
               </div>
               {selectedMethod && (<motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mb-4">{renderPaymentForm()}</motion.div>)}
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground"><Shield className="h-3.5 w-3.5" /><span>{t('payment.secure_note')}</span></div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Shield className="h-3.5 w-3.5" /><span>{t('payment.secure_note')}</span></div>
               <div className="flex gap-2 mt-4">
                 <Button variant="outline" className="rounded-xl font-display" onClick={() => setStep('select')}>{t('payment.back')}</Button>
                 <Button className="flex-1 rounded-xl font-display gap-2" disabled={!selectedMethod || !isFormValid} onClick={handlePay}><Crown className="h-4 w-4" />{payButtonLabel}</Button>
