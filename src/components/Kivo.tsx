@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { KIVO_TIPS } from '@/data/kivo-tips';
@@ -9,7 +9,7 @@ interface KivoProps {
   page: keyof typeof KIVO_TIPS;
 }
 
-export function Kivo({ page }: KivoProps) {
+export const Kivo = forwardRef<HTMLDivElement, KivoProps>(function Kivo({ page }, ref) {
   const t = useT();
   const tips = KIVO_TIPS[page] || KIVO_TIPS.dashboard;
   const [tipIndex, setTipIndex] = useState(0);
