@@ -56,4 +56,4 @@ export const Kivo = forwardRef<HTMLDivElement, KivoProps>(function Kivo({ page }
       )}
     </AnimatePresence>
   );
-}
+});
