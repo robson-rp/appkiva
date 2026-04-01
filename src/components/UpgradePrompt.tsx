@@ -63,7 +63,7 @@ export default function UpgradePrompt({ featureName, description, currentTier, v
             <p className="font-display font-bold text-sm">{featureName}</p>
             {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
           </div>
-          <div className="bg-muted/60 rounded-xl px-3 py-2 text-[10px] text-muted-foreground">
+          <div className="bg-muted/60 rounded-xl px-3 py-2 text-xs text-muted-foreground">
             <span className="font-semibold text-foreground">{tierLabel}</span>{' → '}<span className="font-semibold text-accent-foreground">{suggestedTier}</span>
           </div>
           <Button size="sm" className="rounded-xl font-display gap-1.5 bg-accent hover:bg-accent/90 text-accent-foreground w-full" onClick={onUpgrade}>
@@ -88,7 +88,7 @@ export default function UpgradePrompt({ featureName, description, currentTier, v
                 <h3 className="font-display font-bold text-sm">{featureName}</h3>
                 {description && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>}
               </div>
-              <div className="flex items-center gap-2 text-[10px]">
+              <div className="flex items-center gap-2 text-xs">
                 <span className="px-2 py-1 rounded-lg bg-muted text-muted-foreground font-semibold uppercase tracking-wider">{tierLabel}</span>
                 <ArrowRight className="h-3 w-3 text-muted-foreground" />
                 <span className="px-2 py-1 rounded-lg bg-accent/15 text-accent-foreground font-semibold uppercase tracking-wider">{suggestedTier}</span>
@@ -154,7 +154,7 @@ export function FeatureGateWrapper({ allowed, featureName, description, tierName
               <div>
                 <p className="text-sm font-display font-bold text-foreground">{t('upgrade.requires').replace('{feature}', featureName)}</p>
                 {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('upgrade.current_plan')}: <span className="font-semibold">{tierLabel}</span>{' → '}<span className="font-semibold text-accent-foreground">{suggestedTier}</span>
                 </p>
               </div>

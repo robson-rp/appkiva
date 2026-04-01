@@ -168,7 +168,7 @@ export default function TeacherStudentProfile() {
             <CardContent className="p-4 text-center space-y-1">
               <stat.icon className={`h-5 w-5 mx-auto ${stat.color}`} />
               <p className="font-display font-bold text-xl">{stat.value}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -183,10 +183,10 @@ export default function TeacherStudentProfile() {
                 <TrendingUp className="h-4 w-4 text-secondary" /> {t('teacher.student.savings_evolution')}
               </CardTitle>
               <div className="flex gap-1">
-                <Button variant={chartPeriod === 'weekly' ? 'default' : 'outline'} size="sm" className="h-7 text-[10px] rounded-lg px-3 font-display" onClick={() => setChartPeriod('weekly')}>
+                <Button variant={chartPeriod === 'weekly' ? 'default' : 'outline'} size="sm" className="h-7 text-xs rounded-lg px-3 font-display" onClick={() => setChartPeriod('weekly')}>
                   {t('teacher.student.weekly')}
                 </Button>
-                <Button variant={chartPeriod === 'monthly' ? 'default' : 'outline'} size="sm" className="h-7 text-[10px] rounded-lg px-3 font-display" onClick={() => setChartPeriod('monthly')}>
+                <Button variant={chartPeriod === 'monthly' ? 'default' : 'outline'} size="sm" className="h-7 text-xs rounded-lg px-3 font-display" onClick={() => setChartPeriod('monthly')}>
                   {t('teacher.student.monthly')}
                 </Button>
               </div>
@@ -242,7 +242,7 @@ export default function TeacherStudentProfile() {
                       <span className="text-xs font-bold text-primary">{pct}%</span>
                     </div>
                     <Progress value={pct} className="h-2" />
-                    <p className="text-[10px] text-muted-foreground">{currentAmount} / {targetAmount} KVC</p>
+                    <p className="text-xs text-muted-foreground">{currentAmount} / {targetAmount} KVC</p>
                   </div>
                 );
               })}
@@ -267,9 +267,9 @@ export default function TeacherStudentProfile() {
                   <div key={task.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
                     <div className="min-w-0">
                       <p className="text-sm font-display font-semibold truncate">{task.title}</p>
-                      <p className="text-[10px] text-muted-foreground">+{task.reward} KVC</p>
+                      <p className="text-xs text-muted-foreground">+{task.reward} KVC</p>
                     </div>
-                    <Badge className={`${s.color} border-0 text-[10px] shrink-0`}>{s.label}</Badge>
+                    <Badge className={`${s.color} border-0 text-xs shrink-0`}>{s.label}</Badge>
                   </div>
                 );
               })}
@@ -293,7 +293,7 @@ export default function TeacherStudentProfile() {
                   <span className="text-2xl">{b.icon}</span>
                   <div className="min-w-0">
                     <p className="text-sm font-display font-semibold">{b.name}</p>
-                    <p className="text-[10px] text-muted-foreground">{b.description}</p>
+                    <p className="text-xs text-muted-foreground">{b.description}</p>
                   </div>
                 </div>
               ))}
@@ -316,7 +316,7 @@ export default function TeacherStudentProfile() {
                 <div key={tx.id} className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-muted/20">
                   <div className="min-w-0">
                     <p className="text-sm font-display font-medium truncate">{tx.description}</p>
-                    <p className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleDateString('pt-PT')}</p>
+                    <p className="text-xs text-muted-foreground">{new Date(tx.created_at).toLocaleDateString('pt-PT')}</p>
                   </div>
                   <span className={`text-sm font-display font-bold shrink-0 ${tx.direction === 'credit' ? 'text-secondary' : 'text-destructive'}`}>
                     {tx.direction === 'credit' ? '+' : '-'}{tx.amount}

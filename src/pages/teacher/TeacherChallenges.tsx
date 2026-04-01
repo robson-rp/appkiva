@@ -206,11 +206,11 @@ export default function TeacherChallenges() {
                     <h3 className="font-display font-bold text-base">{challenge.title}</h3>
                     {isCritical && <AlertTriangle className="h-4 w-4 text-destructive animate-pulse" />}
                   </div>
-                  <p className="text-[11px] text-muted-foreground">{classroom?.name} · {typeLabels[challenge.type]}</p>
+                  <p className="text-xs text-muted-foreground">{classroom?.name} · {typeLabels[challenge.type]}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className={`text-[10px] font-display font-semibold ${status.className}`}>
+                <Badge variant="outline" className={`text-xs font-display font-semibold ${status.className}`}>
                   <StatusIcon className="h-3 w-3 mr-1" />
                   {status.label}
                 </Badge>
@@ -236,7 +236,7 @@ export default function TeacherChallenges() {
                   <span className="font-display font-bold text-primary">{pct}%</span>
                 </div>
                 <Progress value={pct} className="h-3" />
-                <div className="flex justify-between text-[10px] text-muted-foreground">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>🪙 {challenge.currentAmount} / {challenge.targetAmount}</span>
                 </div>
               </div>
@@ -249,7 +249,7 @@ export default function TeacherChallenges() {
                 </span>
                 <span>+{challenge.kivaPointsReward} pts</span>
               </div>
-              <span className="text-[10px] sm:text-xs flex items-center gap-1">
+              <span className="text-xs sm:text-xs flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 {challenge.startDate} → {challenge.endDate}
               </span>
@@ -353,7 +353,7 @@ export default function TeacherChallenges() {
               <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center text-2xl">{form.icon}</div>
               <div>
                 <p className="text-sm font-display font-bold">{form.title || t('teacher.challenges.new')}</p>
-                <p className="text-[11px] text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `${t('teacher.challenges.form_target').split(' ')[0]}: ${form.targetAmount} 🪙` : ''}</p>
+                <p className="text-xs text-muted-foreground">{typeLabels[form.type]} · {form.targetAmount ? `${t('teacher.challenges.form_target').split(' ')[0]}: ${form.targetAmount} 🪙` : ''}</p>
               </div>
             </div>
             <Button className="w-full rounded-xl font-display" onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
@@ -393,16 +393,16 @@ export default function TeacherChallenges() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.active')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.active')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{activeChallenges.length}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.completed')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('teacher.challenges.completed')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{completedChallenges.length}</p>
                 </div>
                 {urgentActive.length > 0 && (
                   <div className="bg-destructive/20 backdrop-blur-sm rounded-2xl px-4 py-2 text-center ring-1 ring-destructive/30">
-                    <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider flex items-center gap-1 justify-center">
+                    <p className="text-xs text-primary-foreground/60 uppercase tracking-wider flex items-center gap-1 justify-center">
                       <AlertTriangle className="h-3 w-3" /> {t('teacher.challenges.urgent')}
                     </p>
                     <p className="font-display text-xl font-bold text-primary-foreground">{urgentActive.length}</p>
@@ -427,13 +427,13 @@ export default function TeacherChallenges() {
       {/* Tabs */}
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="w-full grid grid-cols-3 rounded-xl h-10 sm:h-11">
-          <TabsTrigger value="active" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+          <TabsTrigger value="active" className="rounded-lg font-display text-xs sm:text-xs gap-1 sm:gap-1.5">
             <Target className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_active')}</span> ({activeChallenges.length})
           </TabsTrigger>
-          <TabsTrigger value="upcoming" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+          <TabsTrigger value="upcoming" className="rounded-lg font-display text-xs sm:text-xs gap-1 sm:gap-1.5">
             <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_upcoming')}</span> ({upcomingChallenges.length})
           </TabsTrigger>
-          <TabsTrigger value="completed" className="rounded-lg font-display text-[10px] sm:text-xs gap-1 sm:gap-1.5">
+          <TabsTrigger value="completed" className="rounded-lg font-display text-xs sm:text-xs gap-1 sm:gap-1.5">
             <Trophy className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> <span className="hidden xs:inline">{t('teacher.challenges.tab_completed')}</span> ({completedChallenges.length})
           </TabsTrigger>
         </TabsList>

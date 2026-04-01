@@ -138,11 +138,11 @@ export default function ParentRewards() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.active')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.active')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{rewards.filter(r => r.available).length}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.claimed')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('parent.rewards.claimed')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{rewards.filter(r => r.claimedAt).length}</p>
                 </div>
               </div>
@@ -266,11 +266,11 @@ export default function ParentRewards() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <h4 className="font-display font-bold text-sm truncate">{s.name}</h4>
-                        <Badge variant="outline" className={`text-[10px] shrink-0 ${categoryColors[s.category] ?? ''}`}>
+                        <Badge variant="outline" className={`text-xs shrink-0 ${categoryColors[s.category] ?? ''}`}>
                           {categoryLabels[s.category] ?? s.category}
                         </Badge>
                       </div>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2">{s.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{s.description}</p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-display text-sm font-bold">🪙 {s.price}</span>
                         <Button
@@ -343,13 +343,13 @@ export default function ParentRewards() {
                     <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center text-3xl">
                       {reward.icon}
                     </div>
-                    <Badge variant="outline" className={`text-[10px] ${categoryColors[reward.category]}`}>
+                    <Badge variant="outline" className={`text-xs ${categoryColors[reward.category]}`}>
                       {categoryLabels[reward.category]}
                     </Badge>
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-sm">{reward.name}</h3>
-                    <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{reward.description}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{reward.description}</p>
                   </div>
                   <div className="flex items-center justify-between pt-1 border-t border-border/30">
                     <span className="font-display font-bold text-sm">🪙 {reward.price}</span>

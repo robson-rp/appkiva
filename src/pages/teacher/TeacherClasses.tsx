@@ -319,11 +319,11 @@ export default function TeacherClasses() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.dashboard.classes')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('teacher.dashboard.classes')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{classrooms.length}</p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 py-2 text-center">
-                  <p className="text-[10px] text-primary-foreground/60 uppercase tracking-wider">{t('teacher.dashboard.students')}</p>
+                  <p className="text-xs text-primary-foreground/60 uppercase tracking-wider">{t('teacher.dashboard.students')}</p>
                   <p className="font-display text-xl font-bold text-primary-foreground">{uniqueStudentCount}</p>
                 </div>
               </div>
@@ -446,7 +446,7 @@ export default function TeacherClasses() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="block truncate">{classroom.name}</span>
-                          <span className="text-[10px] sm:text-xs text-muted-foreground font-normal line-clamp-1">
+                          <span className="text-xs sm:text-xs text-muted-foreground font-normal line-clamp-1">
                             {classroom.grade}
                             {classroom.subject ? ` · ${classroom.subject}` : ''}
                             {classroom.schedule ? ` · ${classroom.schedule}` : ''}
@@ -489,11 +489,11 @@ export default function TeacherClasses() {
                     {/* Stats */}
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.dashboard.students')}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.dashboard.students')}</p>
                         <p className="font-display font-bold text-lg">{students.length}</p>
                       </div>
                       <div className="bg-muted/30 rounded-xl p-3 text-center">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.classes.goals')}</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.classes.goals')}</p>
                         <p className="font-display font-bold text-lg">{goals.filter(g => g.classId === classroom.id).length}</p>
                       </div>
                     </div>
@@ -606,12 +606,12 @@ export default function TeacherClasses() {
                               </div>
                               <Popover>
                                 <PopoverTrigger asChild>
-                                  <button className={`text-[9px] font-semibold px-2 py-0.5 rounded-md shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all ${pct >= 100 ? 'bg-secondary/10 text-secondary' : pct >= 50 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                  <button className={`text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all ${pct >= 100 ? 'bg-secondary/10 text-secondary' : pct >= 50 ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
                                     {goal.current}/{goal.target}{cat?.unit}
                                   </button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-48 p-3 space-y-2" side="top">
-                                  <p className="text-[10px] font-display font-semibold text-muted-foreground">{t('teacher.classes.update_progress')}</p>
+                                  <p className="text-xs font-display font-semibold text-muted-foreground">{t('teacher.classes.update_progress')}</p>
                                   <Input
                                     type="number"
                                     defaultValue={goal.current}
@@ -645,11 +645,11 @@ export default function TeacherClasses() {
                               <span className="text-sm">{cat?.icon}</span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-display font-semibold text-muted-foreground line-through">{goal.title}</p>
-                                <p className="text-[9px] text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                   {goal.completedAt ? `${t('teacher.classes.completed_at')} ${format(new Date(goal.completedAt), 'dd/MM/yyyy')}` : t('teacher.classes.completed_label')}
                                 </p>
                               </div>
-                              <Badge variant="secondary" className="bg-secondary/15 text-secondary text-[9px] shrink-0">{t('teacher.classes.completed_label')}</Badge>
+                              <Badge variant="secondary" className="bg-secondary/15 text-secondary text-xs shrink-0">{t('teacher.classes.completed_label')}</Badge>
                               <button onClick={() => deleteGoal(goal.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                                 <Trash2 className="h-3 w-3" />
                               </button>

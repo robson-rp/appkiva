@@ -73,7 +73,7 @@ export function TodayLoop({ missions, streakData, kivaPoints, weeklyPoints, vaul
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-foreground truncate">{todayMission.title}</p>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 +{todayMission.reward} KVC · +{todayMission.kiva_points_reward} FXP
               </p>
             </div>
@@ -90,14 +90,14 @@ export function TodayLoop({ missions, streakData, kivaPoints, weeklyPoints, vaul
           >
             <Flame className="h-4 w-4 text-destructive mb-0.5" />
             <span className="text-sm font-display font-bold text-foreground">{streak}</span>
-            <span className="text-[9px] text-muted-foreground">{t('today.streak')}</span>
+            <span className="text-xs text-muted-foreground">{t('today.streak')}</span>
           </div>
 
           {/* League */}
           <div className="flex flex-col items-center p-2 rounded-lg bg-muted/50">
             <span className="text-base mb-0.5">{leagueConfig.icon}</span>
-            <span className={`text-[10px] font-display font-bold ${leagueConfig.color}`}>{leagueConfig.label}</span>
-            <span className="text-[9px] text-muted-foreground">{weeklyPoints} FXP</span>
+            <span className={`text-xs font-display font-bold ${leagueConfig.color}`}>{leagueConfig.label}</span>
+            <span className="text-xs text-muted-foreground">{weeklyPoints} FXP</span>
           </div>
 
           {/* Next reward */}
@@ -105,24 +105,24 @@ export function TodayLoop({ missions, streakData, kivaPoints, weeklyPoints, vaul
             {nextMilestone ? (
               <>
                 <span className="text-base mb-0.5">{nextMilestone.icon}</span>
-                <span className="text-[10px] font-display font-bold text-foreground">
+                <span className="text-xs font-display font-bold text-foreground">
                   {nextMilestone.days - streak}d
                 </span>
-                <span className="text-[9px] text-muted-foreground">{t('today.next_reward')}</span>
+                <span className="text-xs text-muted-foreground">{t('today.next_reward')}</span>
               </>
             ) : nextLevel ? (
               <>
                 <span className="text-base mb-0.5">{nextLevel[1].avatar}</span>
-                <span className="text-[10px] font-display font-bold text-foreground">
+                <span className="text-xs font-display font-bold text-foreground">
                   {nextLevel[1].minPoints - kivaPoints} FXP
                 </span>
-                <span className="text-[9px] text-muted-foreground">{t('today.next_level')}</span>
+                <span className="text-xs text-muted-foreground">{t('today.next_level')}</span>
               </>
             ) : (
               <>
                 <Trophy className="h-4 w-4 text-accent mb-0.5" />
-                <span className="text-[10px] font-display font-bold text-accent">MAX</span>
-                <span className="text-[9px] text-muted-foreground">{t('today.max_level')}</span>
+                <span className="text-xs font-display font-bold text-accent">MAX</span>
+                <span className="text-xs text-muted-foreground">{t('today.max_level')}</span>
               </>
             )}
           </div>
@@ -136,10 +136,10 @@ export function TodayLoop({ missions, streakData, kivaPoints, weeklyPoints, vaul
           >
             <span className="text-lg shrink-0">{activeVault.icon}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-semibold text-foreground truncate">{activeVault.title}</p>
+              <p className="text-xs font-semibold text-foreground truncate">{activeVault.title}</p>
               <Progress value={vaultPct} className="h-1.5 mt-0.5" />
             </div>
-            <span className="text-[10px] font-display font-bold text-secondary shrink-0">
+            <span className="text-xs font-display font-bold text-secondary shrink-0">
               {Math.round(vaultPct)}%
             </span>
           </div>

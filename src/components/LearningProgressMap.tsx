@@ -83,7 +83,7 @@ export function LearningProgressMap({ lessons, completedIds, onStartLesson }: Le
                     {!unlocked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
                     {allDone && <CheckCircle className="h-3.5 w-3.5 text-secondary" />}
                   </div>
-                  <p className="text-[10px] text-muted-foreground">{t('learn.lessons_count').replace('{completed}', String(completedCount)).replace('{done}', String(completedCount)).replace('{total}', String(totalCount))}</p>
+                  <p className="text-xs text-muted-foreground">{t('learn.lessons_count').replace('{completed}', String(completedCount)).replace('{done}', String(completedCount)).replace('{total}', String(totalCount))}</p>
                 </div>
                 {/* Mini progress */}
                 <div className="w-12 h-12 relative shrink-0">
@@ -100,7 +100,7 @@ export function LearningProgressMap({ lessons, completedIds, onStartLesson }: Le
                       transition={{ duration: 0.8, delay: worldIndex * 0.1 }}
                     />
                   </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-[10px] font-display font-bold text-foreground">
+                  <span className="absolute inset-0 flex items-center justify-center text-xs font-display font-bold text-foreground">
                     {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
                   </span>
                 </div>

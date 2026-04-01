@@ -39,7 +39,7 @@ function Podium({ entries }: { entries: ClassLeaderboardEntry[] }) {
             <p className={`text-xs font-bold truncate max-w-[64px] ${entry.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
               {entry.name}
             </p>
-            <p className="text-[10px] text-muted-foreground">{entry.score} pts</p>
+            <p className="text-xs text-muted-foreground">{entry.score} pts</p>
             <div className={`${heights[ri]} w-14 rounded-t-xl mt-1 flex items-start justify-center pt-1 ${ri === 0 ? 'bg-accent/20' : 'bg-muted/60'}`}>
               <span className="text-lg">{MEDAL[ri]}</span>
             </div>
@@ -67,7 +67,7 @@ function LeaderboardList({ entries }: { entries: ClassLeaderboardEntry[] }) {
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-semibold truncate ${e.isCurrentUser ? 'text-primary' : 'text-foreground'}`}>
               {e.name}
-              {e.isCurrentUser && <Badge variant="secondary" className="ml-2 text-[9px] py-0">Tu</Badge>}
+              {e.isCurrentUser && <Badge variant="secondary" className="ml-2 text-xs py-0">Tu</Badge>}
             </p>
           </div>
           <span className="text-sm font-bold tabular-nums text-foreground">{e.score}</span>

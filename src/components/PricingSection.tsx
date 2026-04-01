@@ -116,7 +116,7 @@ export default function PricingSection() {
               )}
             >
               {t('pricing.yearly')}
-              <span className="bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-accent text-accent-foreground text-xs font-bold px-2 py-0.5 rounded-full">
                 {t('pricing.save')}
               </span>
             </button>

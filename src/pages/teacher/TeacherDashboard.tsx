@@ -188,7 +188,7 @@ export default function TeacherDashboard() {
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex items-center gap-2">
                   <p className="text-primary-foreground/60 text-xs sm:text-small font-medium uppercase tracking-wider">{t('teacher.dashboard.school_mode')}</p>
-                  <span className="text-[10px] sm:text-caption bg-white/20 text-primary-foreground px-2 sm:px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
+                  <span className="text-xs sm:text-caption bg-white/20 text-primary-foreground px-2 sm:px-2.5 py-0.5 rounded-lg font-display font-semibold">BETA</span>
                 </div>
                 <h1 className="font-display text-xl sm:text-heading md:text-heading-lg font-bold text-primary-foreground">
                   {t('teacher.dashboard.hello')} {user?.name}! 📚
@@ -198,7 +198,7 @@ export default function TeacherDashboard() {
                 </p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-center">
-                <p className="text-primary-foreground/60 text-[10px] sm:text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
+                <p className="text-primary-foreground/60 text-xs sm:text-caption uppercase tracking-wider font-medium">{t('teacher.dashboard.school')}</p>
                 <p className="font-display text-sm sm:text-base font-bold text-primary-foreground mt-1">Escola</p>
               </div>
             </div>

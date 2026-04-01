@@ -95,7 +95,7 @@ export default function AdminUsers() {
           <Card key={key} className="border-border/50">
             <CardContent className="p-3 text-center">
               <p className="text-xl font-display font-bold">{stats[key] ?? 0}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">{label}</p>
             </CardContent>
           </Card>
         ))}
@@ -158,7 +158,7 @@ export default function AdminUsers() {
                             <span className="text-lg">{u.avatar ?? '👤'}</span>
                             <div>
                               <p className="text-sm font-medium">{u.display_name}</p>
-                              {u.institution_name && <p className="text-[10px] text-muted-foreground">{u.institution_name}</p>}
+                              {u.institution_name && <p className="text-xs text-muted-foreground">{u.institution_name}</p>}
                             </div>
                           </div>
                         </TableCell>
@@ -196,14 +196,14 @@ export default function AdminUsers() {
                             <TableCell colSpan={6} className="bg-muted/20 p-0">
                               <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                                 <div className="p-3 space-y-1">
-                                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">{t('admin.users.dependents')}</p>
+                                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-2">{t('admin.users.dependents')}</p>
                                   {u.childrenOf.map(child => {
                                     const childProfile = users.find(up => up.id === child.profile_id);
                                     return (
                                       <div key={child.profile_id} className="flex items-center gap-2 p-2 rounded-lg bg-background/60">
                                         <span className="text-base">{childProfile?.avatar ?? '👤'}</span>
                                         <span className="text-sm font-medium">{childProfile?.display_name ?? child.nickname ?? t('admin.users.role_child')}</span>
-                                        <Badge variant="outline" className="text-[9px]">{roleLabels[childProfile?.role ?? 'child']}</Badge>
+                                        <Badge variant="outline" className="text-xs">{roleLabels[childProfile?.role ?? 'child']}</Badge>
                                       </div>
                                     );
                                   })}

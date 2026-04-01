@@ -153,7 +153,7 @@ export default function ChildWallet() {
               ].map((s) => (
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
-                  <p className="text-[10px] text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
+                  <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
                   <p className="font-display font-bold text-white text-lg">
                     <CurrencyDisplay amount={s.value} size="lg" className="text-white" />
                   </p>
@@ -206,7 +206,7 @@ export default function ChildWallet() {
                           >
                             <span className="text-2xl block mb-1">{cause.icon}</span>
                             <p className="font-display font-bold text-xs">{cause.name}</p>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{cause.description}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{cause.description}</p>
                           </motion.button>
                         ))}
                       </div>
@@ -235,11 +235,11 @@ export default function ChildWallet() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.total_donated')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('child.wallet.total_donated')}</p>
                 <CurrencyDisplay amount={totalDonated} size="lg" className="font-display font-bold text-lg" />
               </div>
               <div className="bg-muted/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('child.wallet.causes_supported')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('child.wallet.causes_supported')}</p>
                 <p className="font-display font-bold text-lg">💜 {uniqueCauses}</p>
               </div>
             </div>
@@ -251,7 +251,7 @@ export default function ChildWallet() {
       <motion.div variants={item}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display font-bold text-sm">{t('child.wallet.history')}</h2>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} {t('child.wallet.movements')}</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{transactions.length} {t('child.wallet.movements')}</span>
         </div>
         <div className="space-y-2">
           {transactions.length === 0 ? (
@@ -278,9 +278,9 @@ export default function ChildWallet() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-semibold truncate">{tx.description}</p>
-                          <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-medium ${cfg.bg} ${cfg.color}`}>{cfg.label}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${cfg.bg} ${cfg.color}`}>{cfg.label}</span>
                         </div>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{tx.date}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{tx.date}</p>
                       </div>
                       <CurrencyDisplay
                         amount={tx.amount}

@@ -42,14 +42,14 @@ export function ChildFamilyRankings() {
               whileHover={{ scale: 1.01 }}
               className="bg-muted/40 rounded-xl p-3 text-center border border-border/30"
             >
-              <p className="text-[10px] font-display font-bold mb-2">{cat.title}</p>
+              <p className="text-xs font-display font-bold mb-2">{cat.title}</p>
               {cat.data.slice(0, 2).map((c, i) => (
                 <div key={c.profileId} className={`flex items-center gap-1.5 justify-center mb-1 ${i === 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
                   <span className="text-xs">{i === 0 ? '🥇' : '🥈'}</span>
                   <span className="text-lg">{c.avatar}</span>
                   <div className="text-left">
-                    <p className={`text-[10px] font-bold ${i === 0 ? '' : 'font-normal'}`}>{c.name}</p>
-                    <p className="text-[9px] text-muted-foreground">{cat.metric(c)}</p>
+                    <p className={`text-xs font-bold ${i === 0 ? '' : 'font-normal'}`}>{c.name}</p>
+                    <p className="text-xs text-muted-foreground">{cat.metric(c)}</p>
                   </div>
                 </div>
               ))}

@@ -137,7 +137,7 @@ export default function AdminInvoicesTab() {
                         <Badge
                           variant="outline"
                           className={cn(
-                            'text-[10px]',
+                            'text-xs',
                             inv.status === 'paid' && 'border-green-300 text-green-700',
                             inv.status === 'pending' && 'border-amber-300 text-amber-700',
                             inv.status === 'failed' && 'border-destructive text-destructive',

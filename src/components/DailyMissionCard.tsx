@@ -55,7 +55,7 @@ export function DailyMissionCard({ mission, type }: DailyMissionCardProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
                 <h3 className="font-display font-bold text-sm truncate">{mission.title}</h3>
-                <Badge className={`text-[9px] border-0 rounded-lg shrink-0 ${
+                <Badge className={`text-xs border-0 rounded-lg shrink-0 ${
                   type === 'daily'
                     ? 'bg-accent/15 text-accent-foreground'
                     : 'bg-primary/15 text-primary'
@@ -63,14 +63,14 @@ export function DailyMissionCard({ mission, type }: DailyMissionCardProps) {
                   {type === 'daily' ? t('mission.daily') : t('mission.weekly')}
                 </Badge>
               </div>
-              <p className="text-[11px] text-muted-foreground line-clamp-1">{mission.description}</p>
+              <p className="text-xs text-muted-foreground line-clamp-1">{mission.description}</p>
               <div className="flex items-center gap-3 mt-2">
-                <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Sparkles className="h-3 w-3 text-accent" /> {mission.kivaPointsReward} FXP
                 </span>
-                <span className="text-[10px] font-display font-bold text-muted-foreground">🪙 {mission.reward}</span>
+                <span className="text-xs font-display font-bold text-muted-foreground">🪙 {mission.reward}</span>
                 {!isCompleted && (
-                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground ml-auto">
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground ml-auto">
                     <Clock className="h-3 w-3" /> {countdown}
                   </span>
                 )}

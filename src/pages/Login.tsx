@@ -559,7 +559,7 @@ export default function Login() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="hidden lg:inline-flex mt-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.05] text-white/30 text-[10px] tracking-widest uppercase"
+            className="hidden lg:inline-flex mt-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.05] text-white/30 text-xs tracking-widest uppercase"
           >
             beta v1.0
           </motion.span>
@@ -569,7 +569,7 @@ export default function Login() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="lg:hidden absolute bottom-1.5 right-3 z-10 text-white/40 text-[8px] sm:text-[9px] tracking-[0.15em] uppercase font-light"
+          className="lg:hidden absolute bottom-1.5 right-3 z-10 text-white/40 text-[8px] sm:text-xs tracking-[0.15em] uppercase font-light"
         >
           {t('auth.slogan')}
         </motion.p>
@@ -983,7 +983,7 @@ export default function Login() {
                               required
                               autoComplete="current-password"
                             />
-                            <p className="text-[10px] text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4 dígitos definido pelo encarregado'}</p>
+                            <p className="text-xs text-muted-foreground text-center">{t('auth.pin_hint') || 'PIN de 4 dígitos definido pelo encarregado'}</p>
                           </div>
                           <Button
                             type="submit"
@@ -1019,7 +1019,7 @@ export default function Login() {
                                 }`}
                               >
                                 <Phone className="h-4 w-4" /> {t('auth.phone')}
-                                <span className="absolute -top-1 -right-1 text-[9px] bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
+                                <span className="absolute -top-1 -right-1 text-xs bg-muted-foreground/20 text-muted-foreground px-1.5 py-0.5 rounded-full leading-none">{t('auth.coming_soon')}</span>
                               </button>
                             </div>
                           )}

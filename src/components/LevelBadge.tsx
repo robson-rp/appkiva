@@ -43,10 +43,10 @@ export function LevelBadge({ level, points, showProgress = false, showAvatar = f
         <div className="space-y-0.5">
           <Progress value={progress} className="h-2" />
           <div className="flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {t('level.pts_to').replace('{pts}', String(nextLevel[1].minPoints - points)).replace('{label}', nextLevel[1].label)}
             </p>
-            <span className="text-[10px] text-muted-foreground">→ {nextLevel[1].avatar}</span>
+            <span className="text-xs text-muted-foreground">→ {nextLevel[1].avatar}</span>
           </div>
         </div>
       )}

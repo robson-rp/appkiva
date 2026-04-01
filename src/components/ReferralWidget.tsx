@@ -77,13 +77,13 @@ export default function ReferralWidget() {
             </div>
             <div>
               <h3 className="font-display font-bold text-sm">{t('referral.title')}</h3>
-              <p className="text-[10px] text-muted-foreground">{t('referral.subtitle')}</p>
+              <p className="text-xs text-muted-foreground">{t('referral.subtitle')}</p>
             </div>
           </div>
 
           {/* Code display */}
           <div className="bg-muted/50 rounded-2xl p-4 text-center border border-border/30">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{t('referral.your_code')}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-1">{t('referral.your_code')}</p>
             <p className="font-display text-2xl font-bold tracking-[0.3em] text-foreground">{data.code}</p>
           </div>
 
@@ -94,14 +94,14 @@ export default function ReferralWidget() {
                 <Users className="h-3 w-3 text-muted-foreground" />
               </div>
               <p className="font-display font-bold text-lg">{data.claimCount}</p>
-              <p className="text-[10px] text-muted-foreground">{t('referral.friends_invited')}</p>
+              <p className="text-xs text-muted-foreground">{t('referral.friends_invited')}</p>
             </div>
             <div className="bg-muted/30 rounded-xl p-3 text-center">
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Sparkles className="h-3 w-3 text-accent-foreground" />
               </div>
               <p className="font-display font-bold text-lg">🪙 {bonusEarned}</p>
-              <p className="text-[10px] text-muted-foreground">{t('referral.bonus_earned')}</p>
+              <p className="text-xs text-muted-foreground">{t('referral.bonus_earned')}</p>
             </div>
           </div>
 
@@ -128,7 +128,7 @@ export default function ReferralWidget() {
 
           {/* Link preview */}
           <div className="flex gap-2">
-            <Input readOnly value={referralLink} className="rounded-xl border-border/50 text-[10px] bg-muted/30 font-mono" />
+            <Input readOnly value={referralLink} className="rounded-xl border-border/50 text-xs bg-muted/30 font-mono" />
           </div>
         </CardContent>
       </Card>

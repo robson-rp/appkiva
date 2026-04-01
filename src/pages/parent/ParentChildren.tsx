@@ -198,7 +198,7 @@ export default function ParentChildren() {
         <div className="absolute bottom-0 left-1/4 w-60 h-20 rounded-full bg-white/5 blur-2xl" />
         <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.children.management')}</p>
+            <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.children.management')}</p>
             <h1 className="font-display text-2xl font-bold mt-1">{t('parent.children.title')}</h1>
             <p className="text-sm text-primary-foreground/60 mt-1">{t('parent.children.subtitle')}</p>
           </div>
@@ -222,17 +222,17 @@ export default function ParentChildren() {
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <Users className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">{children.length}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">/ {maxChildren} {t('parent.children.max_children')}</span>
+            <span className="text-xs sm:text-xs text-primary-foreground/60">/ {maxChildren} {t('parent.children.max_children')}</span>
           </div>
           <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2">
             <TrendingUp className="h-4 w-4" />
             <span className="font-display font-bold text-base sm:text-lg">🪙 {totalBalance}</span>
-            <span className="text-[10px] sm:text-xs text-primary-foreground/60">{t('parent.children.total_balance')}</span>
+            <span className="text-xs sm:text-xs text-primary-foreground/60">{t('parent.children.total_balance')}</span>
           </div>
           {!canAddChild && (
             <div className="flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 cursor-pointer hover:bg-accent/30 transition-colors" onClick={() => setExtraChildOpen(true)}>
               <Crown className="h-4 w-4 text-accent-foreground" />
-              <span className="text-[10px] sm:text-xs text-accent-foreground font-semibold">{t('parent.children.upgrade_more')}</span>
+              <span className="text-xs sm:text-xs text-accent-foreground font-semibold">{t('parent.children.upgrade_more')}</span>
             </div>
           )}
         </div>
@@ -250,7 +250,7 @@ export default function ParentChildren() {
                 </div>
                 <div>
                   <p className="text-sm font-display font-bold">{t('parent.children.budget_exceptions')}</p>
-                  <p className="text-[10px] text-muted-foreground">{pendingExceptions.length} {t('parent.children.pending_requests')}</p>
+                  <p className="text-xs text-muted-foreground">{pendingExceptions.length} {t('parent.children.pending_requests')}</p>
                 </div>
               </div>
               {pendingExceptions.map((req) => (
@@ -259,7 +259,7 @@ export default function ParentChildren() {
                     <span className="text-xl">{req.reward_icon || '🎁'}</span>
                     <div className="min-w-0">
                       <p className="text-xs font-display font-bold truncate">{req.child_name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">
+                      <p className="text-xs text-muted-foreground truncate">
                         {req.reward_name} — 🪙 {req.amount}
                       </p>
                     </div>
@@ -348,14 +348,14 @@ export default function ParentChildren() {
 
                   <div className="grid grid-cols-2 gap-2 mb-5">
                     <div className="bg-[hsl(var(--kivara-light-blue))] rounded-2xl p-3.5 text-center">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1">{t('parent.children.balance')}</p>
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-1">{t('parent.children.balance')}</p>
                       <CoinDisplay amount={child.balance} size="sm" />
                     </div>
                     <div
                       className="bg-muted/50 rounded-2xl p-3.5 text-center cursor-pointer hover:bg-muted/80 transition-colors group/budget"
                       onClick={() => openBudgetDialog({ childId: child.childId, profileId: child.profileId, displayName: child.displayName, monthlyBudget: child.monthlyBudget, dailySpendLimit: child.dailySpendLimit })}
                     >
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-1 flex items-center justify-center gap-1">
                         <Wallet className="h-3 w-3" /> {t('parent.children.monthly_limit')}
                       </p>
                       <p className="font-display font-bold text-lg text-foreground">
@@ -403,7 +403,7 @@ export default function ParentChildren() {
                   </div>
                   <div>
                     <p className="text-sm font-display font-bold">{t('guardian.title')}</p>
-                    <p className="text-[10px] text-muted-foreground">{t('guardian.subtitle')}</p>
+                    <p className="text-xs text-muted-foreground">{t('guardian.subtitle')}</p>
                   </div>
                 </div>
                 <Button size="sm" variant="outline" className="rounded-xl font-display gap-1.5 text-xs" onClick={() => setGuardianDialogOpen(true)}>
@@ -418,7 +418,7 @@ export default function ParentChildren() {
                         <span className="text-xl">{g.avatar}</span>
                         <div>
                           <p className="text-xs font-display font-bold">{g.displayName}</p>
-                          <p className="text-[10px] text-muted-foreground">{g.role === 'primary' ? t('guardian.primary') : t('guardian.secondary')}</p>
+                          <p className="text-xs text-muted-foreground">{g.role === 'primary' ? t('guardian.primary') : t('guardian.secondary')}</p>
                         </div>
                       </div>
                       {g.role === 'secondary' && (
@@ -494,19 +494,19 @@ export default function ParentChildren() {
             {/* Info box explaining this flow */}
             <div className="bg-accent/10 rounded-2xl p-3 flex items-start gap-2 border border-accent/20">
               <Shield className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed">
                 {t('parent.children.invite_note')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_code')}</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_code')}</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-muted/50 rounded-2xl p-4 text-center border border-border/30">
                   <motion.p key={inviteCode} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-3xl font-bold tracking-[0.3em] text-foreground">
                     {inviteCode}
                   </motion.p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{t('parent.children.valid_48h')}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t('parent.children.valid_48h')}</p>
                 </div>
               </div>
               <div className="flex gap-2">
@@ -527,11 +527,11 @@ export default function ParentChildren() {
             </div>
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border/50" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.or')}</span>
+              <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.or')}</span>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_link')}</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.invite_link')}</p>
               <div className="flex gap-2">
                 <Input readOnly value={inviteLink} className="rounded-xl border-border/50 text-xs bg-muted/30 font-mono" />
                 <Button variant="outline" size="icon" className="rounded-xl border-border/50 shrink-0" onClick={() => handleCopy(inviteLink, 'link')}>
@@ -546,7 +546,7 @@ export default function ParentChildren() {
               <QrCode className="h-5 w-5 text-accent-foreground shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-display font-bold text-accent-foreground">{t('parent.children.how_works')}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                   {t('parent.children.how_works_desc')}
                 </p>
               </div>
@@ -594,7 +594,7 @@ export default function ParentChildren() {
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {t('parent.children.set_0_remove')}
               </p>
             </div>
@@ -627,7 +627,7 @@ export default function ParentChildren() {
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center">
                 {t('parent.children.max_daily')}
               </p>
             </div>
@@ -816,7 +816,7 @@ export default function ParentChildren() {
                 minLength={3}
                 maxLength={20}
               />
-              <p className="text-[10px] text-muted-foreground">{t('parent.children.child_username_hint')}</p>
+              <p className="text-xs text-muted-foreground">{t('parent.children.child_username_hint')}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -849,7 +849,7 @@ export default function ParentChildren() {
                 />
               </div>
             </div>
-            <p className="text-[10px] text-muted-foreground text-center">{t('parent.children.child_pin_hint')}</p>
+            <p className="text-xs text-muted-foreground text-center">{t('parent.children.child_pin_hint')}</p>
             {newChildPin && newChildPinConfirm && newChildPin !== newChildPinConfirm && (
               <p className="text-xs text-destructive text-center">{t('parent.children.child_pin_mismatch')}</p>
             )}
@@ -919,12 +919,12 @@ export default function ParentChildren() {
             <div className="space-y-4 mt-2">
               <div className="bg-muted/50 rounded-2xl p-4 space-y-3 border border-border/30">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.child_username')}</span>
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{t('parent.children.child_username')}</span>
                   <span className="font-mono font-bold text-foreground">{createdCredentials.username}</span>
                 </div>
                 <div className="h-px bg-border/30" />
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">PIN</span>
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">PIN</span>
                   <span className="font-mono font-bold text-foreground tracking-widest">{createdCredentials.pin}</span>
                 </div>
               </div>
@@ -944,7 +944,7 @@ export default function ParentChildren() {
               </Button>
               <div className="bg-[hsl(var(--kivara-light-gold))] rounded-2xl p-3 flex items-start gap-2">
                 <Shield className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {t('parent.children.credentials_warning')}
                 </p>
               </div>

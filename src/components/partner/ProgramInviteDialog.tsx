@@ -114,11 +114,11 @@ export function ProgramInviteDialog({ programId, programName, partnerTenantId }:
                   <div>
                     <div className="flex items-center gap-2">
                       <code className="text-sm font-bold text-foreground tracking-wider">{inv.code}</code>
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-xs">
                         {inv.target_type === 'family' ? t('dialog.invite.family') : t('dialog.invite.school')}
                       </Badge>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {t('dialog.invite.expires')} {format(new Date(inv.expires_at), "d MMM yyyy", { locale: dateFnsLocale })}
                     </p>
                   </div>
@@ -143,7 +143,7 @@ export function ProgramInviteDialog({ programId, programName, partnerTenantId }:
               {usedInvites.map(inv => (
                 <div key={inv.id} className="flex items-center justify-between p-2 rounded-lg opacity-60">
                   <code className="text-xs text-muted-foreground">{inv.code}</code>
-                  <Badge variant={inv.status === 'accepted' ? 'default' : 'secondary'} className="text-[10px]">
+                  <Badge variant={inv.status === 'accepted' ? 'default' : 'secondary'} className="text-xs">
                     {inv.status === 'accepted' ? t('dialog.invite.accepted') : inv.status === 'rejected' ? t('dialog.invite.rejected') : t('dialog.invite.expired')}
                   </Badge>
                 </div>

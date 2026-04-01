@@ -144,21 +144,21 @@ export function ParentWeeklySummary({ householdId }: ParentWeeklySummaryProps) {
                   <CheckCircle className="h-3.5 w-3.5 text-secondary" />
                 </div>
                 <p className="font-display font-bold text-base">{child.tasksCompleted}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.tasks')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.tasks')}</p>
               </div>
               <div className="bg-background/60 rounded-lg p-2.5 text-center border border-border/30">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Target className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <p className="font-display font-bold text-base">{child.missionsCompleted}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.missions')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.missions')}</p>
               </div>
               <div className="bg-background/60 rounded-lg p-2.5 text-center border border-border/30">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <PiggyBank className="h-3.5 w-3.5 text-accent-foreground" />
                 </div>
                 <CurrencyDisplay amount={child.totalSaved} size="sm" className="font-display font-bold" />
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.saved')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">{t('parent.weekly.saved')}</p>
               </div>
             </div>
 

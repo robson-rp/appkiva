@@ -95,7 +95,7 @@ export default function ChildTasks() {
             }`}
           >
             {f.label}
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
+            <span className={`text-xs px-1.5 py-0.5 rounded-md ${
               filter === f.id ? 'bg-white/20' : 'bg-background'
             }`}>
               {f.count}
@@ -151,7 +151,7 @@ export default function ChildTasks() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <h3 className="font-display font-bold text-sm truncate">{task.title}</h3>
-                          <Badge className={`text-[9px] ${cfg.badgeCls} rounded-lg shrink-0`}>
+                          <Badge className={`text-xs ${cfg.badgeCls} rounded-lg shrink-0`}>
                             <StatusIcon className="h-3 w-3 mr-0.5" />
                             {cfg.label}
                           </Badge>
@@ -162,10 +162,10 @@ export default function ChildTasks() {
                         <div className="flex items-center gap-2 mt-2">
                           <span className="font-display font-bold text-sm">🪙 {task.reward}</span>
                           {task.status === 'completed' && (
-                            <span className="text-[10px] text-muted-foreground">{t('child.tasks.waiting_approval')}</span>
+                            <span className="text-xs text-muted-foreground">{t('child.tasks.waiting_approval')}</span>
                           )}
                           {task.status === 'approved' && (
-                            <span className="text-[10px] text-secondary font-semibold">{t('child.tasks.reward_received')}</span>
+                            <span className="text-xs text-secondary font-semibold">{t('child.tasks.reward_received')}</span>
                           )}
                         </div>
                       </div>

@@ -109,7 +109,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               >
                 {sd.currentStreak} 🔥
               </motion.p>
-              <p className="text-[10px] text-muted-foreground">{t('streak.record').replace('{count}', String(sd.longestStreak))}</p>
+              <p className="text-xs text-muted-foreground">{t('streak.record').replace('{count}', String(sd.longestStreak))}</p>
             </div>
           </div>
 
@@ -157,7 +157,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
                           )}
                          </motion.div>
                         </div>
-                        <span className={`text-[9px] capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
+                        <span className={`text-xs capitalize leading-none ${isToday ? 'text-destructive font-semibold' : isActiveDay ? 'text-muted-foreground font-medium' : 'text-muted-foreground/60'}`}>
                           {isToday ? t('streak.today') : shortDay}
                         </span>
                       </div>
@@ -176,7 +176,7 @@ export function StreakWidget({ onClick }: StreakWidgetProps) {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="text-[10px] text-center text-destructive/70 font-semibold mt-2 tracking-wide uppercase"
+              className="text-xs text-center text-destructive/70 font-semibold mt-2 tracking-wide uppercase"
             >
               {t('streak.on_fire')}
             </motion.p>

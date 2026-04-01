@@ -109,7 +109,7 @@ export default function BadgesPage() {
               <TabsTrigger key={key} value={key} className="text-xs rounded-lg gap-1">
                 <span>{cat.icon}</span>
                 <span className="hidden xs:inline">{cat.label}</span>
-                <span className="text-[9px] text-muted-foreground">({prog.unlocked})</span>
+                <span className="text-xs text-muted-foreground">({prog.unlocked})</span>
               </TabsTrigger>
             );
           })}
@@ -188,7 +188,7 @@ function BadgeCard({ badge, index, onSelect }: { badge: CollectibleBadge; index:
               </div>
             )}
           </div>
-          <p className="text-[10px] font-display font-bold text-foreground leading-tight truncate">{badge.name}</p>
+          <p className="text-xs font-display font-bold text-foreground leading-tight truncate">{badge.name}</p>
           <Badge className={`text-[8px] mt-1 border-0 px-1.5 py-0 ${tierConfig.bg} ${tierConfig.color}`}>{tierConfig.label}</Badge>
         </CardContent>
       </Card>
@@ -225,7 +225,7 @@ function BadgeDetail({ badge, onClose }: { badge: CollectibleBadge; onClose: () 
         <div className="p-5 space-y-3">
           <p className="text-sm text-foreground">{badge.description}</p>
           <div className="bg-muted/50 rounded-xl p-3">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">{t('badges.how_to_unlock')}</p>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">{t('badges.how_to_unlock')}</p>
             <p className="text-xs text-foreground">{badge.requirement}</p>
           </div>
           {isUnlocked && badge.unlockedAt && (

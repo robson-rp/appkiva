@@ -145,7 +145,7 @@ export default function ParentConsent() {
         <Card className="border-0 bg-gradient-to-br from-primary via-primary/90 to-accent text-primary-foreground overflow-hidden relative">
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
           <CardContent className="p-5 sm:p-6 relative z-10">
-            <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('parent.consent.privacy')}</p>
+            <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('parent.consent.privacy')}</p>
             <h1 className="font-display text-xl sm:text-2xl font-bold mt-1">{t('parent.consent.title')}</h1>
             <p className="text-xs sm:text-sm text-primary-foreground/70 mt-1">{t('parent.consent.subtitle')}</p>
             <div className="flex flex-wrap gap-3 mt-4">
@@ -248,7 +248,7 @@ export default function ParentConsent() {
                         </div>
                         {existing ? (
                           <div className="flex items-center gap-2 shrink-0 ml-7 sm:ml-0">
-                            <Badge className="bg-secondary/20 text-secondary text-[10px]">
+                            <Badge className="bg-secondary/20 text-secondary text-xs">
                               {format(new Date(existing.granted_at), 'dd/MM/yy')}
                             </Badge>
                             <Button
@@ -262,7 +262,7 @@ export default function ParentConsent() {
                           </div>
                         ) : (
                           <div className="ml-7 sm:ml-0">
-                            <Badge variant="outline" className="text-[10px] text-muted-foreground">{t('parent.consent.not_granted')}</Badge>
+                            <Badge variant="outline" className="text-xs text-muted-foreground">{t('parent.consent.not_granted')}</Badge>
                           </div>
                         )}
                       </div>
@@ -334,7 +334,7 @@ export default function ParentConsent() {
                     <p className="text-sm font-medium">{ct.label}</p>
                     <p className="text-xs text-muted-foreground whitespace-normal">{ct.desc}</p>
                   </div>
-                  {alreadyGranted && <Badge className="ml-auto text-[10px] bg-secondary/20 text-secondary shrink-0">{t('parent.consent.active_badge')}</Badge>}
+                  {alreadyGranted && <Badge className="ml-auto text-xs bg-secondary/20 text-secondary shrink-0">{t('parent.consent.active_badge')}</Badge>}
                 </Button>
               );
             })}

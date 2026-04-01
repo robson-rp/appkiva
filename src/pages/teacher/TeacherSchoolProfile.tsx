@@ -140,7 +140,7 @@ export default function TeacherSchoolProfile() {
             <CardContent className="p-4 text-center">
               <stat.icon className={`h-5 w-5 mx-auto mb-2 ${stat.color}`} />
               <p className="font-display font-bold text-2xl">{stat.value}</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -157,22 +157,22 @@ export default function TeacherSchoolProfile() {
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.name')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.school.name')}</p>
                 <p className="text-sm font-display font-bold">{school.name}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.currency')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.school.currency')}</p>
                 <p className="text-sm font-display font-bold">{school.currency}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.created_at')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.school.created_at')}</p>
                 <p className="text-sm font-display font-bold flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                   {format(new Date(school.created_at), 'dd/MM/yyyy')}
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('teacher.school.status')}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('teacher.school.status')}</p>
                 <Badge variant={school.is_active ? 'default' : 'destructive'} className="text-xs">
                   {school.is_active ? t('teacher.school.active') : t('teacher.school.inactive')}
                 </Badge>
@@ -200,7 +200,7 @@ export default function TeacherSchoolProfile() {
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-xl">{cls.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-display font-bold">{cls.name}</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {cls.grade}{cls.subject ? ` · ${cls.subject}` : ''} · {students.length} {t('teacher.school.students_count')}
                     </p>
                   </div>

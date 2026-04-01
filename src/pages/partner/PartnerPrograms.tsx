@@ -64,7 +64,7 @@ export default function PartnerPrograms() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-[10px] font-display gap-1">
+                <Badge variant="outline" className="text-xs font-display gap-1">
                   <Zap className="h-3 w-3" /> {limits.tierName}
                 </Badge>
               </div>
@@ -133,7 +133,7 @@ export default function PartnerPrograms() {
                     <Users className="h-5 w-5 text-primary" />
                   )}
                 </div>
-                <Badge variant={prog.status === 'active' ? 'default' : 'secondary'} className="text-[10px]">
+                <Badge variant={prog.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                   {prog.status === 'active' ? t('partner.programs.status_active') : prog.status === 'pending' ? t('partner.programs.status_pending') : t('partner.programs.status_inactive')}
                 </Badge>
               </div>

@@ -101,19 +101,19 @@ export default function ChildDiary() {
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Flame className="h-4 w-4 text-destructive mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.streak')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.streak')}</p>
                 <motion.p key={streak} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display font-bold text-foreground text-xl">
                   {streak} 🔥
                 </motion.p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <CalendarDays className="h-4 w-4 text-primary mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.entries')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.entries')}</p>
                 <p className="font-display font-bold text-foreground text-xl">{totalEntries}</p>
               </div>
               <div className="bg-foreground/5 backdrop-blur-sm rounded-2xl p-3 text-center">
                 <Sparkles className="h-4 w-4 text-accent mx-auto mb-1" />
-                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.top_mood')}</p>
+                <p className="text-xs text-foreground/50 uppercase tracking-wider font-medium">{t('child.diary.top_mood')}</p>
                 <p className="font-display font-bold text-foreground text-xl">{topMood}</p>
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function ChildDiary() {
                           }`}
                         >
                           <span className="text-2xl block">{m.emoji}</span>
-                          <span className="text-[9px] text-muted-foreground mt-0.5 block">{m.label}</span>
+                          <span className="text-xs text-muted-foreground mt-0.5 block">{m.label}</span>
                         </motion.button>
                       ))}
                     </div>
@@ -200,7 +200,7 @@ export default function ChildDiary() {
       <motion.div variants={item}>
         <h2 className="font-display font-bold text-sm mb-3 flex items-center gap-2">
           {t('child.diary.previous')}
-          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{entries.length} {t('child.diary.entries_count')}</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{entries.length} {t('child.diary.entries_count')}</span>
         </h2>
         {isLoading ? (
           <p className="text-sm text-muted-foreground text-center py-4">{t('child.diary.loading')}</p>
@@ -226,11 +226,11 @@ export default function ChildDiary() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-[11px] font-display font-bold text-primary">{formatDate(entry.createdAt)}</span>
+                          <span className="text-xs font-display font-bold text-primary">{formatDate(entry.createdAt)}</span>
                           {entry.tags && entry.tags.length > 0 && (
                             <div className="flex gap-1">
                               {entry.tags.map((tag) => (
-                                <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
+                                <span key={tag} className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium">
                                   {tag}
                                 </span>
                               ))}

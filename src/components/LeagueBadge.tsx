@@ -15,7 +15,7 @@ export function LeagueBadge({ weeklyPoints, compact = false }: LeagueBadgeProps)
 
   if (compact) {
     return (
-      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-display font-bold ${config.bg} ${config.color}`}>
+      <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-display font-bold ${config.bg} ${config.color}`}>
         <span>{config.icon}</span>
         <span>{config.label}</span>
       </div>
@@ -37,7 +37,7 @@ export function LeagueBadge({ weeklyPoints, compact = false }: LeagueBadgeProps)
       </motion.div>
       <div>
         <p className={`text-xs font-display font-bold ${config.color}`}>{t('league.title').replace('{label}', config.label)}</p>
-        <p className="text-[10px] text-muted-foreground">{t('league.weekly_pts').replace('{pts}', String(weeklyPoints))}</p>
+        <p className="text-xs text-muted-foreground">{t('league.weekly_pts').replace('{pts}', String(weeklyPoints))}</p>
       </div>
       <Shield className={`h-4 w-4 ml-auto ${config.color} opacity-50`} />
     </motion.div>

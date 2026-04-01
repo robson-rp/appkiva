@@ -169,7 +169,7 @@ function EditTemplateDialog({ template, children }: { template: any; children: R
               {t('admin.notif.save')}
             </Button>
           </div>
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             {t('admin.notif.placeholders_info')} {'{{child_name}}, {{parent_name}}, {{task_title}}, {{amount}}, {{vault_name}}, {{points}}, {{level}}, {{badge_name}}, {{cause_name}}, {{percent}}, {{days}}, {{score}}, {{lesson_title}}, {{reward_name}}, {{title}}, {{message}}'}
           </p>
         </div>
@@ -212,18 +212,18 @@ export default function NotificationTemplateManager() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-display font-bold truncate">{tpl.title_template}</span>
-                      <Badge variant="outline" className="text-[10px] shrink-0">
+                      <Badge variant="outline" className="text-xs shrink-0">
                         {eventLabels[tpl.event] ?? tpl.event}
                       </Badge>
-                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         → {recipientLabels[tpl.recipient_role] ?? tpl.recipient_role}
                       </Badge>
-                      {tpl.is_urgent && <Badge variant="destructive" className="text-[10px]">{t('admin.notif.urgent')}</Badge>}
+                      {tpl.is_urgent && <Badge variant="destructive" className="text-xs">{t('admin.notif.urgent')}</Badge>}
                       {tpl.cooldown_minutes > 0 && (
-                        <span className="text-[10px] text-muted-foreground">⏱ {tpl.cooldown_minutes}min</span>
+                        <span className="text-xs text-muted-foreground">⏱ {tpl.cooldown_minutes}min</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{tpl.message_template}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{tpl.message_template}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Switch

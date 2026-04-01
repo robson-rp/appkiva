@@ -120,7 +120,7 @@ export default function TeenWallet() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">{tx.description}</p>
-                      <p className="text-[10px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {tx.date}
                         {tx.category && ` • ${SPENDING_CATEGORIES[tx.category]?.icon} ${SPENDING_CATEGORIES[tx.category]?.label}`}
                       </p>

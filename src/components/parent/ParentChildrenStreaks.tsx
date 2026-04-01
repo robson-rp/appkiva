@@ -78,7 +78,7 @@ export function ParentChildrenStreaks({ children }: Props) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-display font-bold text-sm truncate">{child.displayName}</p>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {t('parent.streak_record').replace('{count}', String(longest)).replace('{active}', String(streak?.totalActiveDays ?? 0))}
                 </p>
               </div>

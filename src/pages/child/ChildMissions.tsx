@@ -30,11 +30,11 @@ function ExpiresIn({ expiresAt }: { expiresAt?: string | null }) {
   const t = useT();
   if (!expiresAt) return null;
   const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return <span className="text-[10px] text-destructive font-medium">{t('mission.expired')}</span>;
+  if (diff <= 0) return <span className="text-xs text-destructive font-medium">{t('mission.expired')}</span>;
   const hours = Math.floor(diff / 3600000);
   const display = hours >= 24 ? `${Math.ceil(hours / 24)}d` : `${hours}h`;
   return (
-    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+    <span className="flex items-center gap-1 text-xs text-muted-foreground">
       <Clock className="h-3 w-3" /> {display}
     </span>
   );
@@ -173,7 +173,7 @@ function TasksTab({
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
                   <p className="font-display font-bold text-white text-xl">{s.value}</p>
-                  <p className="text-[9px] text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
+                  <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -219,7 +219,7 @@ function TasksTab({
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <h3 className="font-display font-bold text-sm">{task.title}</h3>
-                                <Badge className={`text-[9px] ${cfg.badgeCls} rounded-lg`}>
+                                <Badge className={`text-xs ${cfg.badgeCls} rounded-lg`}>
                                   <StatusIcon className="h-3 w-3 mr-0.5" />
                                   {cfg.label}
                                 </Badge>
@@ -270,11 +270,11 @@ function TasksTab({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-display font-semibold text-sm">{task.title}</h3>
-                        <p className="text-[11px] text-muted-foreground">{t('child.tasks.waiting_parent')}</p>
+                        <p className="text-xs text-muted-foreground">{t('child.tasks.waiting_parent')}</p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-display font-bold text-xs">🪙 {task.reward}</p>
-                        <Badge className="text-[9px] bg-[hsl(var(--kivara-light-gold))] text-accent-foreground border-0 rounded-lg mt-0.5">
+                        <Badge className="text-xs bg-[hsl(var(--kivara-light-gold))] text-accent-foreground border-0 rounded-lg mt-0.5">
                           <Clock className="h-3 w-3 mr-0.5" /> {t('child.tasks.to_approve')}
                         </Badge>
                       </div>
@@ -304,7 +304,7 @@ function TasksTab({
                           <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
                         </div>
                         {task.description && (
-                          <p className="text-[11px] text-muted-foreground truncate">{task.description}</p>
+                          <p className="text-xs text-muted-foreground truncate">{task.description}</p>
                         )}
                       </div>
                       <div className="text-right shrink-0">
@@ -382,7 +382,7 @@ function MissionsTab({
                 <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-3 text-center">
                   <s.icon className="h-3.5 w-3.5 text-white/60 mx-auto mb-1" />
                   <p className="font-display font-bold text-white text-xl">{s.value}</p>
-                  <p className="text-[9px] text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
+                  <p className="text-xs text-white/50 uppercase tracking-wider font-medium">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -420,9 +420,9 @@ function MissionsTab({
                        <div className="flex-1">
                          <div className="flex items-center gap-2 mb-0.5">
                            <h3 className="font-display font-bold text-sm">{mission.title}</h3>
-                           <Badge className={`text-[9px] ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
+                           <Badge className={`text-xs ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
                            {(mission as any).difficulty && difficultyLabel[(mission as any).difficulty] && (
-                             <Badge className={`text-[9px] border-0 rounded-lg ${difficultyLabel[(mission as any).difficulty].cls}`}>
+                             <Badge className={`text-xs border-0 rounded-lg ${difficultyLabel[(mission as any).difficulty].cls}`}>
                                {difficultyLabel[(mission as any).difficulty].label}
                              </Badge>
                            )}
@@ -431,22 +431,22 @@ function MissionsTab({
                        </div>
                        <div className="text-right shrink-0">
                          <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                         <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
+                         <p className="text-xs text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                          <ExpiresIn expiresAt={(mission as any).expires_at} />
                       </div>
                     </div>
                     {progress !== null ? (
                        <div className="space-y-1.5">
                          <div className="flex justify-between">
-                           <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
-                           <span className="text-[10px] font-display font-bold text-accent-foreground">{walletBalance}/{mission.target_amount} 🪙 ({progress}%)</span>
+                           <span className="text-xs text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                           <span className="text-xs font-display font-bold text-accent-foreground">{walletBalance}/{mission.target_amount} 🪙 ({progress}%)</span>
                          </div>
                          <Progress value={progress} className="h-2 rounded-full" />
                        </div>
                      ) : (
                        <div className="flex justify-between">
-                         <span className="text-[10px] text-muted-foreground font-medium">{t('child.missions.progress')}</span>
-                         <span className="text-[10px] font-display font-bold text-accent-foreground">—</span>
+                         <span className="text-xs text-muted-foreground font-medium">{t('child.missions.progress')}</span>
+                         <span className="text-xs font-display font-bold text-accent-foreground">—</span>
                        </div>
                      )}
                       <Button size="sm" className="w-full mt-3 rounded-xl font-display bg-accent hover:bg-accent/90 text-accent-foreground gap-1.5" disabled={completeMission.isPending} onClick={() => completeMission.mutate(mission.id)}>
@@ -481,9 +481,9 @@ function MissionsTab({
                        <div className="flex-1">
                          <div className="flex items-center gap-2 mb-0.5">
                            <h3 className="font-display font-bold text-sm">{mission.title}</h3>
-                           <Badge className={`text-[9px] ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
+                           <Badge className={`text-xs ${cfg.badgeBg} border-0 rounded-lg`}>{cfg.label}</Badge>
                            {(mission as any).difficulty && difficultyLabel[(mission as any).difficulty] && (
-                             <Badge className={`text-[9px] border-0 rounded-lg ${difficultyLabel[(mission as any).difficulty].cls}`}>
+                             <Badge className={`text-xs border-0 rounded-lg ${difficultyLabel[(mission as any).difficulty].cls}`}>
                                {difficultyLabel[(mission as any).difficulty].label}
                              </Badge>
                            )}
@@ -492,7 +492,7 @@ function MissionsTab({
                        </div>
                        <div className="text-right shrink-0">
                          <p className="font-display font-bold text-sm">🪙 {mission.reward}</p>
-                         <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
+                         <p className="text-xs text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                          <ExpiresIn expiresAt={(mission as any).expires_at} />
                         </div>
                       </div>
@@ -503,7 +503,7 @@ function MissionsTab({
                              <div className="flex items-center gap-2">
                                <Target className="h-3.5 w-3.5 text-muted-foreground" />
                                <span className="text-xs text-muted-foreground">{t('child.dreams.target')}: <strong className="text-foreground">🪙 {mission.target_amount}</strong></span>
-                               <span className="text-[10px] font-display font-bold text-accent-foreground ml-auto">{walletBalance}/{mission.target_amount} ({avProgress}%)</span>
+                               <span className="text-xs font-display font-bold text-accent-foreground ml-auto">{walletBalance}/{mission.target_amount} ({avProgress}%)</span>
                              </div>
                              <Progress value={avProgress} className="h-1.5 rounded-full" />
                            </div>
@@ -541,14 +541,14 @@ function MissionsTab({
                          <h3 className="font-display font-semibold text-sm">{mission.title}</h3>
                          <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0" />
                        </div>
-                       <p className="text-[11px] text-muted-foreground truncate">{mission.description}</p>
+                       <p className="text-xs text-muted-foreground truncate">{mission.description}</p>
                        {mission.target_amount && (
                          <Progress value={100} className="h-1.5 rounded-full mt-1.5" />
                        )}
                      </div>
                     <div className="text-right shrink-0">
                       <p className="font-display font-bold text-xs text-secondary">+{mission.reward} 🪙</p>
-                      <p className="text-[10px] text-muted-foreground">+{mission.kiva_points_reward} pts</p>
+                      <p className="text-xs text-muted-foreground">+{mission.kiva_points_reward} pts</p>
                     </div>
                   </CardContent>
                 </Card>

@@ -480,15 +480,15 @@ export default function AdminSubscriptions() {
 
                 <div className="grid grid-cols-4 gap-2 items-end">
                   <div>
-                    <Label className="text-[10px]">{t('admin.subs.rp_currency')}</Label>
+                    <Label className="text-xs">{t('admin.subs.rp_currency')}</Label>
                     <Input placeholder="AOA" value={rpCurrency} onChange={(e) => setRpCurrency(e.target.value.toUpperCase())} maxLength={5} className="font-mono" />
                   </div>
                   <div>
-                    <Label className="text-[10px]">{t('admin.subs.rp_monthly')}</Label>
+                    <Label className="text-xs">{t('admin.subs.rp_monthly')}</Label>
                     <Input type="number" min={0} value={rpMonthly} onChange={(e) => setRpMonthly(parseFloat(e.target.value) || 0)} />
                   </div>
                   <div>
-                    <Label className="text-[10px]">{t('admin.subs.rp_yearly')}</Label>
+                    <Label className="text-xs">{t('admin.subs.rp_yearly')}</Label>
                     <Input type="number" min={0} value={rpYearly} onChange={(e) => setRpYearly(parseFloat(e.target.value) || 0)} />
                   </div>
                   <Button

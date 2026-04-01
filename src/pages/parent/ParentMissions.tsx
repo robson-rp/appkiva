@@ -184,10 +184,10 @@ export default function ParentMissions() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                           <h3 className="font-display font-bold text-sm">{m.title}</h3>
-                          <Badge className={`text-[9px] rounded-lg ${cfg.className}`}>
+                          <Badge className={`text-xs rounded-lg ${cfg.className}`}>
                             <StatusIcon className="h-3 w-3 mr-0.5" /> {cfg.label}
                           </Badge>
-                          <Badge variant="outline" className="text-[9px] rounded-lg">
+                          <Badge variant="outline" className="text-xs rounded-lg">
                             {m.child_avatar} {m.child_display_name}
                           </Badge>
                         </div>
@@ -196,7 +196,7 @@ export default function ParentMissions() {
                           <span>🪙 {m.reward}</span>
                           <span>⭐ {m.kiva_points_reward} pts</span>
                           {m.target_amount && <span>🎯 {t('parent.missions.target').replace('{value}', m.target_amount)}</span>}
-                          <span className="ml-auto text-[10px]">{typeLabels[m.type] ?? m.type}</span>
+                          <span className="ml-auto text-xs">{typeLabels[m.type] ?? m.type}</span>
                         </div>
                       </div>
                       <div className="flex gap-1 shrink-0">
@@ -318,12 +318,12 @@ export default function ParentMissions() {
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-display font-bold text-sm">{s.title}</p>
                   <div className="flex gap-1.5">
-                    <Badge variant="outline" className="text-[10px]">🪙 {s.reward}</Badge>
-                    <Badge variant="outline" className="text-[10px]">⭐ {s.kiva_points_reward}</Badge>
+                    <Badge variant="outline" className="text-xs">🪙 {s.reward}</Badge>
+                    <Badge variant="outline" className="text-xs">⭐ {s.kiva_points_reward}</Badge>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">{s.description}</p>
-                <span className="text-[10px] text-muted-foreground mt-1 inline-block">
+                <span className="text-xs text-muted-foreground mt-1 inline-block">
                   {typeEmoji[s.type] || '🎯'} {typeLabels[s.type] || s.type}
                   {s.target_amount && ` · 🎯 ${s.target_amount}`}
                 </span>

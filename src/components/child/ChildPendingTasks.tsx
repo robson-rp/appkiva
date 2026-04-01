@@ -48,7 +48,7 @@ export function ChildPendingTasks({ tasks }: ChildPendingTasksProps) {
               </div>
               <div>
                 <p className="text-sm font-semibold">{task.title}</p>
-                <p className="text-[11px] text-muted-foreground">{task.description?.slice(0, 35)}...</p>
+                <p className="text-xs text-muted-foreground">{task.description?.slice(0, 35)}...</p>
               </div>
             </div>
             <span className="text-sm font-display font-bold text-secondary">+{task.reward} 🪙</span>

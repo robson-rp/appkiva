@@ -68,7 +68,7 @@ export default function AdminSchools() {
           <CardContent className="p-6 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider font-medium">{t('admin.schools.admin_label')}</p>
+                <p className="text-primary-foreground/60 text-xs uppercase tracking-wider font-medium">{t('admin.schools.admin_label')}</p>
                 <h1 className="font-display text-2xl font-bold mt-1">{t('admin.schools.title')}</h1>
                 <p className="text-sm text-primary-foreground/70 mt-1">{t('admin.schools.subtitle')}</p>
               </div>
@@ -129,7 +129,7 @@ export default function AdminSchools() {
                       </div>
                     </div>
                     {tier && (<div className="flex items-center gap-1.5 bg-accent/10 rounded-lg px-2.5 py-1.5 mb-3 w-fit"><span className="text-xs font-display font-medium text-accent-foreground">{tier.name}</span></div>)}
-                    <p className="text-[10px] text-muted-foreground mb-4">{t('admin.schools.registered_at')} {new Date(school.created_at).toLocaleDateString('pt-PT')}</p>
+                    <p className="text-xs text-muted-foreground mb-4">{t('admin.schools.registered_at')} {new Date(school.created_at).toLocaleDateString('pt-PT')}</p>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm" className="flex-1 rounded-xl font-display gap-1.5 text-xs" onClick={() => openEdit(school)}><Edit className="h-3.5 w-3.5" /> {t('admin.schools.edit')}</Button>
                       <Button variant="outline" size="icon" className="rounded-xl text-destructive hover:bg-destructive hover:text-destructive-foreground h-9 w-9" onClick={() => setDeleteConfirm(school.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
