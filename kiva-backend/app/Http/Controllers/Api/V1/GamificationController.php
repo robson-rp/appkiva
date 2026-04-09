@@ -97,4 +97,28 @@ class GamificationController extends Controller
 
         return response()->json(['data' => $leaderboard]);
     }
+
+    public function showBadge(Request $request, string $badgeId): JsonResponse
+    {
+        $badge = Badge::findOrFail($badgeId);
+
+        return response()->json(['data' => $badge]);
+    }
+
+    public function storeBadge(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name'        => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
+            'icon'        => 'nullable|string|max:255',
+            'type'        => 'nullable|string|max:50',
+            'condition'   => 'nullable|array',
+            'sort_order'  => 'nullable|integer|min:0',
+            'is_active'   => 'nullable|boolean',
+        ]);
+
+        $badge = Badge::create($data);
+
+        return response()->json(['data' => $badge], 201);
+    }
 }

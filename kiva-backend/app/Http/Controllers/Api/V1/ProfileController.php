@@ -7,6 +7,7 @@ use App\Http\Resources\UserProfileResource;
 use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -38,6 +39,21 @@ class ProfileController extends Controller
         ]);
 
         $profile->update($data);
+
+        return response()->json(['data' => new UserProfileResource($profile->fresh()->load('user'))]);
+    }
+
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => 'required|image|max:5120',
+        ]);
+
+        $profile = $request->user()->profile;
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        $profile->update(['avatar' => $path]);
 
         return response()->json(['data' => new UserProfileResource($profile->fresh()->load('user'))]);
     }

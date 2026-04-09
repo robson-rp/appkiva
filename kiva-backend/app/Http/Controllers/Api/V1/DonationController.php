@@ -69,4 +69,56 @@ class DonationController extends Controller
 
         return response()->json(['data' => $donations->items(), 'meta' => ['total' => $donations->total()]]);
     }
+
+    public function listCauses(Request $request): JsonResponse
+    {
+        $causes = DonationCause::paginate(20);
+
+        return response()->json([
+            'data' => $causes->items(),
+            'meta' => [
+                'total'        => $causes->total(),
+                'per_page'     => $causes->perPage(),
+                'current_page' => $causes->currentPage(),
+                'last_page'    => $causes->lastPage(),
+            ],
+        ]);
+    }
+
+    public function storeCause(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name'        => 'required|string|max:150',
+            'description' => 'nullable|string|max:1000',
+            'icon'        => 'nullable|string|max:255',
+            'category'    => 'nullable|string|max:100',
+            'is_active'   => 'nullable|boolean',
+        ]);
+
+        $data['created_by'] = $request->user()->profile->id;
+
+        $cause = DonationCause::create($data);
+
+        return response()->json(['data' => $cause], 201);
+    }
+
+    public function showCause(Request $request, string $causeId): JsonResponse
+    {
+        return response()->json(['data' => DonationCause::findOrFail($causeId)]);
+    }
+
+    public function updateCause(Request $request, string $causeId): JsonResponse
+    {
+        $cause = DonationCause::findOrFail($causeId);
+
+        $cause->update($request->validate([
+            'name'        => 'nullable|string|max:150',
+            'description' => 'nullable|string|max:1000',
+            'icon'        => 'nullable|string|max:255',
+            'category'    => 'nullable|string|max:100',
+            'is_active'   => 'nullable|boolean',
+        ]));
+
+        return response()->json(['data' => $cause->fresh()]);
+    }
 }

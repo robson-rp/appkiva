@@ -117,4 +117,21 @@ class DreamVaultController extends Controller
 
         return response()->json(['data' => $comment], 201);
     }
+
+    public function deleteComment(Request $request, string $vault, string $commentId): JsonResponse
+    {
+        DreamVault::findOrFail($vault);
+
+        $comment = DreamVaultComment::where('id', $commentId)
+            ->where('dream_vault_id', $vault)
+            ->firstOrFail();
+
+        if ($comment->parent_profile_id !== $request->user()->profile->id) {
+            abort(403);
+        }
+
+        $comment->delete();
+
+        return response()->json(null, 204);
+    }
 }

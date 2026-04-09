@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserProfileResource;
+use App\Models\CurrencyExchangeRate;
+use App\Models\LoginBanner;
+use App\Models\OnboardingStep;
 use App\Models\Profile;
 use App\Models\Tenant;
 use App\Models\RiskFlag;
 use App\Models\SupportedCurrency;
+use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -139,5 +144,101 @@ class AdminController extends Controller
         Tenant::findOrFail($id)->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function exchangeRates(Request $request): JsonResponse
+    {
+        return response()->json(['data' => CurrencyExchangeRate::all()]);
+    }
+
+    public function updateExchangeRate(Request $request, string $id): JsonResponse
+    {
+        $rate = CurrencyExchangeRate::findOrFail($id);
+
+        $data = $request->validate([
+            'rate' => 'required|numeric|min:0',
+        ]);
+
+        $rate->update($data);
+
+        return response()->json(['data' => $rate->fresh()]);
+    }
+
+    public function loginBanners(Request $request): JsonResponse
+    {
+        return response()->json(['data' => LoginBanner::orderBy('display_order')->get()]);
+    }
+
+    public function storeLoginBanner(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'title'         => 'required|string|max:255',
+            'image_url'     => 'required|string|max:500',
+            'link_url'      => 'nullable|string|max:500',
+            'display_order' => 'nullable|integer|min:0',
+            'is_active'     => 'nullable|boolean',
+        ]);
+
+        $banner = LoginBanner::create($data);
+
+        return response()->json(['data' => $banner], 201);
+    }
+
+    public function destroyLoginBanner(Request $request, string $id): JsonResponse
+    {
+        LoginBanner::findOrFail($id)->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function onboardingSteps(Request $request): JsonResponse
+    {
+        return response()->json(['data' => OnboardingStep::orderBy('step_index')->get()]);
+    }
+
+    public function updateOnboardingStep(Request $request, string $id): JsonResponse
+    {
+        $step = OnboardingStep::findOrFail($id);
+
+        $step->update($request->validate([
+            'title'            => 'nullable|string|max:255',
+            'description'      => 'nullable|string|max:1000',
+            'illustration_key' => 'nullable|string|max:255',
+            'cta'              => 'nullable|string|max:150',
+            'step_index'       => 'nullable|integer|min:0',
+            'is_active'        => 'nullable|boolean',
+            'visible_from'     => 'nullable|date',
+            'visible_until'    => 'nullable|date|after_or_equal:visible_from',
+        ]));
+
+        return response()->json(['data' => $step->fresh()]);
+    }
+
+    public function getUserRoles(Request $request, string $userId): JsonResponse
+    {
+        $user = User::findOrFail($userId);
+
+        $roles = UserRole::where('user_id', $user->id)->get();
+
+        return response()->json(['data' => $roles]);
+    }
+
+    public function updateUserRoles(Request $request, string $userId): JsonResponse
+    {
+        $user = User::findOrFail($userId);
+
+        $data = $request->validate([
+            'roles'   => 'required|array',
+            'roles.*' => 'string|in:parent,child,teen,teacher,admin,partner',
+        ]);
+
+        UserRole::where('user_id', $user->id)->delete();
+
+        $roles = collect($data['roles'])->map(fn($role) => UserRole::create([
+            'user_id' => $user->id,
+            'role'    => $role,
+        ]));
+
+        return response()->json(['data' => $roles]);
     }
 }

@@ -121,6 +121,23 @@ class MissionController extends Controller
         return response()->json(['data' => new MissionResource($m->fresh())]);
     }
 
+    public function start(Request $request, string $mission): JsonResponse
+    {
+        $m = Mission::findOrFail($mission);
+
+        if ($m->status === 'in_progress') {
+            return response()->json(['message' => 'Mission already started.'], 422);
+        }
+
+        if ($m->status === 'completed') {
+            return response()->json(['message' => 'Mission already completed.'], 422);
+        }
+
+        $m->update(['status' => 'in_progress']);
+
+        return response()->json(['data' => new MissionResource($m->fresh())]);
+    }
+
     public function templates(Request $request): JsonResponse
     {
         $templates = MissionTemplate::where('is_active', true)->get();

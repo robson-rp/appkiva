@@ -112,4 +112,54 @@ class LessonController extends Controller
 
         return response()->json(['data' => $progress], 201);
     }
+
+    public function allProgress(Request $request): JsonResponse
+    {
+        $profile = $request->user()->profile;
+
+        $progress = LessonProgress::with('lesson')
+            ->where('profile_id', $profile->id)
+            ->paginate(20);
+
+        return response()->json([
+            'data' => $progress->items(),
+            'meta' => [
+                'total'        => $progress->total(),
+                'per_page'     => $progress->perPage(),
+                'current_page' => $progress->currentPage(),
+                'last_page'    => $progress->lastPage(),
+            ],
+        ]);
+    }
+
+    public function complete(Request $request, string $lesson): JsonResponse
+    {
+        $l = Lesson::findOrFail($lesson);
+        $profile = $request->user()->profile;
+
+        $data = $request->validate([
+            'score' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        $existing = LessonProgress::where('lesson_id', $l->id)
+            ->where('profile_id', $profile->id)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['data' => $existing]);
+        }
+
+        $progress = LessonProgress::create([
+            'lesson_id'          => $l->id,
+            'profile_id'         => $profile->id,
+            'score'              => $data['score'] ?? null,
+            'kiva_points_earned' => $l->kiva_points_reward,
+            'completed_at'       => now(),
+        ]);
+
+        event(new LessonCompleted($progress));
+        CheckBadgeUnlockJob::dispatch($profile->id);
+
+        return response()->json(['data' => $progress]);
+    }
 }

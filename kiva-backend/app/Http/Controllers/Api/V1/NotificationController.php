@@ -52,4 +52,35 @@ class NotificationController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function getSettings(Request $request): JsonResponse
+    {
+        $profile = $request->user()->profile;
+
+        return response()->json(['data' => $profile->email_preferences ?? (object) []]);
+    }
+
+    public function updateSettings(Request $request): JsonResponse
+    {
+        $profile = $request->user()->profile;
+
+        $settings = $request->validate([
+            '*' => 'nullable',
+        ]);
+
+        $profile->update(['email_preferences' => $request->all()]);
+
+        return response()->json(['data' => $profile->fresh()->email_preferences ?? (object) []]);
+    }
+
+    public function markReadPut(Request $request, string $id): JsonResponse
+    {
+        $n = KivaNotification::where('id', $id)
+            ->where('profile_id', $request->user()->profile->id)
+            ->firstOrFail();
+
+        $n->update(['read' => true]);
+
+        return response()->json(['data' => $n->fresh()]);
+    }
 }

@@ -6,8 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\ChildResource;
 use App\Services\ChildService;
 use App\Models\Child;
+use App\Models\Mission;
+use App\Models\Task;
+use App\Models\Streak;
+use App\Models\Wallet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class ChildController extends Controller
@@ -99,5 +104,56 @@ class ChildController extends Controller
         $child->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function setPin(Request $request, string $id): JsonResponse
+    {
+        $child = Child::findOrFail($id);
+        $this->authorize('update', $child);
+
+        $data = $request->validate([
+            'pin' => 'required|string|min:4|max:8',
+        ]);
+
+        $child->update(['pin_hash' => Hash::make($data['pin'])]);
+
+        return response()->json(null, 204);
+    }
+
+    public function summary(Request $request, string $id): JsonResponse
+    {
+        $child = Child::with('profile')->findOrFail($id);
+        $this->authorize('view', $child);
+
+        $wallet = Wallet::where('profile_id', $child->profile_id)
+            ->where('wallet_type', 'virtual')
+            ->where('is_active', true)
+            ->first();
+
+        $walletBalance = $wallet ? [
+            'wallet_id' => $wallet->id,
+            'balance'   => $wallet->balance,
+            'currency'  => $wallet->currency,
+        ] : null;
+
+        $pendingTasks = Task::where('child_profile_id', $child->profile_id)
+            ->where('status', 'pending')
+            ->count();
+
+        $activeMissions = Mission::where('child_profile_id', $child->profile_id)
+            ->where('status', 'in_progress')
+            ->count();
+
+        $streak = Streak::where('profile_id', $child->profile_id)->first();
+
+        return response()->json([
+            'data' => [
+                'child'           => new ChildResource($child),
+                'wallet_balance'  => $walletBalance,
+                'pending_tasks'   => $pendingTasks,
+                'active_missions' => $activeMissions,
+                'streak'          => $streak,
+            ],
+        ]);
     }
 }

@@ -182,4 +182,33 @@ class AuthController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function addTrustedDevice(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'device_token'  => 'required|string|max:500',
+            'device_name'   => 'nullable|string|max:255',
+            'trusted_until' => 'nullable|date',
+        ]);
+
+        $data['user_id'] = $request->user()->id;
+
+        $device = TrustedDevice::updateOrCreate(
+            ['device_token' => $data['device_token']],
+            $data + ['last_used_at' => now()]
+        );
+
+        return response()->json(['data' => $device], 201);
+    }
+
+    public function removeTrustedDevice(Request $request, string $deviceToken): JsonResponse
+    {
+        $device = TrustedDevice::where('device_token', $deviceToken)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $device->delete();
+
+        return response()->json(null, 204);
+    }
 }

@@ -80,4 +80,13 @@ class AllowanceController extends Controller
 
         return response()->json(['message' => 'Allowance queued for processing.']);
     }
+
+    public function sendNow(Request $request, string $configId): JsonResponse
+    {
+        $config = AllowanceConfig::findOrFail($configId);
+
+        SendAllowanceJob::dispatch($config);
+
+        return response()->json(['message' => 'Allowance queued for processing.']);
+    }
 }

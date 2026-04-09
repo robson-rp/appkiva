@@ -86,4 +86,48 @@ class HouseholdController extends Controller
 
         return response()->json(['data' => Household::find($invite->household_id)]);
     }
+
+    public function members(Request $request, string $householdId): JsonResponse
+    {
+        $h = Household::findOrFail($householdId);
+
+        $members = HouseholdGuardian::with('profile.user')
+            ->where('household_id', $h->id)
+            ->paginate(30);
+
+        return response()->json([
+            'data' => $members->items(),
+            'meta' => [
+                'total'        => $members->total(),
+                'per_page'     => $members->perPage(),
+                'current_page' => $members->currentPage(),
+                'last_page'    => $members->lastPage(),
+            ],
+        ]);
+    }
+
+    public function join(Request $request): JsonResponse
+    {
+        $data = $request->validate(['code' => 'required|string']);
+
+        $invite = FamilyInviteCode::where('code', $data['code'])->where('status', 'active')->firstOrFail();
+
+        if ($invite->expires_at && $invite->expires_at->isPast()) {
+            $invite->update(['status' => 'expired']);
+            return response()->json(['message' => 'Invite code has expired.'], 410);
+        }
+
+        $profile = $request->user()->profile;
+
+        HouseholdGuardian::firstOrCreate(
+            ['household_id' => $invite->household_id, 'profile_id' => $profile->id],
+            ['role' => 'guardian', 'permission_level' => 'limited', 'invited_by' => $invite->created_by]
+        );
+
+        $profile->update(['household_id' => $invite->household_id]);
+
+        $invite->update(['status' => 'used', 'used_by' => $profile->id, 'used_at' => now()]);
+
+        return response()->json(['data' => Household::find($invite->household_id)]);
+    }
 }

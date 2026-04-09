@@ -59,4 +59,19 @@ class ChallengeController extends Controller
 
         return response()->json(['data' => $challenge->fresh()]);
     }
+
+    public function weeklyList(Request $request): JsonResponse
+    {
+        $challenges = WeeklyChallenge::orderByDesc('created_at')->paginate(20);
+
+        return response()->json([
+            'data' => $challenges->items(),
+            'meta' => [
+                'total'        => $challenges->total(),
+                'per_page'     => $challenges->perPage(),
+                'current_page' => $challenges->currentPage(),
+                'last_page'    => $challenges->lastPage(),
+            ],
+        ]);
+    }
 }

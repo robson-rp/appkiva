@@ -115,4 +115,47 @@ class WalletController extends Controller
 
         return response()->json(['data' => new WalletResource($wallet->fresh())]);
     }
+
+    public function balance(Request $request, string $id): JsonResponse
+    {
+        $wallet = Wallet::findOrFail($id);
+        $this->authorize('view', $wallet);
+
+        return response()->json([
+            'data' => [
+                'wallet_id' => $wallet->id,
+                'balance'   => $wallet->balance,
+                'currency'  => $wallet->currency,
+            ],
+        ]);
+    }
+
+    public function transfer(Request $request): JsonResponse
+    {
+        $profile = $request->user()->profile;
+
+        $data = $request->validate([
+            'from_wallet_id' => 'required|uuid|exists:wallets,id',
+            'to_wallet_id'   => 'required|uuid|exists:wallets,id|different:from_wallet_id',
+            'amount'         => 'required|numeric|min:0.0001',
+            'description'    => 'nullable|string|max:500',
+            'idempotency_key' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $entry = $this->walletService->createTransaction([
+                'debit_wallet_id'  => $data['from_wallet_id'],
+                'credit_wallet_id' => $data['to_wallet_id'],
+                'amount'           => $data['amount'],
+                'description'      => $data['description'] ?? null,
+                'entry_type'       => 'transfer',
+                'created_by'       => $profile->id,
+                'idempotency_key'  => $data['idempotency_key'] ?? null,
+            ]);
+
+            return response()->json(['data' => new LedgerEntryResource($entry)], 201);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
 }

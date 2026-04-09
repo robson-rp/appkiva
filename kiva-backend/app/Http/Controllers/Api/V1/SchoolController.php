@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Classroom;
+use App\Models\CollectiveChallenge;
 use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -100,5 +101,46 @@ class SchoolController extends Controller
             ->get();
 
         return response()->json(['data' => $students]);
+    }
+
+    public function classroomChallenges(Request $request, string $classroomId): JsonResponse
+    {
+        Classroom::findOrFail($classroomId);
+
+        $challenges = CollectiveChallenge::where('classroom_id', $classroomId)
+            ->paginate(20);
+
+        return response()->json([
+            'data' => $challenges->items(),
+            'meta' => [
+                'total'        => $challenges->total(),
+                'per_page'     => $challenges->perPage(),
+                'current_page' => $challenges->currentPage(),
+                'last_page'    => $challenges->lastPage(),
+            ],
+        ]);
+    }
+
+    public function storeClassroomChallenge(Request $request, string $classroomId): JsonResponse
+    {
+        Classroom::findOrFail($classroomId);
+
+        $data = $request->validate([
+            'title'              => 'required|string|max:255',
+            'description'        => 'nullable|string|max:1000',
+            'type'               => 'nullable|string|max:50',
+            'reward'             => 'nullable|numeric|min:0',
+            'kiva_points_reward' => 'nullable|integer|min:0',
+            'target_amount'      => 'nullable|numeric|min:0',
+            'start_date'         => 'nullable|date',
+            'end_date'           => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $data['classroom_id']        = $classroomId;
+        $data['teacher_profile_id']  = $request->user()->profile->id;
+
+        $challenge = CollectiveChallenge::create($data);
+
+        return response()->json(['data' => $challenge], 201);
     }
 }
