@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
+    Route::get('/status', function () {
+        return response()->json(['message' => 'Every coin saved is a seed planted. Every seed planted is a future grown.']);
+    });
+
     // Auth (public)
     Route::post('/auth/register',        [AuthController::class, 'register']);
     Route::post('/auth/login',           [AuthController::class, 'login'])->middleware('throttle:login');

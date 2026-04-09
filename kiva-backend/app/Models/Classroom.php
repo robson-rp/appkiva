@@ -2,18 +2,30 @@
 
 namespace App\Models;
 
+use App\Interfaces\Tenantable;
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Classroom extends Model
+class Classroom extends Model implements Tenantable
 {
     use HasFactory, HasUuids;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope());
+    }
 
     protected $fillable = [
         'name', 'description', 'grade', 'icon', 'schedule',
         'subject', 'teacher_profile_id', 'school_tenant_id',
     ];
+
+    public function getTenantIdColumn(): string
+    {
+        return 'school_tenant_id';
+    }
 
     public function teacher(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

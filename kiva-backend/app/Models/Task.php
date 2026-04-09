@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantRelationScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Task extends Model
 {
     use HasFactory, HasUuids, LogsActivity;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantRelationScope('childProfile'));
+    }
 
     protected $fillable = [
         'child_profile_id', 'parent_profile_id', 'household_id',

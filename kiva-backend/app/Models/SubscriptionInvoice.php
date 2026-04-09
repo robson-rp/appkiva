@@ -2,13 +2,20 @@
 
 namespace App\Models;
 
+use App\Interfaces\Tenantable;
+use App\Models\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SubscriptionInvoice extends Model
+class SubscriptionInvoice extends Model implements Tenantable
 {
     use HasFactory, HasUuids;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope());
+    }
 
     protected $fillable = [
         'tenant_id', 'tier_id', 'amount', 'currency', 'status',
@@ -22,6 +29,11 @@ class SubscriptionInvoice extends Model
             'due_date' => 'date',
             'paid_at'  => 'datetime',
         ];
+    }
+
+    public function getTenantIdColumn(): string
+    {
+        return 'tenant_id';
     }
 
     public function tenant(): \Illuminate\Database\Eloquent\Relations\BelongsTo

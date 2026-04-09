@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\TenantRelationScope;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Wallet extends Model
 {
     use HasFactory, HasUuids, LogsActivity;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantRelationScope('profile'));
+    }
 
     protected $fillable = [
         'profile_id', 'wallet_type', 'currency', 'is_active',
