@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Profile;
+use App\Models\Scopes\TenantScope;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,8 +25,14 @@ class AssertTenantOwnership
 
         $user = $request->user();
 
-        if ($user && $user->profile && $user->profile->tenant_id !== $tenant->id) {
-            return response()->json(['message' => 'Forbidden: user does not belong to this tenant.'], 403);
+        if ($user) {
+            // Load profile without TenantScope so we can check the actual tenant_id,
+            // even when the X-Tenant-ID header belongs to a different tenant.
+            $profile = $user->profile()->withoutGlobalScope(TenantScope::class)->first();
+
+            if ($profile && $profile->tenant_id !== null && $profile->tenant_id !== $tenant->id) {
+                return response()->json(['message' => 'Forbidden: user does not belong to this tenant.'], 403);
+            }
         }
 
         return $next($request);

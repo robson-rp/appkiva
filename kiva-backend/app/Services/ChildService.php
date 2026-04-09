@@ -41,8 +41,8 @@ class ChildService
             $child = Child::create([
                 'profile_id'        => $childProfile->id,
                 'parent_profile_id' => $parentProfile->id,
-                'nickname'          => strip_tags($data['nickname'] ?? null),
-                'username'          => strip_tags($data['username'] ?? null),
+                'nickname'          => isset($data['nickname']) ? strip_tags($data['nickname']) : null,
+                'username'          => isset($data['username']) ? strip_tags($data['username']) : null,
                 'pin_hash'          => isset($data['pin']) ? Hash::make($data['pin']) : null,
                 'date_of_birth'     => $dob,
                 'daily_spend_limit' => $data['daily_spend_limit'] ?? null,

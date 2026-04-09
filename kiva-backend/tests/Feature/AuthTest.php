@@ -2,8 +2,6 @@
 
 use App\Models\User;
 use App\Models\Profile;
-use App\Models\Household;
-use App\Models\HouseholdGuardian;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -62,11 +60,10 @@ it('returns 401 with wrong password', function () {
 });
 
 it('returns authenticated user profile on /me', function () {
-    $user = User::factory()->create();
-    $household = Household::factory()->create();
-    $profile = Profile::factory()->create(['user_id' => $user->id, 'household_id' => $household->id]);
+    ['user' => $user, 'profile' => $profile, 'tenant' => $tenant] = $this->createUserInTenant();
 
-    $this->actingAs($user)->getJson('/api/v1/auth/me')
+    $this->actingAsInTenant($user, $tenant)
+         ->getJson('/api/v1/auth/me')
          ->assertStatus(200)
          ->assertJsonPath('data.user_id', $user->id);
 });

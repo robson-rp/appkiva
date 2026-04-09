@@ -71,26 +71,30 @@ class VaultController extends Controller
         $v = SavingsVault::findOrFail($vaultId);
         $data = $request->validate(['amount' => 'required|numeric|min:0.0001']);
 
-        DB::transaction(function () use ($v, $data, $request) {
-            $wallet = Wallet::where('profile_id', $v->profile_id)
-                ->where('wallet_type', 'virtual')->where('is_active', true)->firstOrFail();
+        try {
+            DB::transaction(function () use ($v, $data, $request) {
+                $wallet = Wallet::where('profile_id', $v->profile_id)
+                    ->where('wallet_type', 'virtual')->where('is_active', true)->firstOrFail();
 
-            if ((float) $wallet->balance < (float) $data['amount']) {
-                throw new \RuntimeException('Insufficient balance.');
-            }
+                if ((float) $wallet->balance < (float) $data['amount']) {
+                    throw new \RuntimeException('Insufficient balance.');
+                }
 
-            LedgerEntry::create([
-                'debit_wallet_id' => $wallet->id,
-                'amount'          => $data['amount'],
-                'entry_type'      => 'vault_deposit',
-                'description'     => 'Deposit to vault: ' . $v->name,
-                'reference_id'    => $v->id,
-                'reference_type'  => 'savings_vault',
-                'idempotency_key' => 'vault_deposit_' . $v->id . '_' . now()->timestamp,
-            ]);
+                LedgerEntry::create([
+                    'debit_wallet_id' => $wallet->id,
+                    'amount'          => $data['amount'],
+                    'entry_type'      => 'vault_deposit',
+                    'description'     => 'Deposit to vault: ' . $v->name,
+                    'reference_id'    => $v->id,
+                    'reference_type'  => 'savings_vault',
+                    'idempotency_key' => 'vault_deposit_' . $v->id . '_' . now()->timestamp,
+                ]);
 
-            $v->increment('current_amount', $data['amount']);
-        });
+                $v->increment('current_amount', $data['amount']);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json(['data' => $v->fresh()]);
     }
@@ -100,26 +104,30 @@ class VaultController extends Controller
         $v = SavingsVault::findOrFail($vaultId);
         $data = $request->validate(['amount' => 'required|numeric|min:0.0001']);
 
-        DB::transaction(function () use ($v, $data, $request) {
-            if ((float) $v->current_amount < (float) $data['amount']) {
-                throw new \RuntimeException('Insufficient vault balance.');
-            }
+        try {
+            DB::transaction(function () use ($v, $data, $request) {
+                if ((float) $v->current_amount < (float) $data['amount']) {
+                    throw new \RuntimeException('Insufficient vault balance.');
+                }
 
-            $wallet = Wallet::where('profile_id', $v->profile_id)
-                ->where('wallet_type', 'virtual')->where('is_active', true)->firstOrFail();
+                $wallet = Wallet::where('profile_id', $v->profile_id)
+                    ->where('wallet_type', 'virtual')->where('is_active', true)->firstOrFail();
 
-            LedgerEntry::create([
-                'credit_wallet_id' => $wallet->id,
-                'amount'           => $data['amount'],
-                'entry_type'       => 'vault_withdraw',
-                'description'      => 'Withdraw from vault: ' . $v->name,
-                'reference_id'     => $v->id,
-                'reference_type'   => 'savings_vault',
-                'idempotency_key'  => 'vault_withdraw_' . $v->id . '_' . now()->timestamp,
-            ]);
+                LedgerEntry::create([
+                    'credit_wallet_id' => $wallet->id,
+                    'amount'           => $data['amount'],
+                    'entry_type'       => 'vault_withdraw',
+                    'description'      => 'Withdraw from vault: ' . $v->name,
+                    'reference_id'     => $v->id,
+                    'reference_type'   => 'savings_vault',
+                    'idempotency_key'  => 'vault_withdraw_' . $v->id . '_' . now()->timestamp,
+                ]);
 
-            $v->decrement('current_amount', $data['amount']);
-        });
+                $v->decrement('current_amount', $data['amount']);
+            });
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
 
         return response()->json(['data' => $v->fresh()]);
     }

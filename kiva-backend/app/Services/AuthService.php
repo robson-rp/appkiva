@@ -28,13 +28,16 @@ class AuthService
             $role = $data['role'] ?? 'parent';
             $user->assignRole($role);
 
-            // Create household if parent
+            // Create household if parent and tenant is provided
             $household = null;
             if ($role === 'parent') {
-                $household = Household::create([
-                    'name'      => strip_tags($data['household_name'] ?? $data['display_name'] . "'s Family"),
-                    'tenant_id' => $data['tenant_id'] ?? null,
-                ]);
+                $tenantId = $data['tenant_id'] ?? (app()->bound('current_tenant') ? app('current_tenant')->id : null);
+                if ($tenantId) {
+                    $household = Household::create([
+                        'name'      => strip_tags($data['household_name'] ?? $data['display_name'] . "'s Family"),
+                        'tenant_id' => $tenantId,
+                    ]);
+                }
             }
 
             $profile = Profile::create([

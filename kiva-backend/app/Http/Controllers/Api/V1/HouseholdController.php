@@ -13,6 +13,31 @@ use Illuminate\Support\Str;
 
 class HouseholdController extends Controller
 {
+    public function store(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:150',
+        ]);
+
+        $tenant = app('current_tenant');
+        $data['tenant_id'] = $tenant->id;
+
+        $household = Household::create($data);
+
+        $profile = $request->user()->profile;
+        if ($profile) {
+            HouseholdGuardian::create([
+                'household_id'     => $household->id,
+                'profile_id'       => $profile->id,
+                'role'             => 'admin',
+                'permission_level' => 'full',
+            ]);
+            $profile->update(['household_id' => $household->id]);
+        }
+
+        return response()->json(['data' => $household], 201);
+    }
+
     public function show(Request $request, string $household): JsonResponse
     {
         $h = Household::findOrFail($household);

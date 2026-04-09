@@ -67,10 +67,12 @@ class AuthController extends Controller
 
         RateLimiter::clear($key);
 
+        $profile = $result['user']->profile;
+
         return response()->json([
             'token'         => $result['token'],
             'refresh_token' => $result['refresh_token'],
-            'profile'       => new UserProfileResource($result['user']->profile?->load('user')),
+            'profile'       => $profile ? new UserProfileResource($profile->load('user')) : null,
         ]);
     }
 

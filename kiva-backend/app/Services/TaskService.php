@@ -31,19 +31,23 @@ class TaskService
                     ->first();
 
                 if ($wallet) {
-                    LedgerEntry::create([
-                        'credit_wallet_id' => $wallet->id,
-                        'debit_wallet_id'  => null,
-                        'amount'           => $task->reward,
-                        'entry_type'       => 'task_reward',
-                        'description'      => 'Reward for task: ' . $task->title,
-                        'created_by'       => $approvedByProfileId,
-                        'approved_by'      => $approvedByProfileId,
-                        'approved_at'      => now(),
-                        'reference_id'     => $task->id,
-                        'reference_type'   => 'task',
-                        'idempotency_key'  => 'task_reward_' . $task->id,
-                    ]);
+                    $idempotencyKey = 'task_reward_' . $task->id;
+
+                    if (! LedgerEntry::where('idempotency_key', $idempotencyKey)->exists()) {
+                        LedgerEntry::create([
+                            'credit_wallet_id' => $wallet->id,
+                            'debit_wallet_id'  => null,
+                            'amount'           => $task->reward,
+                            'entry_type'       => 'task_reward',
+                            'description'      => 'Reward for task: ' . $task->title,
+                            'created_by'       => $approvedByProfileId,
+                            'approved_by'      => $approvedByProfileId,
+                            'approved_at'      => now(),
+                            'reference_id'     => $task->id,
+                            'reference_type'   => 'task',
+                            'idempotency_key'  => $idempotencyKey,
+                        ]);
+                    }
                 }
             }
 
