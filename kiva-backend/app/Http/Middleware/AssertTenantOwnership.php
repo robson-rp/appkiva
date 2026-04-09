@@ -15,15 +15,15 @@ class AssertTenantOwnership
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $tenantId = session('tenant_id') ?? $request->header('X-Tenant-ID');
+        $tenant = app()->bound('current_tenant') ? app('current_tenant') : null;
 
-        if (! $tenantId) {
+        if (! $tenant) {
             return response()->json(['message' => 'Tenant not resolved.'], 401);
         }
 
         $user = $request->user();
 
-        if ($user && $user->profile && $user->profile->tenant_id !== $tenantId) {
+        if ($user && $user->profile && $user->profile->tenant_id !== $tenant->id) {
             return response()->json(['message' => 'Forbidden: user does not belong to this tenant.'], 403);
         }
 

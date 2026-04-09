@@ -38,14 +38,14 @@ class ProgramController extends Controller
         return response()->json(['data' => $program], 201);
     }
 
-    public function show(Request $request, string $id): JsonResponse
+    public function show(Request $request, string $programId): JsonResponse
     {
-        return response()->json(['data' => PartnerProgram::findOrFail($id)]);
+        return response()->json(['data' => PartnerProgram::findOrFail($programId)]);
     }
 
-    public function update(Request $request, string $id): JsonResponse
+    public function update(Request $request, string $programId): JsonResponse
     {
-        $p = PartnerProgram::findOrFail($id);
+        $p = PartnerProgram::findOrFail($programId);
 
         $p->update($request->validate([
             'program_name' => 'nullable|string|max:150',
@@ -55,23 +55,23 @@ class ProgramController extends Controller
         return response()->json(['data' => $p->fresh()]);
     }
 
-    public function destroy(Request $request, string $id): JsonResponse
+    public function destroy(Request $request, string $programId): JsonResponse
     {
-        PartnerProgram::findOrFail($id)->delete();
+        PartnerProgram::findOrFail($programId)->delete();
 
         return response()->json(null, 204);
     }
 
-    public function invitations(Request $request, string $id): JsonResponse
+    public function invitations(Request $request, string $programId): JsonResponse
     {
-        $invitations = ProgramInvitation::where('program_id', $id)->get();
+        $invitations = ProgramInvitation::where('program_id', $programId)->get();
 
         return response()->json(['data' => $invitations]);
     }
 
-    public function invite(Request $request, string $id): JsonResponse
+    public function invite(Request $request, string $programId): JsonResponse
     {
-        $program = PartnerProgram::findOrFail($id);
+        $program = PartnerProgram::findOrFail($programId);
 
         $data = $request->validate([
             'target_type' => 'nullable|in:family,school',

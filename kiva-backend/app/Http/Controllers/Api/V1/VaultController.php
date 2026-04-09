@@ -39,14 +39,14 @@ class VaultController extends Controller
         return response()->json(['data' => $vault], 201);
     }
 
-    public function show(Request $request, string $vault): JsonResponse
+    public function show(Request $request, string $vaultId): JsonResponse
     {
-        return response()->json(['data' => SavingsVault::findOrFail($vault)]);
+        return response()->json(['data' => SavingsVault::findOrFail($vaultId)]);
     }
 
-    public function update(Request $request, string $vault): JsonResponse
+    public function update(Request $request, string $vaultId): JsonResponse
     {
-        $v = SavingsVault::findOrFail($vault);
+        $v = SavingsVault::findOrFail($vaultId);
 
         $data = $request->validate([
             'name'          => 'nullable|string|max:150',
@@ -59,16 +59,16 @@ class VaultController extends Controller
         return response()->json(['data' => $v->fresh()]);
     }
 
-    public function destroy(Request $request, string $vault): JsonResponse
+    public function destroy(Request $request, string $vaultId): JsonResponse
     {
-        SavingsVault::findOrFail($vault)->delete();
+        SavingsVault::findOrFail($vaultId)->delete();
 
         return response()->json(null, 204);
     }
 
-    public function deposit(Request $request, string $vault): JsonResponse
+    public function deposit(Request $request, string $vaultId): JsonResponse
     {
-        $v = SavingsVault::findOrFail($vault);
+        $v = SavingsVault::findOrFail($vaultId);
         $data = $request->validate(['amount' => 'required|numeric|min:0.0001']);
 
         DB::transaction(function () use ($v, $data, $request) {
@@ -95,9 +95,9 @@ class VaultController extends Controller
         return response()->json(['data' => $v->fresh()]);
     }
 
-    public function withdraw(Request $request, string $vault): JsonResponse
+    public function withdraw(Request $request, string $vaultId): JsonResponse
     {
-        $v = SavingsVault::findOrFail($vault);
+        $v = SavingsVault::findOrFail($vaultId);
         $data = $request->validate(['amount' => 'required|numeric|min:0.0001']);
 
         DB::transaction(function () use ($v, $data, $request) {

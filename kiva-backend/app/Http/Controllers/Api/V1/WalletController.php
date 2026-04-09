@@ -26,22 +26,22 @@ class WalletController extends Controller
         return response()->json(['data' => WalletResource::collection($wallets)]);
     }
 
-    public function show(Request $request, string $id): JsonResponse
+    public function show(Request $request, string $walletId): JsonResponse
     {
-        $wallet = Wallet::findOrFail($id);
+        $wallet = Wallet::findOrFail($walletId);
         $this->authorize('view', $wallet);
 
         return response()->json(['data' => new WalletResource($wallet)]);
     }
 
-    public function transactions(Request $request, string $id): JsonResponse
+    public function transactions(Request $request, string $walletId): JsonResponse
     {
-        $wallet = Wallet::findOrFail($id);
+        $wallet = Wallet::findOrFail($walletId);
         $this->authorize('view', $wallet);
 
-        $entries = LedgerEntry::where(function ($q) use ($id) {
-            $q->where('credit_wallet_id', $id)
-              ->orWhere('debit_wallet_id', $id);
+        $entries = LedgerEntry::where(function ($q) use ($walletId) {
+            $q->where('credit_wallet_id', $walletId)
+              ->orWhere('debit_wallet_id', $walletId);
         })->orderByDesc('created_at')->paginate(20);
 
         return response()->json([
@@ -82,9 +82,9 @@ class WalletController extends Controller
         }
     }
 
-    public function freeze(Request $request, string $id): JsonResponse
+    public function freeze(Request $request, string $walletId): JsonResponse
     {
-        $wallet = Wallet::findOrFail($id);
+        $wallet = Wallet::findOrFail($walletId);
         $this->authorize('update', $wallet);
 
         $data = $request->validate([
@@ -101,9 +101,9 @@ class WalletController extends Controller
         return response()->json(['data' => new WalletResource($wallet->fresh())]);
     }
 
-    public function unfreeze(Request $request, string $id): JsonResponse
+    public function unfreeze(Request $request, string $walletId): JsonResponse
     {
-        $wallet = Wallet::findOrFail($id);
+        $wallet = Wallet::findOrFail($walletId);
         $this->authorize('update', $wallet);
 
         $wallet->update([
@@ -116,9 +116,9 @@ class WalletController extends Controller
         return response()->json(['data' => new WalletResource($wallet->fresh())]);
     }
 
-    public function balance(Request $request, string $id): JsonResponse
+    public function balance(Request $request, string $walletId): JsonResponse
     {
-        $wallet = Wallet::findOrFail($id);
+        $wallet = Wallet::findOrFail($walletId);
         $this->authorize('view', $wallet);
 
         return response()->json([

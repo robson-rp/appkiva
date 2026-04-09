@@ -20,7 +20,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword']);
 
     // Authenticated routes
-    Route::middleware(['auth:api', 'role.rate'])->group(function () {
+    Route::middleware(['auth:api', 'tenant.owned', 'role.rate'])->group(function () {
 
         // Auth self
         Route::post('/auth/logout',                             [AuthController::class, 'logout']);
@@ -61,28 +61,29 @@ Route::prefix('v1')->group(function () {
         Route::post('/mission-templates',           [\App\Http\Controllers\Api\V1\MissionController::class, 'storeTemplate']);
 
         // Wallets
-        Route::get('/wallet',                    [WalletController::class, 'index']);
-        Route::get('/wallet/{id}',               [WalletController::class, 'show'])->whereUuid('id');
-        Route::get('/wallet/{id}/transactions',  [WalletController::class, 'transactions'])->whereUuid('id');
-        Route::post('/wallet/transactions',      [WalletController::class, 'createTransaction']);
-        Route::post('/wallet/{id}/freeze',       [WalletController::class, 'freeze'])->whereUuid('id');
-        Route::post('/wallet/{id}/unfreeze',     [WalletController::class, 'unfreeze'])->whereUuid('id');
-        Route::get('/wallets/{id}/balance',      [WalletController::class, 'balance'])->whereUuid('id');
-        Route::post('/wallets/transfer',         [WalletController::class, 'transfer']);
+        Route::get('/wallets',                       [WalletController::class, 'index']);
+        Route::get('/wallets/{walletId}',            [WalletController::class, 'show'])->whereUuid('walletId');
+        Route::get('/wallets/{walletId}/transactions',[WalletController::class, 'transactions'])->whereUuid('walletId');
+        Route::post('/wallets/transactions',         [WalletController::class, 'createTransaction']);
+        Route::post('/wallets/{walletId}/freeze',    [WalletController::class, 'freeze'])->whereUuid('walletId');
+        Route::post('/wallets/{walletId}/unfreeze',  [WalletController::class, 'unfreeze'])->whereUuid('walletId');
+        Route::get('/wallets/{walletId}/balance',    [WalletController::class, 'balance'])->whereUuid('walletId');
+        Route::post('/wallets/transfer',             [WalletController::class, 'transfer']);
 
         // Budget exceptions
-        Route::get('/wallet/budget-exceptions',       [\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'index']);
-        Route::post('/wallet/budget-exceptions',      [\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'store']);
-        Route::patch('/wallet/budget-exceptions/{id}',[\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'resolve'])->whereUuid('id');
+        Route::get('/wallets/budget-exceptions',        [\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'index']);
+        Route::post('/wallets/budget-exceptions',       [\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'store']);
+        Route::patch('/wallets/budget-exceptions/{id}', [\App\Http\Controllers\Api\V1\BudgetExceptionController::class, 'resolve'])->whereUuid('id');
 
         // Rewards
         Route::apiResource('rewards', \App\Http\Controllers\Api\V1\RewardController::class);
         Route::post('/rewards/{reward}/claim', [\App\Http\Controllers\Api\V1\RewardController::class, 'claim'])->whereUuid('reward');
 
-        // Vaults
-        Route::apiResource('vaults', \App\Http\Controllers\Api\V1\VaultController::class);
-        Route::post('/vaults/{vault}/deposit',  [\App\Http\Controllers\Api\V1\VaultController::class, 'deposit'])->whereUuid('vault');
-        Route::post('/vaults/{vault}/withdraw', [\App\Http\Controllers\Api\V1\VaultController::class, 'withdraw'])->whereUuid('vault');
+        // Savings Vaults
+        Route::apiResource('savings-vaults', \App\Http\Controllers\Api\V1\VaultController::class)
+            ->parameters(['savings-vaults' => 'vaultId']);
+        Route::post('/savings-vaults/{vaultId}/deposit',  [\App\Http\Controllers\Api\V1\VaultController::class, 'deposit'])->whereUuid('vaultId');
+        Route::post('/savings-vaults/{vaultId}/withdraw', [\App\Http\Controllers\Api\V1\VaultController::class, 'withdraw'])->whereUuid('vaultId');
 
         Route::apiResource('dream-vaults', \App\Http\Controllers\Api\V1\DreamVaultController::class);
         Route::post('/dream-vaults/{vault}/contribute',              [\App\Http\Controllers\Api\V1\DreamVaultController::class, 'contribute'])->whereUuid('vault');
@@ -146,7 +147,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/donation-causes',             [\App\Http\Controllers\Api\V1\DonationController::class, 'storeCause']);
         Route::get('/donation-causes/{causeId}',    [\App\Http\Controllers\Api\V1\DonationController::class, 'showCause'])->whereUuid('causeId');
         Route::put('/donation-causes/{causeId}',    [\App\Http\Controllers\Api\V1\DonationController::class, 'updateCause'])->whereUuid('causeId');
-        Route::get('/donations/causes',             [\App\Http\Controllers\Api\V1\DonationController::class, 'causes']);
         Route::post('/donations',                   [\App\Http\Controllers\Api\V1\DonationController::class, 'donate']);
         Route::get('/donations',                    [\App\Http\Controllers\Api\V1\DonationController::class, 'myDonations']);
 
@@ -158,10 +158,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/subscription/tiers',    [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'tiers']);
         Route::get('/subscription/invoices', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'invoices']);
 
-        // Programs
-        Route::apiResource('programs', \App\Http\Controllers\Api\V1\ProgramController::class);
-        Route::get('/programs/{id}/invitations', [\App\Http\Controllers\Api\V1\ProgramController::class, 'invitations'])->whereUuid('id');
-        Route::post('/programs/{id}/invite',     [\App\Http\Controllers\Api\V1\ProgramController::class, 'invite'])->whereUuid('id');
+        // Partner Programs
+        Route::apiResource('partner-programs', \App\Http\Controllers\Api\V1\ProgramController::class)
+            ->parameters(['partner-programs' => 'programId']);
+        Route::get('/partner-programs/{programId}/invitations', [\App\Http\Controllers\Api\V1\ProgramController::class, 'invitations'])->whereUuid('programId');
+        Route::post('/partner-programs/{programId}/invite',     [\App\Http\Controllers\Api\V1\ProgramController::class, 'invite'])->whereUuid('programId');
         Route::post('/invite/program/{code}',    [\App\Http\Controllers\Api\V1\ProgramController::class, 'acceptInvite']);
 
         // Admin
