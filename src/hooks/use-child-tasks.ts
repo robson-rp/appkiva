@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { notifyTaskCompleted } from '@/lib/notify';
@@ -25,13 +25,7 @@ export function useChildTasks() {
     queryFn: async (): Promise<ChildTask[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('child_profile_id', user.profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.get<any[]>('/tasks?child_profile_id=' + user.profileId);
 
       return (data ?? []).map((t: any) => ({
         id: t.id,
@@ -46,38 +40,26 @@ export function useChildTasks() {
       }));
     },
     enabled: !!user?.profileId && (user?.role === 'child' || user?.role === 'teen'),
+    refetchInterval: 30000, // Poll every 30 seconds
   });
 }
 
 export function useCompleteTask() {
   const queryClient = useQueryClient();
-
   const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (taskId: string) => {
-      // Get task details to notify the parent
-      const { data: task, error: fetchErr } = await supabase
-        .from('tasks')
-        .select('title, parent_profile_id')
-        .eq('id', taskId)
-        .single();
-
-      if (fetchErr || !task) throw fetchErr || new Error('Tarefa não encontrada');
-
-      const { error } = await supabase
-        .from('tasks')
-        .update({
-          status: 'completed' as any,
-          completed_at: new Date().toISOString(),
-        })
-        .eq('id', taskId);
-
-      if (error) throw error;
+      // Complete task via API endpoint
+      const result = await api.post<{
+        task: any;
+        parent_profile_id: string;
+        title: string;
+      }>(`/tasks/${taskId}/complete`, {});
 
       // Notify parent about task completion
       const childName = user?.name ?? 'O teu filho';
-      await notifyTaskCompleted(task.parent_profile_id, childName, task.title, taskId);
+      await notifyTaskCompleted(result.parent_profile_id, childName, result.title, taskId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['child-tasks'] });

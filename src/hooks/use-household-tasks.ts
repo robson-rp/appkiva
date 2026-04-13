@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { notifyTaskApproved, notifyNewTask } from '@/lib/notify';
@@ -31,19 +31,7 @@ export function useHouseholdTasks() {
     queryFn: async (): Promise<HouseholdTask[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          *,
-          profiles!tasks_child_profile_id_fkey (
-            display_name,
-            avatar
-          )
-        `)
-        .eq('parent_profile_id', user.profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.get<any[]>('/tasks?parent_profile_id=' + user.profileId);
 
       return (data ?? []).map((t: any) => ({
         id: t.id,
@@ -54,14 +42,15 @@ export function useHouseholdTasks() {
         status: t.status as TaskStatus,
         childProfileId: t.child_profile_id,
         parentProfileId: t.parent_profile_id,
-        childDisplayName: t.profiles?.display_name ?? 'Criança',
-        childAvatar: t.profiles?.avatar ?? '👧',
+        childDisplayName: t.child_display_name ?? 'Criança',
+        childAvatar: t.child_avatar ?? '👧',
         completedAt: t.completed_at,
         approvedAt: t.approved_at,
         createdAt: t.created_at,
       }));
     },
     enabled: !!user?.profileId && user?.role === 'parent',
+    refetchInterval: 30000, // Poll every 30 seconds
   });
 }
 
@@ -81,7 +70,7 @@ export function useCreateTask() {
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase.from('tasks').insert({
+      await api.post('/tasks', {
         title: input.title,
         description: input.description ?? null,
         reward: input.reward,
@@ -91,11 +80,10 @@ export function useCreateTask() {
         is_recurring: input.isRecurring ?? false,
         recurrence: input.recurrence ?? null,
       });
-
-      if (error) throw error;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['child-tasks'] });
       // Notify the child about the new task
       notifyNewTask(variables.childProfileId, variables.title, variables.reward);
       toast({ title: 'Tarefa criada! ✅', description: 'A tarefa foi adicionada com sucesso.' });
@@ -119,20 +107,15 @@ export function useUpdateTask() {
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase
-        .from('tasks')
-        .update({
-          title: input.title,
-          reward: input.reward,
-          category: input.category,
-        })
-        .eq('id', input.taskId)
-        .eq('parent_profile_id', user.profileId);
-
-      if (error) throw error;
+      await api.patch(`/tasks/${input.taskId}`, {
+        title: input.title,
+        reward: input.reward,
+        category: input.category,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['child-tasks'] });
       toast({ title: 'Tarefa actualizada ✏️', description: 'As alterações foram guardadas.' });
     },
     onError: () => {
@@ -149,16 +132,11 @@ export function useDeleteTask() {
     mutationFn: async (taskId: string) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', taskId)
-        .eq('parent_profile_id', user.profileId);
-
-      if (error) throw error;
+      await api.delete(`/tasks/${taskId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['child-tasks'] });
       toast({ title: 'Tarefa eliminada 🗑️', description: 'A tarefa foi removida com sucesso.' });
     },
     onError: () => {
@@ -175,42 +153,28 @@ export function useApproveTask() {
     mutationFn: async (taskId: string) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      // Get the task to find the reward and child wallet
-      const { data: task, error: taskError } = await supabase
-        .from('tasks')
-        .select('reward, child_profile_id, title')
-        .eq('id', taskId)
-        .single();
-
-      if (taskError || !task) throw taskError || new Error('Tarefa não encontrada');
-
-      // Update task status
-      const { error: updateError } = await supabase
-        .from('tasks')
-        .update({ status: 'approved' as any, approved_at: new Date().toISOString() })
-        .eq('id', taskId);
-
-      if (updateError) throw updateError;
-
-      // Credit the child's wallet via edge function
-      const { error: txError } = await supabase.functions.invoke('create-transaction', {
-        body: {
-          target_profile_id: task.child_profile_id,
-          amount: Number(task.reward),
-          description: `Tarefa aprovada: ${task.title}`,
-          entry_type: 'task_reward',
-        },
-      });
-
-      if (txError) throw txError;
+      // Approve task via API endpoint (handles task update + transaction creation)
+      const result = await api.post<{
+        task: any;
+        child_profile_id: string;
+        title: string;
+        reward: number;
+      }>(`/tasks/${taskId}/approve`, {});
 
       // Notify child about approval
-      await notifyTaskApproved(task.child_profile_id, task.title, Number(task.reward), taskId);
+      await notifyTaskApproved(
+        result.child_profile_id,
+        result.title,
+        Number(result.reward),
+        taskId
+      );
     },
-    onSuccess: (_, taskId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['household-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['child-tasks'] });
       queryClient.invalidateQueries({ queryKey: ['children'] });
       queryClient.invalidateQueries({ queryKey: ['household-transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
       toast({ title: 'Tarefa aprovada! ✅', description: 'As moedas foram creditadas à criança.' });
     },
     onError: () => {

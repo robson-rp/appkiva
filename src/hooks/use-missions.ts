@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -33,16 +33,11 @@ export function useChildMissions() {
     queryFn: async (): Promise<MissionRow[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('missions')
-        .select('*')
-        .eq('child_profile_id', user.profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return (data ?? []) as unknown as MissionRow[];
+      const data = await api.get<MissionRow[]>('/missions?child_profile_id=' + user.profileId);
+      return data ?? [];
     },
     enabled: !!user?.profileId,
+    refetchInterval: 30000, // Poll every 30 seconds
   });
 }
 
@@ -52,11 +47,7 @@ export function useStartMission() {
 
   return useMutation({
     mutationFn: async (missionId: string) => {
-      const { error } = await supabase
-        .from('missions')
-        .update({ status: 'in_progress' as any })
-        .eq('id', missionId);
-      if (error) throw error;
+      await api.post(`/missions/${missionId}/start`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
@@ -66,18 +57,21 @@ export function useStartMission() {
   });
 }
 
-// ─── Child/Teen: complete a mission (via edge function for atomic rewards) ───
+// ─── Child/Teen: complete a mission (via API for atomic rewards) ───
 export function useCompleteMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (missionId: string) => {
-      const { data, error } = await supabase.functions.invoke('complete-mission', {
-        body: { mission_id: missionId },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      return data as { success: boolean; reward_coins: number; reward_points: number; new_balance: number | null; surprise_bonus?: number };
+      const data = await api.post<{ 
+        success: boolean; 
+        reward_coins: number; 
+        reward_points: number; 
+        new_balance: number | null; 
+        surprise_bonus?: number 
+      }>(`/missions/${missionId}/complete`, {});
+      
+      return data;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
@@ -107,26 +101,16 @@ export function useHouseholdMissions() {
     queryFn: async (): Promise<(MissionRow & { child_display_name?: string; child_avatar?: string })[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('missions')
-        .select(`
-          *,
-          profiles!missions_child_profile_id_fkey (
-            display_name,
-            avatar
-          )
-        `)
-        .eq('parent_profile_id', user.profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.get<any[]>('/missions?parent_profile_id=' + user.profileId);
+      
       return (data ?? []).map((m: any) => ({
         ...m,
-        child_display_name: m.profiles?.display_name ?? 'Criança',
-        child_avatar: m.profiles?.avatar ?? '👧',
-      })) as any;
+        child_display_name: m.child_display_name ?? 'Criança',
+        child_avatar: m.child_avatar ?? '👧',
+      }));
     },
     enabled: !!user?.profileId,
+    refetchInterval: 30000, // Poll every 30 seconds
   });
 }
 
@@ -147,18 +131,16 @@ export function useCreateMission() {
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase.from('missions').insert({
+      await api.post('/missions', {
         title: input.title,
         description: input.description ?? '',
-        type: input.type as any,
+        type: input.type,
         target_amount: input.target_amount ?? null,
         reward: input.reward,
         kiva_points_reward: input.kiva_points_reward,
         child_profile_id: input.child_profile_id,
         parent_profile_id: user.profileId,
-      } as any);
-
-      if (error) throw error;
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
@@ -182,18 +164,14 @@ export function useUpdateMission() {
       reward: number;
       kiva_points_reward: number;
     }) => {
-      const { error } = await supabase
-        .from('missions')
-        .update({
-          title: input.title,
-          description: input.description ?? '',
-          type: input.type as any,
-          target_amount: input.target_amount ?? null,
-          reward: input.reward,
-          kiva_points_reward: input.kiva_points_reward,
-        } as any)
-        .eq('id', input.id);
-      if (error) throw error;
+      await api.patch(`/missions/${input.id}`, {
+        title: input.title,
+        description: input.description ?? '',
+        type: input.type,
+        target_amount: input.target_amount ?? null,
+        reward: input.reward,
+        kiva_points_reward: input.kiva_points_reward,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
@@ -209,11 +187,7 @@ export function useDeleteMission() {
 
   return useMutation({
     mutationFn: async (missionId: string) => {
-      const { error } = await supabase
-        .from('missions')
-        .delete()
-        .eq('id', missionId);
-      if (error) throw error;
+      await api.delete(`/missions/${missionId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
