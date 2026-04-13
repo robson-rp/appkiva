@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -18,6 +18,19 @@ export interface Reward {
   createdAt: string;
 }
 
+interface RewardResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  icon: string;
+  category: RewardCategory;
+  available: boolean;
+  claimed_by: string | null;
+  claimed_at: string | null;
+  created_at: string;
+}
+
 export function useRewards() {
   const { user } = useAuth();
 
@@ -26,21 +39,15 @@ export function useRewards() {
     queryFn: async (): Promise<Reward[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('rewards')
-        .select('*')
-        .eq('parent_profile_id', user.profileId)
-        .order('created_at', { ascending: false });
+      const response = await api.get<{ data: RewardResponse[] }>('/rewards');
 
-      if (error) throw error;
-
-      return (data ?? []).map((r: any) => ({
+      return response.data.map((r) => ({
         id: r.id,
         name: r.name,
         description: r.description,
         price: Number(r.price) || 0,
         icon: r.icon,
-        category: r.category as RewardCategory,
+        category: r.category,
         available: r.available,
         claimedBy: r.claimed_by,
         claimedAt: r.claimed_at,
@@ -65,16 +72,13 @@ export function useCreateReward() {
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase.from('rewards').insert({
+      await api.post('/rewards', {
         name: input.name,
         description: input.description ?? null,
         price: input.price,
         icon: input.icon,
         category: input.category,
-        parent_profile_id: user.profileId,
       });
-
-      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
@@ -91,8 +95,7 @@ export function useDeleteReward() {
 
   return useMutation({
     mutationFn: async (rewardId: string) => {
-      const { error } = await supabase.from('rewards').delete().eq('id', rewardId);
-      if (error) throw error;
+      await api.delete(`/rewards/${rewardId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });

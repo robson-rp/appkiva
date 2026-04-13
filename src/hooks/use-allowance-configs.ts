@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -14,6 +14,17 @@ export interface AllowanceConfig {
   lastSentAt: string | null;
 }
 
+interface AllowanceConfigResponse {
+  id: string;
+  child_profile_id: string;
+  parent_profile_id: string;
+  base_amount: number;
+  frequency: 'weekly' | 'monthly';
+  task_bonus: number;
+  mission_bonus: number;
+  last_sent_at: string | null;
+}
+
 export function useAllowanceConfigs() {
   const { user } = useAuth();
 
@@ -22,19 +33,14 @@ export function useAllowanceConfigs() {
     queryFn: async (): Promise<AllowanceConfig[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await supabase
-        .from('allowance_configs')
-        .select('*')
-        .eq('parent_profile_id', user.profileId);
+      const response = await api.get<{ data: AllowanceConfigResponse[] }>('/allowances');
 
-      if (error) throw error;
-
-      return (data ?? []).map((c: any) => ({
+      return response.data.map((c) => ({
         id: c.id,
         childProfileId: c.child_profile_id,
         parentProfileId: c.parent_profile_id,
         baseAmount: Number(c.base_amount) || 25,
-        frequency: c.frequency as 'weekly' | 'monthly',
+        frequency: c.frequency,
         taskBonus: Number(c.task_bonus) || 5,
         missionBonus: Number(c.mission_bonus) || 10,
         lastSentAt: c.last_sent_at,
@@ -50,6 +56,7 @@ export function useUpsertAllowanceConfig() {
 
   return useMutation({
     mutationFn: async (input: {
+      id?: string;
       childProfileId: string;
       baseAmount: number;
       frequency: string;
@@ -58,21 +65,19 @@ export function useUpsertAllowanceConfig() {
     }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      const { error } = await supabase
-        .from('allowance_configs')
-        .upsert(
-          {
-            child_profile_id: input.childProfileId,
-            parent_profile_id: user.profileId,
-            base_amount: input.baseAmount,
-            frequency: input.frequency,
-            task_bonus: input.taskBonus,
-            mission_bonus: input.missionBonus,
-          },
-          { onConflict: 'child_profile_id,parent_profile_id' }
-        );
+      const body = {
+        child_profile_id: input.childProfileId,
+        base_amount: input.baseAmount,
+        frequency: input.frequency,
+        task_bonus: input.taskBonus,
+        mission_bonus: input.missionBonus,
+      };
 
-      if (error) throw error;
+      if (input.id) {
+        await api.patch(`/allowances/${input.id}`, body);
+      } else {
+        await api.post('/allowances', body);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allowance-configs'] });
@@ -89,12 +94,7 @@ export function useUpdateLastSent() {
 
   return useMutation({
     mutationFn: async (configId: string) => {
-      const { error } = await supabase
-        .from('allowance_configs')
-        .update({ last_sent_at: new Date().toISOString() })
-        .eq('id', configId);
-
-      if (error) throw error;
+      await api.post(`/allowances/${configId}/send-now`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allowance-configs'] });
