@@ -71,7 +71,7 @@ export function useClaimReward() {
       return {
         success: true,
         reward_name: response.data.name,
-        new_balance: 0,
+        new_balance: 0, // Balance will be refreshed via query invalidation
       };
     },
     onSuccess: (data, variables) => {
