@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -21,18 +21,30 @@ export interface Donation {
   createdAt: string;
 }
 
+interface DonationCauseResponse {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  total_received: number;
+  is_active: boolean;
+}
+
+interface DonationResponse {
+  id: string;
+  profile_id: string;
+  cause_id: string;
+  amount: number;
+  created_at: string;
+}
+
 export function useDonationCauses() {
   return useQuery({
     queryKey: ['donation-causes'],
     queryFn: async (): Promise<DonationCause[]> => {
-      const { data, error } = await supabase
-        .from('donation_causes')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      return (data ?? []).map((c: any) => ({
+      const data = await api.get<DonationCauseResponse[]>('/donation-causes?is_active=true');
+      return data.map((c) => ({
         id: c.id,
         name: c.name,
         description: c.description ?? '',
@@ -51,20 +63,36 @@ export function useMyDonations() {
     queryKey: ['my-donations', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async (): Promise<Donation[]> => {
-      const { data, error } = await supabase
-        .from('donations')
-        .select('*')
-        .eq('profile_id', user!.profileId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return (data ?? []).map((d: any) => ({
+      const data = await api.get<DonationResponse[]>('/donations');
+      return data.map((d) => ({
         id: d.id,
         profileId: d.profile_id,
         causeId: d.cause_id,
         amount: Number(d.amount),
         createdAt: d.created_at,
       }));
+    },
+  });
+}
+
+export function useCreateDonationCause() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { name: string; description?: string; icon?: string; category?: string }) => {
+      await api.post('/donation-causes', {
+        name: input.name,
+        description: input.description ?? '',
+        icon: input.icon ?? '💜',
+        category: input.category ?? 'solidarity',
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['donation-causes'] });
+      toast({ title: 'Causa criada! 💜', description: 'A causa foi criada com sucesso.' });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível criar a causa.', variant: 'destructive' });
     },
   });
 }
@@ -77,28 +105,10 @@ export function useDonate() {
     mutationFn: async ({ causeId, amount }: { causeId: string; amount: number }) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      // 1. Create the transaction via edge function (debit from child wallet)
-      const { error: txError } = await supabase.functions.invoke('create-transaction', {
-        body: {
-          target_profile_id: user.profileId,
-          amount,
-          description: 'Doação solidária',
-          entry_type: 'donation',
-        },
-      });
-      if (txError) throw txError;
-
-      // 2. Record the donation
-      const { error: donErr } = await supabase.from('donations').insert({
-        profile_id: user.profileId,
+      await api.post('/donations', {
         cause_id: causeId,
         amount,
       });
-      if (donErr) throw donErr;
-
-      // 3. Increment total_received on cause (using rpc would be better but direct update works for now)
-      // We use a raw update - admin RLS allows this via service role in edge function
-      // For client-side, we just record the donation; a trigger or function could update totals
     },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['donation-causes'] });
@@ -106,7 +116,7 @@ export function useDonate() {
       qc.invalidateQueries({ queryKey: ['wallet-balance'] });
       qc.invalidateQueries({ queryKey: ['wallet-transactions'] });
       toast({ title: 'Doação realizada! 💜', description: 'Obrigado pela tua generosidade!' });
-      // Fire notification
+      
       import('@/lib/notify').then(({ notifyDonationMade }) => {
         if (user?.profileId) {
           notifyDonationMade(user.profileId, 'causa solidária', variables.amount);

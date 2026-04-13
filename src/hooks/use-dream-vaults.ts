@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 export interface DreamComment {
   id: string;
@@ -23,7 +24,34 @@ export interface DreamVault {
   parentComments: DreamComment[];
 }
 
-function mapRow(row: any): DreamVault {
+interface DreamCommentResponse {
+  id: string;
+  text: string;
+  emoji: string;
+  created_at: string;
+}
+
+interface DreamVaultResponse {
+  id: string;
+  profile_id: string;
+  household_id: string | null;
+  title: string;
+  description: string | null;
+  icon: string;
+  target_amount: number;
+  current_amount: number;
+  priority: 'high' | 'medium' | 'low';
+  created_at: string;
+  comments?: DreamCommentResponse[];
+}
+
+interface ContributeResponse {
+  contributed: number;
+  vault_balance: number;
+  wallet_balance: number;
+}
+
+function mapRow(row: DreamVaultResponse): DreamVault {
   return {
     id: row.id,
     profileId: row.profile_id,
@@ -33,9 +61,9 @@ function mapRow(row: any): DreamVault {
     icon: row.icon,
     targetAmount: Number(row.target_amount),
     currentAmount: Number(row.current_amount),
-    priority: row.priority as DreamVault['priority'],
+    priority: row.priority,
     createdAt: row.created_at,
-    parentComments: (row.dream_vault_comments ?? []).map((c: any) => ({
+    parentComments: (row.comments ?? []).map((c) => ({
       id: c.id,
       text: c.text,
       emoji: c.emoji ?? '💬',
@@ -50,18 +78,9 @@ export function useDreamVaults(profileId?: string) {
   return useQuery({
     queryKey: ['dream-vaults', profileId ?? user?.profileId],
     queryFn: async () => {
-      let query = supabase
-        .from('dream_vaults')
-        .select('*, dream_vault_comments(*)')
-        .order('created_at', { ascending: false });
-
-      if (profileId) {
-        query = query.eq('profile_id', profileId);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data ?? []).map(mapRow);
+      const queryParams = profileId ? `?profile_id=${profileId}` : '';
+      const data = await api.get<DreamVaultResponse[]>(`/dream-vaults${queryParams}`);
+      return data.map(mapRow);
     },
     enabled: !!user,
   });
@@ -74,7 +93,7 @@ export function useCreateDreamVault() {
   return useMutation({
     mutationFn: async (input: { title: string; description?: string; icon?: string; targetAmount: number; priority?: string }) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase.from('dream_vaults').insert({
+      await api.post('/dream-vaults', {
         profile_id: user.profileId,
         household_id: user.householdId,
         title: input.title,
@@ -83,7 +102,6 @@ export function useCreateDreamVault() {
         target_amount: input.targetAmount,
         priority: input.priority ?? 'medium',
       });
-      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['dream-vaults'] }),
   });
@@ -96,15 +114,39 @@ export function useAddDreamComment() {
   return useMutation({
     mutationFn: async ({ dreamVaultId, text, emoji }: { dreamVaultId: string; text: string; emoji?: string }) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase.from('dream_vault_comments').insert({
-        dream_vault_id: dreamVaultId,
-        parent_profile_id: user.profileId,
+      await api.post(`/dream-vaults/${dreamVaultId}/comments`, {
         text,
         emoji: emoji ?? '💬',
       });
-      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['dream-vaults'] }),
+  });
+}
+
+export function useDeleteDreamComment() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ dreamVaultId, commentId }: { dreamVaultId: string; commentId: string }) => {
+      await api.delete(`/dream-vaults/${dreamVaultId}/comments/${commentId}`);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['dream-vaults'] }),
+  });
+}
+
+export function useGetDreamComments(dreamVaultId: string) {
+  return useQuery({
+    queryKey: ['dream-vault-comments', dreamVaultId],
+    queryFn: async () => {
+      const data = await api.get<DreamCommentResponse[]>(`/dream-vaults/${dreamVaultId}/comments`);
+      return data.map((c) => ({
+        id: c.id,
+        text: c.text,
+        emoji: c.emoji ?? '💬',
+        createdAt: c.created_at,
+      }));
+    },
+    enabled: !!dreamVaultId,
   });
 }
 
@@ -113,51 +155,55 @@ export function useDepositToDream() {
 
   return useMutation({
     mutationFn: async ({ dreamId, amount }: { dreamId: string; amount: number }) => {
-      const { data: dream, error: fetchErr } = await supabase
-        .from('dream_vaults')
-        .select('current_amount, target_amount, title, profile_id')
-        .eq('id', dreamId)
-        .single();
-      if (fetchErr) throw fetchErr;
-
-      // Use the ledger to deduct KVC from the caller's wallet
-      const { createTransaction } = await import('@/lib/ledger-api');
-      await createTransaction({
-        entry_type: 'vault_deposit',
-        amount,
-        description: `Depósito no sonho: ${dream.title}`,
-        target_profile_id: dream.profile_id,
-        reference_id: dreamId,
-        reference_type: 'dream_vault',
-      });
-
-      // Update dream vault amount
-      const newAmount = Number(dream.current_amount) + amount;
-      const { error } = await supabase
-        .from('dream_vaults')
-        .update({ current_amount: newAmount })
-        .eq('id', dreamId);
-      if (error) throw error;
-
-      // Check savings milestones
-      if (dream.target_amount > 0) {
-        const pct = Math.floor((newAmount / Number(dream.target_amount)) * 100);
-        const milestones = [25, 50, 75, 100];
-        for (const m of milestones) {
-          const prevPct = Math.floor((Number(dream.current_amount) / Number(dream.target_amount)) * 100);
-          if (pct >= m && prevPct < m) {
-            import('@/lib/notify').then(({ notifySavingsMilestone }) => {
-              notifySavingsMilestone(dream.profile_id, dream.title, m);
-            });
-            break;
-          }
-        }
-      }
+      const data = await api.post<ContributeResponse>(`/dream-vaults/${dreamId}/contribute`, { amount });
+      return data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['dream-vaults'] });
       qc.invalidateQueries({ queryKey: ['wallet'] });
+      qc.invalidateQueries({ queryKey: ['wallet-balance'] });
+      qc.invalidateQueries({ queryKey: ['wallet-transactions'] });
       qc.invalidateQueries({ queryKey: ['profile-balance'] });
+      toast({
+        title: 'Contribuição realizada! ✨',
+        description: 'Estás mais perto de realizar o teu sonho!',
+      });
+    },
+    onError: (err: Error) => {
+      const msg = err.message.includes('Saldo insuficiente')
+        ? 'Não tens KivaCoins suficientes para esta contribuição.'
+        : 'Não foi possível realizar a contribuição.';
+      toast({ title: 'Erro', description: msg, variant: 'destructive' });
+    },
+  });
+}
+
+export function useUpdateDreamVault() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ dreamId, updates }: { dreamId: string; updates: Partial<DreamVaultResponse> }) => {
+      await api.patch(`/dream-vaults/${dreamId}`, updates);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dream-vaults'] });
+    },
+  });
+}
+
+export function useDeleteDreamVault() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (dreamId: string) => {
+      await api.delete(`/dream-vaults/${dreamId}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['dream-vaults'] });
+      toast({ title: 'Sonho eliminado 🗑️', description: 'O sonho foi removido com sucesso.' });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Não foi possível eliminar o sonho.', variant: 'destructive' });
     },
   });
 }

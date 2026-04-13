@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -15,7 +15,31 @@ export interface SavingsVault {
   createdAt: string;
 }
 
-function mapRow(row: any): SavingsVault {
+interface SavingsVaultResponse {
+  id: string;
+  profile_id: string;
+  household_id: string | null;
+  name: string;
+  icon: string;
+  target_amount: number;
+  current_amount: number;
+  interest_rate: number;
+  created_at: string;
+}
+
+interface DepositResponse {
+  deposited: number;
+  vault_balance: number;
+  wallet_balance: number;
+}
+
+interface WithdrawResponse {
+  withdrawn: number;
+  vault_balance: number;
+  wallet_balance: number;
+}
+
+function mapRow(row: SavingsVaultResponse): SavingsVault {
   return {
     id: row.id,
     profileId: row.profile_id,
@@ -35,15 +59,9 @@ export function useSavingsVaults(profileId?: string) {
   return useQuery({
     queryKey: ['savings-vaults', profileId ?? user?.profileId],
     queryFn: async () => {
-      let query = supabase.from('savings_vaults').select('*').order('created_at', { ascending: false });
-
-      if (profileId) {
-        query = query.eq('profile_id', profileId);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return (data ?? []).map(mapRow);
+      const queryParams = profileId ? `?profile_id=${profileId}` : '';
+      const data = await api.get<SavingsVaultResponse[]>(`/savings-vaults${queryParams}`);
+      return data.map(mapRow);
     },
     enabled: !!user,
   });
@@ -57,7 +75,7 @@ export function useCreateSavingsVault() {
     mutationFn: async (input: { name: string; icon?: string; targetAmount: number; interestRate?: number; profileId?: string }) => {
       if (!user) throw new Error('Not authenticated');
       const targetProfileId = input.profileId || user.profileId;
-      const { error } = await supabase.from('savings_vaults').insert({
+      await api.post('/savings-vaults', {
         profile_id: targetProfileId,
         household_id: user.householdId,
         name: input.name,
@@ -65,7 +83,6 @@ export function useCreateSavingsVault() {
         target_amount: input.targetAmount,
         interest_rate: input.interestRate ?? 1,
       });
-      if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['savings-vaults'] }),
   });
@@ -76,18 +93,8 @@ export function useDepositToVault() {
 
   return useMutation({
     mutationFn: async ({ vaultId, amount }: { vaultId: string; amount: number }) => {
-      const { data, error } = await supabase.functions.invoke('vault-deposit', {
-        body: { vault_id: vaultId, amount },
-      });
-
-      if (error) throw error;
-
-      // Check for application-level errors
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      return data as { deposited: number; vault_balance: number; wallet_balance: number };
+      const data = await api.post<DepositResponse>(`/savings-vaults/${vaultId}/deposit`, { amount });
+      return data;
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['savings-vaults'] });
@@ -96,11 +103,6 @@ export function useDepositToVault() {
       toast({
         title: 'Depósito realizado! 🐷',
         description: `Depositaste ${data.deposited} KivaCoins no cofre.`,
-      });
-      // Notify on savings milestone
-      import('@/lib/notify').then(({ notifySavingsMilestone }) => {
-        const pct = data.vault_balance; // We don't have target here, so skip for now
-        // Milestone check would need vault target - handled elsewhere
       });
     },
     onError: (err: Error) => {
@@ -117,14 +119,8 @@ export function useWithdrawFromVault() {
 
   return useMutation({
     mutationFn: async ({ vaultId, amount }: { vaultId: string; amount: number }) => {
-      const { data, error } = await supabase.functions.invoke('vault-withdraw', {
-        body: { vault_id: vaultId, amount },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      return data as { withdrawn: number; vault_balance: number; wallet_balance: number };
+      const data = await api.post<WithdrawResponse>(`/savings-vaults/${vaultId}/withdraw`, { amount });
+      return data;
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['savings-vaults'] });
@@ -149,11 +145,7 @@ export function useUpdateVaultInterestRate() {
 
   return useMutation({
     mutationFn: async ({ vaultId, interestRate }: { vaultId: string; interestRate: number }) => {
-      const { error } = await supabase
-        .from('savings_vaults')
-        .update({ interest_rate: interestRate })
-        .eq('id', vaultId);
-      if (error) throw error;
+      await api.patch(`/savings-vaults/${vaultId}`, { interest_rate: interestRate });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['savings-vaults'] });
@@ -166,11 +158,7 @@ export function useDeleteSavingsVault() {
 
   return useMutation({
     mutationFn: async (vaultId: string) => {
-      const { error } = await supabase
-        .from('savings_vaults')
-        .delete()
-        .eq('id', vaultId);
-      if (error) throw error;
+      await api.delete(`/savings-vaults/${vaultId}`);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['savings-vaults'] });
@@ -188,12 +176,8 @@ export function useHouseholdVaults() {
   return useQuery({
     queryKey: ['savings-vaults', 'household'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('savings_vaults')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data ?? []).map(mapRow);
+      const data = await api.get<SavingsVaultResponse[]>('/savings-vaults');
+      return data.map(mapRow);
     },
     enabled: !!user,
   });

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface InterestEntry {
@@ -13,7 +13,20 @@ export interface InterestEntry {
   principal: number | null;
 }
 
-function mapRow(row: any): InterestEntry {
+interface InterestEntryResponse {
+  id: string;
+  amount: number;
+  description: string;
+  created_at: string;
+  reference_id: string | null;
+  metadata: {
+    vault_name?: string;
+    interest_rate?: number;
+    principal?: number;
+  } | null;
+}
+
+function mapRow(row: InterestEntryResponse): InterestEntry {
   const meta = row.metadata ?? {};
   return {
     id: row.id,
@@ -36,27 +49,9 @@ export function useVaultInterestHistory(profileId?: string) {
     queryFn: async () => {
       if (!id) return [];
 
-      // Get wallet id
-      const { data: wallet } = await supabase
-        .from('wallets')
-        .select('id')
-        .eq('profile_id', id)
-        .eq('wallet_type', 'virtual')
-        .eq('currency', 'KVC')
-        .maybeSingle();
-
-      if (!wallet) return [];
-
-      const { data, error } = await supabase
-        .from('ledger_entries')
-        .select('id, amount, description, created_at, metadata, reference_id')
-        .eq('entry_type', 'vault_interest')
-        .eq('credit_wallet_id', wallet.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-      return (data ?? []).map(mapRow);
+      const queryParams = `?profile_id=${id}&entry_type=vault_interest&limit=50`;
+      const data = await api.get<InterestEntryResponse[]>(`/ledger-entries${queryParams}`);
+      return data.map(mapRow);
     },
     enabled: !!id,
   });
