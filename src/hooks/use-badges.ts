@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface BadgeRow {
@@ -24,18 +24,22 @@ export interface BadgeWithProgress extends BadgeRow {
   unlockedAt: string | null;
 }
 
+interface BadgesResponse {
+  data: BadgeRow[];
+}
+
+interface BadgeProgressResponse {
+  data: BadgeProgressRow[];
+}
+
 export function useBadges() {
   return useQuery({
     queryKey: ['badges'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('badges')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order');
-      if (error) throw error;
-      return (data as BadgeRow[]) ?? [];
+      const response = await api.get<BadgesResponse>('/badges');
+      return response.data ?? [];
     },
+    refetchInterval: 60000,
   });
 }
 
@@ -47,14 +51,11 @@ export function useBadgeProgress(profileId?: string) {
     queryKey: ['badge-progress', id],
     queryFn: async () => {
       if (!id) return [];
-      const { data, error } = await supabase
-        .from('badge_progress')
-        .select('*')
-        .eq('profile_id', id);
-      if (error) throw error;
-      return (data as BadgeProgressRow[]) ?? [];
+      const response = await api.get<BadgeProgressResponse>(`/badges/progress?profile_id=${id}`);
+      return response.data ?? [];
     },
     enabled: !!id,
+    refetchInterval: 60000,
   });
 }
 

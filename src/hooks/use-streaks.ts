@@ -1,72 +1,56 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { StreakData, STREAK_MILESTONES } from '@/types/kivara';
 import { mockStreakData } from '@/data/streaks-data';
 
-async function getProfileId(userId: string): Promise<string | null> {
-  const { data } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle();
-  return data?.id ?? null;
+interface StreakResponse {
+  data: {
+    current_streak: number;
+    longest_streak: number;
+    total_active_days: number;
+    last_active_date: string;
+    active_dates: string[];
+    claimed_milestones: number[];
+  };
+}
+
+interface ActivityResponse {
+  data: {
+    recorded: boolean;
+    current_streak: number;
+    longest_streak: number;
+    total_active_days: number;
+  };
 }
 
 export function useStreakData() {
   const { user } = useAuth();
 
   return useQuery<StreakData>({
-    queryKey: ['streak-data', user?.id],
+    queryKey: ['streak-data', user?.profileId],
     queryFn: async () => {
-      if (!user?.id) return mockStreakData;
+      if (!user?.profileId) return mockStreakData;
 
-      const profileId = await getProfileId(user.id);
-      if (!profileId) return mockStreakData;
+      const response = await api.get<StreakResponse>(`/streaks?profile_id=${user.profileId}`);
+      const { current_streak, longest_streak, total_active_days, last_active_date, active_dates, claimed_milestones } = response.data;
 
-      // Fetch streak summary
-      const { data: streak } = await supabase
-        .from('streaks')
-        .select('*')
-        .eq('profile_id', profileId)
-        .maybeSingle();
-
-      // Fetch active dates
-      const { data: activities } = await supabase
-        .from('streak_activities')
-        .select('active_date')
-        .eq('profile_id', profileId)
-        .order('active_date', { ascending: false })
-        .limit(365);
-
-      // Fetch claimed rewards
-      const { data: claims } = await supabase
-        .from('streak_reward_claims')
-        .select('milestone_days')
-        .eq('profile_id', profileId);
-
-      const claimedSet = new Set((claims ?? []).map(c => c.milestone_days));
-      const activeDates = (activities ?? []).map(a => a.active_date);
-
-      const currentStreak = streak?.current_streak ?? 0;
-      const longestStreak = streak?.longest_streak ?? 0;
-      const totalActiveDays = streak?.total_active_days ?? 0;
-      const lastActiveDate = streak?.last_active_date ?? '';
+      const claimedSet = new Set(claimed_milestones ?? []);
 
       return {
-        currentStreak,
-        longestStreak,
-        totalActiveDays,
-        lastActiveDate,
-        activeDates,
+        currentStreak: current_streak ?? 0,
+        longestStreak: longest_streak ?? 0,
+        totalActiveDays: total_active_days ?? 0,
+        lastActiveDate: last_active_date ?? '',
+        activeDates: active_dates ?? [],
         streakRewards: STREAK_MILESTONES.map(m => ({
           ...m,
           claimed: claimedSet.has(m.days),
         })),
       };
     },
-    enabled: true,
-    staleTime: 60_000,
+    enabled: !!user?.profileId,
+    refetchInterval: 60000,
   });
 }
 
@@ -76,15 +60,12 @@ export function useRecordActivity() {
 
   return useMutation({
     mutationFn: async () => {
-      if (!user?.id) throw new Error('Not authenticated');
-      const profileId = await getProfileId(user.id);
-      if (!profileId) throw new Error('No profile');
+      if (!user?.profileId) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase.rpc('record_daily_activity', {
-        _profile_id: profileId,
+      const response = await api.post<ActivityResponse>('/streaks/activity', {
+        profile_id: user.profileId,
       });
-      if (error) throw error;
-      return data as { recorded: boolean; current_streak: number; longest_streak: number; total_active_days: number };
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['streak-data'] });
@@ -98,29 +79,19 @@ export function useClaimStreakReward() {
 
   return useMutation({
     mutationFn: async ({ milestoneDays, kivaPoints }: { milestoneDays: number; kivaPoints: number }) => {
-      if (!user?.id) throw new Error('Not authenticated');
-      const profileId = await getProfileId(user.id);
-      if (!profileId) throw new Error('No profile');
+      if (!user?.profileId) throw new Error('Not authenticated');
 
-      const { error } = await supabase
-        .from('streak_reward_claims')
-        .insert({
-          profile_id: profileId,
-          milestone_days: milestoneDays,
-          kiva_points: kivaPoints,
-        });
-      if (error) throw error;
+      await api.post(`/streaks/claim-reward`, {
+        profile_id: user.profileId,
+        milestone_days: milestoneDays,
+        kiva_points: kivaPoints,
+      });
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['streak-data'] });
-      // Fire streak milestone notification
-      if (user?.id) {
-        getProfileId(user.id).then(profileId => {
-          if (profileId) {
-            import('@/lib/notify').then(({ notifyStreakMilestone }) => {
-              notifyStreakMilestone(profileId, variables.milestoneDays, variables.kivaPoints);
-            });
-          }
+      if (user?.profileId) {
+        import('@/lib/notify').then(({ notifyStreakMilestone }) => {
+          notifyStreakMilestone(user.profileId!, variables.milestoneDays, variables.kivaPoints);
         });
       }
     },
