@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { convertPrice, type ExchangeRate } from '@/hooks/use-exchange-rates';
 
 export interface RegionalPrice {
@@ -16,11 +16,8 @@ export function useRegionalPrices() {
     queryKey: ['tier-regional-prices'],
     staleTime: 30 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('tier_regional_prices')
-        .select('id, tier_id, currency_code, price_monthly, price_yearly, extra_child_price');
-      if (error) throw error;
-      return (data ?? []) as RegionalPrice[];
+      const data = await api.get<RegionalPrice[]>('/admin/regional-prices');
+      return data;
     },
   });
 }
@@ -44,25 +41,19 @@ export function getRegionalPrice(
   return convertPrice(usdAmount, 'USD', currencyCode, rates);
 }
 
-// ── Admin CRUD mutations ──
-
 export function useUpsertRegionalPrice() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (row: Omit<RegionalPrice, 'id'> & { id?: string }) => {
-      const { error } = await supabase
-        .from('tier_regional_prices')
-        .upsert(
-          {
-            tier_id: row.tier_id,
-            currency_code: row.currency_code,
-            price_monthly: row.price_monthly,
-            price_yearly: row.price_yearly,
-            extra_child_price: row.extra_child_price,
-          },
-          { onConflict: 'tier_id,currency_code' }
-        );
-      if (error) throw error;
+      if (row.id) {
+        await api.put(`/admin/regional-prices/${row.id}`, {
+          price_monthly: row.price_monthly,
+          price_yearly: row.price_yearly,
+          extra_child_price: row.extra_child_price,
+        });
+      } else {
+        await api.post('/admin/regional-prices', row);
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tier-regional-prices'] }),
   });
@@ -72,8 +63,7 @@ export function useDeleteRegionalPrice() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('tier_regional_prices').delete().eq('id', id);
-      if (error) throw error;
+      await api.delete(`/admin/regional-prices/${id}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['tier-regional-prices'] }),
   });

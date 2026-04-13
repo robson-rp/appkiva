@@ -1,7 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api-client';
 
 export interface ExchangeRate {
+  id: string;
   base_currency: string;
   target_currency: string;
   rate: number;
@@ -12,12 +13,20 @@ export function useExchangeRates() {
     queryKey: ['exchange-rates'],
     staleTime: 30 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('currency_exchange_rates')
-        .select('base_currency, target_currency, rate');
-      if (error) throw error;
-      return (data ?? []) as ExchangeRate[];
+      const data = await api.get<ExchangeRate[]>('/admin/exchange-rates');
+      return data;
     },
+  });
+}
+
+export function useUpdateExchangeRate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, rate }: { id: string; rate: number }) => {
+      const data = await api.put<ExchangeRate>(`/admin/exchange-rates/${id}`, { rate });
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['exchange-rates'] }),
   });
 }
 

@@ -1,6 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+
+interface ProgramInvitation {
+  id: string;
+  program_id: string;
+  partner_tenant_id: string;
+  target_type: 'family' | 'school';
+  code: string;
+  status: string;
+  created_at: string;
+}
 
 export function useProgramInvitations(programId?: string) {
   const { user } = useAuth();
@@ -8,30 +18,15 @@ export function useProgramInvitations(programId?: string) {
   return useQuery({
     queryKey: ['program-invitations', programId],
     queryFn: async () => {
-      let query = supabase
-        .from('program_invitations')
-        .select('*')
-        .order('created_at', { ascending: false });
-
       if (programId) {
-        query = query.eq('program_id', programId);
+        const data = await api.get<ProgramInvitation[]>(`/partner-programs/${programId}/invitations`);
+        return data;
       }
-
-      const { data, error } = await query;
-      if (error) throw error;
+      const data = await api.get<ProgramInvitation[]>('/program-invitations');
       return data;
     },
     enabled: !!user,
   });
-}
-
-function generateCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
 }
 
 export function useCreateProgramInvitation() {
@@ -43,18 +38,12 @@ export function useCreateProgramInvitation() {
       partner_tenant_id: string;
       target_type: 'family' | 'school';
     }) => {
-      const code = generateCode();
-      const { data, error } = await supabase
-        .from('program_invitations')
-        .insert({
-          program_id: params.program_id,
-          partner_tenant_id: params.partner_tenant_id,
+      const data = await api.post<ProgramInvitation>(
+        `/partner-programs/${params.program_id}/invite`,
+        {
           target_type: params.target_type,
-          code,
-        })
-        .select()
-        .single();
-      if (error) throw error;
+        }
+      );
       return data;
     },
     onSuccess: () => {
@@ -68,11 +57,9 @@ export function useAcceptProgramInvitation() {
 
   return useMutation({
     mutationFn: async (params: { code: string; profileId: string }) => {
-      const { data, error } = await supabase.rpc('accept_program_invitation', {
-        _code: params.code,
-        _profile_id: params.profileId,
-      } as any);
-      if (error) throw error;
+      const data = await api.post(`/invite/program/${params.code}`, {
+        profile_id: params.profileId,
+      });
       return data;
     },
     onSuccess: () => {
@@ -85,11 +72,8 @@ export function useValidateProgramInvite(code: string | null) {
   return useQuery({
     queryKey: ['validate-program-invite', code],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('validate_program_invite', {
-        _code: code!,
-      } as any);
-      if (error) throw error;
-      return data as any;
+      const data = await api.get<{ valid: boolean; program?: any }>(`/invite/program/${code}/validate`);
+      return data;
     },
     enabled: !!code && code.length >= 6,
   });

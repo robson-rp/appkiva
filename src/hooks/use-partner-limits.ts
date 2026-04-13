@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PartnerLimits {
@@ -15,51 +15,26 @@ interface PartnerLimits {
   priceMonthly: number;
 }
 
+interface PartnerLimitsResponse {
+  tier: {
+    id: string;
+    name: string;
+    max_programs: number;
+    max_children: number;
+    price_monthly: number;
+  } | null;
+  usedPrograms: number;
+  usedChildren: number;
+}
+
 export function usePartnerLimits(): PartnerLimits {
   const { user } = useAuth();
 
   const { data, isLoading } = useQuery({
     queryKey: ['partner-limits', user?.id],
     queryFn: async () => {
-      // Get profile -> tenant -> subscription_tier
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('user_id', user!.id)
-        .single();
-
-      if (!profile?.tenant_id) return null;
-
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('subscription_tier_id')
-        .eq('id', profile.tenant_id)
-        .single();
-
-      let tier: any = null;
-      if (tenant?.subscription_tier_id) {
-        const { data: t } = await supabase
-          .from('subscription_tiers')
-          .select('*')
-          .eq('id', tenant.subscription_tier_id)
-          .single();
-        tier = t;
-      }
-
-      // Get usage
-      const { data: programs } = await supabase
-        .from('partner_programs')
-        .select('children_count, status')
-        .eq('partner_tenant_id', profile.tenant_id);
-
-      const activePrograms = (programs ?? []).filter(p => p.status === 'active');
-      const totalChildren = (programs ?? []).reduce((sum, p) => sum + p.children_count, 0);
-
-      return {
-        tier,
-        usedPrograms: activePrograms.length,
-        usedChildren: totalChildren,
-      };
+      const response = await api.get<PartnerLimitsResponse>('/partner-limits');
+      return response;
     },
     enabled: !!user && user.role === 'partner',
   });

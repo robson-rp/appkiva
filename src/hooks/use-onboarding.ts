@@ -1,14 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ONBOARDING_STEPS, type OnboardingStep } from '@/data/onboarding-steps';
 import { useCallback, useRef } from 'react';
 
-function trackEvent(profileId: string, role: string, eventType: string, stepIndex: number, metadata?: Record<string, unknown>) {
-  supabase
-    .from('onboarding_analytics' as any)
-    .insert({ profile_id: profileId, event_type: eventType, step_index: stepIndex, role, metadata: metadata ?? {} })
-    .then(); // fire-and-forget
+interface OnboardingStepDB {
+  title: string;
+  description: string;
+  illustration_key: string;
+  cta?: string;
+}
+
+interface OnboardingProgress {
+  profile_id: string;
+  current_step: number;
+  completed: boolean;
+  skipped: boolean;
+  completed_at: string | null;
 }
 
 export function useOnboarding() {
@@ -18,37 +26,26 @@ export function useOnboarding() {
   const role = user?.role;
   const trackedSteps = useRef<Set<number>>(new Set());
 
-  // Fetch steps from DB with fallback to hardcoded
   const { data: steps = [] } = useQuery({
     queryKey: ['onboarding-steps', role],
     queryFn: async () => {
       if (!role) return [];
-      const { data, error } = await supabase
-        .from('onboarding_steps')
-        .select('title, description, illustration_key, cta')
-        .eq('role', role)
-        .eq('is_active', true)
-        .order('step_index', { ascending: true });
+      try {
+        const data = await api.get<OnboardingStepDB[]>(`/admin/onboarding-steps?role=${role}`);
+        
+        if (!data || data.length === 0) {
+          return ONBOARDING_STEPS[role] ?? [];
+        }
 
-      if (error || !data || data.length === 0) {
-        // Fallback to hardcoded
-        return ONBOARDING_STEPS[role] ?? [];
-      }
-
-      // Client-side time-based visibility filter
-      const now = new Date();
-      return data
-        .filter((row: any) => {
-          const from = row.visible_from ? new Date(row.visible_from) : null;
-          const until = row.visible_until ? new Date(row.visible_until) : null;
-          return (!from || from <= now) && (!until || until >= now);
-        })
-        .map((row): OnboardingStep => ({
+        return data.map((row): OnboardingStep => ({
           title: row.title,
           description: row.description,
           illustrationKey: row.illustration_key,
           cta: row.cta ?? undefined,
         }));
+      } catch (error) {
+        return ONBOARDING_STEPS[role] ?? [];
+      }
     },
     enabled: !!role,
   });
@@ -57,13 +54,12 @@ export function useOnboarding() {
     queryKey: ['onboarding', profileId],
     queryFn: async () => {
       if (!profileId) return null;
-      const { data, error } = await supabase
-        .from('onboarding_progress')
-        .select('*')
-        .eq('profile_id', profileId)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+      try {
+        const data = await api.get<OnboardingProgress>(`/onboarding/progress`);
+        return data;
+      } catch (error) {
+        return null;
+      }
     },
     enabled: !!profileId,
   });
@@ -71,10 +67,7 @@ export function useOnboarding() {
   const upsertProgress = useMutation({
     mutationFn: async (values: Record<string, unknown>) => {
       if (!profileId) return;
-      const { error } = await supabase
-        .from('onboarding_progress')
-        .upsert({ profile_id: profileId, ...values }, { onConflict: 'profile_id' });
-      if (error) throw error;
+      await api.put('/onboarding/progress', values);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['onboarding', profileId] }),
   });
@@ -85,14 +78,24 @@ export function useOnboarding() {
   const trackView = useCallback((step: number) => {
     if (!profileId || !role || trackedSteps.current.has(step)) return;
     trackedSteps.current.add(step);
-    trackEvent(profileId, role, 'view', step);
+    api.post('/onboarding/analytics', {
+      event_type: 'view',
+      step_index: step,
+      role,
+      metadata: {},
+    }).catch(() => {});
   }, [profileId, role]);
 
   const nextStep = useCallback(() => {
     const next = currentStep + 1;
     if (next >= steps.length) {
       if (profileId && role) {
-        trackEvent(profileId, role, 'complete', currentStep, { total_steps: steps.length });
+        api.post('/onboarding/analytics', {
+          event_type: 'complete',
+          step_index: currentStep,
+          role,
+          metadata: { total_steps: steps.length },
+        }).catch(() => {});
       }
       upsertProgress.mutate({ completed: true, completed_at: new Date().toISOString(), current_step: next });
     } else {
@@ -108,7 +111,12 @@ export function useOnboarding() {
 
   const skipWalkthrough = useCallback(() => {
     if (profileId && role) {
-      trackEvent(profileId, role, 'skip', currentStep, { total_steps: steps.length });
+      api.post('/onboarding/analytics', {
+        event_type: 'skip',
+        step_index: currentStep,
+        role,
+        metadata: { total_steps: steps.length },
+      }).catch(() => {});
     }
     upsertProgress.mutate({ skipped: true, current_step: currentStep });
   }, [currentStep, steps.length, profileId, role, upsertProgress]);

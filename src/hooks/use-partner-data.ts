@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface PartnerProgram {
@@ -36,12 +36,8 @@ export function usePartnerPrograms() {
   return useQuery({
     queryKey: ['partner-programs', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('partner_programs')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as PartnerProgram[];
+      const data = await api.get<PartnerProgram[]>('/partner-programs');
+      return data;
     },
     enabled: !!user && user.role === 'partner',
   });
@@ -53,12 +49,8 @@ export function useSponsoredChallenges() {
   return useQuery({
     queryKey: ['sponsored-challenges', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('sponsored_challenges')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as SponsoredChallenge[];
+      const data = await api.get<SponsoredChallenge[]>('/sponsored-challenges');
+      return data;
     },
     enabled: !!user && user.role === 'partner',
   });
@@ -77,12 +69,7 @@ export function useCreateSponsoredChallenge() {
       end_date: string;
       status?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('sponsored_challenges')
-        .insert(challenge)
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await api.post<SponsoredChallenge>('/sponsored-challenges', challenge);
       return data;
     },
     onSuccess: () => {
@@ -104,13 +91,7 @@ export function useUpdateSponsoredChallenge() {
       end_date?: string;
       status?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('sponsored_challenges')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await api.patch<SponsoredChallenge>(`/sponsored-challenges/${id}`, updates);
       return data;
     },
     onSuccess: () => {
@@ -124,11 +105,7 @@ export function useDeleteSponsoredChallenge() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('sponsored_challenges')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
+      await api.delete(`/sponsored-challenges/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sponsored-challenges'] });
@@ -147,12 +124,7 @@ export function useCreatePartnerProgram() {
       children_count?: number;
       investment_amount?: number;
     }) => {
-      const { data, error } = await supabase
-        .from('partner_programs')
-        .insert(program)
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await api.post<PartnerProgram>('/partner-programs', program);
       return data;
     },
     onSuccess: () => {
@@ -173,13 +145,7 @@ export function useUpdatePartnerProgram() {
       investment_amount?: number;
       status?: string;
     }) => {
-      const { data, error } = await supabase
-        .from('partner_programs')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await api.patch<PartnerProgram>(`/partner-programs/${id}`, updates);
       return data;
     },
     onSuccess: () => {
@@ -193,11 +159,7 @@ export function useDeletePartnerProgram() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('partner_programs')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
+      await api.delete(`/partner-programs/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partner-programs'] });
