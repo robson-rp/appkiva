@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -20,6 +20,17 @@ export interface BudgetExceptionRequest {
   child_name?: string;
 }
 
+interface BudgetExceptionResponse {
+  data: BudgetExceptionRequest | BudgetExceptionRequest[];
+}
+
+interface PendingExceptionResponse {
+  data: {
+    id: string;
+    status: string;
+  } | null;
+}
+
 /** Child: check if there's already a pending request for a reward */
 export function usePendingExceptionForReward(rewardId: string | undefined) {
   const { user } = useAuth();
@@ -27,14 +38,12 @@ export function usePendingExceptionForReward(rewardId: string | undefined) {
     queryKey: ['budget-exception', 'pending', rewardId, user?.profileId],
     queryFn: async () => {
       if (!user?.profileId || !rewardId) return null;
-      const { data } = await (supabase as any)
-        .from('budget_exception_requests')
-        .select('id, status')
-        .eq('child_profile_id', user.profileId)
-        .eq('reward_id', rewardId)
-        .eq('status', 'pending')
-        .maybeSingle();
-      return data;
+      
+      const response = await api.get<PendingExceptionResponse>(
+        `/wallets/budget-exceptions?reward_id=${rewardId}&status=pending`
+      );
+      
+      return response.data;
     },
     enabled: !!user?.profileId && !!rewardId,
   });
@@ -51,20 +60,15 @@ export function useRequestBudgetException() {
       amount: number;
       reason?: string;
     }) => {
-      const { data, error } = await (supabase as any)
-        .from('budget_exception_requests')
-        .insert({
-          child_profile_id: params.childProfileId,
-          parent_profile_id: params.parentProfileId,
-          reward_id: params.rewardId,
-          amount: params.amount,
-          reason: params.reason ?? null,
-        })
-        .select()
-        .single();
+      const response = await api.post<BudgetExceptionResponse>('/wallets/budget-exceptions', {
+        child_profile_id: params.childProfileId,
+        parent_profile_id: params.parentProfileId,
+        reward_id: params.rewardId,
+        amount: params.amount,
+        reason: params.reason ?? null,
+      });
 
-      if (error) throw error;
-      return data;
+      return response.data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budget-exception'] });
@@ -87,25 +91,11 @@ export function usePendingBudgetExceptions() {
     queryFn: async (): Promise<BudgetExceptionRequest[]> => {
       if (!user?.profileId) return [];
 
-      const { data, error } = await (supabase as any)
-        .from('budget_exception_requests')
-        .select(`
-          *,
-          rewards:reward_id (name, icon),
-          child:child_profile_id (display_name)
-        `)
-        .eq('parent_profile_id', user.profileId)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+      const response = await api.get<BudgetExceptionResponse>(
+        '/wallets/budget-exceptions?status=pending'
+      );
 
-      if (error) throw error;
-
-      return (data ?? []).map((r: any) => ({
-        ...r,
-        reward_name: r.rewards?.name,
-        reward_icon: r.rewards?.icon,
-        child_name: r.child?.display_name,
-      }));
+      return Array.isArray(response.data) ? response.data : [];
     },
     enabled: !!user?.profileId && user?.role === 'parent',
   });
@@ -116,12 +106,11 @@ export function useResolveBudgetException() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { requestId: string; action: 'approve' | 'reject' }) => {
-      const { data, error } = await supabase.functions.invoke('resolve-budget-exception', {
-        body: { request_id: params.requestId, action: params.action },
-      });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-      return data;
+      const response = await api.patch<{ reward_name?: string }>(
+        `/wallets/budget-exceptions/${params.requestId}`,
+        { action: params.action }
+      );
+      return response;
     },
     onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: ['budget-exceptions-pending'] });

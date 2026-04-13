@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface DiaryEntry {
@@ -11,6 +11,19 @@ export interface DiaryEntry {
   createdAt: string;
 }
 
+interface DiaryEntryResponse {
+  id: string;
+  profile_id: string;
+  text: string;
+  mood: string;
+  tags: string[];
+  created_at: string;
+}
+
+interface DiaryApiResponse {
+  data: DiaryEntryResponse[];
+}
+
 export function useDiaryEntries() {
   const { user } = useAuth();
 
@@ -18,13 +31,10 @@ export function useDiaryEntries() {
     queryKey: ['diary-entries', user?.profileId],
     queryFn: async (): Promise<DiaryEntry[]> => {
       if (!user?.profileId) return [];
-      const { data, error } = await (supabase as any)
-        .from('diary_entries')
-        .select('*')
-        .eq('profile_id', user.profileId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data ?? []).map((r: any) => ({
+      
+      const response = await api.get<DiaryApiResponse>('/diary');
+      
+      return (response.data ?? []).map((r) => ({
         id: r.id,
         profileId: r.profile_id,
         text: r.text,
@@ -44,13 +54,44 @@ export function useCreateDiaryEntry() {
   return useMutation({
     mutationFn: async ({ text, mood, tags }: { text: string; mood: string; tags?: string[] }) => {
       if (!user?.profileId) throw new Error('Not authenticated');
-      const { error } = await (supabase as any).from('diary_entries').insert({
-        profile_id: user.profileId,
+      
+      await api.post('/diary', {
         text,
         mood,
         tags: tags ?? [],
       });
-      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['diary-entries'] }),
+  });
+}
+
+export function useUpdateDiaryEntry() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      id, 
+      text, 
+      mood, 
+      tags 
+    }: { 
+      id: string; 
+      text?: string; 
+      mood?: string; 
+      tags?: string[] 
+    }) => {
+      await api.patch(`/diary/${id}`, { text, mood, tags });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['diary-entries'] }),
+  });
+}
+
+export function useDeleteDiaryEntry() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/diary/${id}`);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['diary-entries'] }),
   });
