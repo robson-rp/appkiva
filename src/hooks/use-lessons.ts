@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { MicroLesson, LessonCategory, LessonDifficulty } from '@/types/kivara';
+import { api } from '@/lib/api-client';
+import { MicroLesson, LessonCategory, LessonDifficulty, LessonBlock, QuizQuestion } from '@/types/kivara';
 import { mockLessons } from '@/data/lessons-data';
 
-interface DbLesson {
+interface LessonResponse {
   id: string;
   title: string;
   description: string;
@@ -12,13 +12,13 @@ interface DbLesson {
   difficulty: string;
   estimated_minutes: number;
   kiva_points_reward: number;
-  blocks: any;
-  quiz: any;
+  blocks: LessonBlock[];
+  quiz: QuizQuestion[];
   sort_order: number;
   is_active: boolean;
 }
 
-function mapDbToMicroLesson(row: DbLesson): MicroLesson {
+function mapResponseToMicroLesson(row: LessonResponse): MicroLesson {
   return {
     id: row.id,
     title: row.title,
@@ -28,8 +28,8 @@ function mapDbToMicroLesson(row: DbLesson): MicroLesson {
     difficulty: row.difficulty as LessonDifficulty,
     estimatedMinutes: row.estimated_minutes,
     kivaPointsReward: row.kiva_points_reward,
-    blocks: row.blocks as MicroLesson['blocks'],
-    quiz: row.quiz as MicroLesson['quiz'],
+    blocks: row.blocks,
+    quiz: row.quiz,
   };
 }
 
@@ -37,19 +37,13 @@ export function useLessons() {
   return useQuery({
     queryKey: ['lessons'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
+      const data = await api.get<LessonResponse[]>('/lessons');
 
       if (!data || data.length === 0) {
         return mockLessons;
       }
 
-      return (data as unknown as DbLesson[]).map(mapDbToMicroLesson);
+      return data.map(mapResponseToMicroLesson);
     },
   });
 }
@@ -58,13 +52,8 @@ export function useAllLessons() {
   return useQuery({
     queryKey: ['lessons', 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .order('sort_order', { ascending: true });
-
-      if (error) throw error;
-      return data as unknown as DbLesson[];
+      const data = await api.get<LessonResponse[]>('/lessons?include_inactive=true');
+      return data;
     },
   });
 }

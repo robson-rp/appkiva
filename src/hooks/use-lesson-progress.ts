@@ -1,6 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+
+interface LessonProgressResponse {
+  lesson_id: string;
+  kiva_points_earned: number;
+  score: number;
+}
+
+interface CompleteLessonRequest {
+  score: number;
+  kiva_points_earned: number;
+}
 
 export function useLessonProgress() {
   const { user } = useAuth();
@@ -10,12 +21,7 @@ export function useLessonProgress() {
     queryKey: ['lesson-progress', profileId],
     enabled: !!profileId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lesson_progress')
-        .select('lesson_id, kiva_points_earned, score')
-        .eq('profile_id', profileId!);
-
-      if (error) throw error;
+      const data = await api.get<LessonProgressResponse[]>('/lessons/progress');
       return data ?? [];
     },
   });
@@ -33,18 +39,10 @@ export function useCompleteLessonMutation() {
 
   return useMutation({
     mutationFn: async ({ lessonId, score, kivaPoints }: { lessonId: string; score: number; kivaPoints: number }) => {
-      const { error } = await supabase
-        .from('lesson_progress')
-        .upsert(
-          {
-            profile_id: user!.profileId,
-            lesson_id: lessonId,
-            score,
-            kiva_points_earned: kivaPoints,
-          },
-          { onConflict: 'profile_id,lesson_id' }
-        );
-      if (error) throw error;
+      await api.post<void>(`/lessons/${lessonId}/complete`, {
+        score,
+        kiva_points_earned: kivaPoints,
+      } as CompleteLessonRequest);
     },
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['lesson-progress'] });
