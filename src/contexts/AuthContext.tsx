@@ -1,9 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
-
-type AppRole = Database['public']['Enums']['app_role'];
+import { api } from '@/lib/api-client';
 
 export type UserRole = 'parent' | 'child' | 'teen' | 'teacher' | 'admin' | 'partner';
 
@@ -19,7 +15,7 @@ export interface KivaraUser {
 
 interface AuthContextType {
   user: KivaraUser | null;
-  session: Session | null;
+  session: { token: string } | null;
   loading: boolean;
   currentChildId: string | null;
   pending2FA: boolean;
@@ -31,6 +27,37 @@ interface AuthContextType {
   complete2FA: () => void;
 }
 
+interface LoginResponse {
+  token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    profile_id: string;
+    household_id: string | null;
+    tenant_id: string;
+    avatar: string;
+  };
+  requires_2fa?: boolean;
+}
+
+interface RegisterResponse {
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    profile_id: string;
+    household_id: string | null;
+    tenant_id: string;
+    avatar: string;
+  };
+  token: string;
+  refresh_token: string;
+}
+
 // Idle timeout constants (ms)
 const IDLE_TIMEOUT_PARENT = 30 * 60 * 1000; // 30 minutes
 const IDLE_TIMEOUT_ADMIN = 15 * 60 * 1000;  // 15 minutes
@@ -38,48 +65,8 @@ const ACTIVITY_EVENTS = ['mousedown', 'keydown', 'touchstart', 'scroll'];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function fetchKivaraUser(supabaseUser: SupabaseUser, retries = 3): Promise<KivaraUser | null> {
-  let profile: { id: string; display_name: string; avatar: string | null; household_id: string | null } | null = null;
-
-  for (let attempt = 0; attempt < retries; attempt++) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, display_name, avatar, household_id')
-      .eq('user_id', supabaseUser.id)
-      .single();
-    
-    if (data) {
-      profile = data;
-      break;
-    }
-
-    if (attempt < retries - 1) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  }
-
-  if (!profile) return null;
-
-  const { data: roles } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', supabaseUser.id);
-
-  const role = (roles?.[0]?.role as UserRole) ?? 'child';
-
-  return {
-    id: supabaseUser.id,
-    name: profile.display_name,
-    email: supabaseUser.email,
-    role,
-    avatar: profile.avatar ?? '👤',
-    profileId: profile.id,
-    householdId: profile.household_id,
-  };
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<{ token: string } | null>(null);
   const [user, setUser] = useState<KivaraUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentChildId, setCurrentChildId] = useState<string | null>(null);
@@ -90,138 +77,132 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user?.profileId || streakRecorded.current) return;
     streakRecorded.current = true;
-    supabase
-      .rpc('record_daily_activity', { _profile_id: user.profileId })
-      .then(({ error }) => {
-        if (error) console.warn('[streak] record_daily_activity:', error.message);
+    api.post('/streaks/activity', { profile_id: user.profileId })
+      .catch((error) => {
+        console.warn('[streak] record_daily_activity:', error.message);
       });
   }, [user?.profileId]);
 
+  // Boot: restore session on mount
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setSession(newSession);
-        if (newSession?.user) {
-          setLoading(true);
-          setTimeout(async () => {
-            const kivaraUser = await fetchKivaraUser(newSession.user);
-            setUser(kivaraUser);
-            setLoading(false);
-          }, 0);
-        } else {
-          setUser(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      if (existingSession?.user) {
-        fetchKivaraUser(existingSession.user).then(kivaraUser => {
-          setUser(kivaraUser);
+    const token = localStorage.getItem('kivara_token');
+    if (token) {
+      setLoading(true);
+      api.get<LoginResponse['user']>('/auth/me')
+        .then((userData) => {
+          setSession({ token });
+          setUser({
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            role: userData.role,
+            avatar: userData.avatar || '👤',
+            profileId: userData.profile_id,
+            householdId: userData.household_id,
+          });
+        })
+        .catch(() => {
+          // Token invalid, clear storage
+          localStorage.removeItem('kivara_token');
+          localStorage.removeItem('kivara_refresh_token');
+          localStorage.removeItem('kivara_tenant_id');
+        })
+        .finally(() => {
           setLoading(false);
         });
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Check lockout before attempting login
     try {
-      const { data: lockoutResult } = await supabase.functions.invoke('auth-guard', {
-        body: { action: 'check-lockout', email },
-      });
-      if (lockoutResult?.locked) {
-        return { error: 'auth.generic_login_error', requires2FA: false };
-      }
-    } catch {
-      // If auth-guard is unavailable, proceed with login
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      // Record failure (fire-and-forget)
-      supabase.functions.invoke('auth-guard', {
-        body: { action: 'record-failure', email },
-      }).catch(() => {});
-      // Generic error — never reveal specifics
-      return { error: 'auth.generic_login_error', requires2FA: false };
-    }
-
-    // Immediately check role from user_metadata to prevent race condition
-    const metadataRole = data.user?.user_metadata?.role;
-    const needs2FACheck = metadataRole === 'parent' || metadataRole === 'admin';
-
-    // Set pending2FA IMMEDIATELY before any async work, so onAuthStateChange
-    // won't expose the user to AppRoutes before 2FA is resolved
-    if (needs2FACheck) {
-      setPending2FA(true);
-    }
-
-    // Record success (fire-and-forget)
-    supabase.functions.invoke('auth-guard', {
-      body: { action: 'record-success', email, user_id: data.user.id },
-    }).catch(() => {});
-
-    if (needs2FACheck) {
-      // Check for trusted device
-      const deviceToken = localStorage.getItem('kivara_trusted_device');
-      if (deviceToken) {
-        try {
-          const { data: trustResult } = await supabase.functions.invoke('verify-2fa', {
-            body: { action: 'check-trust', device_token: deviceToken },
-          });
-          if (trustResult?.trusted) {
-            setPending2FA(false);
-            return { error: null, requires2FA: false };
+      const response = await api.post<LoginResponse>('/auth/login', { email, password });
+      
+      // Store tokens and tenant ID
+      localStorage.setItem('kivara_token', response.token);
+      localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      localStorage.setItem('kivara_tenant_id', response.user.tenant_id);
+      
+      setSession({ token: response.token });
+      
+      // Check if 2FA is required
+      if (response.requires_2fa) {
+        setPending2FA(true);
+        
+        // Check for trusted device
+        const deviceToken = localStorage.getItem('kivara_trusted_device');
+        if (deviceToken) {
+          try {
+            const trustResult = await api.post<{ trusted: boolean }>('/auth/trusted-devices/verify', {
+              device_token: deviceToken,
+            });
+            if (trustResult.trusted) {
+              setPending2FA(false);
+              setUser({
+                id: response.user.id,
+                name: response.user.name,
+                email: response.user.email,
+                role: response.user.role,
+                avatar: response.user.avatar || '👤',
+                profileId: response.user.profile_id,
+                householdId: response.user.household_id,
+              });
+              return { error: null, requires2FA: false };
+            }
+          } catch {
+            // Trust check failed — proceed with 2FA
+            localStorage.removeItem('kivara_trusted_device');
           }
-        } catch {
-          // Trust check failed — proceed with 2FA
         }
-        localStorage.removeItem('kivara_trusted_device');
+        
+        // Don't set user yet, wait for 2FA completion
+        return { error: null, requires2FA: true };
       }
-      return { error: null, requires2FA: true };
+      
+      // No 2FA required, set user immediately
+      setUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        avatar: response.user.avatar || '👤',
+        profileId: response.user.profile_id,
+        householdId: response.user.household_id,
+      });
+      
+      return { error: null, requires2FA: false };
+    } catch (error: any) {
+      return { error: error.message || 'auth.generic_login_error', requires2FA: false };
     }
-
-    return { error: null, requires2FA: false };
   };
 
   const complete2FA = () => setPending2FA(false);
 
   const loginAsChild = async (username: string, pin: string) => {
-    const normalizedUsername = username.trim().toLowerCase();
-    const normalizedPin = pin.trim();
-
-    // Compat: tenta o username exato e, se houver sufixo numérico acidental, tenta sem sufixo.
-    const usernameCandidates = Array.from(new Set([
-      normalizedUsername,
-      normalizedUsername.replace(/\d+$/, ''),
-    ].filter((u) => u.length >= 3)));
-
-    // Compat: contas antigas podem estar com PIN raw (4) ou padded (6).
-    const pinCandidates = normalizedPin.length < 6
-      ? [normalizedPin, normalizedPin.padEnd(6, '0')]
-      : [normalizedPin];
-
-    for (const usernameCandidate of usernameCandidates) {
-      const syntheticEmail = `${usernameCandidate}@child.kivara.local`;
-      for (const candidate of pinCandidates) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: syntheticEmail,
-          password: candidate,
-        });
-        if (!error) {
-          return { error: null };
-        }
-      }
+    try {
+      const response = await api.post<LoginResponse>('/auth/child-login', { username, pin });
+      
+      // Store tokens and tenant ID
+      localStorage.setItem('kivara_token', response.token);
+      localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      localStorage.setItem('kivara_tenant_id', response.user.tenant_id);
+      
+      setSession({ token: response.token });
+      setUser({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role,
+        avatar: response.user.avatar || '👤',
+        profileId: response.user.profile_id,
+        householdId: response.user.household_id,
+      });
+      
+      return { error: null };
+    } catch (error: any) {
+      return { error: error.message || 'auth.generic_login_error' };
     }
-
-    return { error: 'auth.generic_login_error' };
   };
 
   const signup = async (
@@ -239,52 +220,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       invite_code?: string;
     }
   ) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName,
-          role,
-          country,
-          avatar: role === 'parent' ? '👩' : role === 'teacher' ? '👨‍🏫' : role === 'teen' ? '🧑‍💻' : role === 'admin' ? '🛡️' : role === 'partner' ? '🏢' : '🦊',
-          gender: extra?.gender,
-          phone: extra?.phone,
-          institution_name: extra?.institution_name,
-          sector: extra?.sector,
-          school_tenant_id: extra?.school_tenant_id,
-        },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) return { error: error.message };
-
-    // If child/teen with invite code, claim it after signup
-    if (extra?.invite_code && data.user && (role === 'child' || role === 'teen')) {
-      setTimeout(async () => {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('user_id', data.user!.id)
-          .single();
-        if (profile) {
-          await supabase.rpc('claim_invite_code', {
-            _code: extra.invite_code!,
-            _profile_id: profile.id,
-          } as any);
-        }
-      }, 1000);
+    try {
+      const response = await api.post<RegisterResponse>('/auth/register', {
+        name: displayName,
+        email,
+        password,
+        role,
+        country,
+        gender: extra?.gender,
+        phone: extra?.phone,
+        institution_name: extra?.institution_name,
+        sector: extra?.sector,
+        school_tenant_id: extra?.school_tenant_id,
+        invite_code: extra?.invite_code,
+      });
+      
+      // Store tokens and tenant ID
+      localStorage.setItem('kivara_token', response.token);
+      localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      localStorage.setItem('kivara_tenant_id', response.data.tenant_id);
+      
+      setSession({ token: response.token });
+      setUser({
+        id: response.data.id,
+        name: response.data.name,
+        email: response.data.email,
+        role: response.data.role,
+        avatar: response.data.avatar || '👤',
+        profileId: response.data.profile_id,
+        householdId: response.data.household_id,
+      });
+      
+      return { error: null };
+    } catch (error: any) {
+      return { error: error.message || 'Registration failed' };
     }
-
-    return { error: null };
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setCurrentChildId(null);
-    setPending2FA(false);
+    try {
+      await api.post('/auth/logout', {});
+    } catch (error) {
+      // Ignore errors during logout
+      console.warn('Logout error:', error);
+    } finally {
+      // Always clear local state
+      localStorage.removeItem('kivara_token');
+      localStorage.removeItem('kivara_refresh_token');
+      localStorage.removeItem('kivara_tenant_id');
+      setUser(null);
+      setSession(null);
+      setCurrentChildId(null);
+      setPending2FA(false);
+    }
   };
 
   // ── Idle timeout ──
