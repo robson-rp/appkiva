@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 
 export interface MoneySupplyStats {
   total_emitted: number;
@@ -17,10 +17,9 @@ export function useMoneySupply() {
   return useQuery({
     queryKey: ['money-supply-stats'],
     queryFn: async (): Promise<MoneySupplyStats> => {
-      const { data, error } = await supabase.rpc('get_money_supply_stats');
-      if (error) throw error;
-      return data as unknown as MoneySupplyStats;
+      const data = await api.get<{ money_supply: MoneySupplyStats }>('/admin/stats');
+      return data.money_supply;
     },
-    refetchInterval: 30000, // refresh every 30s
+    refetchInterval: 30000,
   });
 }

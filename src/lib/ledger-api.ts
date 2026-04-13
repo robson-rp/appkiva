@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 
 export type LedgerEntryType =
   | 'allowance'
@@ -43,17 +43,7 @@ export async function createTransaction(req: CreateTransactionRequest): Promise<
     idempotency_key: req.idempotency_key || generateIdempotencyKey(),
   };
 
-  const { data, error } = await supabase.functions.invoke('create-transaction', {
-    body: requestWithKey,
-  });
+  const data = await api.post<CreateTransactionResponse>('/wallets/transactions', requestWithKey);
 
-  if (error) {
-    throw new Error(error.message || 'Erro ao criar transacção');
-  }
-
-  if (data?.error) {
-    throw new Error(data.error);
-  }
-
-  return data as CreateTransactionResponse;
+  return data;
 }

@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function useNativePush() {
@@ -32,16 +32,11 @@ export function useNativePush() {
     const tokenListener = PushNotifications.addListener('registration', async (token) => {
       const platform = Capacitor.getPlatform() as 'ios' | 'android';
       
-      // Upsert the device token
-      await supabase.from('push_device_tokens' as any).upsert(
-        {
-          profile_id: user.profileId,
-          platform,
-          token: token.value,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'profile_id,token' }
-      );
+      // Store the device token
+      await api.post('/push/device-tokens', {
+        platform,
+        token: token.value,
+      });
     });
 
     // Handle registration errors

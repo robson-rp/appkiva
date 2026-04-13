@@ -1,9 +1,9 @@
 /**
  * Smart Notification Helpers — KIVARA
  * Typed, personalised notification creators with Kivo mascot personality.
- * Includes throttle engine to prevent notification fatigue.
+ * Backend handles throttle engine to prevent notification fatigue.
  */
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 
 type NotifCategory =
   | 'task'
@@ -25,60 +25,22 @@ interface NotifPayload {
   metadata?: Record<string, any>;
 }
 
-// ─── Throttle Engine ───────────────────────────────────────────
-
-/** Check if a profile can still receive notifications today */
-async function canSendNotification(profileId: string): Promise<boolean> {
-  try {
-    const { data, error } = await supabase.rpc('check_notification_throttle', {
-      _profile_id: profileId,
-    });
-    if (error) {
-      console.warn('[notify] throttle check failed, allowing:', error.message);
-      return true; // fail-open
-    }
-    return data === true;
-  } catch {
-    return true;
-  }
-}
-
-/** Log a sent notification for throttle tracking */
-async function logNotification(profileId: string, notificationId?: string) {
-  const { error } = await supabase.from('notification_log' as any).insert({
-    profile_id: profileId,
-    notification_id: notificationId ?? null,
-  });
-  if (error) console.warn('[notify] log insert failed:', error.message);
-}
-
 // ─── Core Send ─────────────────────────────────────────────────
 
-/** Low-level send with throttle check */
+/** Low-level send (backend handles throttle check) */
 export async function send(payload: NotifPayload) {
-  // Check throttle
-  const allowed = await canSendNotification(payload.profileId);
-  if (!allowed) {
-    console.info('[notify] throttled for', payload.profileId);
-    return;
+  try {
+    await api.post('/notifications', {
+      profile_id: payload.profileId,
+      title: payload.title,
+      message: payload.message,
+      type: payload.type,
+      urgent: payload.urgent ?? false,
+      metadata: payload.metadata ?? {},
+    });
+  } catch (error) {
+    console.error('[notify]', error);
   }
-
-  const { data, error } = await supabase.from('notifications').insert({
-    profile_id: payload.profileId,
-    title: payload.title,
-    message: payload.message,
-    type: payload.type,
-    urgent: payload.urgent ?? false,
-    metadata: payload.metadata ?? {},
-  }).select('id').single();
-
-  if (error) {
-    console.error('[notify]', error.message);
-    return;
-  }
-
-  // Log for throttle tracking
-  await logNotification(payload.profileId, data?.id);
 }
 
 /** createNotification for backward compat (accepts type as string) */

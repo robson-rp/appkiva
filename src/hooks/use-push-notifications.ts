@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 const VAPID_PUBLIC_KEY_STORAGE = 'kivara-vapid-public';
@@ -22,12 +22,10 @@ export function usePushNotifications() {
       setPermission(perm);
       if (perm !== 'granted') return false;
 
-      // Fetch VAPID public key from edge function
-      const { data: keyData } = await supabase.functions.invoke('send-push-notification', {
-        body: { action: 'get-vapid-key' },
-      });
+      // Fetch VAPID public key from backend
+      const { data: keyData } = await api.get('/push/vapid-key');
 
-      if (!keyData?.vapidPublicKey) {
+      if (!keyData?.vapid_public_key) {
         console.error('VAPID public key not available');
         return false;
       }
@@ -35,22 +33,16 @@ export function usePushNotifications() {
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(keyData.vapidPublicKey),
+        applicationServerKey: urlBase64ToUint8Array(keyData.vapid_public_key),
       });
 
       const subJson = subscription.toJSON();
 
-      const { error } = await supabase.from('push_subscriptions' as any).upsert(
-        {
-          profile_id: user.profileId,
-          endpoint: subJson.endpoint!,
-          p256dh: subJson.keys!.p256dh,
-          auth: subJson.keys!.auth,
-        },
-        { onConflict: 'profile_id,endpoint' }
-      );
-
-      if (error) throw error;
+      await api.post('/push/subscriptions', {
+        endpoint: subJson.endpoint!,
+        p256dh: subJson.keys!.p256dh,
+        auth: subJson.keys!.auth,
+      });
       return true;
     } catch (e) {
       console.error('Push subscription failed:', e);
