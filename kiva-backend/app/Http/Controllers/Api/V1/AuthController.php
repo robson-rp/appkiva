@@ -72,6 +72,7 @@ class AuthController extends Controller
         return response()->json([
             'token'         => $result['token'],
             'refresh_token' => $result['refresh_token'],
+            'tenant_id'     => $profile?->tenant_id,
             'profile'       => $profile ? new UserProfileResource($profile->load('user')) : null,
         ]);
     }

@@ -154,9 +154,11 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('diary', \App\Http\Controllers\Api\V1\DiaryController::class);
 
         // Tenants & Subscriptions
-        Route::get('/subscription',          [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'current']);
-        Route::get('/subscription/tiers',    [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'tiers']);
-        Route::get('/subscription/invoices', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'invoices']);
+        Route::get('/subscription',              [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'current']);
+        Route::get('/subscription/tiers',        [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'tiers']);
+        Route::get('/subscription/invoices',     [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'invoices']);
+        Route::post('/subscription/subscribe',   [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'subscribe']);
+        Route::post('/subscription/cancel',      [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'cancelSubscription']);
 
         // Partner Programs
         Route::apiResource('partner-programs', \App\Http\Controllers\Api\V1\ProgramController::class)

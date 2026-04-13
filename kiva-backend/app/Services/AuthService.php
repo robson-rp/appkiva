@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Profile;
+use App\Models\Tenant;
 use App\Models\Household;
 use App\Models\HouseholdGuardian;
 use App\Models\Child;
@@ -24,34 +25,50 @@ class AuthService
                 'password' => $data['password'],
             ]);
 
-            // Assign role
             $role = $data['role'] ?? 'parent';
             $user->assignRole($role);
 
-            // Create household if parent and tenant is provided
+            // Resolve or auto-create a tenant for standalone registrations
+            $tenantId = $data['tenant_id'] ?? (app()->bound('current_tenant') ? app('current_tenant')->id : null);
+
+            if (! $tenantId && in_array($role, ['parent', 'teacher', 'partner'])) {
+                $baseName   = strip_tags($data['display_name']);
+                $baseSlug   = Str::slug($baseName . '-' . Str::random(6));
+                $tenantType = match ($role) {
+                    'teacher' => 'school',
+                    'partner' => 'partner',
+                    default   => 'family',
+                };
+                $tenant   = Tenant::create([
+                    'name'        => $baseName . "'s Space",
+                    'slug'        => $baseSlug,
+                    'tenant_type' => $tenantType,
+                    'currency'    => 'EUR',
+                    'is_active'   => true,
+                ]);
+                $tenantId = $tenant->id;
+            }
+
             $household = null;
-            if ($role === 'parent') {
-                $tenantId = $data['tenant_id'] ?? (app()->bound('current_tenant') ? app('current_tenant')->id : null);
-                if ($tenantId) {
-                    $household = Household::create([
-                        'name'      => strip_tags($data['household_name'] ?? $data['display_name'] . "'s Family"),
-                        'tenant_id' => $tenantId,
-                    ]);
-                }
+            if ($role === 'parent' && $tenantId) {
+                $household = Household::create([
+                    'name'      => strip_tags($data['household_name'] ?? $data['display_name'] . "'s Family"),
+                    'tenant_id' => $tenantId,
+                ]);
             }
 
             $profile = Profile::create([
                 'user_id'          => $user->id,
                 'display_name'     => strip_tags($data['display_name']),
-                'username'         => strip_tags($data['username'] ?? null),
+                'username'         => isset($data['username']) && $data['username'] !== '' ? strip_tags($data['username']) : null,
                 'language'         => $data['language'] ?? 'pt',
                 'country'          => $data['country'] ?? 'PT',
                 'household_id'     => $household?->id,
-                'tenant_id'        => $data['tenant_id'] ?? null,
-                'phone'            => strip_tags($data['phone'] ?? null),
-                'gender'           => strip_tags($data['gender'] ?? null),
-                'sector'           => strip_tags($data['sector'] ?? null),
-                'institution_name' => strip_tags($data['institution_name'] ?? null),
+                'tenant_id'        => $tenantId,
+                'phone'            => isset($data['phone']) && $data['phone'] !== '' ? strip_tags($data['phone']) : null,
+                'gender'           => isset($data['gender']) && $data['gender'] !== '' ? strip_tags($data['gender']) : null,
+                'sector'           => isset($data['sector']) && $data['sector'] !== '' ? strip_tags($data['sector']) : null,
+                'institution_name' => isset($data['institution_name']) && $data['institution_name'] !== '' ? strip_tags($data['institution_name']) : null,
             ]);
 
             if ($household) {

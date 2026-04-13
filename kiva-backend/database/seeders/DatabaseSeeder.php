@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Badge;
 use App\Models\SubscriptionTier;
 use App\Models\SupportedCurrency;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Profile;
 use App\Models\Household;
@@ -80,26 +81,37 @@ class DatabaseSeeder extends Seeder
             return;
         }
 
+        $demoTenant = Tenant::firstOrCreate(['slug' => 'kivara-demo'], [
+            'name'        => 'KIVARA Demo',
+            'tenant_type' => 'family',
+            'currency'    => 'EUR',
+            'is_active'   => true,
+        ]);
+
         $adminUser = User::firstOrCreate(['email' => 'admin@kivara.local'], [
             'password' => bcrypt('AdminPass123!'),
         ]);
         $adminUser->assignRole('admin');
-        $adminProfile = Profile::firstOrCreate(['user_id' => $adminUser->id], [
+        Profile::firstOrCreate(['user_id' => $adminUser->id], [
             'display_name' => 'KIVARA Admin',
             'language'     => 'pt',
             'country'      => 'PT',
+            'tenant_id'    => $demoTenant->id,
         ]);
 
         $parentUser = User::firstOrCreate(['email' => 'parent@kivara.local'], [
             'password' => bcrypt('ParentPass123!'),
         ]);
         $parentUser->assignRole('parent');
-        $household = Household::firstOrCreate(['name' => 'Demo Family']);
+        $household = Household::firstOrCreate(
+            ['name' => 'Demo Family', 'tenant_id' => $demoTenant->id],
+        );
         $parentProfile = Profile::firstOrCreate(['user_id' => $parentUser->id], [
             'display_name' => 'Demo Parent',
             'household_id' => $household->id,
             'language'     => 'pt',
             'country'      => 'PT',
+            'tenant_id'    => $demoTenant->id,
         ]);
 
         HouseholdGuardian::firstOrCreate(

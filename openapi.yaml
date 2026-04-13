@@ -4,11 +4,10 @@ info:
   version: 1.0.0
   description: |
     API REST para a plataforma KIVARA — educação financeira para famílias, escolas e parceiros.
-    Migração de Supabase/PostgREST para Laravel. Segue os módulos do plano de migração.
 servers:
   - url: https://api.kivara.app/v1
     description: Produção
-  - url: http://localhost:8000/api/v1
+  - url: https://kiva-backend.test/api/v1
     description: Desenvolvimento local
 security:
   - BearerAuth: []
@@ -50,6 +49,21 @@ tags:
   - name: Admin
     description: Administração da plataforma
 paths:
+  /status:
+    get:
+      tags: [Auth]
+      summary: Estado da API
+      security: []
+      responses:
+        '200':
+          description: API operacional
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
   /auth/register:
     post:
       tags: [Auth]
@@ -98,6 +112,11 @@ paths:
                     type: string
                   refresh_token:
                     type: string
+                  tenant_id:
+                    type: string
+                    format: uuid
+                    nullable: true
+                    description: ID do tenant do utilizador. Usar como header X-Tenant-ID em todos os pedidos autenticados.
                   profile:
                     $ref: '#/components/schemas/UserProfile'
         '400':
@@ -203,6 +222,29 @@ paths:
                     $ref: '#/components/schemas/UserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
+    patch:
+      tags: [Auth]
+      summary: Actualizar utilizador autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /auth/child-login:
     post:
       tags: [Auth]
@@ -278,51 +320,12 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-  /profiles/me:
-    get:
-      tags: [Profiles]
-      summary: Obter perfil do utilizador autenticado
-      responses:
-        '200':
-          description: Perfil do utilizador
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/UserProfile'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-    put:
-      tags: [Profiles]
-      summary: Actualizar perfil do utilizador autenticado
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateProfileRequest'
-      responses:
-        '200':
-          description: Perfil actualizado
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/UserProfile'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-  /profiles/{profileId}:
+  /profiles/{id}:
     get:
       tags: [Profiles]
       summary: Obter perfil por ID
       parameters:
-        - name: profileId
+        - name: id
           in: path
           required: true
           schema:
@@ -344,23 +347,36 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-    delete:
+    patch:
       tags: [Profiles]
-      summary: Eliminar perfil
+      summary: Actualizar perfil por ID
       parameters:
-        - name: profileId
+        - name: id
           in: path
           required: true
           schema:
             type: string
             format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
-        '204':
-          description: Perfil eliminado
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
   /profiles/avatar:
@@ -592,6 +608,33 @@ paths:
                     $ref: '#/components/schemas/Household'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /households/{householdId}/guardians:
+    get:
+      tags: [Households]
+      summary: Listar guardiões do agregado familiar
+      parameters:
+        - name: householdId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de guardiões
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -1474,6 +1517,43 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+  /wallets/transactions:
+    post:
+      tags: [Wallets]
+      summary: Criar transação manual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [wallet_id, amount, type]
+              properties:
+                wallet_id:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                type:
+                  type: string
+                  enum: [credit, debit]
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Transação criada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /rewards:
     post:
       tags: [Rewards]
@@ -1639,7 +1719,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /budget-exceptions:
+  /wallets/budget-exceptions:
     get:
       tags: [Rewards]
       summary: Listar excepções de orçamento
@@ -1695,12 +1775,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-  /budget-exceptions/{exceptionId}/resolve:
-    put:
+  /wallets/budget-exceptions/{id}:
+    patch:
       tags: [Rewards]
       summary: Resolver excepção de orçamento
       parameters:
-        - name: exceptionId
+        - name: id
           in: path
           required: true
           schema:
@@ -2331,6 +2411,22 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+  /allowances/process:
+    post:
+      tags: [Allowances]
+      summary: Processar mesadas pendentes (cron/manual)
+      responses:
+        '200':
+          description: Processamento executado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /lessons:
     get:
       tags: [Education]
@@ -2530,6 +2626,68 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+  /lessons/{lessonId}/progress:
+    get:
+      tags: [Education]
+      summary: Obter progresso de uma lição específica
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Progresso da lição
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Education]
+      summary: Registar progresso de uma lição
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                step:
+                  type: integer
+                percentage:
+                  type: number
+      responses:
+        '200':
+          description: Progresso registado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /badges:
     get:
       tags: [Gamification]
@@ -2562,13 +2720,20 @@ paths:
     post:
       tags: [Gamification]
       summary: Criar badge (admin)
-      description: Apenas para administradores.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Badge'
+              type: object
+              required: [name, description]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                icon:
+                  type: string
       responses:
         '201':
           description: Badge criado
@@ -2583,8 +2748,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
   /badges/progress:
     get:
       tags: [Gamification]
@@ -2646,6 +2809,74 @@ paths:
                     $ref: '#/components/schemas/Streak'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /streaks/activity:
+    post:
+      tags: [Gamification]
+      summary: Registar actividade de streak
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                activity_type:
+                  type: string
+      responses:
+        '200':
+          description: Actividade registada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /kiva-points:
+    get:
+      tags: [Gamification]
+      summary: Obter pontos Kiva do utilizador autenticado
+      responses:
+        '200':
+          description: Pontos Kiva
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      points:
+                        type: integer
+                      level:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /leaderboard/household:
+    get:
+      tags: [Gamification]
+      summary: Leaderboard do agregado familiar
+      responses:
+        '200':
+          description: Ranking do agregado familiar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /notifications:
     get:
       tags: [Notifications]
@@ -2704,7 +2935,118 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-  /notifications/read-all:
+  /challenges/weekly:
+    get:
+      tags: [School]
+      summary: Listar desafios semanais activos
+      responses:
+        '200':
+          description: Desafios semanais
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /challenges/collective:
+    get:
+      tags: [School]
+      summary: Listar desafios colectivos
+      responses:
+        '200':
+          description: Desafios colectivos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [School]
+      summary: Criar desafio colectivo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Desafio criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /challenges/{id}/complete:
+    post:
+      tags: [School]
+      summary: Marcar desafio como completo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Desafio completo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /school/students:
+    get:
+      tags: [School]
+      summary: Listar todos os alunos da escola
+      responses:
+        '200':
+          description: Lista de alunos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /notifications/mark-all-read:
     post:
       tags: [Notifications]
       summary: Marcar todas as notificações como lidas
@@ -3507,7 +3849,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /subscription-tiers:
+  /subscription/tiers:
     get:
       tags: [Tenants]
       summary: Listar planos de subscrição disponíveis
@@ -3524,17 +3866,10 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/SubscriptionTier'
-  /tenants/{tenantId}/subscription:
+  /subscription:
     get:
       tags: [Tenants]
-      summary: Obter subscrição activa do tenant
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      summary: Obter subscrição activa do utilizador autenticado
       responses:
         '200':
           description: Subscrição activa
@@ -3544,24 +3879,13 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/SubscriptionTier'
+                    $ref: '#/components/schemas/Tenant'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /tenants/{tenantId}/subscribe:
+  /subscription/subscribe:
     post:
       tags: [Tenants]
-      summary: Subscrever plano para o tenant
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      summary: Subscrever plano
       requestBody:
         required: true
         content:
@@ -3582,21 +3906,12 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /tenants/{tenantId}/cancel-subscription:
+  /subscription/cancel:
     post:
       tags: [Tenants]
-      summary: Cancelar subscrição do tenant
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+      summary: Cancelar subscrição
       responses:
         '200':
           description: Subscrição cancelada
@@ -3607,23 +3922,15 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/Tenant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-  /tenants/{tenantId}/invoices:
+  /subscription/invoices:
     get:
       tags: [Tenants]
-      summary: Listar facturas do tenant
+      summary: Listar facturas do utilizador autenticado
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
         - name: page
           in: query
           schema:
@@ -3648,10 +3955,6 @@ paths:
                     $ref: '#/components/schemas/PaginatedMeta'
         '401':
           $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
   /partner-programs:
     post:
       tags: [Tenants]
@@ -3844,21 +4147,17 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-  /partner-invitations/accept:
+  /invite/program/{code}:
     post:
       tags: [Tenants]
       summary: Aceitar convite de programa de parceiro
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [code]
-              properties:
-                code:
-                  type: string
-                  description: Código único de convite
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Código único de convite
       responses:
         '200':
           description: Convite aceite
@@ -3875,6 +4174,52 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+  /invite/accept/{code}:
+    post:
+      tags: [Households]
+      summary: Aceitar convite de agregado familiar via código na URL
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Convite aceite
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Household'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /admin/stats:
+    get:
+      tags: [Admin]
+      summary: Estatísticas globais da plataforma (admin)
+      description: Apenas para administradores.
+      responses:
+        '200':
+          description: Estatísticas da plataforma
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /admin/tenants:
     get:
       tags: [Admin]
@@ -3911,6 +4256,88 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Admin]
+      summary: Criar tenant (admin)
+      description: Apenas para administradores.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /admin/tenants/{id}:
+    patch:
+      tags: [Admin]
+      summary: Actualizar tenant (admin)
+      description: Apenas para administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '200':
+          description: Tenant actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Admin]
+      summary: Eliminar tenant (admin)
+      description: Apenas para administradores.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Tenant eliminado
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /admin/users:
     get:
       tags: [Admin]
@@ -3944,9 +4371,38 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
   /admin/users/{userId}/roles:
-    post:
+    get:
       tags: [Admin]
-      summary: Atribuir papel a utilizador (admin)
+      summary: Obter papéis de utilizador (admin)
+      description: Apenas para administradores.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Papéis do utilizador
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserRole'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Admin]
+      summary: Definir papéis de utilizador (admin)
       description: Apenas para administradores.
       parameters:
         - name: userId
@@ -3962,8 +4418,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AssignRoleRequest'
       responses:
-        '201':
-          description: Papel atribuído
+        '200':
+          description: Papéis actualizados
           content:
             application/json:
               schema:
@@ -4019,13 +4475,13 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /admin/risk-flags/{flagId}/resolve:
-    put:
+  /admin/risk-flags/{id}:
+    patch:
       tags: [Admin]
       summary: Resolver flag de risco (admin)
       description: Apenas para administradores.
       parameters:
-        - name: flagId
+        - name: id
           in: path
           required: true
           schema:
@@ -4252,48 +4708,13 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /admin/login-banners/{bannerId}:
-    put:
-      tags: [Admin]
-      summary: Actualizar banner de login (admin)
-      description: Apenas para administradores.
-      parameters:
-        - name: bannerId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginBanner'
-      responses:
-        '200':
-          description: Banner actualizado
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/LoginBanner'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+  /admin/login-banners/{id}:
     delete:
       tags: [Admin]
       summary: Eliminar banner de login (admin)
       description: Apenas para administradores.
       parameters:
-        - name: bannerId
+        - name: id
           in: path
           required: true
           schema:
@@ -4391,6 +4812,404 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  # ── Rotas adicionais implementadas ──────────────────────────────────────────
+  /status:
+    get:
+      tags: [Auth]
+      summary: Estado da API
+      security: []
+      responses:
+        '200':
+          description: API operacional
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /households/{householdId}/guardians:
+    get:
+      tags: [Households]
+      summary: Listar guardiões do agregado familiar
+      parameters:
+        - name: householdId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de guardiões
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /invite/accept/{code}:
+    post:
+      tags: [Households]
+      summary: Aceitar convite de agregado familiar via URL
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Convite aceite
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Household'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /wallets/transactions:
+    post:
+      tags: [Wallets]
+      summary: Criar transacção manual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [wallet_id, amount, type]
+              properties:
+                wallet_id:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                type:
+                  type: string
+                  enum: [credit, debit]
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Transacção criada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /allowances/process:
+    post:
+      tags: [Allowances]
+      summary: Processar mesadas pendentes
+      responses:
+        '200':
+          description: Processamento executado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processed:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /lessons/{lessonId}/progress:
+    get:
+      tags: [Education]
+      summary: Obter progresso de uma lição específica
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Progresso da lição
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [Education]
+      summary: Registar progresso de uma lição
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                step:
+                  type: integer
+                percentage:
+                  type: number
+      responses:
+        '200':
+          description: Progresso registado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /kiva-points:
+    get:
+      tags: [Gamification]
+      summary: Obter pontos Kiva do utilizador autenticado
+      responses:
+        '200':
+          description: Pontos Kiva
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      points:
+                        type: integer
+                      level:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /leaderboard/household:
+    get:
+      tags: [Gamification]
+      summary: Leaderboard do agregado familiar
+      responses:
+        '200':
+          description: Ranking do agregado familiar
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /streaks/activity:
+    post:
+      tags: [Gamification]
+      summary: Registar actividade de streak
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                activity_type:
+                  type: string
+      responses:
+        '200':
+          description: Actividade registada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /challenges/weekly:
+    get:
+      tags: [School]
+      summary: Desafios semanais activos
+      responses:
+        '200':
+          description: Desafios semanais
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /challenges/collective:
+    get:
+      tags: [School]
+      summary: Listar desafios colectivos
+      responses:
+        '200':
+          description: Desafios colectivos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [School]
+      summary: Criar desafio colectivo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Desafio criado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /challenges/{id}/complete:
+    post:
+      tags: [School]
+      summary: Marcar desafio como completo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Desafio completo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /school/students:
+    get:
+      tags: [School]
+      summary: Listar todos os alunos da escola
+      responses:
+        '200':
+          description: Lista de alunos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/stats:
+    get:
+      tags: [Admin]
+      summary: Estatísticas globais da plataforma (admin)
+      description: Apenas para administradores.
+      responses:
+        '200':
+          description: Estatísticas da plataforma
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
 components:
   securitySchemes:
     BearerAuth:

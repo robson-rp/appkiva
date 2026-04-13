@@ -76,4 +76,29 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'Too many requests.'], 429);
             }
         });
+
+        // JWT exceptions — always return 401 instead of 500
+        $exceptions->render(function (\Lcobucci\JWT\Signer\InvalidKeyProvided $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
+
+        $exceptions->render(function (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Token inválido.'], 401);
+            }
+        });
+
+        $exceptions->render(function (\PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Token expirado.'], 401);
+            }
+        });
+
+        $exceptions->render(function (\PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
     })->create();
