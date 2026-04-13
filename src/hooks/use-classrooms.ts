@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface ClassroomRow {
@@ -33,13 +33,8 @@ export function useClassrooms() {
     queryKey: ['classrooms', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('classrooms')
-        .select('*')
-        .eq('teacher_profile_id', user!.profileId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as ClassroomRow[];
+      const data = await api.get<ClassroomRow[]>('/classrooms');
+      return data;
     },
   });
 }
@@ -49,26 +44,8 @@ export function useClassroomStudents(classroomId: string | null) {
     queryKey: ['classroom_students', classroomId],
     enabled: !!classroomId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('classroom_students')
-        .select('id, classroom_id, student_profile_id, added_at')
-        .eq('classroom_id', classroomId!);
-      if (error) throw error;
-
-      // Fetch profiles for each student
-      const profileIds = data.map(s => s.student_profile_id);
-      if (profileIds.length === 0) return [];
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar')
-        .in('id', profileIds);
-
-      const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
-      return data.map(s => ({
-        ...s,
-        profile: profileMap.get(s.student_profile_id) || { id: s.student_profile_id, display_name: 'Aluno', avatar: '👤' },
-      })) as ClassroomStudentRow[];
+      const data = await api.get<ClassroomStudentRow[]>(`/classrooms/${classroomId}/students`);
+      return data;
     },
   });
 }
@@ -78,25 +55,12 @@ export function useAllClassroomStudents(classroomIds: string[]) {
     queryKey: ['all_classroom_students', classroomIds],
     enabled: classroomIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('classroom_students')
-        .select('id, classroom_id, student_profile_id, added_at')
-        .in('classroom_id', classroomIds);
-      if (error) throw error;
-
-      const profileIds = [...new Set(data.map(s => s.student_profile_id))];
-      if (profileIds.length === 0) return [];
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar')
-        .in('id', profileIds);
-
-      const profileMap = new Map((profiles ?? []).map(p => [p.id, p]));
-      return data.map(s => ({
-        ...s,
-        profile: profileMap.get(s.student_profile_id) || { id: s.student_profile_id, display_name: 'Aluno', avatar: '👤' },
-      })) as ClassroomStudentRow[];
+      const allStudents: ClassroomStudentRow[] = [];
+      for (const classroomId of classroomIds) {
+        const students = await api.get<ClassroomStudentRow[]>(`/classrooms/${classroomId}/students`);
+        allStudents.push(...students);
+      }
+      return allStudents;
     },
   });
 }
@@ -106,13 +70,8 @@ export function useSchoolStudents(schoolTenantId: string | null) {
     queryKey: ['school_students', schoolTenantId],
     enabled: !!schoolTenantId,
     queryFn: async () => {
-      // Get all profiles linked to this school
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar')
-        .eq('school_tenant_id', schoolTenantId!);
-      if (error) throw error;
-      return data ?? [];
+      const data = await api.get<Array<{ id: string; display_name: string; avatar: string | null }>>('/school/students');
+      return data;
     },
   });
 }
@@ -121,12 +80,7 @@ export function useCreateClassroom() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { name: string; grade: string; icon: string; subject?: string; schedule?: string; description?: string; teacher_profile_id: string; school_tenant_id?: string }) => {
-      const { data, error } = await supabase
-        .from('classrooms')
-        .insert(params as any)
-        .select()
-        .single();
-      if (error) throw error;
+      const data = await api.post<ClassroomRow>('/classrooms', params);
       return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['classrooms'] }),
@@ -137,11 +91,7 @@ export function useUpdateClassroom() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; name?: string; grade?: string; icon?: string; subject?: string; schedule?: string; description?: string }) => {
-      const { error } = await supabase
-        .from('classrooms')
-        .update(updates as any)
-        .eq('id', id);
-      if (error) throw error;
+      await api.patch(`/classrooms/${id}`, updates);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['classrooms'] }),
   });
@@ -151,8 +101,7 @@ export function useDeleteClassroom() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('classrooms').delete().eq('id', id);
-      if (error) throw error;
+      await api.delete(`/classrooms/${id}`);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['classrooms'] });
@@ -165,9 +114,9 @@ export function useAddClassroomStudents() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ classroomId, studentProfileIds }: { classroomId: string; studentProfileIds: string[] }) => {
-      const rows = studentProfileIds.map(sid => ({ classroom_id: classroomId, student_profile_id: sid }));
-      const { error } = await supabase.from('classroom_students').insert(rows as any);
-      if (error) throw error;
+      for (const studentId of studentProfileIds) {
+        await api.post(`/classrooms/${classroomId}/students/${studentId}`, {});
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['classroom_students'] });
@@ -180,12 +129,7 @@ export function useRemoveClassroomStudent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ classroomId, studentProfileId }: { classroomId: string; studentProfileId: string }) => {
-      const { error } = await supabase
-        .from('classroom_students')
-        .delete()
-        .eq('classroom_id', classroomId)
-        .eq('student_profile_id', studentProfileId);
-      if (error) throw error;
+      await api.delete(`/classrooms/${classroomId}/students/${studentProfileId}`);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['classroom_students'] });
