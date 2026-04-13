@@ -5,7 +5,7 @@ import { Lock, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
 import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
@@ -22,17 +22,10 @@ export default function ResetPassword() {
   const [isRecovery, setIsRecovery] = useState(false);
 
   useEffect(() => {
-    // Listen for the PASSWORD_RECOVERY event from the URL hash
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setIsRecovery(true);
-      }
-    });
-    // Also check hash directly
-    if (window.location.hash.includes('type=recovery')) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('token') && params.has('email')) {
       setIsRecovery(true);
     }
-    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,15 +35,21 @@ export default function ResetPassword() {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+    try {
+      const params = new URLSearchParams(window.location.search);
+      await api.post('/auth/reset-password', {
+        token: params.get('token'),
+        email: params.get('email'),
+        password,
+        password_confirmation: password,
+      });
+      setSuccess(true);
+      setTimeout(() => navigate('/login', { replace: true }), 3000);
+    } catch (error: any) {
+      toast({ title: t('common.error'), description: error.response?.data?.message || error.message, variant: 'destructive' });
+    } finally {
       setSubmitting(false);
-      return;
     }
-    setSuccess(true);
-    setSubmitting(false);
-    setTimeout(() => navigate('/login', { replace: true }), 3000);
   };
 
   return (

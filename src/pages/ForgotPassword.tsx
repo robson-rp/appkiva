@@ -5,7 +5,7 @@ import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useT } from '@/contexts/LanguageContext';
 import kivaraLogoWhite from '@/assets/logo-kivara-white.svg';
 
@@ -19,32 +19,15 @@ export default function ForgotPassword() {
     e.preventDefault();
     setSubmitting(true);
 
-    // Check rate limit before sending
     try {
-      const { data: rateResult } = await supabase.functions.invoke('auth-guard', {
-        body: { action: 'check-reset-rate', email },
-      });
-      if (rateResult && !rateResult.allowed) {
-        // Still show generic success to prevent enumeration
-        setSent(true);
-        setSubmitting(false);
-        return;
-      }
-    } catch {
-      // If auth-guard unavailable, proceed
+      await api.post('/auth/forgot-password', { email });
+      setSent(true);
+    } catch (error) {
+      // Always show success to prevent email enumeration
+      setSent(true);
+    } finally {
+      setSubmitting(false);
     }
-
-    // Log the reset request
-    supabase.functions.invoke('auth-guard', {
-      body: { action: 'log-event', event_type: 'password_reset_requested', email },
-    }).catch(() => {});
-
-    await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    // Always show generic success regardless of whether email exists
-    setSent(true);
-    setSubmitting(false);
   };
 
   return (

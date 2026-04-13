@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import { Camera, Save, Loader2, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,31 +24,24 @@ export default function TeenProfile() {
   const [displayName, setDisplayName] = useState(user?.name || '');
 
   useEffect(() => {
-    if (!user?.id) return;
-    supabase
-      .from('profiles')
-      .select('avatar, display_name')
-      .eq('user_id', user.id)
-      .single()
+    if (!user?.profileId) return;
+    api.get(`/profiles/${user.profileId}`)
       .then(({ data }) => {
         if (data?.avatar) setAvatar(data.avatar);
         if (data?.display_name) setDisplayName(data.display_name);
       });
-  }, [user?.id]);
+  }, [user?.profileId]);
 
   const handleSave = async () => {
     if (!user?.profileId) return;
     setSaving(true);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ avatar, language: locale })
-      .eq('id', user.profileId);
-    setSaving(false);
-    if (error) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      await api.patch(`/profiles/${user.profileId}`, { avatar, language: locale });
       toast({ title: t('profile.updated') + ' 🎉' });
+    } catch (error: any) {
+      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
     }
+    setSaving(false);
   };
 
   return (
