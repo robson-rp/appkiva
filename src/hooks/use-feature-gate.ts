@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
@@ -33,69 +32,38 @@ interface FeatureGateResult {
   loading: boolean;
 }
 
+interface ApiSubscriptionResponse {
+  tier: {
+    name: string;
+    features: string[];
+  };
+  status: string;
+}
+
 /**
- * Shared hook that fetches features + subscribes to realtime tenant changes.
+ * Shared hook that fetches features from the current subscription.
  */
 function useFeatureQuery() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const tenantIdRef = useRef<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['feature-gate', user?.id],
     enabled: !!user,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 30000,
+    refetchInterval: 60000,
     queryFn: async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('user_id', user!.id)
-        .single();
+      const response = await api.get<ApiSubscriptionResponse>('/subscription');
 
-      if (!profile?.tenant_id) {
-        tenantIdRef.current = null;
-        return { features: [] as string[], tierName: 'Free', tenantId: null as string | null };
+      if (!response?.tier) {
+        return { features: [] as string[], tierName: 'Free' };
       }
-
-      tenantIdRef.current = profile.tenant_id;
-
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('subscription_tier_id, subscription_tiers(name, features)')
-        .eq('id', profile.tenant_id)
-        .single();
-
-      if (!tenant?.subscription_tiers) {
-        return { features: [] as string[], tierName: 'Free', tenantId: profile.tenant_id };
-      }
-
-      const tier = tenant.subscription_tiers as unknown as { name: string; features: string[] };
 
       return {
-        features: Array.isArray(tier.features) ? tier.features : [],
-        tierName: tier.name,
-        tenantId: profile.tenant_id,
+        features: Array.isArray(response.tier.features) ? response.tier.features : [],
+        tierName: response.tier.name,
       };
     },
   });
-
-  // Realtime: invalidate cache when tenant's subscription changes
-  const resolvedTenantId = data?.tenantId ?? tenantIdRef.current;
-  useEffect(() => {
-    if (!resolvedTenantId) return;
-    const channel = supabase
-      .channel(`tenant-sub-${resolvedTenantId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'tenants',
-        filter: `id=eq.${resolvedTenantId}`,
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ['feature-gate'] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [resolvedTenantId, queryClient]);
 
   return { data, isLoading };
 }
