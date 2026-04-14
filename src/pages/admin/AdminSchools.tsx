@@ -47,9 +47,15 @@ export default function AdminSchools() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (editSchool) {
-        await api.patch('/admin/tenants/' + editSchool.id, { name, subscription_tier_id: tierId || null, is_active: isActive });
+        await api.patch('/admin/tenants/' + editSchool.id, { name });
+        if (tierId !== (editSchool.subscription_tier_id || '')) {
+          await api.patch('/admin/tenants/' + editSchool.id + '/subscription', { subscription_tier_id: tierId || null });
+        }
+        if (isActive !== editSchool.is_active) {
+          await api.post('/admin/tenants/' + editSchool.id + (isActive ? '/activate' : '/deactivate'), {});
+        }
       } else {
-        await api.post('/admin/tenants', { name, tenant_type: 'school', subscription_tier_id: tierId || null, is_active: isActive, currency: 'AOA' });
+        await api.post('/admin/tenants', { name, tenant_type: 'school', subscription_tier_id: tierId || null, currency: 'AOA' });
       }
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-schools'] }); setDialogOpen(false); toast({ title: editSchool ? t('admin.schools.updated') : t('admin.schools.registered') }); },
@@ -57,7 +63,7 @@ export default function AdminSchools() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await api.patch('/admin/tenants/' + id, { is_active: false }); },
+    mutationFn: async (id: string) => { await api.post('/admin/tenants/' + id + '/deactivate', {}); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-schools'] }); setDeleteConfirm(null); toast({ title: t('admin.schools.deactivated') }); },
   });
 

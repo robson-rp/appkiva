@@ -164,7 +164,7 @@ export default function AdminBanners() {
   };
 
   const handleToggleActive = async (b: Banner) => {
-    await api.patch('/admin/login-banners/' + b.id, { is_active: !b.is_active });
+    await api.post('/admin/login-banners/' + b.id + '/toggle-active', {});
     fetchBanners();
   };
 
@@ -173,10 +173,12 @@ export default function AdminBanners() {
     const swapIdx = idx + direction;
     if (swapIdx < 0 || swapIdx >= banners.length) return;
     const other = banners[swapIdx];
-    await Promise.all([
-      api.patch('/admin/login-banners/' + b.id, { display_order: other.display_order }),
-      api.patch('/admin/login-banners/' + other.id, { display_order: b.display_order }),
-    ]);
+    await api.post('/admin/login-banners/reorder', {
+      items: [
+        { id: b.id, display_order: other.display_order },
+        { id: other.id, display_order: b.display_order },
+      ],
+    });
     fetchBanners();
   };
 

@@ -30,13 +30,13 @@ function CurrenciesTab() {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ code, is_active }: { code: string; is_active: boolean }) => { await api.patch('/admin/currencies/' + code, { is_active }); },
+    mutationFn: async ({ code }: { code: string }) => { await api.post('/admin/currencies/' + code + '/toggle-active', {}); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-currencies'] }); toast.success(t('admin.currencies.status_updated')); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (vals: { code: string; name: string; symbol: string; decimal_places: number }) => { await api.post('/admin/currencies', { ...vals, is_active: true }); },
+    mutationFn: async (vals: { code: string; name: string; symbol: string; decimal_places: number }) => { await api.post('/admin/currencies', vals); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-currencies'] }); toast.success(t('admin.currencies.created')); setAddOpen(false); setAddForm({ code: '', name: '', symbol: '', decimal_places: 2 }); },
     onError: (e: any) => toast.error(e.message),
   });
@@ -58,7 +58,7 @@ function CurrenciesTab() {
               <CardTitle className="text-sm font-medium">{c.code}</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant={c.is_active ? 'default' : 'outline'} className="text-xs">{c.is_active ? t('admin.currencies.active') : t('admin.currencies.inactive')}</Badge>
-                <Switch checked={c.is_active} onCheckedChange={(v) => toggleMutation.mutate({ code: c.code, is_active: v })} className="scale-75" />
+                <Switch checked={c.is_active} onCheckedChange={() => toggleMutation.mutate({ code: c.code })} className="scale-75" />
               </div>
             </CardHeader>
             <CardContent>

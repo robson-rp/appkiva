@@ -98,9 +98,9 @@ export default function AdminLessons() {
     }
   };
 
-  const toggleActive = async (id: string, current: boolean) => {
+  const toggleActive = async (id: string) => {
     try {
-      await api.patch('/lessons/' + id, { is_active: !current });
+      await api.post('/lessons/' + id + '/toggle-active', {});
       queryClient.invalidateQueries({ queryKey: ['lessons'] });
     } catch {}
   };
@@ -161,7 +161,7 @@ export default function AdminLessons() {
                   <TableCell><Badge variant="outline" className="text-xs">{(LESSON_CATEGORIES as any)[lesson.category]?.label || lesson.category}</Badge></TableCell>
                   <TableCell><Badge className={`text-xs border-0 ${(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.color || ''}`}>{(DIFFICULTY_CONFIG as any)[lesson.difficulty]?.label || lesson.difficulty}</Badge></TableCell>
                   <TableCell className="text-center font-mono text-sm">{lesson.kiva_points_reward}</TableCell>
-                  <TableCell className="text-center"><Switch checked={lesson.is_active} onCheckedChange={() => toggleActive(lesson.id, lesson.is_active)} /></TableCell>
+                  <TableCell className="text-center"><Switch checked={lesson.is_active} onCheckedChange={() => toggleActive(lesson.id)} /></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(lesson)}><Pencil className="h-3.5 w-3.5" /></Button>

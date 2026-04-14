@@ -40,7 +40,7 @@ export default function AdminRisk() {
 
   const resolveFlag = useMutation({
     mutationFn: async (flagId: string) => {
-      await api.patch('/admin/risk-flags/' + flagId, { resolved_at: new Date().toISOString(), resolution_notes: 'Resolvido pelo admin' });
+      await api.patch('/admin/risk-flags/' + flagId, { resolution_notes: 'Resolvido pelo admin' });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['risk-flags'] });
