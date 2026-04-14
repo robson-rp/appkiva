@@ -9,7 +9,7 @@ import { ArrowLeft, Wallet, Target, CheckCircle2, Trophy, TrendingUp, Clock, Coi
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useT } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useWalletBalance, useWalletTransactions } from '@/hooks/use-wallet';
 import { useBadgesWithProgress } from '@/hooks/use-badges';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,12 +22,7 @@ function useStudentProfile(studentProfileId?: string) {
     queryKey: ['student-profile', studentProfileId],
     queryFn: async () => {
       if (!studentProfileId) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar')
-        .eq('id', studentProfileId)
-        .single();
-      if (error) throw error;
+      const data = await api.get<any>('/profiles/' + studentProfileId);
       return data;
     },
     enabled: !!studentProfileId,
@@ -39,13 +34,7 @@ function useStudentTasks(studentProfileId?: string) {
     queryKey: ['student-tasks', studentProfileId],
     queryFn: async () => {
       if (!studentProfileId) return [];
-      const { data, error } = await supabase
-        .from('missions')
-        .select('*')
-        .eq('child_profile_id', studentProfileId)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      if (error) throw error;
+      const data = await api.get<any[]>('/tasks?profile_id=' + studentProfileId);
       return data ?? [];
     },
     enabled: !!studentProfileId,
@@ -57,11 +46,7 @@ function useStudentVaults(studentProfileId?: string) {
     queryKey: ['student-vaults', studentProfileId],
     queryFn: async () => {
       if (!studentProfileId) return [];
-      const { data, error } = await supabase
-        .from('dream_vaults')
-        .select('*')
-        .eq('profile_id', studentProfileId);
-      if (error) throw error;
+      const data = await api.get<any[]>('/vaults?profile_id=' + studentProfileId);
       return data ?? [];
     },
     enabled: !!studentProfileId,

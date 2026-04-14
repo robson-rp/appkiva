@@ -11,6 +11,10 @@ Route::prefix('v1')->group(function () {
         return response()->json(['message' => 'Every coin saved is a seed planted. Every seed planted is a future grown.']);
     });
 
+    // Deployment Hook (authenticated by token, not Sanctum)
+    Route::post('deployment-hook', [\App\Http\Controllers\DeploymentController::class, 'hook']);
+
+
     // Auth (public)
     Route::post('/auth/register',        [AuthController::class, 'register']);
     Route::post('/auth/login',           [AuthController::class, 'login'])->middleware('throttle:login');
@@ -101,6 +105,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/lessons/progress',                  [\App\Http\Controllers\Api\V1\LessonController::class, 'allProgress']);
         Route::get('/lessons/{lesson}/progress',         [\App\Http\Controllers\Api\V1\LessonController::class, 'getProgress'])->whereUuid('lesson');
         Route::post('/lessons/{lesson}/progress',        [\App\Http\Controllers\Api\V1\LessonController::class, 'recordProgress'])->whereUuid('lesson');
+        Route::post('/lessons/{lesson}/toggle-active',        [\App\Http\Controllers\Api\V1\LessonController::class, 'toggleActive'])->whereUuid('lesson');
         Route::post('/lessons/{lesson}/complete',        [\App\Http\Controllers\Api\V1\LessonController::class, 'complete'])->whereUuid('lesson');
 
         // Gamification
@@ -169,26 +174,34 @@ Route::prefix('v1')->group(function () {
 
         // Admin
         Route::prefix('admin')->middleware('role:admin')->group(function () {
-            Route::get('/stats',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'stats']);
-            Route::get('/users',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'users']);
-            Route::get('/users/{userId}/roles',           [\App\Http\Controllers\Api\V1\AdminController::class, 'getUserRoles'])->whereUuid('userId');
-            Route::put('/users/{userId}/roles',           [\App\Http\Controllers\Api\V1\AdminController::class, 'updateUserRoles'])->whereUuid('userId');
-            Route::get('/audit-log',                      [\App\Http\Controllers\Api\V1\AdminController::class, 'auditLog']);
-            Route::get('/risk-flags',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'riskFlags']);
-            Route::patch('/risk-flags/{id}',              [\App\Http\Controllers\Api\V1\AdminController::class, 'resolveRiskFlag'])->whereUuid('id');
-            Route::get('/currencies',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'currencies']);
-            Route::post('/currencies',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'storeCurrency']);
-            Route::get('/exchange-rates',                 [\App\Http\Controllers\Api\V1\AdminController::class, 'exchangeRates']);
-            Route::put('/exchange-rates/{id}',            [\App\Http\Controllers\Api\V1\AdminController::class, 'updateExchangeRate'])->whereUuid('id');
-            Route::get('/login-banners',                  [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);
-            Route::post('/login-banners',                 [\App\Http\Controllers\Api\V1\AdminController::class, 'storeLoginBanner']);
-            Route::delete('/login-banners/{id}',          [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyLoginBanner'])->whereUuid('id');
-            Route::get('/onboarding-steps',               [\App\Http\Controllers\Api\V1\AdminController::class, 'onboardingSteps']);
-            Route::put('/onboarding-steps/{id}',          [\App\Http\Controllers\Api\V1\AdminController::class, 'updateOnboardingStep'])->whereUuid('id');
-            Route::get('/tenants',                        [\App\Http\Controllers\Api\V1\AdminController::class, 'tenants']);
-            Route::post('/tenants',                       [\App\Http\Controllers\Api\V1\AdminController::class, 'storeTenant']);
-            Route::patch('/tenants/{id}',                 [\App\Http\Controllers\Api\V1\AdminController::class, 'updateTenant'])->whereUuid('id');
-            Route::delete('/tenants/{id}',                [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyTenant'])->whereUuid('id');
+            Route::get('/stats',                                   [\App\Http\Controllers\Api\V1\AdminController::class, 'stats']);
+            Route::get('/users',                                   [\App\Http\Controllers\Api\V1\AdminController::class, 'users']);
+            Route::get('/users/{userId}/roles',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'getUserRoles'])->whereUuid('userId');
+            Route::put('/users/{userId}/roles',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'updateUserRoles'])->whereUuid('userId');
+            Route::get('/audit-log',                               [\App\Http\Controllers\Api\V1\AdminController::class, 'auditLog']);
+            Route::get('/risk-flags',                              [\App\Http\Controllers\Api\V1\AdminController::class, 'riskFlags']);
+            Route::patch('/risk-flags/{id}',                       [\App\Http\Controllers\Api\V1\AdminController::class, 'resolveRiskFlag'])->whereUuid('id');
+            Route::get('/currencies',                              [\App\Http\Controllers\Api\V1\AdminController::class, 'currencies']);
+            Route::post('/currencies',                             [\App\Http\Controllers\Api\V1\AdminController::class, 'storeCurrency']);
+            Route::post('/currencies/{code}/toggle-active',        [\App\Http\Controllers\Api\V1\AdminController::class, 'toggleCurrencyActive']);
+            Route::get('/exchange-rates',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'exchangeRates']);
+            Route::put('/exchange-rates/{id}',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'updateExchangeRate'])->whereUuid('id');
+            Route::get('/login-banners',                           [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);
+            Route::post('/login-banners',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'storeLoginBanner']);
+            Route::post('/login-banners/reorder',                  [\App\Http\Controllers\Api\V1\AdminController::class, 'reorderLoginBanners']);
+            Route::patch('/login-banners/{id}',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'updateLoginBanner'])->whereUuid('id');
+            Route::post('/login-banners/{id}/toggle-active',       [\App\Http\Controllers\Api\V1\AdminController::class, 'toggleLoginBannerActive'])->whereUuid('id');
+            Route::delete('/login-banners/{id}',                   [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyLoginBanner'])->whereUuid('id');
+            Route::get('/onboarding-steps',                        [\App\Http\Controllers\Api\V1\AdminController::class, 'onboardingSteps']);
+            Route::put('/onboarding-steps/{id}',                   [\App\Http\Controllers\Api\V1\AdminController::class, 'updateOnboardingStep'])->whereUuid('id');
+            Route::get('/tenants',                                 [\App\Http\Controllers\Api\V1\AdminController::class, 'tenants']);
+            Route::post('/tenants',                                [\App\Http\Controllers\Api\V1\AdminController::class, 'storeTenant']);
+            Route::patch('/tenants/{id}',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'updateTenant'])->whereUuid('id');
+            Route::patch('/tenants/{id}/subscription',             [\App\Http\Controllers\Api\V1\AdminController::class, 'setTenantSubscription'])->whereUuid('id');
+            Route::post('/tenants/{id}/activate',                  [\App\Http\Controllers\Api\V1\AdminController::class, 'activateTenant'])->whereUuid('id');
+            Route::post('/tenants/{id}/deactivate',                [\App\Http\Controllers\Api\V1\AdminController::class, 'deactivateTenant'])->whereUuid('id');
+            Route::delete('/tenants/{id}',                         [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyTenant'])->whereUuid('id');
+            Route::post('/invoices/{id}/mark-paid',                [\App\Http\Controllers\Api\V1\AdminController::class, 'markInvoicePaid'])->whereUuid('id');
         });
     });
 });

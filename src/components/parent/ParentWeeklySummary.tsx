@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import CurrencyDisplay from '@/components/CurrencyDisplay';
 import { CalendarDays, CheckCircle, Target, TrendingUp, TrendingDown, Flame, RefreshCw, PiggyBank } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
@@ -39,11 +39,8 @@ export function ParentWeeklySummary({ householdId }: ParentWeeklySummaryProps) {
     if (!householdId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('weekly-summary', {
-        body: { householdId },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await api.post<{ children: ChildSummary[] }>('/weekly-summary', { householdId });
+      if ((data as any)?.error) throw new Error((data as any).error);
       setSummaries(data.children || []);
       setLoaded(true);
     } catch (err: any) {

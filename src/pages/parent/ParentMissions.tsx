@@ -14,7 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useHouseholdMissions, useCreateMission, useUpdateMission, useDeleteMission, type MissionType } from '@/hooks/use-missions';
 import { useChildren } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -105,11 +105,10 @@ export default function ParentMissions() {
   const handleAiSuggest = async () => {
     setAiLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('suggest-missions', {
-        body: { childAge: '8-12', missionType: type !== 'custom' ? type : undefined },
+      const data = await api.post<{ suggestions: any[] }>('/missions/suggest', {
+        childAge: '8-12', missionType: type !== 'custom' ? type : undefined,
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if ((data as any)?.error) throw new Error((data as any).error);
       setAiSuggestions(data.suggestions || []);
       setAiSuggestOpen(true);
     } catch (e: any) {

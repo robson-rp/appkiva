@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -39,18 +39,16 @@ export default function NotificationHistory() {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['admin-notifications-list', search, typeFilter],
     queryFn: async () => {
-      let query = supabase
-        .from('notifications')
-        .select('*, profiles!notifications_profile_id_fkey(display_name, avatar)')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (typeFilter !== 'all') query = query.eq('type', typeFilter);
-      if (search) query = query.or(`title.ilike.%${search}%,message.ilike.%${search}%`);
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data ?? [];
+      const data = await api.get<any[]>('/notifications');
+      let filtered = data ?? [];
+      if (typeFilter !== 'all') filtered = filtered.filter((n: any) => n.type === typeFilter);
+      if (search) {
+        const lower = search.toLowerCase();
+        filtered = filtered.filter((n: any) =>
+          n.title?.toLowerCase().includes(lower) || n.message?.toLowerCase().includes(lower)
+        );
+      }
+      return filtered.slice(0, 100);
     },
   });
 

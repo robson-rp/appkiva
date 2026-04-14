@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Bell, Send, Eye, AlertTriangle } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -8,23 +8,15 @@ export function useNotificationStats() {
   return useQuery({
     queryKey: ['admin-notification-stats'],
     queryFn: async () => {
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-
-      const [totalRes, todayRes, unreadRes, urgentRes, templatesRes] = await Promise.all([
-        supabase.from('notifications').select('id', { count: 'exact', head: true }),
-        supabase.from('notifications').select('id', { count: 'exact', head: true }).gte('created_at', today),
-        supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('read', false),
-        supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('urgent', true).eq('read', false),
-        (supabase as any).from('notification_templates').select('id', { count: 'exact', head: true }).eq('is_active', true),
-      ]);
-
+      const data = await api.get<{
+        total: number; today: number; unread: number; urgent: number; activeTemplates: number;
+      }>('/admin/stats');
       return {
-        total: totalRes.count ?? 0,
-        today: todayRes.count ?? 0,
-        unread: unreadRes.count ?? 0,
-        urgent: urgentRes.count ?? 0,
-        activeTemplates: templatesRes.count ?? 0,
+        total: data?.total ?? 0,
+        today: data?.today ?? 0,
+        unread: data?.unread ?? 0,
+        urgent: data?.urgent ?? 0,
+        activeTemplates: data?.activeTemplates ?? 0,
       };
     },
   });

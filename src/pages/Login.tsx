@@ -17,7 +17,7 @@ import { PasswordStrengthMeter } from '@/components/PasswordStrengthMeter';
 import { isPasswordValid } from '@/lib/password-validation';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
 import { PARTNER_SECTORS } from '@/data/partner-sectors';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import LoginBannerCarousel from '@/components/LoginBannerCarousel';
 import { useT, useLanguage } from '@/contexts/LanguageContext';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -176,25 +176,19 @@ export default function Login() {
 
   useEffect(() => {
     if (['teacher', 'parent', 'child', 'teen'].includes(selectedRole ?? '') && authMode === 'signup') {
-      supabase
-        .from('tenants')
-        .select('id, name')
-        .eq('tenant_type', 'school')
-        .eq('is_active', true)
-        .then(({ data }) => {
-          if (data) setSchools(data);
-        });
+      api.get<{ id: string; name: string }[]>('/tenants?tenant_type=school&is_active=true')
+        .then((data) => setSchools(data))
+        .catch(() => {});
     }
   }, [selectedRole, authMode]);
 
   useEffect(() => {
     if ((selectedRole === 'child' || selectedRole === 'teen') && inviteCode.length === 6) {
-      supabase.rpc('validate_invite_code', { _code: inviteCode }).then(({ data, error }) => {
-        if (error || !data) {
-          setInviteValid(false);
-          setInviteData(null);
-        } else {
-          const result = data as any;
+      api.post<{ valid: boolean; household_id: string; parent_profile_id: string; code_id: string }>(
+        '/invite/validate',
+        { code: inviteCode }
+      )
+        .then((result) => {
           setInviteValid(result.valid);
           if (result.valid) {
             setInviteData({
@@ -205,8 +199,11 @@ export default function Login() {
           } else {
             setInviteData(null);
           }
-        }
-      });
+        })
+        .catch(() => {
+          setInviteValid(false);
+          setInviteData(null);
+        });
     } else {
       setInviteValid(null);
       setInviteData(null);
@@ -287,9 +284,7 @@ export default function Login() {
             // Fire-and-forget: claim referral after a delay to let profile be created
             setTimeout(async () => {
               try {
-                await supabase.functions.invoke('claim-referral', {
-                  body: { referral_code: referralCode },
-                });
+                await api.post('/referrals/claim', { referral_code: referralCode });
               } catch {}
             }, 3000);
           }
@@ -320,13 +315,8 @@ export default function Login() {
             return;
           }
           if (requires2FA) {
-            try {
-              await supabase.auth.reauthenticate();
-              startTwoFACountdown();
-              toast({ title: t('twofa.code_sent'), description: email });
-            } catch (e) {
-              console.warn('reauthenticate error:', e);
-            }
+            startTwoFACountdown();
+            toast({ title: t('twofa.code_sent'), description: email });
             setSubmitting(false);
             return;
           }
@@ -343,42 +333,19 @@ export default function Login() {
     }
   };
 
-  // ── 2FA handlers ──
   const handleVerify2FA = async () => {
     if (twoFACode.length !== 6 || submitting) return;
     setSubmitting(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: { _2fa_verified_at: new Date().toISOString() },
-        nonce: twoFACode,
-      });
-
-      if (error) {
-        const newAttempts = twoFAAttempts + 1;
-        setTwoFAAttempts(newAttempts);
-        setTwoFACode('');
-
-        if (newAttempts >= 5) {
-          setTwoFALocked(true);
-          await supabase.auth.signOut();
-          complete2FA();
-          toast({ title: t('twofa.too_many_attempts'), description: t('twofa.try_again_later'), variant: 'destructive' });
-        } else {
-          toast({ title: t('twofa.invalid_code'), description: `${t('twofa.attempts_remaining')}: ${5 - newAttempts}`, variant: 'destructive' });
-        }
-        setSubmitting(false);
-        return;
-      }
+      await api.post('/auth/2fa/verify', { code: twoFACode });
 
       // 2FA verified successfully — trust device if checked
       if (twoFATrustDevice) {
         const token = crypto.randomUUID();
         localStorage.setItem('kivara_trusted_device', token);
         try {
-          await supabase.functions.invoke('verify-2fa', {
-            body: { action: 'trust-device', device_token: token },
-          });
+          await api.post('/auth/2fa/verify', { action: 'trust-device', device_token: token });
         } catch {
           // Non-critical failure
         }
@@ -387,7 +354,21 @@ export default function Login() {
       complete2FA();
       toast({ title: t('twofa.verified') });
     } catch {
-      toast({ title: t('auth.error_unexpected'), variant: 'destructive' });
+      const newAttempts = twoFAAttempts + 1;
+      setTwoFAAttempts(newAttempts);
+      setTwoFACode('');
+
+      if (newAttempts >= 5) {
+        setTwoFALocked(true);
+        try { await api.post('/auth/logout'); } catch {}
+        localStorage.removeItem('kivara_token');
+        localStorage.removeItem('kivara_refresh_token');
+        localStorage.removeItem('kivara_tenant_id');
+        complete2FA();
+        toast({ title: t('twofa.too_many_attempts'), description: t('twofa.try_again_later'), variant: 'destructive' });
+      } else {
+        toast({ title: t('twofa.invalid_code'), description: `${t('twofa.attempts_remaining')}: ${5 - newAttempts}`, variant: 'destructive' });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -396,7 +377,6 @@ export default function Login() {
   const handleResend2FA = async () => {
     if (twoFAResendCountdown > 0) return;
     try {
-      await supabase.auth.reauthenticate();
       startTwoFACountdown();
       setTwoFACode('');
       toast({ title: t('twofa.code_resent'), description: email });
@@ -406,7 +386,10 @@ export default function Login() {
   };
 
   const handleCancel2FA = async () => {
-    await supabase.auth.signOut();
+    try { await api.post('/auth/logout'); } catch {}
+    localStorage.removeItem('kivara_token');
+    localStorage.removeItem('kivara_refresh_token');
+    localStorage.removeItem('kivara_tenant_id');
     complete2FA();
     setTwoFACode('');
     setTwoFAAttempts(0);

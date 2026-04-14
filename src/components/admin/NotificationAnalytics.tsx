@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,48 +17,40 @@ function useNotificationAnalytics() {
   return useQuery({
     queryKey: ['notification-analytics'],
     queryFn: async (): Promise<AnalyticsData> => {
-      const { count: totalSent } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true });
+      try {
+        const stats = await api.get<any>('/admin/stats');
+        const totalSent: number = stats?.notifications_total ?? 0;
+        const totalRead: number = stats?.notifications_read ?? 0;
+        const readRate = totalSent > 0 ? Math.round((totalRead / totalSent) * 100) : 0;
 
-      const { count: totalRead } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('read', true);
+        const allNotifs: any[] = stats?.recent_notifications ?? [];
 
-      const sent = totalSent ?? 0;
-      const read = totalRead ?? 0;
-      const readRate = sent > 0 ? Math.round((read / sent) * 100) : 0;
+        const typeMap = new Map<string, number>();
+        const dailyMap = new Map<string, number>();
 
-      const { data: allNotifs } = await supabase
-        .from('notifications')
-        .select('type, created_at, read')
-        .order('created_at', { ascending: false })
-        .limit(1000);
+        for (const n of allNotifs) {
+          typeMap.set(n.type, (typeMap.get(n.type) || 0) + 1);
+          const day = (n.created_at ?? '').split('T')[0];
+          if (day) dailyMap.set(day, (dailyMap.get(day) || 0) + 1);
+        }
 
-      const typeMap = new Map<string, number>();
-      const dailyMap = new Map<string, number>();
+        const byType = Array.from(typeMap.entries())
+          .map(([type, count]) => ({ type, count }))
+          .sort((a, b) => b.count - a.count);
 
-      for (const n of allNotifs ?? []) {
-        typeMap.set(n.type, (typeMap.get(n.type) || 0) + 1);
-        const day = n.created_at.split('T')[0];
-        dailyMap.set(day, (dailyMap.get(day) || 0) + 1);
+        const today = new Date();
+        const dailyVolume: Array<{ date: string; count: number }> = [];
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(today);
+          d.setDate(d.getDate() - i);
+          const key = d.toISOString().split('T')[0];
+          dailyVolume.push({ date: key.slice(5), count: dailyMap.get(key) || 0 });
+        }
+
+        return { readRate, totalSent, totalRead, byType, dailyVolume };
+      } catch {
+        return { readRate: 0, totalSent: 0, totalRead: 0, byType: [], dailyVolume: [] };
       }
-
-      const byType = Array.from(typeMap.entries())
-        .map(([type, count]) => ({ type, count }))
-        .sort((a, b) => b.count - a.count);
-
-      const today = new Date();
-      const dailyVolume: Array<{ date: string; count: number }> = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        const key = d.toISOString().split('T')[0];
-        dailyVolume.push({ date: key.slice(5), count: dailyMap.get(key) || 0 });
-      }
-
-      return { readRate, totalSent: sent, totalRead: read, byType, dailyVolume };
     },
   });
 }

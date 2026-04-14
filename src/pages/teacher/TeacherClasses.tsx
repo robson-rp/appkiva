@@ -26,7 +26,7 @@ import {
   useAddClassroomStudents, useRemoveClassroomStudent,
 } from '@/hooks/use-classrooms';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 
 const CLASS_ICONS = ['🎓', '📚', '🌟', '🚀', '🧠', '💡', '🎨', '🔬', '📐', '🌍', '💰', '🎵'];
 
@@ -50,12 +50,7 @@ function useTeacherSchoolTenantId() {
     queryKey: ['teacher_school_tenant_id', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('school_tenant_id')
-        .eq('id', user!.profileId)
-        .single();
-      return data?.school_tenant_id ?? null;
+      return null;
     },
   });
 }

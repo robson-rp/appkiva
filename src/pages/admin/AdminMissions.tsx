@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Target, Plus, Pencil, Trash2, Loader2, BarChart3, Rocket, Settings2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -33,11 +33,7 @@ function useTemplates() {
   return useQuery({
     queryKey: ['mission-templates'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mission_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
+      const data = await api.get<MissionTemplate[]>('/mission-templates');
       return (data ?? []) as unknown as MissionTemplate[];
     },
   });
@@ -47,10 +43,7 @@ function useMissionAnalytics() {
   return useQuery({
     queryKey: ['mission-analytics'],
     queryFn: async () => {
-      const { data: all, error } = await supabase
-        .from('missions')
-        .select('status, type, difficulty, is_auto_generated, source');
-      if (error) throw error;
+      const all = await api.get<any[]>('/missions?fields=status,type,difficulty,is_auto_generated,source');
       const missions = all ?? [];
       const total = missions.length;
       const completed = missions.filter((m: any) => m.status === 'completed').length;
@@ -180,11 +173,9 @@ function TemplatesTab() {
         age_group: form.age_group,
       };
       if (editTemplate) {
-        const { error } = await supabase.from('mission_templates').update(payload as any).eq('id', editTemplate.id);
-        if (error) throw error;
+        await api.patch('/mission-templates/' + editTemplate.id, payload as any);
       } else {
-        const { error } = await supabase.from('mission_templates').insert(payload as any);
-        if (error) throw error;
+        await api.post('/mission-templates', payload as any);
       }
     },
     onSuccess: () => {
@@ -199,8 +190,7 @@ function TemplatesTab() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('mission_templates').delete().eq('id', id);
-      if (error) throw error;
+      await api.delete('/mission-templates/' + id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mission-templates'] });
@@ -311,10 +301,7 @@ function EngineTab() {
   const triggerGeneration = async (schedule: 'daily' | 'weekly') => {
     setRunning(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-missions', {
-        body: { schedule },
-      });
-      if (error) throw error;
+      const data = await api.post<{ generated?: number }>('/missions/generate', { schedule });
       toast.success(`${data?.generated ?? 0} missões geradas (${schedule})!`);
     } catch {
       toast.error('Erro ao gerar missões.');

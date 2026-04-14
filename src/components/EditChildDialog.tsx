@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import { useUpdateChild } from '@/hooks/use-children';
 import { useT } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 
 const AVATAR_OPTIONS = ['👧', '👦', '🧒', '👶', '🧒🏽', '👧🏾', '👦🏻', '👧🏼', '🧒🏿', '👦🏽', '🦊', '🐱', '🐶', '🦁', '🐼', '🐰'];
 
@@ -44,13 +44,8 @@ export default function EditChildDialog({ open, onOpenChange, child }: EditChild
   const { data: schools = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ['school-tenants'],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
-        .from('tenants')
-        .select('id, name')
-        .eq('type', 'school')
-        .order('name');
-      if (error) throw error;
-      return (data ?? []) as { id: string; name: string }[];
+      const data = await api.get<{ id: string; name: string; type?: string; tenant_type?: string }[]>('/admin/tenants');
+      return (data ?? []).filter((t: any) => t.type === 'school' || t.tenant_type === 'school') as { id: string; name: string }[];
     },
   });
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,15 +97,22 @@ export default function OnboardingStepManager() {
 
   const { data: steps = [], isLoading } = useQuery({
     queryKey: ['admin-onboarding-steps', selectedRole],
-    queryFn: async () => { const { data, error } = await supabase.from('onboarding_steps').select('*').eq('role', selectedRole).order('step_index', { ascending: true }); if (error) throw error; return (data ?? []) as StepRow[]; },
+    queryFn: async () => {
+      const data = await api.get<StepRow[]>('/admin/onboarding-steps?role=' + selectedRole);
+      return (data ?? []) as StepRow[];
+    },
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['admin-onboarding-steps', selectedRole] });
 
   const saveMutation = useMutation({
     mutationFn: async ({ id, values }: { id?: string; values: Partial<StepRow> }) => {
-      if (id) { const { error } = await supabase.from('onboarding_steps').update(values).eq('id', id); if (error) throw error; }
-      else { const newIndex = steps.length; const { error } = await supabase.from('onboarding_steps').insert([{ ...values, role: selectedRole, step_index: newIndex, title: values.title ?? '' }]); if (error) throw error; }
+      if (id) {
+        await api.put('/admin/onboarding-steps/' + id, values);
+      } else {
+        const newIndex = steps.length;
+        await api.post('/admin/onboarding-steps', { ...values, role: selectedRole, step_index: newIndex, title: values.title ?? '' });
+      }
     },
     onSuccess: () => { invalidate(); toast.success(t('admin.onboarding.step_saved')); },
     onError: (e: any) => toast.error(e.message),
@@ -113,9 +120,11 @@ export default function OnboardingStepManager() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('onboarding_steps').delete().eq('id', id); if (error) throw error;
+      await api.delete('/admin/onboarding-steps/' + id);
       const remaining = steps.filter(s => s.id !== id).sort((a, b) => a.step_index - b.step_index);
-      for (let i = 0; i < remaining.length; i++) { if (remaining[i].step_index !== i) await supabase.from('onboarding_steps').update({ step_index: i }).eq('id', remaining[i].id); }
+      for (let i = 0; i < remaining.length; i++) {
+        if (remaining[i].step_index !== i) await api.put('/admin/onboarding-steps/' + remaining[i].id, { step_index: i });
+      }
     },
     onSuccess: () => { invalidate(); toast.success(t('admin.onboarding.step_deleted')); },
     onError: (e: any) => toast.error(e.message),
@@ -124,9 +133,9 @@ export default function OnboardingStepManager() {
   const swapMutation = useMutation({
     mutationFn: async ({ a, b }: { a: StepRow; b: StepRow }) => {
       const tempIndex = 9999;
-      await supabase.from('onboarding_steps').update({ step_index: tempIndex }).eq('id', a.id);
-      await supabase.from('onboarding_steps').update({ step_index: a.step_index }).eq('id', b.id);
-      await supabase.from('onboarding_steps').update({ step_index: b.step_index }).eq('id', a.id);
+      await api.put('/admin/onboarding-steps/' + a.id, { step_index: tempIndex });
+      await api.put('/admin/onboarding-steps/' + b.id, { step_index: a.step_index });
+      await api.put('/admin/onboarding-steps/' + a.id, { step_index: b.step_index });
     },
     onSuccess: () => invalidate(),
     onError: (e: any) => toast.error(e.message),
@@ -135,10 +144,9 @@ export default function OnboardingStepManager() {
   const duplicateMutation = useMutation({
     mutationFn: async ({ step, targetRoles }: { step: StepRow; targetRoles: string[] }) => {
       for (const role of targetRoles) {
-        const { data: existing } = await supabase.from('onboarding_steps').select('step_index').eq('role', role).order('step_index', { ascending: false }).limit(1);
-        const nextIndex = (existing && existing.length > 0 ? existing[0].step_index + 1 : 0);
-        const { error } = await supabase.from('onboarding_steps').insert([{ role, step_index: nextIndex, title: step.title, description: step.description, illustration_key: step.illustration_key, cta: step.cta, is_active: step.is_active }]);
-        if (error) throw error;
+        const existing = await api.get<any[]>('/admin/onboarding-steps?role=' + role);
+        const nextIndex = (existing && existing.length > 0 ? existing[existing.length - 1].step_index + 1 : 0);
+        await api.post('/admin/onboarding-steps', { role, step_index: nextIndex, title: step.title, description: step.description, illustration_key: step.illustration_key, cta: step.cta, is_active: step.is_active });
       }
     },
     onSuccess: (_, { targetRoles }) => {

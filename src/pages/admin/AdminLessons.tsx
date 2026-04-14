@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAllLessons } from '@/hooks/use-lessons';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { LESSON_CATEGORIES, DIFFICULTY_CONFIG } from '@/types/kivara';
@@ -61,8 +61,7 @@ export default function AdminLessons() {
   const handleAiGenerate = async () => {
     setAiLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-lesson', { body: { category: aiCategory, difficulty: aiDifficulty, topic: aiTopic || undefined } });
-      if (error) throw error;
+      const data = await api.post<any>('/lessons/generate', { category: aiCategory, difficulty: aiDifficulty, topic: aiTopic || undefined });
       if (data?.error) throw new Error(data.error);
       const lesson = data.lesson;
       setEditingId(null);
@@ -79,12 +78,10 @@ export default function AdminLessons() {
       const blocks = JSON.parse(form.blocks); const quiz = JSON.parse(form.quiz);
       const payload = { title: form.title, description: form.description, icon: form.icon, category: form.category, difficulty: form.difficulty, estimated_minutes: form.estimated_minutes, kiva_points_reward: form.kiva_points_reward, sort_order: form.sort_order, is_active: form.is_active, blocks, quiz };
       if (editingId) {
-        const { error } = await supabase.from('lessons').update(payload).eq('id', editingId);
-        if (error) throw error;
+        await api.patch('/lessons/' + editingId, payload);
         toast({ title: t('admin.lessons.updated') });
       } else {
-        const { error } = await supabase.from('lessons').insert(payload);
-        if (error) throw error;
+        await api.post('/lessons', payload);
         toast({ title: t('admin.lessons.created') });
       }
       queryClient.invalidateQueries({ queryKey: ['lessons'] }); setDialogOpen(false);
@@ -92,14 +89,20 @@ export default function AdminLessons() {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('lessons').delete().eq('id', id);
-    if (error) { toast({ title: t('admin.lessons.delete_error'), description: error.message, variant: 'destructive' }); }
-    else { toast({ title: t('admin.lessons.deleted') }); queryClient.invalidateQueries({ queryKey: ['lessons'] }); }
+    try {
+      await api.delete('/lessons/' + id);
+      toast({ title: t('admin.lessons.deleted') });
+      queryClient.invalidateQueries({ queryKey: ['lessons'] });
+    } catch (e: any) {
+      toast({ title: t('admin.lessons.delete_error'), description: e.message, variant: 'destructive' });
+    }
   };
 
   const toggleActive = async (id: string, current: boolean) => {
-    const { error } = await supabase.from('lessons').update({ is_active: !current }).eq('id', id);
-    if (!error) queryClient.invalidateQueries({ queryKey: ['lessons'] });
+    try {
+      await api.patch('/lessons/' + id, { is_active: !current });
+      queryClient.invalidateQueries({ queryKey: ['lessons'] });
+    } catch {}
   };
 
   const catEntries = Object.entries(LESSON_CATEGORIES);

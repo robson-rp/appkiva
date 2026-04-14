@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useSubscriptionTiers, useUpgradeSubscription } from '@/hooks/use-subscription';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -122,19 +122,20 @@ export function FeatureGateWrapper({ allowed, featureName, description, tierName
     if (!user?.householdId || !user?.profileId) return;
     setRequesting(true);
     try {
-      const { data: parentProfiles } = await supabase.from('profiles').select('id').eq('household_id', user.householdId).neq('id', user.profileId);
-      if (!parentProfiles?.length) {
+      const parentProfiles = await api.get<{ id: string }[]>('/profiles?household_id=' + user.householdId);
+      const filtered = (parentProfiles ?? []).filter(p => p.id !== user.profileId);
+      if (!filtered.length) {
         toast({ title: t('common.error'), description: t('upgrade.request_error'), variant: 'destructive' });
         return;
       }
-      for (const parent of parentProfiles) {
-        await supabase.from('notifications').insert({
+      for (const parent of filtered) {
+        await api.post('/notifications', {
           profile_id: parent.id,
           title: t('upgrade.request_title'),
           message: t('upgrade.request_msg').replace('{name}', user.name ?? '').replace('{feature}', featureName),
           type: 'achievement', urgent: true,
           metadata: { feature: featureName, requester_profile_id: user.profileId, requester_name: user.name },
-        } as any);
+        });
       }
       toast({ title: t('upgrade.request_sent'), description: t('upgrade.request_sent_desc') });
     } catch {

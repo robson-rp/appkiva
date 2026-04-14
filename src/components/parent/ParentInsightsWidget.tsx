@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Brain, RefreshCw, AlertTriangle, Lightbulb, ThumbsUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 import { differenceInYears } from 'date-fns';
@@ -50,16 +50,13 @@ export function ParentInsightsWidget({ children }: ParentInsightsWidgetProps) {
         ? differenceInYears(new Date(), new Date(child.dateOfBirth))
         : undefined;
 
-      const { data, error } = await supabase.functions.invoke('generate-insights', {
-        body: {
-          childProfileId: child.profileId,
-          childName: child.displayName,
-          childAge,
-        },
+      const data = await api.post<{ insights: Insight[] }>('/insights/generate', {
+        childProfileId: child.profileId,
+        childName: child.displayName,
+        childAge,
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if ((data as any)?.error) throw new Error((data as any).error);
 
       setInsights(data.insights || []);
       setGenerated(true);

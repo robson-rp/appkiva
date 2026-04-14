@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRewards, useCreateReward, useDeleteReward, type RewardCategory } from '@/hooks/use-rewards';
 import { useT } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
@@ -81,11 +81,8 @@ export default function ParentRewards() {
     setAiLoading(true);
     setAiSuggestions([]);
     try {
-      const { data, error } = await supabase.functions.invoke('suggest-rewards', {
-        body: { childAge: '8-12' },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await api.post<{ suggestions: AISuggestion[] }>('/rewards/suggest', { childAge: '8-12' });
+      if ((data as any)?.error) throw new Error((data as any).error);
       setAiSuggestions(data.suggestions ?? []);
     } catch (err) {
       toast({

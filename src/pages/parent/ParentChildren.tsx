@@ -19,7 +19,7 @@ import { useSubscriptionTiers, useAddExtraChild } from '@/hooks/use-subscription
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { useUpgradeSubscription } from '@/hooks/use-subscription';
 import EditChildDialog from '@/components/EditChildDialog';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
@@ -75,8 +75,7 @@ export default function ParentChildren() {
   const removeGuardian = useRemoveGuardian();
   const deleteChildMutation = useMutation({
     mutationFn: async (childId: string) => {
-      const { error } = await supabase.rpc('delete_child_safe', { _child_id: childId } as any);
-      if (error) throw error;
+      await api.delete('/children/' + childId);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['children'] });
@@ -155,21 +154,20 @@ export default function ParentChildren() {
       // Ensure parent has a household (creates one if missing)
       let householdId = user.householdId;
       if (!householdId) {
-        const { data: hId, error: hErr } = await supabase.rpc('ensure_parent_household', { _profile_id: user.profileId } as any);
-        if (hErr || !hId) throw new Error('Could not create household');
-        householdId = hId as string;
+        const hId = await api.post<string>('/households', { profile_id: user.profileId });
+        if (!hId) throw new Error('Could not create household');
+        householdId = hId;
       }
-      const { error } = await supabase.from('family_invite_codes').insert({
+      await api.post('/households/' + householdId + '/invite', {
         code: newCode,
         parent_profile_id: user.profileId,
         household_id: householdId,
       });
-      if (error) throw error;
       setInviteCode(newCode);
     } catch (err: any) {
       console.error('Invite code error:', err);
       toast({ title: t('common.error'), description: err?.message || t('parent.children.code_error'), variant: 'destructive' });
-      // Fallback: use code locally even if DB insert fails
+      // Fallback: use code locally even if API call fails
       setInviteCode(newCode);
     } finally {
       setInviteSaving(false);
@@ -751,27 +749,13 @@ export default function ParentChildren() {
             }
             setCreatingChild(true);
             try {
-              const { data, error } = await supabase.functions.invoke('create-child-account', {
-                body: {
-                  display_name: newChildName,
-                  username: newChildUsername,
-                  pin: newChildPin,
-                  avatar: newChildAvatar,
-                  date_of_birth: newChildDob || null,
-                },
+              const data = await api.post<any>('/children', {
+                display_name: newChildName,
+                username: newChildUsername,
+                pin: newChildPin,
+                avatar: newChildAvatar,
+                date_of_birth: newChildDob || null,
               });
-              if (error) {
-                // Extract the actual error message from the response context
-                let errorMsg = error.message;
-                try {
-                  if ('context' in error && (error as any).context?.json) {
-                    const body = await (error as any).context.json();
-                    errorMsg = body?.error || errorMsg;
-                  }
-                } catch {}
-                toast({ title: t('common.error'), description: errorMsg, variant: 'destructive' });
-                return;
-              }
               if (data?.error) {
                 toast({ title: t('common.error'), description: data.error, variant: 'destructive' });
                 return;

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertTriangle, Shield, RefreshCw } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -20,21 +20,15 @@ export default function AdminRisk() {
   const { data: flags, isLoading } = useQuery({
     queryKey: ['risk-flags'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('risk_flags')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return data;
+      const data = await api.get<any[]>('/admin/risk-flags');
+      return data ?? [];
     },
   });
 
   const runScan = async () => {
     setScanning(true);
     try {
-      const { data, error } = await supabase.functions.invoke('risk-scan');
-      if (error) throw error;
+      const data = await api.post<any>('/admin/risk-scan');
       toast({ title: t('admin.risk.scan_done'), description: t('admin.risk.scan_desc').replace('{count}', String(data?.flags_created ?? 0)) });
       qc.invalidateQueries({ queryKey: ['risk-flags'] });
     } catch (e: any) {
@@ -46,11 +40,7 @@ export default function AdminRisk() {
 
   const resolveFlag = useMutation({
     mutationFn: async (flagId: string) => {
-      const { error } = await supabase
-        .from('risk_flags')
-        .update({ resolved_at: new Date().toISOString(), resolution_notes: 'Resolvido pelo admin' } as any)
-        .eq('id', flagId);
-      if (error) throw error;
+      await api.patch('/admin/risk-flags/' + flagId, { resolved_at: new Date().toISOString(), resolution_notes: 'Resolvido pelo admin' });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['risk-flags'] });

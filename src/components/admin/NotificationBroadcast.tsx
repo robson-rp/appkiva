@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Send } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
@@ -17,35 +17,8 @@ function useBroadcast() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { title: string; message: string; type: string; urgent: boolean; role?: string }) => {
-      let profileIds: string[] = [];
-
-      if (payload.role && payload.role !== 'all') {
-        const { data: roleUsers } = await supabase
-          .from('user_roles')
-          .select('user_id')
-          .eq('role', payload.role as any);
-        const userIds = (roleUsers ?? []).map(r => r.user_id);
-        if (userIds.length === 0) return { sent: 0 };
-        const { data: profiles } = await supabase.from('profiles').select('id').in('user_id', userIds);
-        profileIds = (profiles ?? []).map(p => p.id);
-      } else {
-        const { data: profiles } = await supabase.from('profiles').select('id');
-        profileIds = (profiles ?? []).map(p => p.id);
-      }
-
-      if (profileIds.length === 0) return { sent: 0 };
-
-      const rows = profileIds.map(pid => ({
-        profile_id: pid,
-        title: payload.title,
-        message: payload.message,
-        type: payload.type,
-        urgent: payload.urgent,
-      }));
-
-      const { error } = await supabase.from('notifications').insert(rows);
-      if (error) throw error;
-      return { sent: rows.length };
+      const data = await api.post<{ sent: number }>('/notifications/broadcast', payload);
+      return data ?? { sent: 0 };
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['admin-notification'] });

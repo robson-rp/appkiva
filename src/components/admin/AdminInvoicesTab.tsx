@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { CheckCircle2, Clock, XCircle, Download, DollarSign, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useAdminInvoices } from '@/hooks/use-subscription';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
@@ -42,11 +42,7 @@ export default function AdminInvoicesTab() {
 
   const markAsPaid = async (invoiceId: string) => {
     try {
-      const { error } = await supabase
-        .from('subscription_invoices')
-        .update({ status: 'paid', paid_at: new Date().toISOString(), payment_method: 'manual' })
-        .eq('id', invoiceId);
-      if (error) throw error;
+      await api.post('/admin/invoices/' + invoiceId + '/mark-paid', {});
       qc.invalidateQueries({ queryKey: ['admin-invoices'] });
       toast.success(t('admin.invoices.marked_paid'));
     } catch (err: any) {

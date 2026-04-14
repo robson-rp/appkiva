@@ -1,0 +1,65 @@
+name: Deploy UAT
+
+on:
+  push:
+    branches:
+      - uat
+
+concurrency:
+  group: deploy-uat
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer:v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Prepare deploy environment files
+        shell: bash
+        env:
+          CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
+          DEPLOYMENT_TOKEN: ${{ secrets.DEPLOYMENT_TOKEN }}
+          ENV_PRODUCTION_CONTENT: ${{ secrets.ENV_PRODUCTION_CONTENT }}
+        run: |
+          for secret_name in CPANEL_API_TOKEN DEPLOYMENT_TOKEN ENV_PRODUCTION_CONTENT; do
+            if [ -z "${!secret_name}" ]; then
+              echo "::error::Missing required secret: ${secret_name}"
+              exit 1
+            fi
+          done
+
+          cp .env.example .env
+          {
+            echo ""
+            echo "CPANEL_API_TOKEN=${CPANEL_API_TOKEN}"
+            echo "DEPLOYMENT_TOKEN=${DEPLOYMENT_TOKEN}"
+          } >> .env
+
+          printf '%s' "$ENV_PRODUCTION_CONTENT" > .env.production
+
+      - name: Run deployment
+        env:
+          CPANEL_API_TOKEN: ${{ secrets.CPANEL_API_TOKEN }}
+          DEPLOYMENT_TOKEN: ${{ secrets.DEPLOYMENT_TOKEN }}
+        run: npm run deploy

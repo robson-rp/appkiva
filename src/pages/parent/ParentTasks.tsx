@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useHouseholdTasks, useCreateTask, useApproveTask, useDeleteTask, useUpdateTask, type TaskCategory } from '@/hooks/use-household-tasks';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useChildren } from '@/hooks/use-children';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -108,11 +108,10 @@ export default function ParentTasks() {
   const handleAiSuggest = async () => {
     setAiLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('suggest-tasks', {
-        body: { childAge: '8-12', category: category !== 'other' ? category : undefined },
+      const data = await api.post<{ suggestions: any[] }>('/tasks/suggest', {
+        childAge: '8-12', category: category !== 'other' ? category : undefined,
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if ((data as any)?.error) throw new Error((data as any).error);
       setAiSuggestions(data.suggestions || []);
       setAiSuggestOpen(true);
     } catch (e: any) {

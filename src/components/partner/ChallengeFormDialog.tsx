@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCreateSponsoredChallenge, useUpdateSponsoredChallenge, type SponsoredChallenge } from '@/hooks/use-partner-data';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -80,20 +80,16 @@ export default function ChallengeFormDialog({ open, onOpenChange, challenge }: P
         });
         toast.success(t('dialog.challenge.updated'));
       } else {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('tenant_id')
-          .eq('user_id', user.id)
-          .single();
+        const me = await api.get<any>('/auth/me');
 
-        if (!profile?.tenant_id) {
+        if (!me?.tenant_id) {
           toast.error(t('dialog.challenge.no_org'));
           setLoading(false);
           return;
         }
 
         await createChallenge.mutateAsync({
-          partner_tenant_id: profile.tenant_id,
+          partner_tenant_id: me.tenant_id,
           title: values.title,
           description: values.description || null,
           reward_amount: values.reward_amount,

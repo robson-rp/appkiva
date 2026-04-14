@@ -57,9 +57,16 @@ class LessonController extends Controller
             'blocks'             => 'nullable|array',
             'quiz'               => 'nullable|array',
             'kiva_points_reward' => 'nullable|integer|min:0',
-            'is_active'          => 'nullable|boolean',
             'sort_order'         => 'nullable|integer|min:0',
         ]));
+
+        return response()->json(['data' => $l->fresh()]);
+    }
+
+    public function toggleActive(Request $request, string $lesson): JsonResponse
+    {
+        $l = Lesson::findOrFail($lesson);
+        $l->update(['is_active' => !$l->is_active]);
 
         return response()->json(['data' => $l->fresh()]);
     }

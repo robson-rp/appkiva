@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { getCurrencyByCountry } from '@/data/countries-currencies';
@@ -41,39 +41,32 @@ export default function ParentProfile() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase
-      .from('profiles')
-      .select('display_name, avatar, phone, country, gender, school_tenant_id')
-      .eq('user_id', user.id)
-      .single()
-      .then(({ data }) => {
+    api.get<{ display_name?: string; avatar?: string; phone?: string; country?: string; gender?: string; school_tenant_id?: string }>('/auth/me')
+      .then((data) => {
         if (data?.display_name) setName(data.display_name);
         if (data?.avatar) setSelectedAvatar(data.avatar);
         if (data?.phone) setPhone(data.phone);
         if (data?.country) setCountry(data.country);
         if (data?.gender) setGender(data.gender);
         if (data?.school_tenant_id) setSchoolTenantId(data.school_tenant_id);
-      });
+      })
+      .catch(() => {});
   }, [user?.id]);
 
   useEffect(() => {
-    supabase
-      .from('tenants')
-      .select('id, name')
-      .eq('tenant_type', 'school')
-      .eq('is_active', true)
-      .then(({ data }) => {
-        if (data) setSchools(data);
-      });
+    api.get<{ id: string; name: string; tenant_type?: string; is_active?: boolean }[]>('/admin/tenants')
+      .then((data) => {
+        if (data) setSchools(data.filter(t => t.tenant_type === 'school' && t.is_active !== false));
+      })
+      .catch(() => {});
   }, []);
 
   const handleSave = async () => {
     if (!user?.profileId) return;
     setSaving(true);
     const updatedSchool = schoolTenantId && schoolTenantId !== 'none' ? schoolTenantId : null;
-    const { error } = await supabase
-      .from('profiles')
-      .update({
+    try {
+      await api.patch('/profiles/' + user.profileId, {
         display_name: name.trim() || user.name,
         avatar: selectedAvatar,
         phone: phone.trim() || null,
@@ -81,30 +74,18 @@ export default function ParentProfile() {
         gender: gender || null,
         school_tenant_id: updatedSchool,
         language: locale,
-      })
-      .eq('id', user.profileId);
-
-    if (!error) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('id', user.profileId)
-        .single();
+      });
+      const profile = await api.get<{ tenant_id?: string }>('/auth/me');
       if (profile?.tenant_id) {
         const newCurrency = getCurrencyByCountry(country);
-        await supabase.rpc('update_tenant_currency', {
-          _tenant_id: profile.tenant_id,
-          _currency: newCurrency,
-        } as any);
+        await api.patch('/admin/tenants/' + profile.tenant_id, { currency: newCurrency });
       }
-    }
-
-    setSaving(false);
-    if (error) {
-      toast({ title: t('parent.profile.save_error'), description: error.message, variant: 'destructive' });
-    } else {
       queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
       toast({ title: t('parent.profile.saved'), description: t('parent.profile.saved_desc') });
+    } catch (e: any) {
+      toast({ title: t('parent.profile.save_error'), description: e.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 

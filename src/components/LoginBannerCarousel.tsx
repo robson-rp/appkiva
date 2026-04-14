@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { api } from "@/lib/api-client";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -36,19 +36,13 @@ export default function LoginBannerCarousel() {
   const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
-    supabase
-      .from("login_banners")
-      .select("id, title, image_url, link_url, display_order")
-      .eq("is_active", true)
-      .order("display_order")
-      .limit(5)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error("Banner query failed, using fallback:", error.message);
-          setBanners(FALLBACK_BANNERS);
-          return;
-        }
+    api.get<Banner[]>('/admin/login-banners')
+      .then((data) => {
         setBanners(data?.length ? data : FALLBACK_BANNERS);
+      })
+      .catch((error) => {
+        console.error("Banner query failed, using fallback:", error.message);
+        setBanners(FALLBACK_BANNERS);
       });
   }, []);
 
@@ -87,13 +81,15 @@ export default function LoginBannerCarousel() {
     startTimeRef.current = Date.now() - (progress * AUTO_PLAY_MS);
   }, [progress]);
 
-  const trackClick = useCallback((bannerId: string) => {
+  const trackClick = useCallback(async (bannerId: string) => {
     if (bannerId.startsWith("fb-")) return; // skip fallback banners
-    supabase.from("banner_clicks").insert({
-      banner_id: bannerId,
-      user_agent: navigator.userAgent,
-      referrer: document.referrer || null,
-    }).then(() => {});
+    try {
+      await api.post('/admin/login-banners/click', {
+        banner_id: bannerId,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null,
+      });
+    } catch {}
   }, []);
 
   const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,12 +41,8 @@ export default function ParentConsent() {
     queryKey: ['parent-children-profiles', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('children')
-        .select('id, profile_id, nickname, profile:profiles!children_profile_id_fkey(id, display_name, avatar)')
-        .eq('parent_profile_id', user!.profileId);
-      if (error) throw error;
-      return data;
+      const data = await api.get<any[]>('/children');
+      return data ?? [];
     },
   });
 
@@ -55,25 +51,19 @@ export default function ParentConsent() {
     queryKey: ['parent-consent-records', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('consent_records')
-        .select('*, child:profiles!consent_records_child_profile_id_fkey(display_name, avatar)')
-        .eq('adult_profile_id', user!.profileId)
-        .order('granted_at', { ascending: false });
-      if (error) throw error;
-      return data;
+      const data = await api.get<any[]>('/admin/compliance/consent-records');
+      return data ?? [];
     },
   });
 
   const grantMutation = useMutation({
     mutationFn: async ({ childProfileId, consentType }: { childProfileId: string; consentType: string }) => {
-      const { error } = await supabase.from('consent_records').insert({
+      await api.post('/consent', {
         adult_profile_id: user!.profileId,
         child_profile_id: childProfileId,
         consent_type: consentType,
         metadata: { granted_via: 'parent_consent_panel', user_agent: navigator.userAgent },
       });
-      if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['parent-consent-records'] });
@@ -84,11 +74,7 @@ export default function ParentConsent() {
 
   const revokeMutation = useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { error } = await supabase
-        .from('consent_records')
-        .update({ revoked_at: new Date().toISOString(), revocation_reason: reason })
-        .eq('id', id);
-      if (error) throw error;
+      await api.patch('/consent/' + id, { revoked_at: new Date().toISOString(), revocation_reason: reason });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['parent-consent-records'] });
@@ -102,10 +88,7 @@ export default function ParentConsent() {
   const handleExportData = async (childProfileId: string) => {
     setExportingChild(childProfileId);
     try {
-      const { data, error } = await supabase.functions.invoke('export-user-data', {
-        body: { profile_id: childProfileId },
-      });
-      if (error) throw error;
+      const data = await api.post<any>('/admin/export-user-data', { profile_id: childProfileId });
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

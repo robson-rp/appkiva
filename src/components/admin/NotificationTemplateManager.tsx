@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Pencil, Plus, Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
@@ -49,18 +49,13 @@ function useTemplates(search: string) {
   return useQuery({
     queryKey: ['admin-notification-templates', search],
     queryFn: async () => {
-      let query = (supabase as any)
-        .from('notification_templates')
-        .select('*')
-        .order('event', { ascending: true });
-
-      if (search) {
-        query = query.or(`title_template.ilike.%${search}%,message_template.ilike.%${search}%`);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data ?? [];
+      const data = await api.get<any[]>('/admin/notification-templates');
+      if (!search) return data ?? [];
+      const lower = search.toLowerCase();
+      return (data ?? []).filter((tpl: any) =>
+        tpl.title_template?.toLowerCase().includes(lower) ||
+        tpl.message_template?.toLowerCase().includes(lower)
+      );
     },
   });
 }
@@ -69,11 +64,7 @@ function useToggleTemplate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await (supabase as any)
-        .from('notification_templates')
-        .update({ is_active } as any)
-        .eq('id', id);
-      if (error) throw error;
+      await api.patch('/admin/notification-templates/' + id, { is_active });
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-notification-templates'] });
@@ -88,11 +79,7 @@ function useUpdateTemplate() {
   return useMutation({
     mutationFn: async (payload: { id: string; title_template: string; message_template: string; icon: string; is_urgent: boolean; cooldown_minutes: number }) => {
       const { id, ...rest } = payload;
-      const { error } = await (supabase as any)
-        .from('notification_templates')
-        .update(rest as any)
-        .eq('id', id);
-      if (error) throw error;
+      await api.patch('/admin/notification-templates/' + id, rest);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin-notification-templates'] });

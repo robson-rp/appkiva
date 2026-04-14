@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { useT } from '@/contexts/LanguageContext';
 
@@ -17,22 +17,11 @@ export default function AdminAudit() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ['audit-log', resourceFilter, actionFilter],
     queryFn: async () => {
-      let query = supabase
-        .from('audit_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (resourceFilter !== 'all') {
-        query = query.eq('resource_type', resourceFilter);
-      }
-      if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter as any);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      const params = new URLSearchParams({ limit: '100', order: 'created_at:desc' });
+      if (resourceFilter !== 'all') params.set('resource_type', resourceFilter);
+      if (actionFilter !== 'all') params.set('action', actionFilter);
+      const data = await api.get<any[]>('/admin/audit-log?' + params.toString());
+      return data ?? [];
     },
   });
 

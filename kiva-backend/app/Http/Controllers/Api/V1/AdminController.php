@@ -8,6 +8,7 @@ use App\Models\CurrencyExchangeRate;
 use App\Models\LoginBanner;
 use App\Models\OnboardingStep;
 use App\Models\Profile;
+use App\Models\SubscriptionInvoice;
 use App\Models\Tenant;
 use App\Models\RiskFlag;
 use App\Models\SupportedCurrency;
@@ -130,11 +131,38 @@ class AdminController extends Controller
         $tenant = Tenant::findOrFail($id);
 
         $tenant->update($request->validate([
-            'name'                 => 'nullable|string|max:150',
-            'is_active'            => 'nullable|boolean',
-            'real_money_enabled'   => 'nullable|boolean',
-            'subscription_tier_id' => 'nullable|uuid|exists:subscription_tiers,id',
+            'name'               => 'nullable|string|max:150',
+            'real_money_enabled' => 'nullable|boolean',
         ]));
+
+        return response()->json(['data' => $tenant->fresh()]);
+    }
+
+    public function activateTenant(Request $request, string $id): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($id);
+        $tenant->update(['is_active' => true]);
+
+        return response()->json(['data' => $tenant->fresh()]);
+    }
+
+    public function deactivateTenant(Request $request, string $id): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($id);
+        $tenant->update(['is_active' => false]);
+
+        return response()->json(['data' => $tenant->fresh()]);
+    }
+
+    public function setTenantSubscription(Request $request, string $id): JsonResponse
+    {
+        $tenant = Tenant::findOrFail($id);
+
+        $data = $request->validate([
+            'subscription_tier_id' => 'required|uuid|exists:subscription_tiers,id',
+        ]);
+
+        $tenant->update(['subscription_tier_id' => $data['subscription_tier_id']]);
 
         return response()->json(['data' => $tenant->fresh()]);
     }
@@ -182,6 +210,76 @@ class AdminController extends Controller
         $banner = LoginBanner::create($data);
 
         return response()->json(['data' => $banner], 201);
+    }
+
+    public function toggleCurrencyActive(Request $request, string $code): JsonResponse
+    {
+        $currency = SupportedCurrency::where('code', strtoupper($code))->firstOrFail();
+        $currency->update(['is_active' => !$currency->is_active]);
+
+        return response()->json(['data' => $currency->fresh()]);
+    }
+
+    public function updateLoginBanner(Request $request, string $id): JsonResponse
+    {
+        $banner = LoginBanner::findOrFail($id);
+
+        $banner->update($request->validate([
+            'title'         => 'nullable|string|max:255',
+            'image_url'     => 'nullable|string|max:500',
+            'link_url'      => 'nullable|string|max:500',
+            'display_order' => 'nullable|integer|min:0',
+        ]));
+
+        return response()->json(['data' => $banner->fresh()]);
+    }
+
+    public function toggleLoginBannerActive(Request $request, string $id): JsonResponse
+    {
+        $banner = LoginBanner::findOrFail($id);
+        $banner->update(['is_active' => !$banner->is_active]);
+
+        return response()->json(['data' => $banner->fresh()]);
+    }
+
+    public function reorderLoginBanners(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'items'                 => 'required|array',
+            'items.*.id'            => 'required|uuid|exists:login_banners,id',
+            'items.*.display_order' => 'required|integer|min:0',
+        ]);
+
+        DB::transaction(function () use ($data) {
+            foreach ($data['items'] as $item) {
+                LoginBanner::where('id', $item['id'])->update(['display_order' => $item['display_order']]);
+            }
+        });
+
+        return response()->json(['data' => LoginBanner::orderBy('display_order')->get()]);
+    }
+
+    public function markInvoicePaid(Request $request, string $id): JsonResponse
+    {
+        $invoice = SubscriptionInvoice::findOrFail($id);
+
+        if ($invoice->status === 'paid') {
+            return response()->json(['message' => 'Invoice is already paid.'], 422);
+        }
+
+        $data = $request->validate([
+            'payment_method'    => 'nullable|in:manual,bank_transfer,card,mpesa,express',
+            'payment_reference' => 'nullable|string|max:255',
+        ]);
+
+        $invoice->update([
+            'status'            => 'paid',
+            'paid_at'           => now(),
+            'payment_method'    => $data['payment_method'] ?? 'manual',
+            'payment_reference' => $data['payment_reference'] ?? null,
+        ]);
+
+        return response()->json(['data' => $invoice->fresh()]);
     }
 
     public function destroyLoginBanner(Request $request, string $id): JsonResponse

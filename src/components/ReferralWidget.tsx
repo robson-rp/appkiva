@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Copy, Check, Share2, Gift, Users, Sparkles } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
@@ -20,20 +20,13 @@ export default function ReferralWidget() {
     enabled: !!user?.profileId,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data: code } = await supabase
-        .from('referral_codes')
-        .select('id, code')
-        .eq('profile_id', user!.profileId)
-        .single();
-
-      if (!code) return null;
-
-      const { count } = await supabase
-        .from('referral_claims')
-        .select('id', { count: 'exact', head: true })
-        .eq('referral_code_id', code.id);
-
-      return { code: code.code, claimCount: count ?? 0 };
+      try {
+        const code = await api.get<any>('/referral/code');
+        if (!code) return null;
+        return { code: code.code, claimCount: code.claim_count ?? 0 };
+      } catch {
+        return null;
+      }
     },
   });
 

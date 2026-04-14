@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,7 +25,10 @@ interface AnalyticsRow { event_type: string; step_index: number; role: string; p
 function useOnboardingAnalytics() {
   return useQuery({
     queryKey: ['admin-onboarding-analytics'],
-    queryFn: async () => { const { data, error } = await supabase.from('onboarding_analytics').select('event_type, step_index, role, profile_id, created_at').order('created_at', { ascending: true }); if (error) throw error; return (data ?? []) as AnalyticsRow[]; },
+    queryFn: async () => {
+      const data = await api.get<AnalyticsRow[]>('/admin/onboarding-analytics');
+      return (data ?? []) as AnalyticsRow[];
+    },
   });
 }
 

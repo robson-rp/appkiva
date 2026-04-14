@@ -7,7 +7,7 @@ import { useCreatePartnerProgram } from '@/hooks/use-partner-data';
 import { usePartnerLimits } from '@/hooks/use-partner-limits';
 import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Plus, Loader2, Users, School, Crown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -45,20 +45,16 @@ export function CreateProgramDialog() {
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('tenant_id')
-      .eq('user_id', user!.id)
-      .single();
+    const me = await api.get<any>('/auth/me');
 
-    if (!profile?.tenant_id) {
+    if (!me?.tenant_id) {
       toast.error(t('dialog.program.tenant_error'));
       return;
     }
 
     try {
       await createProgram.mutateAsync({
-        partner_tenant_id: profile.tenant_id,
+        partner_tenant_id: me.tenant_id,
         program_name: name.trim(),
         program_type: type,
         children_count: parsedChildren,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -15,13 +15,15 @@ export default function JoinFamily() {
 
   useEffect(() => {
     if (!code) { setStatus('invalid'); return; }
-    supabase.rpc('validate_invite_code', { _code: code } as any).then(({ data, error }) => {
-      if (error || !data || !(data as any).valid) {
-        setStatus('invalid');
-      } else {
-        setStatus('valid');
-      }
-    });
+    api.post<{ valid: boolean }>('/invite/validate', { code })
+      .then((data) => {
+        if (!data?.valid) {
+          setStatus('invalid');
+        } else {
+          setStatus('valid');
+        }
+      })
+      .catch(() => setStatus('invalid'));
   }, [code]);
 
   return (

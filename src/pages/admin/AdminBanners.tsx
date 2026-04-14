@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,12 +42,12 @@ export default function AdminBanners() {
   const { toast } = useToast();
 
   const fetchBanners = async () => {
-    const { data } = await supabase
-      .from('login_banners')
-      .select('*')
-      .order('display_order');
-    if (data) setBanners(data);
-    setLoading(false);
+    try {
+      const data = await api.get<Banner[]>('/admin/login-banners');
+      if (data) setBanners(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchClickStats = async () => {
@@ -55,22 +55,23 @@ export default function AdminBanners() {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: allClicks } = await supabase
-      .from('banner_clicks')
-      .select('banner_id, clicked_at');
+    try {
+      const allClicks = await api.get<{ banner_id: string; clicked_at: string }[]>('/admin/banner-clicks');
+      if (!allClicks) return;
 
-    if (!allClicks) return;
-
-    const statsMap: Record<string, BannerClickStats> = {};
-    for (const click of allClicks) {
-      if (!statsMap[click.banner_id]) {
-        statsMap[click.banner_id] = { banner_id: click.banner_id, total_clicks: 0, clicks_today: 0, clicks_7d: 0 };
+      const statsMap: Record<string, BannerClickStats> = {};
+      for (const click of allClicks) {
+        if (!statsMap[click.banner_id]) {
+          statsMap[click.banner_id] = { banner_id: click.banner_id, total_clicks: 0, clicks_today: 0, clicks_7d: 0 };
+        }
+        statsMap[click.banner_id].total_clicks++;
+        if (click.clicked_at >= todayStart) statsMap[click.banner_id].clicks_today++;
+        if (click.clicked_at >= weekAgo) statsMap[click.banner_id].clicks_7d++;
       }
-      statsMap[click.banner_id].total_clicks++;
-      if (click.clicked_at >= todayStart) statsMap[click.banner_id].clicks_today++;
-      if (click.clicked_at >= weekAgo) statsMap[click.banner_id].clicks_7d++;
+      setClickStats(statsMap);
+    } catch {
+      // click stats are non-critical
     }
-    setClickStats(statsMap);
   };
 
   useEffect(() => { fetchBanners(); fetchClickStats(); }, []);
@@ -93,12 +94,26 @@ export default function AdminBanners() {
     setUploading(true);
     const ext = file.name.split('.').pop();
     const path = `${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from('banners').upload(path, file, { upsert: true });
-    if (error) {
-      toast({ title: t('admin.banners.upload_error'), description: error.message, variant: 'destructive' });
-    } else {
-      const { data } = supabase.storage.from('banners').getPublicUrl(path);
-      setForm(f => ({ ...f, image_url: data.publicUrl }));
+    try {
+      const token = localStorage.getItem('kivara_token');
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', path);
+      const res = await fetch(`${apiBase}/admin/login-banners/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Upload failed' }));
+        toast({ title: t('admin.banners.upload_error'), description: err.message, variant: 'destructive' });
+      } else {
+        const imageUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1') + '/storage/' + path;
+        setForm(f => ({ ...f, image_url: imageUrl }));
+      }
+    } catch (err: any) {
+      toast({ title: t('admin.banners.upload_error'), description: err.message, variant: 'destructive' });
     }
     setUploading(false);
   };
@@ -113,32 +128,43 @@ export default function AdminBanners() {
       image_url: form.image_url,
       link_url: form.link_url || null,
       display_order: form.display_order,
-      is_active: form.is_active,
     };
 
     if (editing) {
-      const { error } = await supabase.from('login_banners').update(payload).eq('id', editing.id);
-      if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
-      toast({ title: t('admin.banners.updated') });
+      try {
+        await api.patch('/admin/login-banners/' + editing.id, payload);
+        if (form.is_active !== editing.is_active) {
+          await api.post('/admin/login-banners/' + editing.id + '/toggle-active', {});
+        }
+        toast({ title: t('admin.banners.updated') });
+      } catch (e: any) {
+        toast({ title: t('admin.banners.error'), description: e.message, variant: 'destructive' }); return;
+      }
     } else {
-      const { error } = await supabase.from('login_banners').insert(payload);
-      if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
-      toast({ title: t('admin.banners.created') });
+      try {
+        await api.post('/admin/login-banners', { ...payload, is_active: form.is_active });
+        toast({ title: t('admin.banners.created') });
+      } catch (e: any) {
+        toast({ title: t('admin.banners.error'), description: e.message, variant: 'destructive' }); return;
+      }
     }
     setDialogOpen(false);
     fetchBanners();
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('login_banners').delete().eq('id', id);
-    if (error) { toast({ title: t('admin.banners.error'), description: error.message, variant: 'destructive' }); return; }
-    toast({ title: t('admin.banners.deleted') });
-    fetchBanners();
-    fetchClickStats();
+    try {
+      await api.delete('/admin/login-banners/' + id);
+      toast({ title: t('admin.banners.deleted') });
+      fetchBanners();
+      fetchClickStats();
+    } catch (e: any) {
+      toast({ title: t('admin.banners.error'), description: e.message, variant: 'destructive' });
+    }
   };
 
   const handleToggleActive = async (b: Banner) => {
-    await supabase.from('login_banners').update({ is_active: !b.is_active }).eq('id', b.id);
+    await api.patch('/admin/login-banners/' + b.id, { is_active: !b.is_active });
     fetchBanners();
   };
 
@@ -148,8 +174,8 @@ export default function AdminBanners() {
     if (swapIdx < 0 || swapIdx >= banners.length) return;
     const other = banners[swapIdx];
     await Promise.all([
-      supabase.from('login_banners').update({ display_order: other.display_order }).eq('id', b.id),
-      supabase.from('login_banners').update({ display_order: b.display_order }).eq('id', other.id),
+      api.patch('/admin/login-banners/' + b.id, { display_order: other.display_order }),
+      api.patch('/admin/login-banners/' + other.id, { display_order: b.display_order }),
     ]);
     fetchBanners();
   };

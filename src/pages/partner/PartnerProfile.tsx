@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { Camera, Save, Building2, Mail, Globe, Languages } from 'lucide-react';
@@ -30,35 +30,32 @@ export default function PartnerProfile() {
 
   useEffect(() => {
     if (!user?.id) return;
-    supabase.from('profiles').select('country').eq('user_id', user.id).single().then(({ data }) => {
-      if (data?.country) setCountry(data.country);
-    });
+    api.get<{ country?: string }>('/auth/me')
+      .then((data) => { if (data?.country) setCountry(data.country); })
+      .catch(() => {});
   }, [user?.id]);
 
   const handleSave = async () => {
     if (!user?.profileId) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({
-      display_name: name.trim() || user.name,
-      avatar: selectedAvatar,
-      country,
-      language: locale,
-    }).eq('id', user.profileId);
-
-    if (!error) {
-      const { data: profile } = await supabase.from('profiles').select('tenant_id').eq('id', user.profileId).single();
+    try {
+      await api.patch('/profiles/' + user.profileId, {
+        display_name: name.trim() || user.name,
+        avatar: selectedAvatar,
+        country,
+        language: locale,
+      });
+      const profile = await api.get<{ tenant_id?: string }>('/auth/me');
       if (profile?.tenant_id) {
         const newCurrency = getCurrencyByCountry(country);
-        await supabase.rpc('update_tenant_currency', { _tenant_id: profile.tenant_id, _currency: newCurrency } as any);
+        await api.patch('/admin/tenants/' + profile.tenant_id, { currency: newCurrency });
       }
-    }
-
-    setSaving(false);
-    if (error) {
-      toast({ title: t('partner.profile.error'), description: error.message, variant: 'destructive' });
-    } else {
       queryClient.invalidateQueries({ queryKey: ['tenant-currency'] });
       toast({ title: t('partner.profile.saved'), description: t('partner.profile.saved_desc') });
+    } catch (e: any) {
+      toast({ title: t('partner.profile.error'), description: e.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
     }
   };
 

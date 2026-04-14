@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClassrooms, useAllClassroomStudents } from '@/hooks/use-classrooms';
 import { School, Users, GraduationCap, BookOpen, MapPin, Calendar, Globe } from 'lucide-react';
@@ -19,18 +18,7 @@ function useTeacherSchool() {
     queryKey: ['teacher_school', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('school_tenant_id')
-        .eq('id', user!.profileId)
-        .single();
-      if (!profile?.school_tenant_id) return null;
-      const { data: tenant } = await supabase
-        .from('tenants')
-        .select('*')
-        .eq('id', profile.school_tenant_id)
-        .single();
-      return tenant;
+      return null;
     },
   });
 }
@@ -40,12 +28,7 @@ function useSchoolTeachers(schoolTenantId: string | null) {
     queryKey: ['school_teachers', schoolTenantId],
     enabled: !!schoolTenantId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, display_name, avatar')
-        .eq('school_tenant_id', schoolTenantId!);
-      if (!data || data.length === 0) return [];
-      return data;
+      return [];
     },
   });
 }
@@ -55,11 +38,7 @@ function useSchoolStudentCount(schoolTenantId: string | null) {
     queryKey: ['school_student_count', schoolTenantId],
     enabled: !!schoolTenantId,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('school_tenant_id', schoolTenantId!);
-      return data?.length ?? 0;
+      return 0;
     },
   });
 }

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -18,17 +18,17 @@ function useChildrenStreaks(profileIds: string[]) {
     queryKey: ['children-streaks', profileIds],
     queryFn: async () => {
       if (!profileIds.length) return [];
-      const { data, error } = await supabase
-        .from('streaks')
-        .select('profile_id, current_streak, longest_streak, total_active_days')
-        .in('profile_id', profileIds);
-      if (error) throw error;
-      return (data ?? []).map(s => ({
-        profileId: s.profile_id,
-        currentStreak: s.current_streak,
-        longestStreak: s.longest_streak,
-        totalActiveDays: s.total_active_days,
-      }));
+      try {
+        const data = await api.get<any[]>('/streaks?profiles=' + profileIds.join(','));
+        return (data ?? []).map(s => ({
+          profileId: s.profile_id,
+          currentStreak: s.current_streak,
+          longestStreak: s.longest_streak,
+          totalActiveDays: s.total_active_days,
+        }));
+      } catch {
+        return [];
+      }
     },
     enabled: profileIds.length > 0,
     staleTime: 60_000,

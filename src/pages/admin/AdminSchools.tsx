@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,16 @@ import { useT } from '@/contexts/LanguageContext';
 interface SchoolTenant { id: string; name: string; currency: string; is_active: boolean; created_at: string; subscription_tier_id: string | null; settings: any; }
 
 function useSchools() {
-  return useQuery({ queryKey: ['admin-schools'], queryFn: async () => { const { data, error } = await supabase.from('tenants').select('*').eq('tenant_type', 'school').order('name'); if (error) throw error; return data as SchoolTenant[]; } });
+  return useQuery({ queryKey: ['admin-schools'], queryFn: async () => {
+    const data = await api.get<SchoolTenant[]>('/admin/tenants');
+    return (data ?? []) as SchoolTenant[];
+  } });
 }
 function useSubscriptionTiers() {
-  return useQuery({ queryKey: ['subscription-tiers-school'], queryFn: async () => { const { data, error } = await supabase.from('subscription_tiers').select('id, name, tier_type').eq('is_active', true); if (error) throw error; return data; } });
+  return useQuery({ queryKey: ['subscription-tiers-school'], queryFn: async () => {
+    const data = await api.get<any[]>('/subscription/tiers');
+    return data ?? [];
+  } });
 }
 
 export default function AdminSchools() {
@@ -41,11 +47,9 @@ export default function AdminSchools() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (editSchool) {
-        const { error } = await supabase.from('tenants').update({ name, subscription_tier_id: tierId || null, is_active: isActive }).eq('id', editSchool.id);
-        if (error) throw error;
+        await api.patch('/admin/tenants/' + editSchool.id, { name, subscription_tier_id: tierId || null, is_active: isActive });
       } else {
-        const { error } = await supabase.from('tenants').insert({ name, tenant_type: 'school', subscription_tier_id: tierId || null, is_active: isActive, currency: 'AOA' });
-        if (error) throw error;
+        await api.post('/admin/tenants', { name, tenant_type: 'school', subscription_tier_id: tierId || null, is_active: isActive, currency: 'AOA' });
       }
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-schools'] }); setDialogOpen(false); toast({ title: editSchool ? t('admin.schools.updated') : t('admin.schools.registered') }); },
@@ -53,7 +57,7 @@ export default function AdminSchools() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.from('tenants').update({ is_active: false }).eq('id', id); if (error) throw error; },
+    mutationFn: async (id: string) => { await api.patch('/admin/tenants/' + id, { is_active: false }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-schools'] }); setDeleteConfirm(null); toast({ title: t('admin.schools.deactivated') }); },
   });
 

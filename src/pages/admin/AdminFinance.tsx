@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, TrendingUp, Calculator, BarChart3, Globe, Vault, ArrowUpFromLine, ArrowDownToLine, Coins, Wallet, PiggyBank, ShieldAlert, Lock, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 import { COUNTRY_CURRENCIES } from '@/data/countries-currencies';
@@ -25,13 +25,10 @@ function useTenantsByTier() {
   return useQuery({
     queryKey: ['admin_tenants_by_tier'],
     queryFn: async () => {
-      const { data: tenants } = await supabase
-        .from('tenants')
-        .select('id, name, subscription_tier_id, is_active, tenant_type, currency')
-        .eq('is_active', true);
-      const { data: tiers } = await supabase
-        .from('subscription_tiers')
-        .select('*');
+      const [tenants, tiers] = await Promise.all([
+        api.get<any[]>('/admin/tenants?is_active=true'),
+        api.get<any[]>('/admin/subscription-tiers'),
+      ]);
       return { tenants: tenants ?? [], tiers: tiers ?? [] };
     },
   });
@@ -48,23 +45,16 @@ export default function AdminFinance() {
   const [simCount, setSimCount] = useState('10');
   const [simPeriod, setSimPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
-  // Frozen wallets query
   const { data: frozenWallets } = useQuery({
     queryKey: ['admin_frozen_wallets'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('wallets')
-        .select('id, profile_id, is_frozen, frozen_at, frozen_by, freeze_reason')
-        .eq('is_frozen', true);
-      if (error) throw error;
-      // Get profile names for display
-      const profileIds = [...new Set((data ?? []).flatMap(w => [w.profile_id, w.frozen_by].filter(Boolean)))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, display_name')
-        .in('id', profileIds);
-      const profileMap = new Map((profiles ?? []).map(p => [p.id, p.display_name]));
-      return (data ?? []).map(w => ({
+      const data = await api.get<any[]>('/admin/wallets?is_frozen=true');
+      const profileIds = [...new Set((data ?? []).flatMap((w: any) => [w.profile_id, w.frozen_by].filter(Boolean)))];
+      const profiles = profileIds.length > 0
+        ? await api.get<any[]>('/admin/profiles?ids=' + profileIds.join(','))
+        : [];
+      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]));
+      return (data ?? []).map((w: any) => ({
         ...w,
         owner_name: profileMap.get(w.profile_id) ?? w.profile_id,
         frozen_by_name: w.frozen_by ? (profileMap.get(w.frozen_by) ?? w.frozen_by) : '—',
@@ -76,13 +66,7 @@ export default function AdminFinance() {
   const { data: riskFlags } = useQuery({
     queryKey: ['admin_risk_flags_active'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('risk_flags')
-        .select('*')
-        .is('resolved_at', null)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      if (error) throw error;
+      const data = await api.get<any[]>('/admin/risk-flags?unresolved=true&limit=50&order=created_at:desc');
       return data ?? [];
     },
   });

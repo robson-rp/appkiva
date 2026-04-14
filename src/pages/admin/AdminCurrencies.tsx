@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,17 +26,17 @@ function CurrenciesTab() {
 
   const { data: currencies = [], isLoading } = useQuery({
     queryKey: ['admin-currencies'],
-    queryFn: async () => { const { data, error } = await supabase.from('supported_currencies').select('*').order('code'); if (error) throw error; return data as CurrencyRow[]; },
+    queryFn: async () => { const data = await api.get<CurrencyRow[]>('/admin/currencies'); return data ?? []; },
   });
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ code, is_active }: { code: string; is_active: boolean }) => { const { error } = await supabase.from('supported_currencies').update({ is_active }).eq('code', code); if (error) throw error; },
+    mutationFn: async ({ code, is_active }: { code: string; is_active: boolean }) => { await api.patch('/admin/currencies/' + code, { is_active }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-currencies'] }); toast.success(t('admin.currencies.status_updated')); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (vals: { code: string; name: string; symbol: string; decimal_places: number }) => { const { error } = await supabase.from('supported_currencies').insert({ ...vals, is_active: true }); if (error) throw error; },
+    mutationFn: async (vals: { code: string; name: string; symbol: string; decimal_places: number }) => { await api.post('/admin/currencies', { ...vals, is_active: true }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-currencies'] }); toast.success(t('admin.currencies.created')); setAddOpen(false); setAddForm({ code: '', name: '', symbol: '', decimal_places: 2 }); },
     onError: (e: any) => toast.error(e.message),
   });
@@ -98,17 +98,17 @@ function ExchangeRatesTab() {
 
   const { data: rates = [], isLoading } = useQuery({
     queryKey: ['admin-exchange-rates'],
-    queryFn: async () => { const { data, error } = await supabase.from('currency_exchange_rates').select('*').order('target_currency'); if (error) throw error; return data as RateRow[]; },
+    queryFn: async () => { const data = await api.get<RateRow[]>('/admin/exchange-rates'); return data ?? []; },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, rate }: { id: string; rate: number }) => { const { error } = await supabase.from('currency_exchange_rates').update({ rate, updated_at: new Date().toISOString() }).eq('id', id); if (error) throw error; },
+    mutationFn: async ({ id, rate }: { id: string; rate: number }) => { await api.put('/admin/exchange-rates/' + id, { rate }); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-exchange-rates'] }); queryClient.invalidateQueries({ queryKey: ['exchange-rates'] }); toast.success(t('admin.currencies.rate_updated')); setEditRate(null); },
     onError: (e: any) => toast.error(e.message),
   });
 
   const addMutation = useMutation({
-    mutationFn: async (vals: { base_currency: string; target_currency: string; rate: number }) => { const { error } = await supabase.from('currency_exchange_rates').insert(vals); if (error) throw error; },
+    mutationFn: async (vals: { base_currency: string; target_currency: string; rate: number }) => { await api.post('/admin/exchange-rates', vals); },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-exchange-rates'] }); queryClient.invalidateQueries({ queryKey: ['exchange-rates'] }); toast.success(t('admin.currencies.rate_added')); setAddOpen(false); setAddForm({ base: 'EUR', target: '', rate: '' }); },
     onError: (e: any) => toast.error(e.message),
   });

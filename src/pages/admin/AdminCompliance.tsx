@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Shield, FileDown, Trash2, Eye, CheckCircle2 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useT } from '@/contexts/LanguageContext';
@@ -21,23 +21,19 @@ export default function AdminCompliance() {
   const { data: consents, isLoading } = useQuery({
     queryKey: ['consent-records', statusFilter],
     queryFn: async () => {
-      let query = supabase.from('consent_records').select('*, adult:profiles!consent_records_adult_profile_id_fkey(display_name), child:profiles!consent_records_child_profile_id_fkey(display_name)').order('granted_at', { ascending: false }).limit(200);
-      if (statusFilter === 'active') query = query.is('revoked_at', null);
-      else if (statusFilter === 'revoked') query = query.not('revoked_at', 'is', null);
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      const params = new URLSearchParams({ limit: '200', order: 'granted_at:desc' });
+      if (statusFilter === 'active') params.set('status', 'active');
+      else if (statusFilter === 'revoked') params.set('status', 'revoked');
+      const data = await api.get<any[]>('/admin/compliance/consent-records?' + params.toString());
+      return data ?? [];
     },
   });
 
   const { data: auditStats } = useQuery({
     queryKey: ['compliance-stats'],
     queryFn: async () => {
-      const [consentCount, auditCount] = await Promise.all([
-        supabase.from('consent_records').select('id', { count: 'exact', head: true }),
-        supabase.from('audit_log').select('id', { count: 'exact', head: true }),
-      ]);
-      return { totalConsents: consentCount.count ?? 0, totalAuditRecords: auditCount.count ?? 0 };
+      const stats = await api.get<{ totalConsents: number; totalAuditRecords: number }>('/admin/compliance/stats');
+      return { totalConsents: stats.totalConsents ?? 0, totalAuditRecords: stats.totalAuditRecords ?? 0 };
     },
   });
 

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { getCurrencyByCountry } from '@/data/countries-currencies';
@@ -30,47 +30,40 @@ export function useTenantCurrency() {
     enabled: !!user,
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id, country')
-        .eq('user_id', user!.id)
-        .single();
+      const me = await api.get<any>('/auth/me');
+      if (!me) return null;
 
-      if (!profile) return null;
+      const tenantId: string | null = me.tenant_id ?? null;
+      const country: string | null = me.country ?? null;
 
-      // Determine currency code: tenant overrides country
       let currencyCode: string | null = null;
 
-      if (profile.tenant_id) {
-        const { data: tenant } = await supabase
-          .from('tenants')
-          .select('currency')
-          .eq('id', profile.tenant_id)
-          .single();
-        currencyCode = tenant?.currency ?? null;
+      if (tenantId) {
+        try {
+          const tenant = await api.get<any>('/admin/tenants/' + tenantId);
+          currencyCode = tenant?.currency ?? null;
+        } catch {}
       }
 
-      if (!currencyCode && profile.country) {
-        currencyCode = getCurrencyByCountry(profile.country);
+      if (!currencyCode && country) {
+        currencyCode = getCurrencyByCountry(country);
       }
 
       if (!currencyCode) currencyCode = 'AOA';
 
-      const { data: currency } = await supabase
-        .from('supported_currencies')
-        .select('code, symbol, name, decimal_places')
-        .eq('code', currencyCode)
-        .eq('is_active', true)
-        .single();
-
-      if (!currency) return null;
-
-      return {
-        code: currency.code,
-        symbol: currency.symbol,
-        name: currency.name,
-        decimalPlaces: currency.decimal_places,
-      } as CurrencyInfo;
+      try {
+        const currencies = await api.get<any[]>('/admin/currencies');
+        const currency = (currencies ?? []).find((c: any) => c.code === currencyCode && c.is_active);
+        if (!currency) return null;
+        return {
+          code: currency.code,
+          symbol: currency.symbol,
+          name: currency.name,
+          decimalPlaces: currency.decimal_places,
+        } as CurrencyInfo;
+      } catch {
+        return null;
+      }
     },
   });
 }
