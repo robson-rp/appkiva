@@ -39,11 +39,12 @@ export function useChildRewards() {
     queryFn: async (): Promise<ChildReward[]> => {
       if (!user?.profileId) return [];
 
-      const response = await api.get<{ data: ChildRewardResponse[] }>('/rewards?available=true');
+      const res = await api.get<any>('/rewards?available=true');
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
 
-      return response.data
-        .filter((r) => !r.claimed_by)
-        .map((r) => ({
+      return items
+        .filter((r: any) => !r.claimed_by)
+        .map((r: any) => ({
           id: r.id,
           name: r.name,
           description: r.description,

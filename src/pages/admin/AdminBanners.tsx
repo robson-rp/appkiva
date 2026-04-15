@@ -99,22 +99,15 @@ export default function AdminBanners() {
     const ext = file.name.split('.').pop();
     const path = `${crypto.randomUUID()}.${ext}`;
     try {
-      const token = localStorage.getItem('kivara_token');
-      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
       const formData = new FormData();
       formData.append('file', file);
       formData.append('path', path);
-      const res = await fetch(`${apiBase}/admin/login-banners/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: 'Upload failed' }));
-        toast({ title: t('admin.banners.upload_error'), description: err.message, variant: 'destructive' });
+      const res = await api.post<any>('/admin/login-banners/upload', formData);
+      const result = res?.data ?? res;
+      if (result?.url) {
+        setForm(f => ({ ...f, image_url: result.url }));
       } else {
-        const imageUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1') + '/storage/' + path;
-        setForm(f => ({ ...f, image_url: imageUrl }));
+        setForm(f => ({ ...f, image_url: `/storage/${path}` }));
       }
     } catch (err: any) {
       toast({ title: t('admin.banners.upload_error'), description: err.message, variant: 'destructive' });
@@ -168,8 +161,12 @@ export default function AdminBanners() {
   };
 
   const handleToggleActive = async (b: Banner) => {
-    await api.post('/admin/login-banners/' + b.id + '/toggle-active', {});
-    fetchBanners();
+    try {
+      await api.post('/admin/login-banners/' + b.id + '/toggle-active', {});
+      fetchBanners();
+    } catch (e: any) {
+      toast({ title: t('admin.banners.error'), description: e.message, variant: 'destructive' });
+    }
   };
 
   const moveOrder = async (b: Banner, direction: -1 | 1) => {
@@ -177,13 +174,17 @@ export default function AdminBanners() {
     const swapIdx = idx + direction;
     if (swapIdx < 0 || swapIdx >= banners.length) return;
     const other = banners[swapIdx];
-    await api.post('/admin/login-banners/reorder', {
-      items: [
-        { id: b.id, display_order: other.display_order },
-        { id: other.id, display_order: b.display_order },
-      ],
-    });
-    fetchBanners();
+    try {
+      await api.post('/admin/login-banners/reorder', {
+        items: [
+          { id: b.id, display_order: other.display_order },
+          { id: other.id, display_order: b.display_order },
+        ],
+      });
+      fetchBanners();
+    } catch (e: any) {
+      toast({ title: t('admin.banners.error'), description: e.message, variant: 'destructive' });
+    }
   };
 
   const totalClicks = Object.values(clickStats).reduce((s, c) => s + c.total_clicks, 0);

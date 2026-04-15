@@ -16,12 +16,12 @@ Route::prefix('v1')->group(function () {
 
 
     // Auth (public)
-    Route::post('/auth/register',        [AuthController::class, 'register']);
+    Route::post('/auth/register',        [AuthController::class, 'register'])->middleware('throttle:login');
     Route::post('/auth/login',           [AuthController::class, 'login'])->middleware('throttle:login');
     Route::post('/auth/child-login',     [AuthController::class, 'childLogin'])->middleware('throttle:child-login');
     Route::post('/auth/refresh',         [AuthController::class, 'refresh']);
-    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword']);
+    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:login');
+    Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword'])->middleware('throttle:login');
 
     // Public login banners (used on login screen before authentication)
     Route::get('/admin/login-banners', [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);

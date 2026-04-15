@@ -65,10 +65,17 @@ class NotificationController extends Controller
         $profile = $request->user()->profile;
 
         $settings = $request->validate([
-            '*' => 'nullable',
+            'task_completed'       => 'nullable|boolean',
+            'mission_update'       => 'nullable|boolean',
+            'wallet_activity'      => 'nullable|boolean',
+            'badge_earned'         => 'nullable|boolean',
+            'weekly_summary'       => 'nullable|boolean',
+            'promotional'          => 'nullable|boolean',
+            'push_enabled'         => 'nullable|boolean',
+            'email_enabled'        => 'nullable|boolean',
         ]);
 
-        $profile->update(['email_preferences' => $request->all()]);
+        $profile->update(['email_preferences' => $settings]);
 
         return response()->json(['data' => $profile->fresh()->email_preferences ?? (object) []]);
     }

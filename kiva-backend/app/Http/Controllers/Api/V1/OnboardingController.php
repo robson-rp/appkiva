@@ -27,6 +27,10 @@ class OnboardingController extends Controller
             'skipped'      => $progress->skipped,
             'completed_at' => $progress->completed_at,
         ]]);
+    }
+
+    /** POST /onboarding/progress */
+    public function upsertProgress(Request $request): JsonResponse
     {
         $data = $request->validate([
             'current_step' => 'sometimes|integer|min:0',
@@ -49,6 +53,9 @@ class OnboardingController extends Controller
             'skipped'      => $progress->skipped,
             'completed_at' => $progress->completed_at,
         ]]);
+    }
+
+    /** POST /onboarding/track */
     public function trackEvent(Request $request): JsonResponse
     {
         $data = $request->validate([

@@ -13,8 +13,8 @@ export function useExchangeRates() {
     queryKey: ['exchange-rates'],
     staleTime: 30 * 60 * 1000,
     queryFn: async () => {
-      const data = await api.get<ExchangeRate[]>('/admin/exchange-rates');
-      return data;
+      const res = await api.get<any>('/admin/exchange-rates');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 }

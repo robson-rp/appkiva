@@ -139,8 +139,9 @@ export function useGetDreamComments(dreamVaultId: string) {
   return useQuery({
     queryKey: ['dream-vault-comments', dreamVaultId],
     queryFn: async () => {
-      const data = await api.get<DreamCommentResponse[]>(`/dream-vaults/${dreamVaultId}/comments`);
-      return data.map((c) => ({
+      const res = await api.get<any>(`/dream-vaults/${dreamVaultId}/comments`);
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((c: any) => ({
         id: c.id,
         text: c.text,
         emoji: c.emoji ?? '💬',

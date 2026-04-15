@@ -21,8 +21,9 @@ export function useLessonProgress() {
     queryKey: ['lesson-progress', profileId],
     enabled: !!profileId,
     queryFn: async () => {
-      const data = await api.get<LessonProgressResponse[]>('/lessons/progress');
-      return data ?? [];
+      const res = await api.get<any>('/lessons/progress');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data;
     },
   });
 

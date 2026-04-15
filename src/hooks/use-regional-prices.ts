@@ -16,8 +16,8 @@ export function useRegionalPrices() {
     queryKey: ['tier-regional-prices'],
     staleTime: 30 * 60 * 1000,
     queryFn: async () => {
-      const data = await api.get<RegionalPrice[]>('/admin/regional-prices');
-      return data;
+      const res = await api.get<any>('/admin/regional-prices');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 }

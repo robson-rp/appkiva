@@ -177,7 +177,8 @@ export function useHouseholdVaults() {
   return useQuery({
     queryKey: ['savings-vaults', 'household'],
     queryFn: async () => {
-      const data = await api.get<SavingsVaultResponse[]>('/savings-vaults');
+      const res = await api.get<any>('/savings-vaults');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
       return data.map(mapRow);
     },
     enabled: !!user,
