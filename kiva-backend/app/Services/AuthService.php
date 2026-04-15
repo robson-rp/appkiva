@@ -2,16 +2,18 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Models\Profile;
-use App\Models\Tenant;
+use App\Mail\WelcomeMail;
+use App\Models\AllowanceConfig;
+use App\Models\Child;
 use App\Models\Household;
 use App\Models\HouseholdGuardian;
-use App\Models\Child;
+use App\Models\Profile;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Models\Wallet;
-use App\Models\AllowanceConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
@@ -82,6 +84,12 @@ class AuthService
 
             $token = JWTAuth::fromUser($user);
 
+            // Send welcome email (queued, non-blocking)
+            Mail::to($user->email)->queue(new WelcomeMail(
+                displayName: $profile->display_name,
+                appUrl: config('app.frontend_url', config('app.url')),
+            ));
+
             return [
                 'user'    => $user,
                 'profile' => $profile,
@@ -147,11 +155,18 @@ class AuthService
         JWTAuth::invalidate(JWTAuth::getToken());
     }
 
-    public function refresh(string $refreshToken): ?string
+    public function refresh(string $refreshToken): ?array
     {
         try {
             JWTAuth::setToken($refreshToken);
-            return JWTAuth::refresh();
+            $user          = JWTAuth::toUser();
+            $newToken      = JWTAuth::refresh();
+            $newRefresh    = JWTAuth::claims(['type' => 'refresh'])->fromUser($user);
+
+            return [
+                'token'         => $newToken,
+                'refresh_token' => $newRefresh,
+            ];
         } catch (\Throwable) {
             return null;
         }

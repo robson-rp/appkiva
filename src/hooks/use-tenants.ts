@@ -9,7 +9,7 @@ interface Tenant {
   subscription_tier_id?: string;
   is_active: boolean;
   created_at: string;
-  subscription_tiers?: {
+  subscription_tier?: {
     name: string;
     tier_type: string;
   };
@@ -35,8 +35,8 @@ export function useTenants() {
   return useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {
-      const data = await api.get<Tenant[]>('/admin/tenants');
-      return data;
+      const res = await api.get<{ data: Tenant[] } | Tenant[]>('/admin/tenants');
+      return Array.isArray(res) ? res : (res as any).data ?? [];
     },
   });
 }
@@ -46,7 +46,7 @@ export function useSubscriptionTiers(showInactive = false) {
     queryKey: ['subscription_tiers', showInactive],
     queryFn: async () => {
       const data = await api.get<SubscriptionTier[]>(`/admin/subscription-tiers?show_inactive=${showInactive}`);
-      return data;
+      return Array.isArray(data) ? data : (data as any).data ?? [];
     },
   });
 }
@@ -116,11 +116,31 @@ export function useUpdateTenant() {
   });
 }
 
+export function useActivateTenant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.post(`/admin/tenants/${id}/activate`);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tenants'] }),
+  });
+}
+
+export function useDeactivateTenant() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.post(`/admin/tenants/${id}/deactivate`);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['tenants'] }),
+  });
+}
+
 export function useAdminStats() {
   return useQuery({
     queryKey: ['admin-stats'],
     queryFn: async () => {
-      const data = await api.get<{
+      const response = await api.get<{ data: {
         totalTenants: number;
         activeTenants: number;
         tenantsByType: {
@@ -129,6 +149,7 @@ export function useAdminStats() {
           institutional_partner: number;
         };
         totalUsers: number;
+        totalChildren: number;
         totalWallets: number;
         dau: number;
         missionCompletionRate: number;
@@ -137,8 +158,8 @@ export function useAdminStats() {
         dailyTxVolume: number;
         dailyTxCount: number;
         weeklySparkline: Array<{ day: string; volume: number; count: number }>;
-      }>('/admin/stats');
-      return data;
+      }}>('/admin/stats');
+      return response.data;
     },
   });
 }

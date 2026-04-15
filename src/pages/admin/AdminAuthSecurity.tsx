@@ -10,6 +10,7 @@ import { api } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import { QueryError } from '@/components/ui/query-error';
 import { useT } from '@/contexts/LanguageContext';
 
 export default function AdminAuthSecurity() {
@@ -19,21 +20,21 @@ export default function AdminAuthSecurity() {
   const [filter, setFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('all');
 
-  const { data: events, isLoading } = useQuery({
+  const { data: events, isLoading, error, refetch } = useQuery({
     queryKey: ['auth-events', eventFilter],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '200', order: 'created_at:desc' });
       if (eventFilter !== 'all') params.set('event_type', eventFilter);
-      const data = await api.get<any[]>('/admin/auth-events?' + params.toString());
-      return data ?? [];
+      const res = await api.get<any>('/admin/auth-events?' + params.toString());
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
   const { data: lockouts } = useQuery({
     queryKey: ['login-lockouts'],
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/login-lockouts?failed_attempts_gt=0&limit=50&order=last_attempt_at:desc');
-      return (data ?? []) as any[];
+      const res = await api.get<any>('/admin/login-lockouts?failed_attempts_gt=0&limit=50&order=last_attempt_at:desc');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
@@ -186,6 +187,8 @@ export default function AdminAuthSecurity() {
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.risk.loading')}</p>
+          ) : error ? (
+            <QueryError error={error} onRetry={() => refetch()} />
           ) : !filteredEvents.length ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('security.no_events')}</p>
           ) : (

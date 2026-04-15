@@ -17,8 +17,13 @@ export function useMoneySupply() {
   return useQuery({
     queryKey: ['money-supply-stats'],
     queryFn: async (): Promise<MoneySupplyStats> => {
-      const data = await api.get<{ money_supply: MoneySupplyStats }>('/admin/stats');
-      return data.money_supply;
+      const res = await api.get<{ data: { money_supply?: MoneySupplyStats } }>('/admin/stats');
+      const ms = res?.data?.money_supply;
+      return ms ?? {
+        total_emitted: 0, total_burned: 0, total_in_circulation: 0,
+        total_in_wallets: 0, total_in_vaults: 0, wallet_count: 0,
+        system_wallet_id: '', audit_timestamp: new Date().toISOString(),
+      };
     },
     refetchInterval: 30000,
   });

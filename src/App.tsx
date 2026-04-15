@@ -329,7 +329,7 @@ function AppShell() {
     <>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <AuthProvider>
           <RewardAnimationProvider>
             <a href="#main-content" className="skip-to-content">

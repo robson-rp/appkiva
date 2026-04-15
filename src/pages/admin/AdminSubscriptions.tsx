@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { QueryError } from '@/components/ui/query-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +46,7 @@ function useTierTypeLabels() {
 export default function AdminSubscriptions() {
   const t = useT();
   const tierTypeLabels = useTierTypeLabels();
-  const { data: tiers, isLoading } = useSubscriptionTiers(true);
+  const { data: tiers, isLoading, error: tiersError, refetch } = useSubscriptionTiers(true);
   const createTier = useCreateSubscriptionTier();
   const updateTier = useUpdateSubscriptionTier();
   const deleteTier = useDeleteSubscriptionTier();
@@ -273,6 +274,8 @@ export default function AdminSubscriptions() {
       {/* Table */}
       {isLoading ? (
         <p className="text-center text-muted-foreground py-8">{t('admin.subs.loading')}</p>
+      ) : tiersError ? (
+        <QueryError error={tiersError} onRetry={() => refetch()} />
       ) : (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">

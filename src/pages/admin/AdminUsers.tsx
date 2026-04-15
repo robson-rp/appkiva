@@ -9,6 +9,7 @@ import { Users, Search, ChevronDown, ChevronRight, Home, School, Building2 } fro
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { api } from '@/lib/api-client';
 
 function useRoleLabels() {
   const t = useT();
@@ -25,8 +26,18 @@ function useRoleLabels() {
 function useAllUsers() {
   return useQuery({
     queryKey: ['admin_all_users'],
+    staleTime: 0,
+    gcTime: 0,
     queryFn: async () => {
-      return [];
+      const res = await api.get<{ data: any[] }>('/admin/users');
+      const list = Array.isArray(res) ? res : (res as any).data ?? [];
+      return list.map((u: any) => ({
+        ...u,
+        role: u.roles?.[0] ?? 'parent',
+        school: u.tenant?.tenant_type === 'school' ? u.tenant : null,
+        tenant: u.tenant?.tenant_type !== 'school' ? u.tenant : null,
+        childrenOf: [] as any[],
+      }));
     },
   });
 }
@@ -34,7 +45,7 @@ function useAllUsers() {
 export default function AdminUsers() {
   const t = useT();
   const roleLabels = useRoleLabels();
-  const { data: users = [], isLoading } = useAllUsers();
+  const { data: users = [], isLoading, error } = useAllUsers();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -97,6 +108,8 @@ export default function AdminUsers() {
 
       {isLoading ? (
         <p className="text-center text-muted-foreground py-8">{t('admin.users.loading')}</p>
+      ) : error ? (
+        <p className="text-center text-destructive py-8">{(error as any)?.message ?? 'Erro ao carregar utilizadores'}</p>
       ) : (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="border-border/50">

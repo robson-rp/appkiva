@@ -85,10 +85,11 @@ export default function Login() {
   const [otpCode, setOtpCode] = useState('');
   const [emailSignupSuccess, setEmailSignupSuccess] = useState(false);
   const [otpCountdown, setOtpCountdown] = useState(0);
-  const [honeypot, setHoneypot] = useState('');
+  const honeypotRef = useRef<HTMLInputElement>(null);
   const otpTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 2FA state
+  
   const [twoFACode, setTwoFACode] = useState('');
   const [twoFAAttempts, setTwoFAAttempts] = useState(0);
   const [twoFATrustDevice, setTwoFATrustDevice] = useState(false);
@@ -219,7 +220,7 @@ export default function Login() {
 
     try {
       // Anti-bot: silently reject if honeypot is filled
-      if (honeypot) {
+      if (honeypotRef.current?.value) {
         setSubmitting(false);
         // Simulate success to not reveal detection
         if (authMode === 'signup') setEmailSignupSuccess(true);
@@ -765,12 +766,12 @@ export default function Login() {
                   {/* Honeypot anti-bot field */}
                   <div className="absolute -left-[9999px]" aria-hidden="true">
                     <input
+                      ref={honeypotRef}
                       type="text"
-                      name="website"
+                      name="kivara_url"
                       tabIndex={-1}
-                      autoComplete="off"
-                      value={honeypot}
-                      onChange={e => setHoneypot(e.target.value)}
+                      autoComplete="nope"
+                      defaultValue=""
                     />
                   </div>
                   {authMode === 'signup' && (
@@ -1039,7 +1040,7 @@ export default function Login() {
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 className="h-12 rounded-xl text-base"
-                                minLength={12}
+                                minLength={authMode === 'signup' ? 8 : undefined}
                                 required
                               />
                               {authMode === 'signup' && <PasswordStrengthMeter password={password} />}
@@ -1121,10 +1122,10 @@ export default function Login() {
                         </>
                       )}
 
-                      {/* Hide signup toggle for child login (parents create accounts) */}
-                      {selectedRole === 'child' && authMode === 'login' ? (
+                      {/* Hide signup toggle for child/admin (accounts created externally) */}
+                      {(selectedRole === 'child' && authMode === 'login') || selectedRole === 'admin' ? (
                         <p className="text-center text-xs text-muted-foreground">
-                          {t('auth.child_account_hint') || 'A tua conta é criada pelo teu encarregado'}
+                          {selectedRole === 'child' && (t('auth.child_account_hint') || 'A tua conta é criada pelo teu encarregado')}
                         </p>
                       ) : (
                         <p className="text-center text-sm text-muted-foreground">
@@ -1155,7 +1156,6 @@ export default function Login() {
         </motion.div>
       </div>
     </div>
-  );
-    </>
+  </>
   );
 }

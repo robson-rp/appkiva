@@ -2734,7 +2734,7 @@ const pt: Record<string, string> = {
   'password.strength.moderate': 'Moderada',
   'password.strength.strong': 'Forte',
   'password.strength.very_strong': 'Muito Forte',
-  'password.rule.minLength': 'Mínimo 12 caracteres',
+  'password.rule.minLength': 'Mínimo 8 caracteres',
   'password.rule.uppercase': 'Letra maiúscula',
   'password.rule.lowercase': 'Letra minúscula',
   'password.rule.number': 'Número',

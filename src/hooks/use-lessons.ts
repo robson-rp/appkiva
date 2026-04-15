@@ -37,7 +37,8 @@ export function useLessons() {
   return useQuery({
     queryKey: ['lessons'],
     queryFn: async () => {
-      const data = await api.get<LessonResponse[]>('/lessons');
+      const res = await api.get<any>('/lessons');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
 
       if (!data || data.length === 0) {
         return mockLessons;
@@ -52,8 +53,9 @@ export function useAllLessons() {
   return useQuery({
     queryKey: ['lessons', 'all'],
     queryFn: async () => {
-      const data = await api.get<LessonResponse[]>('/lessons?include_inactive=true');
-      return data;
+      const res = await api.get<any>('/lessons?include_inactive=true');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data as LessonResponse[];
     },
   });
 }

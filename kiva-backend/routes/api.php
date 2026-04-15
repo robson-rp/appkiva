@@ -12,7 +12,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // Deployment Hook (authenticated by token, not Sanctum)
-    Route::post('deployment-hook', [\App\Http\Controllers\DeploymentController::class, 'hook']);
+    Route::post('deployment-hook', [\App\Http\Controllers\Api\V1\DeploymentController::class, 'hook']);
 
 
     // Auth (public)
@@ -22,6 +22,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/refresh',         [AuthController::class, 'refresh']);
     Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/auth/reset-password',  [AuthController::class, 'resetPassword']);
+
+    // Public login banners (used on login screen before authentication)
+    Route::get('/admin/login-banners', [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);
 
     // Authenticated routes
     Route::middleware(['auth:api', 'tenant.owned', 'role.rate'])->group(function () {
@@ -118,6 +121,11 @@ Route::prefix('v1')->group(function () {
         Route::get('/kiva-points',           [\App\Http\Controllers\Api\V1\GamificationController::class, 'kivaPoints']);
         Route::get('/leaderboard/household', [\App\Http\Controllers\Api\V1\GamificationController::class, 'householdLeaderboard']);
 
+        // Onboarding
+        Route::get('/onboarding/progress',   [\App\Http\Controllers\Api\V1\OnboardingController::class, 'getProgress']);
+        Route::put('/onboarding/progress',   [\App\Http\Controllers\Api\V1\OnboardingController::class, 'upsertProgress']);
+        Route::post('/onboarding/analytics', [\App\Http\Controllers\Api\V1\OnboardingController::class, 'trackEvent']);
+
         // Notifications
         Route::get('/notifications',                            [\App\Http\Controllers\Api\V1\NotificationController::class, 'index']);
         Route::patch('/notifications/{id}/read',                [\App\Http\Controllers\Api\V1\NotificationController::class, 'markRead'])->whereUuid('id');
@@ -186,7 +194,6 @@ Route::prefix('v1')->group(function () {
             Route::post('/currencies/{code}/toggle-active',        [\App\Http\Controllers\Api\V1\AdminController::class, 'toggleCurrencyActive']);
             Route::get('/exchange-rates',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'exchangeRates']);
             Route::put('/exchange-rates/{id}',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'updateExchangeRate'])->whereUuid('id');
-            Route::get('/login-banners',                           [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);
             Route::post('/login-banners',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'storeLoginBanner']);
             Route::post('/login-banners/reorder',                  [\App\Http\Controllers\Api\V1\AdminController::class, 'reorderLoginBanners']);
             Route::patch('/login-banners/{id}',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'updateLoginBanner'])->whereUuid('id');
@@ -202,6 +209,18 @@ Route::prefix('v1')->group(function () {
             Route::post('/tenants/{id}/deactivate',                [\App\Http\Controllers\Api\V1\AdminController::class, 'deactivateTenant'])->whereUuid('id');
             Route::delete('/tenants/{id}',                         [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyTenant'])->whereUuid('id');
             Route::post('/invoices/{id}/mark-paid',                [\App\Http\Controllers\Api\V1\AdminController::class, 'markInvoicePaid'])->whereUuid('id');
+            Route::get('/subscription-tiers',                      [\App\Http\Controllers\Api\V1\AdminController::class, 'subscriptionTiers']);
+            Route::post('/subscription-tiers',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'storeSubscriptionTier']);
+            Route::patch('/subscription-tiers/{id}',               [\App\Http\Controllers\Api\V1\AdminController::class, 'updateSubscriptionTier'])->whereUuid('id');
+            Route::delete('/subscription-tiers/{id}',              [\App\Http\Controllers\Api\V1\AdminController::class, 'destroySubscriptionTier'])->whereUuid('id');
+            Route::get('/wallets',                                  [\App\Http\Controllers\Api\V1\AdminController::class, 'adminWallets']);
+            Route::get('/profiles',                                 [\App\Http\Controllers\Api\V1\AdminController::class, 'adminProfiles']);
+            Route::get('/auth-events',                              [\App\Http\Controllers\Api\V1\AdminController::class, 'authEvents']);
+            Route::get('/login-lockouts',                           [\App\Http\Controllers\Api\V1\AdminController::class, 'loginLockouts']);
+            Route::get('/compliance/consent-records',               [\App\Http\Controllers\Api\V1\AdminController::class, 'consentRecords']);
+            Route::get('/compliance/stats',                         [\App\Http\Controllers\Api\V1\AdminController::class, 'complianceStats']);
+            Route::get('/banner-clicks',                            [\App\Http\Controllers\Api\V1\AdminController::class, 'bannerClicks']);
+            Route::get('/onboarding-analytics',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'onboardingAnalytics']);
         });
     });
 });

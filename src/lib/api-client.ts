@@ -42,9 +42,11 @@ class ApiClient {
     return localStorage.getItem('kivara_tenant_id');
   }
 
-  private setTokens(token: string, refreshToken: string): void {
+  private setTokens(token: string, refreshToken?: string): void {
     localStorage.setItem('kivara_token', token);
-    localStorage.setItem('kivara_refresh_token', refreshToken);
+    if (refreshToken) {
+      localStorage.setItem('kivara_refresh_token', refreshToken);
+    }
   }
 
   private clearAuth(): void {

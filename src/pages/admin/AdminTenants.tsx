@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Building2 } from 'lucide-react';
-import { useTenants, useSubscriptionTiers, useCreateTenant, useUpdateTenant } from '@/hooks/use-tenants';
+import { useTenants, useSubscriptionTiers, useCreateTenant, useUpdateTenant, useActivateTenant, useDeactivateTenant } from '@/hooks/use-tenants';
 import { useToast } from '@/hooks/use-toast';
 import { useT } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -19,6 +19,8 @@ export default function AdminTenants() {
   const { data: tiers } = useSubscriptionTiers();
   const createTenant = useCreateTenant();
   const updateTenant = useUpdateTenant();
+  const activateTenant = useActivateTenant();
+  const deactivateTenant = useDeactivateTenant();
   const { toast } = useToast();
 
   const [open, setOpen] = useState(false);
@@ -52,7 +54,11 @@ export default function AdminTenants() {
 
   const toggleActive = async (id: string, isActive: boolean) => {
     try {
-      await updateTenant.mutateAsync({ id, is_active: !isActive });
+      if (isActive) {
+        await deactivateTenant.mutateAsync(id);
+      } else {
+        await activateTenant.mutateAsync(id);
+      }
       toast({ title: isActive ? t('admin.tenants.deactivated') : t('admin.tenants.activated') });
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, variant: 'destructive' });
@@ -170,7 +176,7 @@ export default function AdminTenants() {
                       <TableCell>{typeLabels[tenant.tenant_type] ?? tenant.tenant_type}</TableCell>
                       <TableCell>{tenant.currency}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{tenant.subscription_tiers?.name ?? t('admin.tenants.no_plan')}</Badge>
+                        <Badge variant="secondary">{tenant.subscription_tier?.name ?? t('admin.tenants.no_plan')}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={tenant.is_active ? 'default' : 'outline'}>

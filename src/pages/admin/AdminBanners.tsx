@@ -43,8 +43,11 @@ export default function AdminBanners() {
 
   const fetchBanners = async () => {
     try {
-      const data = await api.get<Banner[]>('/admin/login-banners');
-      if (data) setBanners(data);
+      const res = await api.get<any>('/admin/login-banners');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      setBanners(data);
+    } catch {
+      // non-critical, show empty
     } finally {
       setLoading(false);
     }
@@ -56,8 +59,9 @@ export default function AdminBanners() {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     try {
-      const allClicks = await api.get<{ banner_id: string; clicked_at: string }[]>('/admin/banner-clicks');
-      if (!allClicks) return;
+      const res = await api.get<any>('/admin/banner-clicks');
+      const allClicks = Array.isArray(res) ? res : (res?.data ?? []);
+      if (!allClicks.length) return;
 
       const statsMap: Record<string, BannerClickStats> = {};
       for (const click of allClicks) {

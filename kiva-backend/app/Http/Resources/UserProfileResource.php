@@ -25,6 +25,8 @@ class UserProfileResource extends JsonResource
             'institution_name' => $this->institution_name,
             'ranking_visibility' => $this->ranking_visibility,
             'roles'            => $this->whenLoaded('user', fn() => $this->user->getRoleNames()),
+            'household'        => $this->whenLoaded('household', fn() => $this->household ? ['id' => $this->household->id, 'name' => $this->household->name] : null),
+            'tenant'           => $this->whenLoaded('tenant', fn() => $this->tenant ? ['id' => $this->tenant->id, 'name' => $this->tenant->name, 'tenant_type' => $this->tenant->tenant_type] : null),
             'created_at'       => $this->created_at,
             'updated_at'       => $this->updated_at,
             // date_of_birth is NEVER included here

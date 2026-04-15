@@ -12,25 +12,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { School, Plus, Edit, Trash2, Search, GraduationCap } from 'lucide-react';
 import { useT } from '@/contexts/LanguageContext';
+import { useSubscriptionTiers } from '@/hooks/use-tenants';
+import { QueryError } from '@/components/ui/query-error';
 
 interface SchoolTenant { id: string; name: string; currency: string; is_active: boolean; created_at: string; subscription_tier_id: string | null; settings: any; }
 
 function useSchools() {
   return useQuery({ queryKey: ['admin-schools'], queryFn: async () => {
-    const data = await api.get<SchoolTenant[]>('/admin/tenants');
-    return (data ?? []) as SchoolTenant[];
-  } });
-}
-function useSubscriptionTiers() {
-  return useQuery({ queryKey: ['subscription-tiers-school'], queryFn: async () => {
-    const data = await api.get<any[]>('/subscription/tiers');
-    return data ?? [];
+    const res = await api.get<{ data: SchoolTenant[] } | SchoolTenant[]>('/admin/tenants?type=school');
+    return (Array.isArray(res) ? res : (res as any).data ?? []) as SchoolTenant[];
   } });
 }
 
 export default function AdminSchools() {
   const t = useT();
-  const { data: schools = [], isLoading } = useSchools();
+  const { data: schools = [], isLoading, error, refetch } = useSchools();
   const { data: tiers = [] } = useSubscriptionTiers();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
@@ -111,6 +107,8 @@ export default function AdminSchools() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (<Card key={i} className="overflow-hidden"><div className="h-1 bg-gradient-to-r from-primary to-accent" /><CardContent className="p-5 space-y-3"><Skeleton className="h-6 w-40" /><Skeleton className="h-4 w-24" /><Skeleton className="h-8 w-full" /></CardContent></Card>))}
         </div>
+      ) : error ? (
+        <QueryError error={error} onRetry={() => refetch()} />
       ) : filtered.length === 0 ? (
         <Card className="border-border/50">
           <CardContent className="p-12 text-center">

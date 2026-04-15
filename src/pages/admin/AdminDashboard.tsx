@@ -113,9 +113,9 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { label: t('admin.dash.families'), value: stats.tenantsByType.family, emoji: '👨‍👩‍👧‍👦' },
-                  { label: t('admin.dash.schools'), value: stats.tenantsByType.school, emoji: '🏫' },
-                  { label: t('admin.dash.partners'), value: stats.tenantsByType.institutional_partner, emoji: '🏢' },
+                  { label: t('admin.dash.families'), value: stats?.tenantsByType?.family ?? 0, emoji: '👨‍👩‍👧‍👦' },
+                  { label: t('admin.dash.schools'), value: stats?.tenantsByType?.school ?? 0, emoji: '🏫' },
+                  { label: t('admin.dash.partners'), value: stats?.tenantsByType?.institutional_partner ?? 0, emoji: '🏢' },
                 ].map((d) => (
                   <div key={d.label} className="text-center p-5 rounded-2xl bg-muted/50">
                     <div className="text-3xl mb-2">{d.emoji}</div>
@@ -131,3 +131,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+

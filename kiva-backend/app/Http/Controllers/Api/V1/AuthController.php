@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserProfileResource;
 use App\Models\TrustedDevice;
+use App\Services\AuditService;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -62,12 +63,21 @@ class AuthController extends Controller
 
         if (!$result) {
             RateLimiter::hit($key, 60);
+            AuditService::log('login', 'users', null, null, null, null, null, null,
+                ['email' => $data['email'], 'success' => false, 'reason' => 'invalid_credentials']
+            );
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
 
         RateLimiter::clear($key);
 
         $profile = $result['user']->profile;
+
+        AuditService::log('login', 'users', $result['user']->id, null,
+            ['email' => $result['user']->email],
+            $profile?->id, $result['user']->id, $profile?->tenant_id,
+            ['success' => true]
+        );
 
         return response()->json([
             'token'         => $result['token'],
@@ -103,6 +113,10 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
+        $user = auth()->user();
+        AuditService::log('logout', 'users', $user?->id, null, null,
+            $user?->profile?->id, $user?->id
+        );
         $this->authService->logout();
 
         return response()->json(null, 204);
@@ -114,13 +128,16 @@ class AuthController extends Controller
             'refresh_token' => 'required|string',
         ]);
 
-        $token = $this->authService->refresh($data['refresh_token']);
+        $result = $this->authService->refresh($data['refresh_token']);
 
-        if (!$token) {
+        if (!$result) {
             return response()->json(['message' => 'Invalid or expired refresh token.'], 401);
         }
 
-        return response()->json(['token' => $token]);
+        return response()->json([
+            'token'         => $result['token'],
+            'refresh_token' => $result['refresh_token'],
+        ]);
     }
 
     public function me(Request $request): JsonResponse

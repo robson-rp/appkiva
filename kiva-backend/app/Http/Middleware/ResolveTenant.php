@@ -17,7 +17,11 @@ class ResolveTenant
             $tenant = Tenant::find($tenantId);
 
             if (! $tenant || ! $tenant->is_active) {
-                return response()->json(['message' => 'Tenant not found or inactive.'], 401);
+                // Admins can always operate, even in inactive tenants
+                $user = $request->user();
+                if (! $user || ! $user->hasRole('admin')) {
+                    return response()->json(['message' => 'Tenant not found or inactive.'], 401);
+                }
             }
 
             session(['tenant_id' => $tenantId]);

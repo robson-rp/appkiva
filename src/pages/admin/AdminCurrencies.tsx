@@ -26,7 +26,7 @@ function CurrenciesTab() {
 
   const { data: currencies = [], isLoading } = useQuery({
     queryKey: ['admin-currencies'],
-    queryFn: async () => { const data = await api.get<CurrencyRow[]>('/admin/currencies'); return data ?? []; },
+    queryFn: async () => { const res = await api.get<any>('/admin/currencies'); return Array.isArray(res) ? res : (res?.data ?? []); },
   });
 
   const toggleMutation = useMutation({
@@ -98,7 +98,7 @@ function ExchangeRatesTab() {
 
   const { data: rates = [], isLoading } = useQuery({
     queryKey: ['admin-exchange-rates'],
-    queryFn: async () => { const data = await api.get<RateRow[]>('/admin/exchange-rates'); return data ?? []; },
+    queryFn: async () => { const res = await api.get<any>('/admin/exchange-rates'); return Array.isArray(res) ? res : (res?.data ?? []); },
   });
 
   const updateMutation = useMutation({

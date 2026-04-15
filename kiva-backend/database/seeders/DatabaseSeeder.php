@@ -88,7 +88,7 @@ class DatabaseSeeder extends Seeder
             'is_active'   => true,
         ]);
 
-        $adminUser = User::firstOrCreate(['email' => 'admin@kivara.local'], [
+        $adminUser = User::firstOrCreate(['email' => 'r.paulo@strongbox.ao'], [
             'password' => bcrypt('AdminPass123!'),
         ]);
         $adminUser->assignRole('admin');

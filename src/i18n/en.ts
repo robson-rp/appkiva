@@ -2730,7 +2730,7 @@ const en: Record<string, string> = {
   'password.strength.moderate': 'Moderate',
   'password.strength.strong': 'Strong',
   'password.strength.very_strong': 'Very Strong',
-  'password.rule.minLength': 'Minimum 12 characters',
+  'password.rule.minLength': 'Minimum 8 characters',
   'password.rule.uppercase': 'Uppercase letter',
   'password.rule.lowercase': 'Lowercase letter',
   'password.rule.number': 'Number',

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 export default function AdminRisk() {
   const t = useT();
@@ -17,11 +18,11 @@ export default function AdminRisk() {
   const qc = useQueryClient();
   const [scanning, setScanning] = useState(false);
 
-  const { data: flags, isLoading } = useQuery({
+  const { data: flags, isLoading, error, refetch } = useQuery({
     queryKey: ['risk-flags'],
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/risk-flags');
-      return data ?? [];
+      const res = await api.get<any>('/admin/risk-flags');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
@@ -114,6 +115,8 @@ export default function AdminRisk() {
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.risk.loading')}</p>
+          ) : error ? (
+            <QueryError error={error} onRetry={() => refetch()} />
           ) : !openFlags.length ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.risk.no_flags')}</p>
           ) : (

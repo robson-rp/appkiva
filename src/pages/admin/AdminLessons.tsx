@@ -16,6 +16,7 @@ import { api } from '@/lib/api-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { LESSON_CATEGORIES, DIFFICULTY_CONFIG } from '@/types/kivara';
+import { QueryError } from '@/components/ui/query-error';
 import { useT } from '@/contexts/LanguageContext';
 
 interface LessonForm {
@@ -39,7 +40,7 @@ const emptyForm: LessonForm = {
 
 export default function AdminLessons() {
   const t = useT();
-  const { data: lessons, isLoading } = useAllLessons();
+  const { data: lessons, isLoading, error, refetch } = useAllLessons();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -144,6 +145,8 @@ export default function AdminLessons() {
             <TableBody>
               {isLoading ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{t('admin.lessons.loading')}</TableCell></TableRow>
+              ) : error ? (
+                <TableRow><TableCell colSpan={7} className="py-8"><QueryError error={error} onRetry={() => refetch()} /></TableCell></TableRow>
               ) : !lessons?.length ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{t('admin.lessons.empty')}</TableCell></TableRow>
               ) : lessons.map((lesson: any) => (

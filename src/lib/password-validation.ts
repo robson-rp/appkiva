@@ -12,7 +12,7 @@ const COMMON_PASSWORDS = [
 ];
 
 export const PASSWORD_RULES: PasswordRule[] = [
-  { key: 'minLength', test: (pw) => pw.length >= 12 },
+  { key: 'minLength', test: (pw) => pw.length >= 8 },
   { key: 'uppercase', test: (pw) => /[A-Z]/.test(pw) },
   { key: 'lowercase', test: (pw) => /[a-z]/.test(pw) },
   { key: 'number', test: (pw) => /[0-9]/.test(pw) },
@@ -45,5 +45,7 @@ export function getPasswordStrength(password: string): PasswordStrength {
 
 export function isPasswordValid(password: string): boolean {
   if (isCommonPassword(password)) return false;
-  return PASSWORD_RULES.every((rule) => rule.test(password));
+  // Requires minLength + at least 2 of: uppercase, lowercase, number (special is optional)
+  const required = PASSWORD_RULES.filter(r => r.key !== 'special');
+  return required.every((rule) => rule.test(password));
 }

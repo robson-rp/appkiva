@@ -121,7 +121,7 @@ export default function LoginBannerCarousel() {
                 alt={b.title}
                 className="h-full w-full object-cover"
                 loading={idx === 0 ? "eager" : "lazy"}
-                fetchPriority={idx === 0 ? "high" : "auto"}
+                fetchpriority={idx === 0 ? "high" : "auto"}
                 decoding={idx === 0 ? "sync" : "async"}
                 onError={handleImgError}
               />

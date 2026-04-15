@@ -8,20 +8,21 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 export default function AdminAudit() {
   const t = useT();
   const [resourceFilter, setResourceFilter] = useState('all');
   const [actionFilter, setActionFilter] = useState('all');
 
-  const { data: logs, isLoading } = useQuery({
+  const { data: logs, isLoading, error, refetch } = useQuery({
     queryKey: ['audit-log', resourceFilter, actionFilter],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '100', order: 'created_at:desc' });
       if (resourceFilter !== 'all') params.set('resource_type', resourceFilter);
       if (actionFilter !== 'all') params.set('action', actionFilter);
-      const data = await api.get<any[]>('/admin/audit-log?' + params.toString());
-      return data ?? [];
+      const res = await api.get<any>('/admin/audit-log?' + params.toString());
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
@@ -72,6 +73,8 @@ export default function AdminAudit() {
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.audit.loading')}</p>
+          ) : error ? (
+            <QueryError error={error} onRetry={() => refetch()} />
           ) : !logs?.length ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.audit.empty')}</p>
           ) : (

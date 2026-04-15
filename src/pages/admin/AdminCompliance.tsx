@@ -10,6 +10,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { QueryError } from '@/components/ui/query-error';
 import { useT } from '@/contexts/LanguageContext';
 
 export default function AdminCompliance() {
@@ -18,21 +19,22 @@ export default function AdminCompliance() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailDialog, setDetailDialog] = useState<{ open: boolean; record: any }>({ open: false, record: null });
 
-  const { data: consents, isLoading } = useQuery({
+  const { data: consents, isLoading, error, refetch } = useQuery({
     queryKey: ['consent-records', statusFilter],
     queryFn: async () => {
       const params = new URLSearchParams({ limit: '200', order: 'granted_at:desc' });
       if (statusFilter === 'active') params.set('status', 'active');
       else if (statusFilter === 'revoked') params.set('status', 'revoked');
-      const data = await api.get<any[]>('/admin/compliance/consent-records?' + params.toString());
-      return data ?? [];
+      const res = await api.get<any>('/admin/compliance/consent-records?' + params.toString());
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
   const { data: auditStats } = useQuery({
     queryKey: ['compliance-stats'],
     queryFn: async () => {
-      const stats = await api.get<{ totalConsents: number; totalAuditRecords: number }>('/admin/compliance/stats');
+      const res = await api.get<any>('/admin/compliance/stats');
+      const stats = res?.data ?? res ?? {};
       return { totalConsents: stats.totalConsents ?? 0, totalAuditRecords: stats.totalAuditRecords ?? 0 };
     },
   });
@@ -65,6 +67,8 @@ export default function AdminCompliance() {
         <CardContent>
           {isLoading ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.compliance.loading')}</p>
+          ) : error ? (
+            <QueryError error={error} onRetry={() => refetch()} />
           ) : !consents?.length ? (
             <p className="text-sm text-muted-foreground py-8 text-center">{t('admin.compliance.empty')}</p>
           ) : (

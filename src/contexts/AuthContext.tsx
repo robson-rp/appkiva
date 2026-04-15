@@ -27,35 +27,28 @@ interface AuthContextType {
   complete2FA: () => void;
 }
 
+interface ProfileData {
+  id: string;           // profile UUID
+  user_id: string;      // user UUID
+  display_name: string;
+  avatar: string | null;
+  household_id: string | null;
+  tenant_id: string;
+  roles: UserRole[];
+}
+
 interface LoginResponse {
   token: string;
-  refresh_token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: UserRole;
-    profile_id: string;
-    household_id: string | null;
-    tenant_id: string;
-    avatar: string;
-  };
+  refresh_token?: string;
+  tenant_id?: string;
+  profile: ProfileData;
   requires_2fa?: boolean;
 }
 
 interface RegisterResponse {
-  data: {
-    id: string;
-    name: string;
-    email: string;
-    role: UserRole;
-    profile_id: string;
-    household_id: string | null;
-    tenant_id: string;
-    avatar: string;
-  };
+  data: ProfileData;
   token: string;
-  refresh_token: string;
+  refresh_token?: string;
 }
 
 // Idle timeout constants (ms)
@@ -88,17 +81,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = localStorage.getItem('kivara_token');
     if (token) {
       setLoading(true);
-      api.get<LoginResponse['user']>('/auth/me')
-        .then((userData) => {
+      api.get<{ data: ProfileData }>('/auth/me')
+        .then(({ data: profile }) => {
           setSession({ token });
           setUser({
-            id: userData.id,
-            name: userData.name,
-            email: userData.email,
-            role: userData.role,
-            avatar: userData.avatar || '👤',
-            profileId: userData.profile_id,
-            householdId: userData.household_id,
+            id: profile.user_id,
+            name: profile.display_name,
+            role: profile.roles?.[0],
+            avatar: profile.avatar || '👤',
+            profileId: profile.id,
+            householdId: profile.household_id,
           });
         })
         .catch(() => {
@@ -121,8 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store tokens and tenant ID
       localStorage.setItem('kivara_token', response.token);
-      localStorage.setItem('kivara_refresh_token', response.refresh_token);
-      localStorage.setItem('kivara_tenant_id', response.user.tenant_id);
+      if (response.refresh_token) localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      localStorage.setItem('kivara_tenant_id', response.tenant_id ?? response.profile?.tenant_id ?? '');
       
       setSession({ token: response.token });
       
@@ -140,13 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (trustResult.trusted) {
               setPending2FA(false);
               setUser({
-                id: response.user.id,
-                name: response.user.name,
-                email: response.user.email,
-                role: response.user.role,
-                avatar: response.user.avatar || '👤',
-                profileId: response.user.profile_id,
-                householdId: response.user.household_id,
+                id: response.profile.user_id,
+                name: response.profile.display_name,
+                role: response.profile.roles?.[0],
+                avatar: response.profile.avatar || '👤',
+                profileId: response.profile.id,
+                householdId: response.profile.household_id,
               });
               return { error: null, requires2FA: false };
             }
@@ -162,13 +153,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // No 2FA required, set user immediately
       setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        role: response.user.role,
-        avatar: response.user.avatar || '👤',
-        profileId: response.user.profile_id,
-        householdId: response.user.household_id,
+        id: response.profile.user_id,
+        name: response.profile.display_name,
+        role: response.profile.roles?.[0],
+        avatar: response.profile.avatar || '👤',
+        profileId: response.profile.id,
+        householdId: response.profile.household_id,
       });
       
       return { error: null, requires2FA: false };
@@ -185,18 +175,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store tokens and tenant ID
       localStorage.setItem('kivara_token', response.token);
-      localStorage.setItem('kivara_refresh_token', response.refresh_token);
-      localStorage.setItem('kivara_tenant_id', response.user.tenant_id);
+      if (response.refresh_token) localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      localStorage.setItem('kivara_tenant_id', response.profile?.tenant_id ?? '');
       
       setSession({ token: response.token });
       setUser({
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        role: response.user.role,
-        avatar: response.user.avatar || '👤',
-        profileId: response.user.profile_id,
-        householdId: response.user.household_id,
+        id: response.profile.user_id,
+        name: response.profile.display_name,
+        role: response.profile.roles?.[0],
+        avatar: response.profile.avatar || '👤',
+        profileId: response.profile.id,
+        householdId: response.profile.household_id,
       });
       
       return { error: null };
@@ -222,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ) => {
     try {
       const response = await api.post<RegisterResponse>('/auth/register', {
-        name: displayName,
+        display_name: displayName,
         email,
         password,
         role,
@@ -237,17 +226,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Store tokens and tenant ID
       localStorage.setItem('kivara_token', response.token);
-      localStorage.setItem('kivara_refresh_token', response.refresh_token);
+      if (response.refresh_token) localStorage.setItem('kivara_refresh_token', response.refresh_token);
       localStorage.setItem('kivara_tenant_id', response.data.tenant_id);
       
       setSession({ token: response.token });
       setUser({
-        id: response.data.id,
-        name: response.data.name,
-        email: response.data.email,
-        role: response.data.role,
+        id: response.data.user_id,
+        name: response.data.display_name,
+        role: response.data.roles?.[0],
         avatar: response.data.avatar || '👤',
-        profileId: response.data.profile_id,
+        profileId: response.data.id,
         householdId: response.data.household_id,
       });
       

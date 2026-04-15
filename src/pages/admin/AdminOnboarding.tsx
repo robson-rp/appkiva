@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Eye, SkipForward, CheckCircle2, TrendingDown, Users } from 'lucide-react';
+import { QueryError } from '@/components/ui/query-error';
 import { useT } from '@/contexts/LanguageContext';
 
 const OnboardingStepManager = lazy(() => import('@/components/admin/OnboardingStepManager'));
@@ -26,8 +27,9 @@ function useOnboardingAnalytics() {
   return useQuery({
     queryKey: ['admin-onboarding-analytics'],
     queryFn: async () => {
-      const data = await api.get<AnalyticsRow[]>('/admin/onboarding-analytics');
-      return (data ?? []) as AnalyticsRow[];
+      const res = await api.get<any>('/admin/onboarding-analytics');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data as AnalyticsRow[];
     },
   });
 }
@@ -63,11 +65,13 @@ function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType
 
 function AnalyticsTab() {
   const t = useT();
-  const { data: rows, isLoading } = useOnboardingAnalytics();
+  const { data: rows, isLoading, error, refetch } = useOnboardingAnalytics();
 
   const getRoleLabel = (role: string) => t(`admin.onboarding.role_${role}`);
 
   if (isLoading) return (<div className="space-y-6"><div className="grid grid-cols-1 md:grid-cols-4 gap-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div></div>);
+
+  if (error) return <QueryError error={error} onRetry={() => refetch()} />;
 
   const allRows = rows ?? [];
   const metrics = computeMetrics(allRows);

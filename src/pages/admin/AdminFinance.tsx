@@ -25,11 +25,13 @@ function useTenantsByTier() {
   return useQuery({
     queryKey: ['admin_tenants_by_tier'],
     queryFn: async () => {
-      const [tenants, tiers] = await Promise.all([
-        api.get<any[]>('/admin/tenants?is_active=true'),
-        api.get<any[]>('/admin/subscription-tiers'),
+      const [tenantsRes, tiersRes] = await Promise.all([
+        api.get<any>('/admin/tenants?is_active=true'),
+        api.get<any>('/admin/subscription-tiers'),
       ]);
-      return { tenants: tenants ?? [], tiers: tiers ?? [] };
+      const tenants = Array.isArray(tenantsRes) ? tenantsRes : (tenantsRes?.data ?? []);
+      const tiers   = Array.isArray(tiersRes)   ? tiersRes   : (tiersRes?.data   ?? []);
+      return { tenants, tiers };
     },
   });
 }
@@ -48,13 +50,15 @@ export default function AdminFinance() {
   const { data: frozenWallets } = useQuery({
     queryKey: ['admin_frozen_wallets'],
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/wallets?is_frozen=true');
-      const profileIds = [...new Set((data ?? []).flatMap((w: any) => [w.profile_id, w.frozen_by].filter(Boolean)))];
-      const profiles = profileIds.length > 0
-        ? await api.get<any[]>('/admin/profiles?ids=' + profileIds.join(','))
-        : [];
-      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p.display_name]));
-      return (data ?? []).map((w: any) => ({
+      const res = await api.get<any>('/admin/wallets?is_frozen=true');
+      const list: any[] = Array.isArray(res) ? res : (res?.data ?? []);
+      const profileIds = [...new Set(list.flatMap((w: any) => [w.profile_id, w.frozen_by].filter(Boolean)))];
+      const profilesRes = profileIds.length > 0
+        ? await api.get<any>('/admin/profiles?ids=' + profileIds.join(','))
+        : { data: [] };
+      const profiles: any[] = Array.isArray(profilesRes) ? profilesRes : (profilesRes?.data ?? []);
+      const profileMap = new Map(profiles.map((p: any) => [p.id, p.display_name]));
+      return list.map((w: any) => ({
         ...w,
         owner_name: profileMap.get(w.profile_id) ?? w.profile_id,
         frozen_by_name: w.frozen_by ? (profileMap.get(w.frozen_by) ?? w.frozen_by) : '—',
@@ -66,8 +70,8 @@ export default function AdminFinance() {
   const { data: riskFlags } = useQuery({
     queryKey: ['admin_risk_flags_active'],
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/risk-flags?unresolved=true&limit=50&order=created_at:desc');
-      return data ?? [];
+      const res = await api.get<any>('/admin/risk-flags?unresolved=true&limit=50&order=created_at:desc');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 

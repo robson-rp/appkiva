@@ -8,9 +8,8 @@ export function useNotificationStats() {
   return useQuery({
     queryKey: ['admin-notification-stats'],
     queryFn: async () => {
-      const data = await api.get<{
-        total: number; today: number; unread: number; urgent: number; activeTemplates: number;
-      }>('/admin/stats');
+      const res = await api.get<any>('/admin/stats');
+      const data = res?.data ?? res ?? {};
       return {
         total: data?.total ?? 0,
         today: data?.today ?? 0,
