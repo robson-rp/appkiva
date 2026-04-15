@@ -14,6 +14,7 @@ use App\Models\Tenant;
 use App\Models\RiskFlag;
 use App\Models\SupportedCurrency;
 use App\Models\RegionalPrice;
+use App\Models\NotificationTemplate;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Wallet;
@@ -687,5 +688,30 @@ class AdminController extends Controller
             ->get();
 
         return response()->json(['data' => $rows]);
+    }
+
+    // ── Notification Templates ────────────────────────────────
+
+    public function notificationTemplates(Request $request): JsonResponse
+    {
+        return response()->json(['data' => NotificationTemplate::orderBy('event')->get()]);
+    }
+
+    public function updateNotificationTemplate(Request $request, string $id): JsonResponse
+    {
+        $template = NotificationTemplate::findOrFail($id);
+
+        $data = $request->validate([
+            'title_template'   => 'sometimes|string|max:255',
+            'message_template' => 'sometimes|string',
+            'icon'             => 'sometimes|string|max:10',
+            'is_urgent'        => 'sometimes|boolean',
+            'is_active'        => 'sometimes|boolean',
+            'cooldown_minutes' => 'sometimes|integer|min:0',
+        ]);
+
+        $template->update($data);
+
+        return response()->json(['data' => $template->fresh()]);
     }
 }

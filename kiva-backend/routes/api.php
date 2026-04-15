@@ -232,6 +232,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/compliance/stats',                         [\App\Http\Controllers\Api\V1\AdminController::class, 'complianceStats']);
             Route::get('/banner-clicks',                            [\App\Http\Controllers\Api\V1\AdminController::class, 'bannerClicks']);
             Route::get('/onboarding-analytics',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'onboardingAnalytics']);
+            Route::get('/notification-templates',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'notificationTemplates']);
+            Route::patch('/notification-templates/{id}',             [\App\Http\Controllers\Api\V1\AdminController::class, 'updateNotificationTemplate'])->whereUuid('id');
         });
     });
 });

@@ -49,10 +49,11 @@ function useTemplates(search: string) {
   return useQuery({
     queryKey: ['admin-notification-templates', search],
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/notification-templates');
-      if (!search) return data ?? [];
+      const res = await api.get<any>('/admin/notification-templates');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      if (!search) return data;
       const lower = search.toLowerCase();
-      return (data ?? []).filter((tpl: any) =>
+      return data.filter((tpl: any) =>
         tpl.title_template?.toLowerCase().includes(lower) ||
         tpl.message_template?.toLowerCase().includes(lower)
       );
