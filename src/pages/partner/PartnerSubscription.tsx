@@ -13,6 +13,7 @@ import { useRegionalPrices, getRegionalPrice } from '@/hooks/use-regional-prices
 import PaymentSimulator from '@/components/PaymentSimulator';
 import { cn } from '@/lib/utils';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 const FEATURE_LABELS_KEYS: Record<string, string> = {
   basic_wallet: 'feature.basic_wallet',
@@ -33,7 +34,7 @@ const TIER_ICONS: Record<string, string> = {
 export default function PartnerSubscription() {
   const t = useT();
   const limits = usePartnerLimits();
-  const { data: allTiers = [], isLoading } = useSubscriptionTiers();
+  const { data: allTiers = [], isLoading, error: tiersError, refetch } = useSubscriptionTiers();
   const { upgrade, loading: upgradeLoading } = useUpgradeSubscription();
   const [paymentOpen, setPaymentOpen] = useState(false);
   const { data: tenantCurrency } = useTenantCurrency();
@@ -56,6 +57,14 @@ export default function PartnerSubscription() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (tiersError) {
+    return (
+      <div className="max-w-3xl mx-auto py-8">
+        <QueryError error={tiersError} onRetry={() => refetch()} />
       </div>
     );
   }

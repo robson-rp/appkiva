@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from 'sonner';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 export default function PartnerChallenges() {
   const t = useT();
@@ -27,7 +28,7 @@ export default function PartnerChallenges() {
     completed: [],
   };
 
-  const { data: challenges, isLoading } = useSponsoredChallenges();
+  const { data: challenges, isLoading, error, refetch } = useSponsoredChallenges();
   const deleteChallenge = useDeleteSponsoredChallenge();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingChallenge, setEditingChallenge] = useState<SponsoredChallenge | null>(null);
@@ -68,6 +69,14 @@ export default function PartnerChallenges() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto py-8">
+        <QueryError error={error} onRetry={() => refetch()} />
       </div>
     );
   }

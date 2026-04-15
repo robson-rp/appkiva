@@ -30,8 +30,8 @@ export default function PartnerProfile() {
 
   useEffect(() => {
     if (!user?.id) return;
-    api.get<{ country?: string }>('/auth/me')
-      .then((data) => { if (data?.country) setCountry(data.country); })
+    api.get<any>('/auth/me')
+      .then((res) => { const data = res?.data ?? res; if (data?.country) setCountry(data.country); })
       .catch(() => {});
   }, [user?.id]);
 
@@ -45,7 +45,8 @@ export default function PartnerProfile() {
         country,
         language: locale,
       });
-      const profile = await api.get<{ tenant_id?: string }>('/auth/me');
+      const res = await api.get<any>('/auth/me');
+      const profile = res?.data ?? res;
       if (profile?.tenant_id) {
         const newCurrency = getCurrencyByCountry(country);
         await api.patch('/admin/tenants/' + profile.tenant_id, { currency: newCurrency });

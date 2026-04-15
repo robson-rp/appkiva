@@ -16,6 +16,7 @@ import { pt } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 export default function PartnerPrograms() {
   const { user } = useAuth();
@@ -23,7 +24,7 @@ export default function PartnerPrograms() {
   const t = useT();
   const [search, setSearch] = useState('');
   const limits = usePartnerLimits();
-  const { data: programs, isLoading } = usePartnerPrograms();
+  const { data: programs, isLoading, error, refetch } = usePartnerPrograms();
   const deleteProgram = useDeletePartnerProgram();
 
   const handleDelete = async (id: string, name: string) => {
@@ -48,6 +49,14 @@ export default function PartnerPrograms() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto py-8">
+        <QueryError error={error} onRetry={() => refetch()} />
       </div>
     );
   }

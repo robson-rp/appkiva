@@ -47,9 +47,10 @@ export function useSubscriptionTiers() {
     queryKey: ['subscription-tiers'],
     staleTime: 10 * 60 * 1000,
     queryFn: async () => {
-      const data = await api.get<{ data: ApiSubscriptionTier[] }>('/subscription/tiers');
+      const data = await api.get<any>('/subscription/tiers');
+      const items = Array.isArray(data) ? data : (data?.data ?? []);
 
-      return (data.data ?? []).map((t) => ({
+      return items.map((t: any) => ({
         id: t.id,
         name: t.name,
         tierType: t.tier_type,

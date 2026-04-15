@@ -6,11 +6,12 @@ import { usePartnerPrograms, useSponsoredChallenges } from '@/hooks/use-partner-
 import { useTenantCurrency } from '@/components/CurrencyDisplay';
 import { useExchangeRates, convertPrice, formatPrice } from '@/hooks/use-exchange-rates';
 import { useT } from '@/contexts/LanguageContext';
+import { QueryError } from '@/components/ui/query-error';
 
 export default function PartnerReports() {
   const t = useT();
-  const { data: programs, isLoading: loadingP } = usePartnerPrograms();
-  const { data: challenges, isLoading: loadingC } = useSponsoredChallenges();
+  const { data: programs, isLoading: loadingP, error: errorP, refetch: refetchP } = usePartnerPrograms();
+  const { data: challenges, isLoading: loadingC, error: errorC, refetch: refetchC } = useSponsoredChallenges();
 
   const { data: tenantCurrency } = useTenantCurrency();
   const { data: rates = [] } = useExchangeRates();
@@ -59,6 +60,14 @@ export default function PartnerReports() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (errorP || errorC) {
+    return (
+      <div className="max-w-5xl mx-auto py-8">
+        <QueryError error={errorP || errorC} onRetry={() => { refetchP(); refetchC(); }} />
       </div>
     );
   }

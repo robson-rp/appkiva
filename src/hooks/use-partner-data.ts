@@ -36,8 +36,8 @@ export function usePartnerPrograms() {
   return useQuery({
     queryKey: ['partner-programs', user?.id],
     queryFn: async () => {
-      const data = await api.get<PartnerProgram[]>('/partner-programs');
-      return data;
+      const res = await api.get<any>('/partner-programs');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
     enabled: !!user && user.role === 'partner',
   });
@@ -49,8 +49,8 @@ export function useSponsoredChallenges() {
   return useQuery({
     queryKey: ['sponsored-challenges', user?.id],
     queryFn: async () => {
-      const data = await api.get<SponsoredChallenge[]>('/sponsored-challenges');
-      return data;
+      const res = await api.get<any>('/sponsored-challenges');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
     enabled: !!user && user.role === 'partner',
   });

@@ -33,8 +33,9 @@ export function usePartnerLimits(): PartnerLimits {
   const { data, isLoading } = useQuery({
     queryKey: ['partner-limits', user?.id],
     queryFn: async () => {
-      const response = await api.get<PartnerLimitsResponse>('/partner-limits');
-      return response;
+      const response = await api.get<any>('/partner-limits');
+      const data = response?.data ?? response ?? {};
+      return data;
     },
     enabled: !!user && user.role === 'partner',
   });
