@@ -13,6 +13,7 @@ use App\Models\SubscriptionTier;
 use App\Models\Tenant;
 use App\Models\RiskFlag;
 use App\Models\SupportedCurrency;
+use App\Models\RegionalPrice;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Models\Wallet;
@@ -261,6 +262,53 @@ class AdminController extends Controller
         $rate->update($data);
 
         return response()->json(['data' => $rate->fresh()]);
+    }
+
+    // ── Regional Prices ───────────────────────────────────────
+
+    public function regionalPrices(Request $request): JsonResponse
+    {
+        return response()->json(['data' => RegionalPrice::all()]);
+    }
+
+    public function storeRegionalPrice(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'tier_id'           => 'required|uuid|exists:subscription_tiers,id',
+            'currency_code'     => 'required|string|max:10',
+            'price_monthly'     => 'required|numeric|min:0',
+            'price_yearly'      => 'required|numeric|min:0',
+            'extra_child_price' => 'required|numeric|min:0',
+        ]);
+
+        $price = RegionalPrice::updateOrCreate(
+            ['tier_id' => $data['tier_id'], 'currency_code' => $data['currency_code']],
+            $data
+        );
+
+        return response()->json(['data' => $price], 201);
+    }
+
+    public function updateRegionalPrice(Request $request, string $id): JsonResponse
+    {
+        $price = RegionalPrice::findOrFail($id);
+
+        $data = $request->validate([
+            'price_monthly'     => 'required|numeric|min:0',
+            'price_yearly'      => 'required|numeric|min:0',
+            'extra_child_price' => 'required|numeric|min:0',
+        ]);
+
+        $price->update($data);
+
+        return response()->json(['data' => $price->fresh()]);
+    }
+
+    public function destroyRegionalPrice(Request $request, string $id): JsonResponse
+    {
+        RegionalPrice::findOrFail($id)->delete();
+
+        return response()->json(null, 204);
     }
 
     public function loginBanners(Request $request): JsonResponse

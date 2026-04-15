@@ -26,6 +26,15 @@ Route::prefix('v1')->group(function () {
     // Public login banners (used on login screen before authentication)
     Route::get('/admin/login-banners', [\App\Http\Controllers\Api\V1\AdminController::class, 'loginBanners']);
 
+    // Public subscription tiers (shown on pricing/signup pages)
+    Route::get('/subscription/tiers', [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'tiers']);
+
+    // Public exchange rates (needed for currency conversion on pricing pages)
+    Route::get('/admin/exchange-rates', [\App\Http\Controllers\Api\V1\AdminController::class, 'exchangeRates']);
+
+    // Public regional prices (needed for localized pricing)
+    Route::get('/admin/regional-prices', [\App\Http\Controllers\Api\V1\AdminController::class, 'regionalPrices']);
+
     // Authenticated routes
     Route::middleware(['auth:api', 'tenant.owned', 'role.rate'])->group(function () {
 
@@ -168,7 +177,6 @@ Route::prefix('v1')->group(function () {
 
         // Tenants & Subscriptions
         Route::get('/subscription',              [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'current']);
-        Route::get('/subscription/tiers',        [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'tiers']);
         Route::get('/subscription/invoices',     [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'invoices']);
         Route::post('/subscription/subscribe',   [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'subscribe']);
         Route::post('/subscription/cancel',      [\App\Http\Controllers\Api\V1\SubscriptionController::class, 'cancelSubscription']);
@@ -194,6 +202,9 @@ Route::prefix('v1')->group(function () {
             Route::post('/currencies/{code}/toggle-active',        [\App\Http\Controllers\Api\V1\AdminController::class, 'toggleCurrencyActive']);
             Route::get('/exchange-rates',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'exchangeRates']);
             Route::put('/exchange-rates/{id}',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'updateExchangeRate'])->whereUuid('id');
+            Route::post('/regional-prices',                            [\App\Http\Controllers\Api\V1\AdminController::class, 'storeRegionalPrice']);
+            Route::put('/regional-prices/{id}',                        [\App\Http\Controllers\Api\V1\AdminController::class, 'updateRegionalPrice'])->whereUuid('id');
+            Route::delete('/regional-prices/{id}',                     [\App\Http\Controllers\Api\V1\AdminController::class, 'destroyRegionalPrice'])->whereUuid('id');
             Route::post('/login-banners',                          [\App\Http\Controllers\Api\V1\AdminController::class, 'storeLoginBanner']);
             Route::post('/login-banners/reorder',                  [\App\Http\Controllers\Api\V1\AdminController::class, 'reorderLoginBanners']);
             Route::patch('/login-banners/{id}',                    [\App\Http\Controllers\Api\V1\AdminController::class, 'updateLoginBanner'])->whereUuid('id');
