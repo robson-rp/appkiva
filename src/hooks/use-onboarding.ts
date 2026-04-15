@@ -31,7 +31,8 @@ export function useOnboarding() {
     queryFn: async () => {
       if (!role) return [];
       try {
-        const data = await api.get<OnboardingStepDB[]>(`/admin/onboarding-steps?role=${role}`);
+        const res = await api.get<any>(`/admin/onboarding-steps?role=${role}`);
+        const data = Array.isArray(res) ? res : (res?.data ?? []);
         
         if (!data || data.length === 0) {
           return ONBOARDING_STEPS[role] ?? [];
@@ -55,7 +56,8 @@ export function useOnboarding() {
     queryFn: async () => {
       if (!profileId) return null;
       try {
-        const data = await api.get<OnboardingProgress>(`/onboarding/progress`);
+        const res = await api.get<any>(`/onboarding/progress`);
+        const data = res?.data ?? res;
         return data;
       } catch (error) {
         return null;
