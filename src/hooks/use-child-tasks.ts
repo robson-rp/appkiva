@@ -25,9 +25,9 @@ export function useChildTasks() {
     queryFn: async (): Promise<ChildTask[]> => {
       if (!user?.profileId) return [];
 
-      const data = await api.get<any[]>('/tasks?child_profile_id=' + user.profileId);
-
-      return (data ?? []).map((t: any) => ({
+      const res = await api.get<any>('/tasks?child_profile_id=' + user.profileId);
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((t: any) => ({
         id: t.id,
         title: t.title,
         description: t.description,
@@ -51,11 +51,8 @@ export function useCompleteTask() {
   return useMutation({
     mutationFn: async (taskId: string) => {
       // Complete task via API endpoint
-      const result = await api.post<{
-        task: any;
-        parent_profile_id: string;
-        title: string;
-      }>(`/tasks/${taskId}/complete`, {});
+      const res = await api.post<any>(`/tasks/${taskId}/complete`, {});
+      const result = res?.data ?? res;
 
       // Notify parent about task completion
       const childName = user?.name ?? 'O teu filho';

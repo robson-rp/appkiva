@@ -33,9 +33,10 @@ export function useAllowanceConfigs() {
     queryFn: async (): Promise<AllowanceConfig[]> => {
       if (!user?.profileId) return [];
 
-      const response = await api.get<{ data: AllowanceConfigResponse[] }>('/allowances');
+      const response = await api.get<any>('/allowances');
+      const items = Array.isArray(response) ? response : (response?.data ?? []);
 
-      return response.data.map((c) => ({
+      return items.map((c: any) => ({
         id: c.id,
         childProfileId: c.child_profile_id,
         parentProfileId: c.parent_profile_id,

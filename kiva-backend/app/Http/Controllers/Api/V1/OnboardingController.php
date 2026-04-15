@@ -20,17 +20,13 @@ class OnboardingController extends Controller
             ['current_step' => 0, 'completed' => false, 'skipped' => false]
         );
 
-        return response()->json([
+        return response()->json(['data' => [
             'profile_id'   => $progress->profile_id,
             'current_step' => $progress->current_step,
             'completed'    => $progress->completed,
             'skipped'      => $progress->skipped,
             'completed_at' => $progress->completed_at,
-        ]);
-    }
-
-    /** PUT /onboarding/progress */
-    public function upsertProgress(Request $request): JsonResponse
+        ]]);
     {
         $data = $request->validate([
             'current_step' => 'sometimes|integer|min:0',
@@ -46,16 +42,13 @@ class OnboardingController extends Controller
             $data
         );
 
-        return response()->json([
+        return response()->json(['data' => [
             'profile_id'   => $progress->profile_id,
             'current_step' => $progress->current_step,
             'completed'    => $progress->completed,
             'skipped'      => $progress->skipped,
             'completed_at' => $progress->completed_at,
-        ]);
-    }
-
-    /** POST /onboarding/analytics */
+        ]]);
     public function trackEvent(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -75,6 +68,6 @@ class OnboardingController extends Controller
             'metadata'   => $data['metadata'] ?? null,
         ]);
 
-        return response()->json(['ok' => true], 201);
+        return response()->json(['data' => ['status' => 'recorded']], 201);
     }
 }

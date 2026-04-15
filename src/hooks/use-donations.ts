@@ -43,8 +43,9 @@ export function useDonationCauses() {
   return useQuery({
     queryKey: ['donation-causes'],
     queryFn: async (): Promise<DonationCause[]> => {
-      const data = await api.get<DonationCauseResponse[]>('/donation-causes?is_active=true');
-      return data.map((c) => ({
+      const res = await api.get<any>('/donation-causes?is_active=true');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((c: any) => ({
         id: c.id,
         name: c.name,
         description: c.description ?? '',
@@ -63,8 +64,9 @@ export function useMyDonations() {
     queryKey: ['my-donations', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async (): Promise<Donation[]> => {
-      const data = await api.get<DonationResponse[]>('/donations');
-      return data.map((d) => ({
+      const res = await api.get<any>('/donations');
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((d: any) => ({
         id: d.id,
         profileId: d.profile_id,
         causeId: d.cause_id,

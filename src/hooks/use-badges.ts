@@ -36,8 +36,8 @@ export function useBadges() {
   return useQuery({
     queryKey: ['badges'],
     queryFn: async () => {
-      const response = await api.get<BadgesResponse>('/badges');
-      return response.data ?? [];
+      const response = await api.get<any>('/badges');
+      return Array.isArray(response) ? response : (response?.data ?? []);
     },
     refetchInterval: 60000,
   });
@@ -51,8 +51,8 @@ export function useBadgeProgress(profileId?: string) {
     queryKey: ['badge-progress', id],
     queryFn: async () => {
       if (!id) return [];
-      const response = await api.get<BadgeProgressResponse>(`/badges/progress?profile_id=${id}`);
-      return response.data ?? [];
+      const response = await api.get<any>(`/badges/progress?profile_id=${id}`);
+      return Array.isArray(response) ? response : (response?.data ?? []);
     },
     enabled: !!id,
     refetchInterval: 60000,

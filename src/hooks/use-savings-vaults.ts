@@ -60,8 +60,9 @@ export function useSavingsVaults(profileId?: string) {
     queryKey: ['savings-vaults', profileId ?? user?.profileId],
     queryFn: async () => {
       const queryParams = profileId ? `?profile_id=${profileId}` : '';
-      const data = await api.get<SavingsVaultResponse[]>(`/savings-vaults${queryParams}`);
-      return data.map(mapRow);
+      const res = await api.get<any>(`/savings-vaults${queryParams}`);
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
+      return items.map(mapRow);
     },
     enabled: !!user,
   });

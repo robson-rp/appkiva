@@ -34,8 +34,9 @@ function useStudentTasks(studentProfileId?: string) {
     queryKey: ['student-tasks', studentProfileId],
     queryFn: async () => {
       if (!studentProfileId) return [];
-      const data = await api.get<any[]>('/tasks?profile_id=' + studentProfileId);
-      return data ?? [];
+      const res = await api.get<any>('/tasks?profile_id=' + studentProfileId);
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
+      return items;
     },
     enabled: !!studentProfileId,
   });
@@ -46,8 +47,9 @@ function useStudentVaults(studentProfileId?: string) {
     queryKey: ['student-vaults', studentProfileId],
     queryFn: async () => {
       if (!studentProfileId) return [];
-      const data = await api.get<any[]>('/vaults?profile_id=' + studentProfileId);
-      return data ?? [];
+      const res = await api.get<any>('/vaults?profile_id=' + studentProfileId);
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
+      return items;
     },
     enabled: !!studentProfileId,
   });

@@ -50,8 +50,9 @@ export function useVaultInterestHistory(profileId?: string) {
       if (!id) return [];
 
       const queryParams = `?profile_id=${id}&entry_type=vault_interest&limit=50`;
-      const data = await api.get<InterestEntryResponse[]>(`/ledger-entries${queryParams}`);
-      return data.map(mapRow);
+      const res = await api.get<any>(`/ledger-entries${queryParams}`);
+      const items = Array.isArray(res) ? res : (res?.data ?? []);
+      return items.map(mapRow);
     },
     enabled: !!id,
   });

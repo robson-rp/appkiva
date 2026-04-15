@@ -35,8 +35,9 @@ export function useWalletBalance(profileId?: string) {
       if (!id) return null;
 
       // Get wallets first
-      const wallets = await api.get<Array<{ id: string; profile_id: string; wallet_type: string; currency: string }>>('/wallets');
-      const wallet = wallets.find(w => w.profile_id === id && w.wallet_type === 'virtual' && w.currency === 'KVC');
+      const res = await api.get<any>('/wallets');
+      const wallets = Array.isArray(res) ? res : (res?.data ?? []);
+      const wallet = wallets.find((w: any) => w.profile_id === id && w.wallet_type === 'virtual' && w.currency === 'KVC');
       
       if (!wallet) {
         return {
@@ -48,7 +49,8 @@ export function useWalletBalance(profileId?: string) {
         } as WalletBalance;
       }
 
-      const balanceData = await api.get<{ balance: number }>(`/wallets/${wallet.id}/balance`);
+      const balRes = await api.get<any>(`/wallets/${wallet.id}/balance`);
+      const balanceData = balRes?.data ?? balRes ?? {};
 
       return {
         wallet_id: wallet.id,
@@ -79,14 +81,16 @@ export function useWalletTransactions(profileId?: string, limit = 20) {
       if (!id) return [];
 
       // Get wallets first
-      const wallets = await api.get<Array<{ id: string; profile_id: string; wallet_type: string; currency: string }>>('/wallets');
-      const wallet = wallets.find(w => w.profile_id === id && w.wallet_type === 'virtual' && w.currency === 'KVC');
+      const res = await api.get<any>('/wallets');
+      const wallets = Array.isArray(res) ? res : (res?.data ?? []);
+      const wallet = wallets.find((w: any) => w.profile_id === id && w.wallet_type === 'virtual' && w.currency === 'KVC');
       
       if (!wallet) return [];
 
-      const transactions = await api.get<WalletTransaction[]>(`/wallets/${wallet.id}/transactions?limit=${limit}`);
+      const txRes = await api.get<any>(`/wallets/${wallet.id}/transactions?limit=${limit}`);
+      const transactions = Array.isArray(txRes) ? txRes : (txRes?.data ?? []);
 
-      return (transactions ?? []).map((tx) => ({
+      return transactions.map((tx: any) => ({
         ...tx,
         amount: toNumber(tx.amount),
         metadata: (tx.metadata ?? {}) as Record<string, unknown>,

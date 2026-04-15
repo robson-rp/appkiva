@@ -21,7 +21,8 @@ export function useChildren() {
   return useQuery({
     queryKey: ['children', user?.profileId],
     queryFn: async (): Promise<ChildWithBalance[]> => {
-      return api.get<ChildWithBalance[]>('/children');
+      const res = await api.get<any>('/children');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
     enabled: !!user && user.role === 'parent',
   });

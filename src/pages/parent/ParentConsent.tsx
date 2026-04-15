@@ -41,8 +41,8 @@ export default function ParentConsent() {
     queryKey: ['parent-children-profiles', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const data = await api.get<any[]>('/children');
-      return data ?? [];
+      const res = await api.get<any>('/children');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 
@@ -51,8 +51,8 @@ export default function ParentConsent() {
     queryKey: ['parent-consent-records', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const data = await api.get<any[]>('/admin/compliance/consent-records');
-      return data ?? [];
+      const res = await api.get<any>('/admin/compliance/consent-records');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 

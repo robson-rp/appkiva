@@ -33,8 +33,8 @@ export function useChildMissions() {
     queryFn: async (): Promise<MissionRow[]> => {
       if (!user?.profileId) return [];
 
-      const data = await api.get<MissionRow[]>('/missions?child_profile_id=' + user.profileId);
-      return data ?? [];
+      const res = await api.get<any>('/missions?child_profile_id=' + user.profileId);
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
     enabled: !!user?.profileId,
     refetchInterval: 30000, // Poll every 30 seconds
@@ -101,9 +101,9 @@ export function useHouseholdMissions() {
     queryFn: async (): Promise<(MissionRow & { child_display_name?: string; child_avatar?: string })[]> => {
       if (!user?.profileId) return [];
 
-      const data = await api.get<any[]>('/missions?parent_profile_id=' + user.profileId);
-      
-      return (data ?? []).map((m: any) => ({
+      const res = await api.get<any>('/missions?parent_profile_id=' + user.profileId);
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((m: any) => ({
         ...m,
         child_display_name: m.child_display_name ?? 'Criança',
         child_avatar: m.child_avatar ?? '👧',

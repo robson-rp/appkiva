@@ -31,9 +31,9 @@ export function useHouseholdTasks() {
     queryFn: async (): Promise<HouseholdTask[]> => {
       if (!user?.profileId) return [];
 
-      const data = await api.get<any[]>('/tasks?parent_profile_id=' + user.profileId);
-
-      return (data ?? []).map((t: any) => ({
+      const res = await api.get<any>('/tasks?parent_profile_id=' + user.profileId);
+      const data = Array.isArray(res) ? res : (res?.data ?? []);
+      return data.map((t: any) => ({
         id: t.id,
         title: t.title,
         description: t.description,
@@ -153,13 +153,8 @@ export function useApproveTask() {
     mutationFn: async (taskId: string) => {
       if (!user?.profileId) throw new Error('Não autenticado');
 
-      // Approve task via API endpoint (handles task update + transaction creation)
-      const result = await api.post<{
-        task: any;
-        child_profile_id: string;
-        title: string;
-        reward: number;
-      }>(`/tasks/${taskId}/approve`, {});
+      const res = await api.post<any>(`/tasks/${taskId}/approve`, {});
+      const result = res?.data ?? res;
 
       // Notify child about approval
       await notifyTaskApproved(

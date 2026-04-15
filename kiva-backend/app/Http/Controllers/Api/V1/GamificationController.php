@@ -52,7 +52,7 @@ class GamificationController extends Controller
 
         CalculateStreakJob::dispatch($profile->id);
 
-        return response()->json(['message' => 'Activity recorded.']);
+        return response()->json(['data' => ['status' => 'recorded']]);
     }
 
     public function kivaPoints(Request $request): JsonResponse

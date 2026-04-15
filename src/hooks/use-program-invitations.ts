@@ -18,12 +18,9 @@ export function useProgramInvitations(programId?: string) {
   return useQuery({
     queryKey: ['program-invitations', programId],
     queryFn: async () => {
-      if (programId) {
-        const data = await api.get<ProgramInvitation[]>(`/partner-programs/${programId}/invitations`);
-        return data;
-      }
-      const data = await api.get<ProgramInvitation[]>('/program-invitations');
-      return data;
+      const url = programId ? `/partner-programs/${programId}/invitations` : '/program-invitations';
+      const res = await api.get<any>(url);
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
     enabled: !!user,
   });

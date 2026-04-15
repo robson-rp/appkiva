@@ -39,9 +39,10 @@ export function useRewards() {
     queryFn: async (): Promise<Reward[]> => {
       if (!user?.profileId) return [];
 
-      const response = await api.get<{ data: RewardResponse[] }>('/rewards');
+      const response = await api.get<any>('/rewards');
+      const items = Array.isArray(response) ? response : (response?.data ?? []);
 
-      return response.data.map((r) => ({
+      return items.map((r: any) => ({
         id: r.id,
         name: r.name,
         description: r.description,

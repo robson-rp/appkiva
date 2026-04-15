@@ -57,7 +57,7 @@ class DonationController extends Controller
             DonationCause::where('id', $data['cause_id'])->increment('total_received', $data['amount']);
         });
 
-        return response()->json(['message' => 'Donation successful.'], 201);
+        return response()->json(['data' => ['status' => 'success']], 201);
     }
 
     public function myDonations(Request $request): JsonResponse

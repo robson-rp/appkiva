@@ -66,11 +66,12 @@ export function useClaimReward() {
 
   return useMutation({
     mutationFn: async (reward: { id: string; name: string; price: number; parentProfileId?: string }) => {
-      const response = await api.post<{ data: { name: string; price: number; claimed_by: string } }>(`/rewards/${reward.id}/claim`);
+      const response = await api.post<any>(`/rewards/${reward.id}/claim`);
+      const data = response?.data ?? response;
       
       return {
         success: true,
-        reward_name: response.data.name,
+        reward_name: data.name ?? reward.name,
         new_balance: 0, // Balance will be refreshed via query invalidation
       };
     },

@@ -33,8 +33,8 @@ export function useClassrooms() {
     queryKey: ['classrooms', user?.profileId],
     enabled: !!user?.profileId,
     queryFn: async () => {
-      const data = await api.get<ClassroomRow[]>('/classrooms');
-      return data;
+      const res = await api.get<any>('/classrooms');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 }
@@ -44,8 +44,8 @@ export function useClassroomStudents(classroomId: string | null) {
     queryKey: ['classroom_students', classroomId],
     enabled: !!classroomId,
     queryFn: async () => {
-      const data = await api.get<ClassroomStudentRow[]>(`/classrooms/${classroomId}/students`);
-      return data;
+      const res = await api.get<any>(`/classrooms/${classroomId}/students`);
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 }
@@ -57,7 +57,8 @@ export function useAllClassroomStudents(classroomIds: string[]) {
     queryFn: async () => {
       const allStudents: ClassroomStudentRow[] = [];
       for (const classroomId of classroomIds) {
-        const students = await api.get<ClassroomStudentRow[]>(`/classrooms/${classroomId}/students`);
+        const res = await api.get<any>(`/classrooms/${classroomId}/students`);
+        const students = Array.isArray(res) ? res : (res?.data ?? []);
         allStudents.push(...students);
       }
       return allStudents;
@@ -70,8 +71,8 @@ export function useSchoolStudents(schoolTenantId: string | null) {
     queryKey: ['school_students', schoolTenantId],
     enabled: !!schoolTenantId,
     queryFn: async () => {
-      const data = await api.get<Array<{ id: string; display_name: string; avatar: string | null }>>('/school/students');
-      return data;
+      const res = await api.get<any>('/school/students');
+      return Array.isArray(res) ? res : (res?.data ?? []);
     },
   });
 }
