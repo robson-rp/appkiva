@@ -1,1 +1,0 @@
-UPDATE onboarding_progress SET completed = false, skipped = false, current_step = 0, completed_at = null

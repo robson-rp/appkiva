@@ -1,1 +1,0 @@
-ALTER TYPE subscription_tier_type ADD VALUE IF NOT EXISTS 'teacher';

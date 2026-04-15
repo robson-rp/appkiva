@@ -1,1 +1,0 @@
-ALTER TABLE public.children ADD COLUMN school_tenant_id uuid REFERENCES public.tenants(id);

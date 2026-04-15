@@ -1,1 +1,0 @@
-ALTER TABLE public.subscription_tiers ADD COLUMN IF NOT EXISTS extra_child_price numeric NOT NULL DEFAULT 0;

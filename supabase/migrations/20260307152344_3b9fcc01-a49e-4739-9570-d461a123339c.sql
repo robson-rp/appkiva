@@ -1,1 +1,0 @@
-ALTER TABLE public.children ADD COLUMN date_of_birth date NULL;

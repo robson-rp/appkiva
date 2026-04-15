@@ -1,1 +1,0 @@
-ALTER TABLE currency_exchange_rates ALTER COLUMN base_currency SET DEFAULT 'USD';
